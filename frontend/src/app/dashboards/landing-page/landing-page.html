@@ -1,1 +1,102 @@
-<p>landing-page works!</p>
+<!-- Navbar -->
+<nav class="navbar" [class.scrolled]="scrollY > 50">
+  <div class="nav-container">
+    <div class="logo">SurgeryVR</div>
+
+    <div class="nav-links">
+      <a href="#solutions">{{ t.nav.solutions }}</a>
+      <a href="#platform">{{ t.nav.platform }}</a>
+      <a href="#about">{{ t.nav.about }}</a>
+
+      <!-- Language -->
+      <button (click)="setLanguage('fr')">FR</button>
+      <button (click)="setLanguage('en')">EN</button>
+
+      <button class="cta">{{ t.nav.demo }}</button>
+    </div>
+
+    <button class="mobile-btn" (click)="toggleMobileMenu()">☰</button>
+  </div>
+
+  <div *ngIf="mobileMenuOpen" class="mobile-menu">
+    <a href="#solutions">{{ t.nav.solutions }}</a>
+    <a href="#platform">{{ t.nav.platform }}</a>
+    <a href="#about">{{ t.nav.about }}</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-content">
+    <span class="badge">{{ t.hero.badge }}</span>
+
+    <h1>
+      {{ t.hero.title }} <br />
+      <span>{{ t.hero.subtitle }}</span>
+    </h1>
+
+    <p>{{ t.hero.description }}</p>
+
+    <div class="hero-actions">
+      <button class="primary">{{ t.hero.cta1 }}</button>
+      <button class="secondary">{{ t.hero.cta2 }}</button>
+    </div>
+
+    <div class="trust">
+      {{ t.hero.trust }}
+    </div>
+  </div>
+</section>
+
+
+<!-- SOLUTIONS -->
+<section id="solutions" class="solutions-section">
+  <h2 class="section-title">
+    Nos <span>Solutions</span>
+  </h2>
+
+  <!-- Tabs -->
+  <div class="solutions-tabs">
+    <button
+      *ngFor="let sol of solutions; let i = index"
+      (click)="setActiveTab(i)"
+      [class.active]="activeTab === i"
+    >
+      {{ sol.title }}
+    </button>
+  </div>
+
+  <!-- Content -->
+  <div class="solution-card" *ngFor="let sol of solutions; let i = index">
+    <div *ngIf="activeTab === i" class="solution-content">
+      <span class="solution-badge">{{ sol.subtitle }}</span>
+
+      <h3>{{ sol.title }}</h3>
+      <p>{{ sol.description }}</p>
+
+      <ul>
+        <li *ngFor="let f of sol.features">✔ {{ f }}</li>
+      </ul>
+
+      <button class="solution-btn">En savoir plus</button>
+    </div>
+  </div>
+</section>
+
+
+<!-- FEATURES -->
+<section id="platform" class="features-section">
+  <h2 class="section-title">
+    Technologie <span>sans compromis</span>
+  </h2>
+
+  <div class="features-grid">
+    <div class="feature-card" *ngFor="let f of features">
+      <div class="feature-icon">
+        {{ f.icon | uppercase }}
+      </div>
+      <h4>{{ f.title }}</h4>
+      <p>{{ f.text }}</p>
+    </div>
+  </div>
+</section>
