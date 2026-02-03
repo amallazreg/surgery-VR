@@ -54,20 +54,21 @@
             justify-content: space-between;
             align-items: center;
         }
-        .logo {
-          font-size: 1.8rem;
-          font-weight: 800;
+ 
 
-          /* Nouveau dégradé */
-          background: linear-gradient(135deg, rgb(0, 102, 255) 0%, rgb(0, 217, 255) 100%);
-          
-          /* Pour que le texte affiche le dégradé */
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
 
-          letter-spacing: -0.02em;
-        }
+         .logo {
+                display: flex;           
+                align-items: center;    
+                height: 50px;    
+                padding-right: 15em;        
+            }
+
+            .logo-img {
+                height: 120px;           
+                width: auto;             
+                display: block;          
+            }
 
 
         .nav-links {
@@ -322,26 +323,24 @@
         }
 
         /* Video Section */
-        .video-section {
-            max-width: 1200px;
-            margin: -50px auto 0;
-            padding: 0 2rem;
-            position: relative;
-            z-index: 20;
-            animation: fadeInUp 1s ease-out 0.8s backwards;
-            padding-top: 100px;
-        }
+  .video-section {
+  width: 100%;
+  max-height: 600px; /* ajuste selon ton design */
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  margin-top: 2rem; /* pour laisser un peu d’espace après la navbar */
+}
 
-        .video-container {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 
-                0 30px 80px rgba(0, 102, 255, 0.2),
-                0 0 0 1px rgba(0, 102, 255, 0.1);
-            aspect-ratio: 16/9;
-            background: #00D9FF;
-        }
+.video-player {
+  width: 100%;
+  height: auto; /* conserve les proportions */
+  object-fit: cover; /* la vidéo remplit l’espace, recadre si besoin */
+  border-radius: 12px; /* optionnel pour arrondir les coins */
+}
+
 
         .video-placeholder {
             width: 100%;
@@ -542,6 +541,13 @@
             overflow: hidden;
             box-shadow: 0 30px 80px rgba(0, 102, 255, 0.15);
         }
+
+        .solution-image .video-player {
+    width: 100%;        /* largeur responsive */
+    max-height: 800px;  /* diminue ici la hauteur selon ton besoin */
+    object-fit: cover;  /* garde les proportions et recadre si nécessaire */
+    display: block;
+}
 
         .solution-image::before {
             content: '';

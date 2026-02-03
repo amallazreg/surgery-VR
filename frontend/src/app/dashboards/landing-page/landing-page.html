@@ -46,13 +46,18 @@
     </section>
 
     <!-- Video Section -->
-    <section class="video-section">
-        <div class="video-container">
-            <div class="video-placeholder">
-                  <div class="play-button" (click)="onPlayVideo()"></div>
-            </div>
-        </div>
-    </section>
+        <section id="video-section" class="video-section">
+        <video 
+            src="assets/videoAccueil.mp4" 
+            autoplay 
+            muted 
+            loop 
+            playsinline 
+            class="video-player">
+            Votre navigateur ne supporte pas la vidéo.
+        </video>
+        </section>
+
 
     <!-- Problem Section -->
     <section class="problem-section">
@@ -121,7 +126,15 @@
             <div class="solution-content">
                 <div class="solution-image">
                     <div class="video-placeholder">
-                        <div style="font-size: 6rem;">🥽</div>
+                      <video 
+                            src="assets/videoAccueil2.mp4" 
+                            autoplay 
+                            muted 
+                            loop 
+                            playsinline 
+                            class="video-player">
+                            Votre navigateur ne supporte pas la vidéo.
+                   </video>
                     </div>
                 </div>
                 
