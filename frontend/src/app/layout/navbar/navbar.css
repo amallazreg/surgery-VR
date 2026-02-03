@@ -1,0 +1,82 @@
+nav {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(0, 102, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+nav.scrolled {
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 10px 40px rgba(0, 102, 255, 0.15);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 1.2rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;           
+  align-items: center;    
+  height: 50px;    
+  padding-right: 15em;        
+}
+
+.logo-img {
+  height: 120px;           
+  width: auto;             
+  display: block;          
+}
+
+.nav-links {
+  display: flex;
+  gap: 2.5rem;
+  list-style: none;
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--text-dark, #1A2B5F);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.cta-nav {
+  background: linear-gradient(135deg, rgb(0, 102, 255) 0%, rgb(0, 217, 255) 100%);
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  color: white !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 102, 255, 0.3);
+}
+
+.cta-nav:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 102, 255, 0.5);
+}

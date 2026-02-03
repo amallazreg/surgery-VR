@@ -1,10 +1,11 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
+import { Navbar } from "../../layout/navbar/navbar";
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, Navbar],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.css',
 })

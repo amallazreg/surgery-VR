@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedVR Solutions - Formation Médicale Immersive en Réalité Virtuelle</title>
+    <title>Login - SurgeryVR</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -11,16 +11,15 @@
             --secondary: #00D9FF;
             --accent: #FF006E;
             --dark: #1A2B5F;
-            --dark-blue: #2D3E6F;
+            --dark-blue: #0A1628;
             --light: #FFFFFF;
             --bg-light: #F8FAFF;
-            --bg-gradient: linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
             --success: #00C48C;
             --gradient-1: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
             --gradient-2: linear-gradient(135deg, #FF006E 0%, #FF6B00 100%);
-            --gradient-glow: radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.08), transparent 70%);
             --text-dark: #1A2B5F;
             --text-gray: #5A6B8C;
+            --navbar-height: 70px;
         }
 
         * {
@@ -31,132 +30,51 @@
 
         body {
             font-family: 'Outfit', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-dark);
-            overflow-x: hidden;
-            line-height: 1.6;
+            overflow: hidden; /* Empêche le scroll */
+            background: var(--bg-light);
         }
 
-        /* Navigation */
-        nav {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-            background: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0, 102, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        nav.scrolled {
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 10px 40px rgba(0, 102, 255, 0.15);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 1.2rem 2rem;
+        /* Page wrapper */
+        .page-wrapper {
+            height: 100vh;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            flex-direction: column;
+            padding-top: var(--navbar-height);
         }
 
-        .logo {
-            font-size: 1.8rem;
-            font-weight: 800;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.02em;
-        }
-
-        .nav-links {
+        /* Main container */
+        .login-page {
+            flex: 1;
             display: flex;
-            gap: 2.5rem;
-            list-style: none;
-            align-items: center;
-        }
-
-        .nav-links a {
-            color: var(--text-dark);
-            text-decoration: none;
-            font-weight: 500;
-            transition: all 0.3s ease;
             position: relative;
-        }
-
-        .nav-links a::after {
-            content: '';
-            position: absolute;
-            bottom: -5px;
-            left: 0;
-            width: 0;
-            height: 2px;
-            background: var(--gradient-1);
-            transition: width 0.3s ease;
-        }
-
-        .nav-links a:hover::after {
-            width: 100%;
-        }
-
-        .cta-nav {
-            background: var(--gradient-1);
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            color: white !important;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 20px rgba(0, 102, 255, 0.3);
-        }
-
-        .cta-nav:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 102, 255, 0.5);
-        }
-
-        /* Hero Section */
-        .hero {
-            position: relative;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
-            padding-top: 80px;
         }
 
-        .hero-background {
-            position: absolute;
+        /* Background animé */
+        .login-background {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: 
-                radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
-                linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
-            overflow: hidden;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
+            z-index: 0;
         }
 
-        .hero-grid {
+        .animated-grid {
             position: absolute;
             width: 100%;
             height: 100%;
             background-image: 
-                linear-gradient(rgba(0, 102, 255, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 102, 255, 0.05) 1px, transparent 1px);
-            background-size: 50px 50px;
-            animation: gridMove 20s linear infinite;
-            opacity: 0.5;
+                linear-gradient(rgba(0, 102, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridSlide 20s linear infinite;
         }
 
-        @keyframes gridMove {
+        @keyframes gridSlide {
             0% { transform: translate(0, 0); }
-            100% { transform: translate(50px, 50px); }
+            100% { transform: translate(40px, 40px); }
         }
 
         .floating-shapes {
@@ -171,86 +89,98 @@
             border-radius: 50%;
             filter: blur(80px);
             animation: float 15s ease-in-out infinite;
-            opacity: 0.15;
+            opacity: 0.08;
         }
 
         .shape-1 {
-            width: 400px;
-            height: 400px;
+            width: 250px;
+            height: 250px;
             background: var(--gradient-1);
-            top: 20%;
-            left: 10%;
-            animation-delay: 0s;
+            top: 10%;
+            left: 5%;
         }
 
         .shape-2 {
-            width: 300px;
-            height: 300px;
+            width: 200px;
+            height: 200px;
             background: var(--gradient-2);
-            bottom: 20%;
-            right: 15%;
+            bottom: 15%;
+            right: 10%;
             animation-delay: 2s;
+        }
+
+        .shape-3 {
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, #00C48C 0%, #00D9FF 100%);
+            top: 50%;
+            right: 30%;
+            animation-delay: 4s;
         }
 
         @keyframes float {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            25% { transform: translate(30px, -30px) rotate(5deg); }
-            50% { transform: translate(-20px, 20px) rotate(-5deg); }
-            75% { transform: translate(20px, 10px) rotate(3deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
         }
 
-        .hero-content {
+        /* Left Panel - Welcome Section */
+        .welcome-panel {
+            flex: 0 0 52%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 1.5rem;
             position: relative;
-            z-index: 10;
-            max-width: 1400px;
-            padding: 2rem;
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.02) 0%, rgba(0, 217, 255, 0.02) 100%);
+        }
+
+        .welcome-content {
+            max-width: 650px;
             text-align: center;
+            animation: fadeInLeft 0.8s ease-out;
         }
 
-        .hero-badge {
-            display: inline-block;
-            background: rgba(0, 217, 255, 0.1);
-            border: 1px solid rgba(0, 217, 255, 0.3);
-            padding: 0.6rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--primary);
-            margin-bottom: 2rem;
-            animation: fadeInDown 1s ease-out;
-            backdrop-filter: blur(10px);
-        }
-
-        @keyframes fadeInDown {
+        @keyframes fadeInLeft {
             from {
                 opacity: 0;
-                transform: translateY(-30px);
+                transform: translateX(-30px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateX(0);
             }
         }
 
-        .hero h1 {
-            font-size: clamp(2.5rem, 6vw, 5.5rem);
-            font-weight: 800;
-            line-height: 1.1;
+        /* Logo Section */
+        .logo-container {
             margin-bottom: 1.5rem;
-            animation: fadeInUp 1s ease-out 0.2s backwards;
-            letter-spacing: -0.03em;
+            animation: fadeInScale 1s ease-out;
         }
 
-        @keyframes fadeInUp {
+        @keyframes fadeInScale {
             from {
                 opacity: 0;
-                transform: translateY(40px);
+                transform: scale(0.8);
             }
             to {
                 opacity: 1;
-                transform: translateY(0);
+                transform: scale(1);
             }
         }
+
+        .welcome-title {
+    font-size: clamp(2rem, 3.8vw, 2.8rem);
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.7rem;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+   
+
 
         .gradient-text {
             background: var(--gradient-1);
@@ -259,1108 +189,996 @@
             background-clip: text;
         }
 
-        .hero p {
-            font-size: clamp(1.1rem, 2vw, 1.4rem);
-            color: var(--text-gray);
-            max-width: 800px;
-            margin: 0 auto 3rem;
-            animation: fadeInUp 1s ease-out 0.4s backwards;
-            line-height: 1.8;
-        }
-
-        .hero-cta-group {
-            display: flex;
-            gap: 1.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-            animation: fadeInUp 1s ease-out 0.6s backwards;
-        }
-
-        .btn {
-            padding: 1.2rem 3rem;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border-radius: 50px;
-            text-decoration: none;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            display: inline-block;
-            cursor: pointer;
-            border: none;
-            font-family: 'Outfit', sans-serif;
-        }
-
-        .btn-primary {
-            background: var(--gradient-1);
-            color: white;
-            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 15px 50px rgba(0, 217, 255, 0.5);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--primary);
-            border: 2px solid var(--primary);
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(0, 102, 255, 0.1);
-            border-color: var(--primary);
-            transform: translateY(-3px);
-        }
-
-        /* Video Section */
-        .video-section {
-            max-width: 1200px;
-            margin: -100px auto 0;
-            padding: 0 2rem;
-            position: relative;
-            z-index: 20;
-            animation: fadeInUp 1s ease-out 0.8s backwards;
-        }
-
-        .video-container {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 
-                0 30px 80px rgba(0, 102, 255, 0.2),
-                0 0 0 1px rgba(0, 102, 255, 0.1);
-            aspect-ratio: 16/9;
-            background: #FFFFFF;
-        }
-
-        .video-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, #F0F6FF 0%, #E6F0FF 100%);
-            position: relative;
-        }
-
-        .video-placeholder::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100px;
-            height: 100px;
-            background: var(--gradient-1);
-            border-radius: 50%;
-            opacity: 0.15;
-            filter: blur(40px);
-        }
-
-        .play-button {
-            width: 80px;
-            height: 80px;
-            background: var(--gradient-1);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 10px 40px rgba(0, 102, 255, 0.3);
-            position: relative;
-            z-index: 10;
-        }
-
-        .play-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 15px 50px rgba(0, 102, 255, 0.5);
-        }
-
-        .play-button::before {
-            content: '';
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 20px solid white;
-            border-top: 12px solid transparent;
-            border-bottom: 12px solid transparent;
-            margin-left: 5px;
-        }
-
-        /* Problem Section */
-        .problem-section {
-            padding: 150px 2rem 100px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .problem-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 2px;
-            height: 100px;
-            background: linear-gradient(to bottom, transparent, var(--primary), transparent);
-        }
-
-        .section-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .section-header {
-            text-align: center;
-            margin-bottom: 5rem;
-        }
-
-        .section-label {
-            display: inline-block;
-            background: rgba(255, 0, 110, 0.1);
-            border: 1px solid rgba(255, 0, 110, 0.3);
-            padding: 0.5rem 1.5rem;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--accent);
-            margin-bottom: 1.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .section-header h2 {
-            font-size: clamp(2rem, 4vw, 3.5rem);
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            letter-spacing: -0.02em;
-        }
-
-        .section-header p {
-            font-size: clamp(1rem, 2vw, 1.3rem);
-            color: var(--text-gray);
-            max-width: 700px;
-            margin: 0 auto;
-            line-height: 1.8;
-        }
-
-        .problem-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 4rem;
-        }
-
-        .problem-card {
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(0, 102, 255, 0.15);
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            transition: all 0.4s ease;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .problem-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--gradient-glow);
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .problem-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 20px 60px rgba(0, 102, 255, 0.15);
-            background: rgba(255, 255, 255, 1);
-        }
-
-        .problem-card:hover::before {
-            opacity: 1;
-        }
-
-        .problem-icon {
-            font-size: 3rem;
-            margin-bottom: 1.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .problem-card h3 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
-            color: var(--text-dark);
-        }
-
-        .problem-card p {
+        .welcome-subtitle {
+            font-size: 1.05rem;
             color: var(--text-gray);
             line-height: 1.7;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 2rem;
         }
 
-        /* Solution Section */
-        .solution-section {
-            padding: 100px 2rem;
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.03) 0%, rgba(0, 217, 255, 0.03) 100%);
-            position: relative;
-        }
 
-        .solution-content {
+
+        /* Stats decorative */
+        .welcome-stats {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4rem;
-            align-items: center;
-            margin-top: 4rem;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(0, 102, 255, 0.1);
         }
 
-        .solution-image {
-            position: relative;
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 30px 80px rgba(0, 102, 255, 0.15);
-        }
-
-        .solution-image::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--gradient-1);
-            opacity: 0.1;
-            z-index: 1;
-        }
-
-        .solution-image img {
-            width: 100%;
-            height: auto;
-            display: block;
-        }
-
-        .solution-features {
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-        }
-
-        .feature-item {
-            display: flex;
-            gap: 1.5rem;
-            align-items: flex-start;
-            padding: 2rem;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 15px;
-            border: 1px solid rgba(0, 102, 255, 0.1);
-            transition: all 0.3s ease;
-        }
-
-        .feature-item:hover {
-            background: rgba(255, 255, 255, 0.9);
-            border-color: var(--primary);
-            transform: translateX(10px);
-            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.1);
-        }
-
-        .feature-icon {
-            width: 60px;
-            height: 60px;
-            background: var(--gradient-1);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            flex-shrink: 0;
-            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.2);
-        }
-
-        .feature-content h3 {
-            font-size: 1.3rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            color: var(--text-dark);
-        }
-
-        .feature-content p {
-            color: var(--text-gray);
-            line-height: 1.7;
-        }
-
-        /* Stats Section */
-        .stats-section {
-            padding: 100px 2rem;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(180deg, rgba(240, 246, 255, 0.5) 0%, rgba(255, 255, 255, 0.5) 100%);
-        }
-
-        .stats-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 30% 50%, rgba(0, 102, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 70% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-top: 4rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .stat-card {
+        .stat-item {
             text-align: center;
-            padding: 3rem 2rem;
-            background: rgba(255, 255, 255, 0.8);
-            border: 2px solid rgba(0, 102, 255, 0.1);
-            border-radius: 20px;
-            transition: all 0.4s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity 0.4s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--primary);
-            transform: translateY(-10px) scale(1.02);
-            box-shadow: 0 25px 70px rgba(0, 102, 255, 0.2);
-            background: rgba(255, 255, 255, 1);
-        }
-
-        .stat-card:hover::before {
-            opacity: 0.05;
         }
 
         .stat-number {
-            font-size: clamp(3rem, 6vw, 5rem);
+            font-size: 1.5rem;
             font-weight: 800;
             background: var(--gradient-1);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 1rem;
-            position: relative;
-            z-index: 1;
+            margin-bottom: 0.3rem;
             font-family: 'Space Mono', monospace;
         }
 
         .stat-label {
-            font-size: 1.2rem;
-            color: var(--text-dark);
-            font-weight: 600;
-            margin-bottom: 0.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .stat-description {
-            font-size: 0.95rem;
+            font-size: 0.8rem;
             color: var(--text-gray);
-            position: relative;
-            z-index: 1;
-            line-height: 1.6;
+            font-weight: 500;
         }
 
-        /* Use Cases Section */
-        .use-cases-section {
-            padding: 100px 2rem;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(240, 246, 255, 0.3) 100%);
-        }
-
-        .use-cases-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 2rem;
-            margin-top: 4rem;
-        }
-
-        .use-case-card {
-            background: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(0, 102, 255, 0.1);
-            border-radius: 20px;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            cursor: pointer;
-        }
-
-        .use-case-card:hover {
-            transform: translateY(-10px);
-            border-color: var(--primary);
-            box-shadow: 0 25px 70px rgba(0, 102, 255, 0.2);
-        }
-
-        .use-case-image {
-            height: 250px;
-            background: linear-gradient(135deg, #E6F0FF 0%, #F0F6FF 100%);
+        /* Feature badges */
+        .feature-badges {
             display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 5rem;
-            position: relative;
-            overflow: hidden;
+            gap: 0.8rem;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
         }
 
-        .use-case-image::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--gradient-1);
-            opacity: 0.05;
-        }
-
-        .use-case-content {
-            padding: 2.5rem;
-        }
-
-        .use-case-content h3 {
-            font-size: 1.6rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
-            color: var(--text-dark);
-        }
-
-        .use-case-content p {
-            color: var(--text-gray);
-            line-height: 1.7;
-            margin-bottom: 1.5rem;
-        }
-
-        .use-case-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
+        .badge {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            transition: all 0.3s ease;
-        }
-
-        .use-case-link:hover {
-            gap: 1rem;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 150px 2rem;
-            position: relative;
-            overflow: hidden;
-            background: linear-gradient(180deg, rgba(240, 246, 255, 0.3) 0%, rgba(255, 255, 255, 0.8) 100%);
-        }
-
-        .cta-section::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: 
-                radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.08) 0%, transparent 60%);
-        }
-
-        .cta-container {
-            max-width: 900px;
-            margin: 0 auto;
-            text-align: center;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid rgba(0, 102, 255, 0.2);
-            border-radius: 30px;
-            padding: 5rem 3rem;
-            position: relative;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 30px 80px rgba(0, 102, 255, 0.15);
-        }
-
-        .cta-container::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--gradient-1);
-            opacity: 0.03;
-            border-radius: 30px;
-        }
-
-        .cta-container h2 {
-            font-size: clamp(2.5rem, 5vw, 4rem);
-            font-weight: 800;
-            margin-bottom: 1.5rem;
-            letter-spacing: -0.02em;
-            color: var(--text-dark);
-        }
-
-        .cta-container p {
-            font-size: 1.3rem;
-            color: var(--text-gray);
-            margin-bottom: 3rem;
-            line-height: 1.8;
-        }
-
-        .cta-form {
-            display: flex;
-            gap: 1rem;
-            max-width: 600px;
-            margin: 0 auto;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .cta-input {
-            flex: 1;
-            min-width: 250px;
-            padding: 1.2rem 2rem;
-            background: rgba(255, 255, 255, 0.9);
-            border: 2px solid rgba(0, 102, 255, 0.2);
+            gap: 0.4rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
             border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
             color: var(--text-dark);
-            font-size: 1rem;
-            font-family: 'Outfit', sans-serif;
+            border: 2px solid rgba(0, 102, 255, 0.15);
+            backdrop-filter: blur(10px);
             transition: all 0.3s ease;
         }
 
-        .cta-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            background: rgba(255, 255, 255, 1);
-            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.1);
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.2);
         }
 
-        .cta-input::placeholder {
+       .badge {
+    padding: 0.6rem 1.3rem;
+}
+
+.badge-icon {
+    font-size: 1.2rem;
+}
+
+
+        /* Right Panel - Form Section */
+        .form-panel {
+            flex: 0 0 55%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem 2.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 550px;
+            animation: fadeInRight 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Carte de login */
+        .login-card {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 102, 255, 0.15);
+            border-radius: 20px;
+            padding: 1.2rem 2rem; /* ↓ réduit la hauteur */
+            box-shadow: 
+                0 20px 60px rgba(0, 102, 255, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+        }
+
+
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* Onglets */
+        .tabs {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 1.5rem;
+            background: rgba(0, 102, 255, 0.05);
+            padding: 0.4rem;
+            border-radius: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.7rem 1.2rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: rgba(0, 102, 255, 0.08);
+            color: var(--primary);
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.1);
+        }
+
+        /* Formulaire */
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-hidden {
+            display: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .label-icon {
+            font-size: 1rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            background: rgba(240, 246, 255, 0.5);
+            border: 2px solid rgba(0, 102, 255, 0.1);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus {
+            outline: none;
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+
+        .form-input::placeholder {
             color: var(--text-gray);
             opacity: 0.6;
         }
 
-        /* Footer */
-        footer {
-            background: rgba(240, 246, 255, 0.8);
-            border-top: 1px solid rgba(0, 102, 255, 0.15);
-            padding: 4rem 2rem 2rem;
+        select.form-input {
+            cursor: pointer;
+        }
+
+        /* Password wrapper */
+        .password-wrapper {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 0.8rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.4rem;
+            transition: all 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* Password strength */
+        .password-strength {
+            height: 3px;
+            background: rgba(0, 102, 255, 0.1);
+            border-radius: 2px;
+            overflow: hidden;
+            margin-top: 0.4rem;
+        }
+
+        .strength-bar {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .strength-bar.weak {
+            width: 33%;
+            background: #FF6B6B;
+        }
+
+        .strength-bar.medium {
+            width: 66%;
+            background: #FFA94D;
+        }
+
+        .strength-bar.strong {
+            width: 100%;
+            background: #00C48C;
+        }
+
+        .password-hint {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            margin-top: 0.2rem;
+        }
+
+        /* Options du formulaire */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            position: relative;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .checkbox-custom {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(0, 102, 255, 0.3);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .checkbox-label input[type="checkbox"]:checked ~ .checkbox-custom {
+            background: var(--gradient-1);
+            border-color: var(--primary);
+        }
+
+        .checkbox-label input[type="checkbox"]:checked ~ .checkbox-custom::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .checkbox-label a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .forgot-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .forgot-link:hover {
+            color: var(--secondary);
+        }
+
+        /* Boutons */
+        .btn {
+            padding: 0.9rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 102, 255, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover .btn-icon {
+            transform: translateX(5px);
+        }
+
+        /* Divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 1rem 0;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(0, 102, 255, 0.1);
+        }
+
+        .divider span {
+            padding: 0 0.8rem;
+        }
+
+        /* Boutons sociaux */
+        .social-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+        }
+
+        .btn-social {
+            padding: 0.8rem 1.2rem;
+            background: white;
+            border: 2px solid rgba(0, 102, 255, 0.15);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .btn-social:hover {
+            border-color: var(--primary);
+            background: rgba(0, 102, 255, 0.05);
+            transform: translateY(-2px);
+        }
+
+        .social-icon {
+            width: 22px;
+            height: 22px;
+            background: var(--gradient-1);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        /* Footer - FULL WIDTH */
+        .page-footer {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-top: 1px solid rgba(0, 102, 255, 0.1);
+            padding: 1rem 2rem;
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 2;
         }
 
         .footer-content {
             max-width: 1400px;
             margin: 0 auto;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 3rem;
-            margin-bottom: 3rem;
-        }
-
-        .footer-section h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--primary);
-        }
-
-        .footer-section ul {
-            list-style: none;
-        }
-
-        .footer-section ul li {
-            margin-bottom: 0.8rem;
-        }
-
-        .footer-section ul li a {
-            color: var(--text-gray);
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .footer-section ul li a:hover {
-            color: var(--primary);
-            padding-left: 5px;
-        }
-
-        .footer-bottom {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding-top: 2rem;
-            border-top: 1px solid rgba(0, 102, 255, 0.1);
-            text-align: center;
-            color: var(--text-gray);
-            font-size: 0.9rem;
         }
 
         /* Responsive */
+        @media (max-width: 1200px) {
+            .welcome-panel {
+                flex: 0 0 42%;
+            }
+            
+            .form-panel {
+                flex: 0 0 58%;
+            }
+        }
+
         @media (max-width: 968px) {
-            .nav-links {
-                display: none;
+            body {
+                overflow-y: auto;
             }
 
-            .solution-content {
+            .page-wrapper {
+                height: auto;
+                min-height: 100vh;
+                padding-top: 65px;
+            }
+
+            .login-page {
+                flex-direction: column;
+            }
+
+            .welcome-panel,
+            .form-panel {
+                flex: 1 1 auto;
+            }
+
+            .welcome-panel {
+                padding: 2rem 1.5rem 1.5rem;
+            }
+
+            .form-panel {
+                padding: 1.5rem;
+            }
+
+            .login-card {
+                padding: 1.8rem;
+            }
+
+            .welcome-stats {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .social-buttons {
                 grid-template-columns: 1fr;
             }
 
-            .hero h1 {
-                font-size: 2.5rem;
+            .login-card {
+                padding: 1.5rem;
             }
 
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .use-cases-grid {
-                grid-template-columns: 1fr;
+            .page-footer {
+                padding: 1rem 1.5rem;
             }
         }
 
-        /* Scroll Animations */
-        .fade-in {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: all 0.8s ease;
-        }
-
-        .fade-in.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-
-        /* Pulse Animation */
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 10px 40px rgba(0, 102, 255, 0.3);
+        @media (max-width: 480px) {
+            .welcome-title {
+                font-size: 1.5rem;
             }
-            50% {
-                box-shadow: 0 15px 60px rgba(0, 102, 255, 0.5);
+            
+            .welcome-subtitle {
+                font-size: 0.9rem;
             }
-        }
+            
+            .form-options {
+                flex-direction: column;
+                align-items: flex-start;
+            }
 
-        .pulse-effect {
-            animation: pulse 3s ease-in-out infinite;
+            .feature-badges {
+                flex-direction: column;
+            }
+
+            .badge {
+                width: 100%;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav id="navbar">
-        <div class="nav-container">
-            <div class="logo">MedVR</div>
-            <ul class="nav-links">
-                <li><a href="#solution">Solution</a></li>
-                <li><a href="#use-cases">Cas d'Usage</a></li>
-                <li><a href="#stats">Impact</a></li>
-                <li><a href="#demo" class="cta-nav">Demander une Démo</a></li>
-            </ul>
-        </div>
-    </nav>
+    <app-navbar></app-navbar>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-background">
-            <div class="hero-grid"></div>
-            <div class="floating-shapes">
-                <div class="shape shape-1"></div>
-                <div class="shape shape-2"></div>
+    <div class="page-wrapper">
+        <div class="login-page">
+            <!-- Background animé -->
+            <div class="login-background">
+                <div class="animated-grid"></div>
+                <div class="floating-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                </div>
             </div>
-        </div>
-        
-        <div class="hero-content">
-            <div class="hero-badge">🚀 Innovation en Formation Médicale</div>
-            <h1>
-                Révolutionnez la <span class="gradient-text">Formation Médicale</span><br>
-                avec la Réalité Virtuelle
-            </h1>
-            <p>
-                Une plateforme VR immersive qui transforme l'apprentissage médical en permettant 
-                aux professionnels de santé de s'entraîner dans des environnements ultra-réalistes, 
-                sans risque pour les patients.
-            </p>
-            <div class="hero-cta-group">
-                <a href="#demo" class="btn btn-primary pulse-effect">Demander une Démo</a>
-                <a href="#solution" class="btn btn-secondary">Découvrir la Solution</a>
-            </div>
-        </div>
-    </section>
 
-    <!-- Video Section -->
-    <section class="video-section">
-        <div class="video-container">
-            <div class="video-placeholder">
-                <div class="play-button"></div>
-            </div>
-        </div>
-    </section>
+            <!-- Left Panel - Welcome Section -->
+            <div class="welcome-panel">
+                <div class="welcome-content">
+                    <!-- Welcome Text --><h1>
+                        
+                    </h1>
+                    <h1 class="welcome-title">
+                        Bienvenue sur <br>
+                        <span class="gradient-text">SurgeryVR</span>
+                    </h1>
+                    <p class="welcome-subtitle">
+                        Connectez-vous pour accéder à votre plateforme de formation VR et transformez votre apprentissage médical
+                    </p>
 
-    <!-- Problem Section -->
-    <section class="problem-section">
-        <div class="section-container">
-            <div class="section-header">
-                <span class="section-label">Le Défi</span>
-                <h2>Les Limites de la Formation Médicale Traditionnelle</h2>
-                <p>
-                    La formation médicale actuelle fait face à des défis majeurs qui impactent 
-                    directement la qualité des soins et la sécurité des patients.
-                </p>
-            </div>
-            
-            <div class="problem-grid">
-                <div class="problem-card">
-                    <div class="problem-icon">⚠️</div>
-                    <h3>Risque d'Erreurs Médicales</h3>
-                    <p>
-                        Les étudiants et jeunes praticiens manquent d'opportunités pour pratiquer 
-                        des procédures complexes avant de les réaliser sur de vrais patients.
-                    </p>
-                </div>
-                
-                <div class="problem-card">
-                    <div class="problem-icon">⏱️</div>
-                    <h3>Temps de Formation Limité</h3>
-                    <p>
-                        L'accès restreint aux salles de simulation et aux mannequins high-tech 
-                        ralentit considérablement le processus d'apprentissage.
-                    </p>
-                </div>
-                
-                <div class="problem-card">
-                    <div class="problem-icon">💰</div>
-                    <h3>Coûts Élevés</h3>
-                    <p>
-                        Les équipements de simulation traditionnels nécessitent des investissements 
-                        importants en infrastructure et maintenance.
-                    </p>
-                </div>
-                
-                <div class="problem-card">
-                    <div class="problem-icon">📉</div>
-                    <h3>Manque de Répétition</h3>
-                    <p>
-                        Les situations d'urgence rares ne peuvent être pratiquées suffisamment, 
-                        laissant les praticiens mal préparés face aux cas critiques.
-                    </p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Solution Section -->
-    <section id="solution" class="solution-section ">
-        <div class="section-container">
-            <div class="section-header">
-                <span class="section-label" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3); color: var(--primary);">La Solution</span>
-                <h2>Formation VR Immersive et Sécurisée</h2>
-                <p>
-                    Notre plateforme offre une expérience d'apprentissage révolutionnaire qui combine 
-                    réalisme, accessibilité et efficacité pédagogique.
-                </p>
-            </div>
-            
-            <div class="solution-content">
-                <div class="solution-image">
-                    <div class="video-placeholder">
-                        <div style="font-size: 6rem;">🥽</div>
-                    </div>
-                </div>
-                
-                <div class="solution-features">
-                    <div class="feature-item">
-                        <div class="feature-icon">🏥</div>
-                        <div class="feature-content">
-                            <h3>Simulations Ultra-Réalistes</h3>
-                            <p>
-                                Des environnements 3D photoréalistes reproduisant fidèlement les blocs 
-                                opératoires, services d'urgence et salles de soins.
-                            </p>
+                    <!-- Feature Badges -->
+                    <div class="feature-badges">
+                        <div class="badge">
+                            <span class="badge-icon">🎯</span>
+                            <span>Formation immersive</span>
+                        </div>
+                        <div class="badge">
+                            <span class="badge-icon">🔒</span>
+                            <span>100% sécurisé</span>
                         </div>
                     </div>
-                    
-                    <div class="feature-item">
-                        <div class="feature-icon">🔄</div>
-                        <div class="feature-content">
-                            <h3>Pratique Illimitée</h3>
-                            <p>
-                                Répétez les procédures autant de fois que nécessaire sans contraintes 
-                                de temps, d'espace ou de coût.
-                            </p>
+
+                    <!-- Stats -->
+                    <div class="welcome-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">15k+</div>
+                            <div class="stat-label">Utilisateurs</div>
                         </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <div class="feature-icon">🎯</div>
-                        <div class="feature-content">
-                            <h3>Scénarios Personnalisables</h3>
-                            <p>
-                                Créez des cas cliniques sur mesure adaptés à vos objectifs pédagogiques 
-                                et spécialités médicales.
-                            </p>
+                        <div class="stat-item">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Scénarios</div>
                         </div>
-                    </div>
-                    
-                    <div class="feature-item">
-                        <div class="feature-icon">📊</div>
-                        <div class="feature-content">
-                            <h3>Suivi des Performances</h3>
-                            <p>
-                                Analysez en détail les performances des apprenants avec des métriques 
-                                précises et des feedbacks instantanés.
-                            </p>
+                        <div class="stat-item">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Satisfaction</div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
 
-    <!-- Stats Section -->
-    <section id="stats" class="stats-section">
-        <div class="section-container">
-            <div class="section-header">
-                <span class="section-label">Impact Mesurable</span>
-                <h2>Des Résultats qui Transforment les Soins</h2>
-                <p>
-                    Notre solution VR génère des améliorations significatives et mesurables 
-                    dans la qualité de la formation médicale.
-                </p>
-            </div>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number">-45%</div>
-                    <div class="stat-label">Réduction des Erreurs</div>
-                    <div class="stat-description">
-                        Diminution significative des erreurs médicales grâce à la pratique intensive
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-number">3x</div>
-                    <div class="stat-label">Gain de Temps</div>
-                    <div class="stat-description">
-                        Formation 3 fois plus rapide comparée aux méthodes traditionnelles
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-number">95%</div>
-                    <div class="stat-label">Sécurité Patient</div>
-                    <div class="stat-description">
-                        Amélioration de la confiance et de la préparation des praticiens
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-number">-60%</div>
-                    <div class="stat-label">Réduction des Coûts</div>
-                    <div class="stat-description">
-                        Économies substantielles sur les coûts de formation et d'infrastructure
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
+            <!-- Right Panel - Form Section -->
+            <div class="form-panel">
+                <div class="form-container">
+                    <!-- Carte de login -->
+                    <div class="login-card">
+                        <!-- Header -->
+                        <div class="card-header">
+                            <h2 class="card-title">Accédez à votre compte</h2>
+                        </div>
 
-    <!-- Use Cases Section -->
-    <section id="use-cases" class="use-cases-section ">
-        <div class="section-container">
-            <div class="section-header">
-                <span class="section-label">Applications</span>
-                <h2>Cas d'Usage Médicaux</h2>
-                <p>
-                    Notre plateforme VR couvre l'ensemble du spectre de la formation médicale, 
-                    de la chirurgie aux urgences.
-                </p>
-            </div>
-            
-            <div class="use-cases-grid">
-                <div class="use-case-card">
-                    <div class="use-case-image">
-                        <div style="font-size: 5rem;">🔪</div>
-                    </div>
-                    <div class="use-case-content">
-                        <h3>Formation Chirurgicale</h3>
-                        <p>
-                            Pratiquez des procédures chirurgicales complexes dans un environnement 
-                            immersif et sans risque. Maîtrisez les gestes techniques avant le bloc opératoire.
-                        </p>
-                        <a href="#" class="use-case-link">
-                            En savoir plus →
-                        </a>
+
+                        <!-- Formulaire de connexion -->
+                        <form id="loginForm" class="login-form" onsubmit="handleLogin(event)">
+                            
+                            <div class="form-group">
+                                <label for="login-email">
+                                    <span class="label-icon">📧</span>
+                                    Email professionnel
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="login-email"
+                                    class="form-input"
+                                    placeholder="votre.email@exemple.com"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="login-password">
+                                    <span class="label-icon">🔒</span>
+                                    Mot de passe
+                                </label>
+                                <div class="password-wrapper">
+                                    <input 
+                                        type="password" 
+                                        id="login-password"
+                                        class="form-input"
+                                        placeholder="••••••••"
+                                        required>
+                                    <button 
+                                        type="button" 
+                                        class="password-toggle"
+                                        onclick="togglePassword('login-password')">
+                                        👁️‍🗨️
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="remember-me">
+                                    <span class="checkbox-custom"></span>
+                                    Se souvenir de moi
+                                </label>
+                                <a href="#" class="forgot-link">Mot de passe oublié ?</a>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <span class="btn-text">Se connecter</span>
+                                <span class="btn-icon">→</span>
+                            </button>
+
+                            <div class="divider">
+                                <span>ou continuer avec</span>
+                            </div>
+
+                            <div class="social-buttons">
+                                <button type="button" class="btn-social" onclick="loginWithGoogle()">
+                                    <span class="social-icon">G</span>
+                                    Google
+                                </button>
+                                <button type="button" class="btn-social" onclick="loginWithMicrosoft()">
+                                    <span class="social-icon">M</span>
+                                    Microsoft
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- Formulaire d'inscription -->
+                        <form id="registerForm" class="login-form form-hidden" onsubmit="handleRegister(event)">
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="register-firstname">
+                                        <span class="label-icon">👤</span>
+                                        Prénom
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="register-firstname"
+                                        class="form-input"
+                                        placeholder="Jean"
+                                        required>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="register-lastname">
+                                        <span class="label-icon">👤</span>
+                                        Nom
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="register-lastname"
+                                        class="form-input"
+                                        placeholder="Dupont"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="register-email">
+                                    <span class="label-icon">📧</span>
+                                    Email professionnel
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="register-email"
+                                    class="form-input"
+                                    placeholder="votre.email@exemple.com"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="register-specialty">
+                                    <span class="label-icon">🏥</span>
+                                    Spécialité
+                                </label>
+                                <select 
+                                    id="register-specialty"
+                                    class="form-input"
+                                    required>
+                                    <option value="">Sélectionnez votre spécialité</option>
+                                    <option value="chirurgie">Chirurgie</option>
+                                    <option value="urgences">Médecine d'urgence</option>
+                                    <option value="anesthesie">Anesthésie</option>
+                                    <option value="cardiologie">Cardiologie</option>
+                                    <option value="pediatrie">Pédiatrie</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="register-password">
+                                    <span class="label-icon">🔒</span>
+                                    Mot de passe
+                                </label>
+                                <div class="password-wrapper">
+                                    <input 
+                                        type="password" 
+                                        id="register-password"
+                                        class="form-input"
+                                        placeholder="••••••••"
+                                        oninput="updatePasswordStrength()"
+                                        required>
+                                    <button 
+                                        type="button" 
+                                        class="password-toggle"
+                                        onclick="togglePassword('register-password')">
+                                        👁️‍🗨️
+                                    </button>
+                                </div>
+                                <div class="password-strength">
+                                    <div id="strength-bar" class="strength-bar"></div>
+                                </div>
+                                <small class="password-hint">Minimum 8 caractères, incluant majuscules et chiffres</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="register-confirm-password">
+                                    <span class="label-icon">🔒</span>
+                                    Confirmer le mot de passe
+                                </label>
+                                <input 
+                                    type="password" 
+                                    id="register-confirm-password"
+                                    class="form-input"
+                                    placeholder="••••••••"
+                                    required>
+                            </div>
+
+                            <div class="form-options">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="accept-terms" required>
+                                    <span class="checkbox-custom"></span>
+                                    J'accepte les <a href="#">conditions d'utilisation</a>
+                                </label>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <span class="btn-text">Créer mon compte</span>
+                                <span class="btn-icon">→</span>
+                            </button>
+
+                            <div class="divider">
+                                <span>ou s'inscrire avec</span>
+                            </div>
+
+                            <div class="social-buttons">
+                                <button type="button" class="btn-social" onclick="registerWithGoogle()">
+                                    <span class="social-icon">G</span>
+                                    Google
+                                </button>
+                                <button type="button" class="btn-social" onclick="registerWithMicrosoft()">
+                                    <span class="social-icon">M</span>
+                                    Microsoft
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
-                
-                <div class="use-case-card">
-                    <div class="use-case-image">
-                        <div style="font-size: 5rem;">🚑</div>
-                    </div>
-                    <div class="use-case-content">
-                        <h3>Médecine d'Urgence</h3>
-                        <p>
-                            Entraînez-vous à gérer des situations critiques et des polytraumatismes. 
-                            Développez vos réflexes et votre capacité de décision sous pression.
-                        </p>
-                        <a href="#" class="use-case-link">
-                            En savoir plus →
-                        </a>
-                    </div>
-                </div>
-                
-                <div class="use-case-card">
-                    <div class="use-case-image">
-                        <div style="font-size: 5rem;">🎓</div>
-                    </div>
-                    <div class="use-case-content">
-                        <h3>Formation Continue</h3>
-                        <p>
-                            Perfectionnez vos compétences et restez à jour avec les dernières 
-                            techniques médicales. Formation accessible 24/7 depuis n'importe où.
-                        </p>
-                        <a href="#" class="use-case-link">
-                            En savoir plus →
-                        </a>
-                    </div>
-                </div>
             </div>
         </div>
-    </section>
 
-    <!-- CTA Section -->
-    <section id="demo" class="cta-section ">
-        <div class="cta-container">
-            <h2>Prêt à Révolutionner Votre Formation ?</h2>
-            <p>
-                Demandez une démonstration personnalisée et découvrez comment notre solution VR 
-                peut transformer votre approche de la formation médicale.
-            </p>
-            <form class="cta-form" onsubmit="event.preventDefault(); alert('Merci! Notre équipe vous contactera sous 24h.');">
-                <input type="email" class="cta-input" placeholder="Votre adresse email professionnelle" required>
-                <button type="submit" class="btn btn-primary">Demander une Démo</button>
-            </form>
-        </div>
-    </section>
+        <!-- Footer - FULL WIDTH -->
+        <footer class="page-footer">
+            <div class="footer-content">
+                <p>© 2026 SurgeryVR. Tous droits réservés.</p>
+            </div>
+        </footer>
+    </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-section">
-                <h3>MedVR Solutions</h3>
-                <p style="color: var(--text-gray); line-height: 1.7;">
-                    Pionnier de la formation médicale en réalité virtuelle, nous transformons 
-                    l'apprentissage des professionnels de santé.
-                </p>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Solutions</h3>
-                <ul>
-                    <li><a href="#">Formation Chirurgicale</a></li>
-                    <li><a href="#">Médecine d'Urgence</a></li>
-                    <li><a href="#">Formation Continue</a></li>
-                    <li><a href="#">Simulations Personnalisées</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Ressources</h3>
-                <ul>
-                    <li><a href="#">Documentation</a></li>
-                    <li><a href="#">Études de Cas</a></li>
-                    <li><a href="#">Blog</a></li>
-                    <li><a href="#">Support</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-section">
-                <h3>Contact</h3>
-                <ul>
-                    <li><a href="/cdn-cgi/l/email-protection#dcbfb3b2a8bdbfa89cb1b9b8aaaef2bfb3b1"><span class="__cf_email__" data-cfemail="2e4d41405a4f4d5a6e434b4a585c004d4143">[email&#160;protected]</span></a></li>
-                    <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
-                    <li><a href="#">Demander une Démo</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <div class="footer-bottom">
-            <p>© 2026 MedVR Solutions. Tous droits réservés. | <a href="#" style="color: var(--primary);">Confidentialité</a> | <a href="#" style="color: var(--primary);">Mentions Légales</a></p>
-        </div>
-    </footer>
+    <script>
+        // Gestion des onglets
+        function switchTab(tab) {
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+            const tabs = document.querySelectorAll('.tab');
 
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
-        // Navbar scroll effect
-        const navbar = document.getElementById('navbar');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 50) {
-                navbar.classList.add('scrolled');
+            tabs.forEach(t => t.classList.remove('active'));
+            
+            if (tab === 'login') {
+                loginForm.classList.remove('form-hidden');
+                registerForm.classList.add('form-hidden');
+                tabs[0].classList.add('active');
             } else {
-                navbar.classList.remove('scrolled');
+                loginForm.classList.add('form-hidden');
+                registerForm.classList.remove('form-hidden');
+                tabs[1].classList.add('active');
             }
-        });
-
-        // Fade-in animations on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add('visible');
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in').forEach(el => {
-            observer.observe(el);
-        });
-
-        // Smooth scroll for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Play button interaction
-        const playButton = document.querySelector('.play-button');
-        if (playButton) {
-            playButton.addEventListener('click', () => {
-                alert('La vidéo de démonstration sera bientôt disponible!');
-            });
         }
 
-       // Add parallax effect to hero shapes
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const shapes = document.querySelectorAll('.shape');
-            shapes.forEach((shape, index) => {
-                const speed = 0.5 + (index * 0.1);
-                shape.style.transform = `translateY(${scrolled * speed}px)`;
-            });
-        });
+        // Toggle password visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const button = input.nextElementSibling;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                button.textContent = '👁️';
+            } else {
+                input.type = 'password';
+                button.textContent = '👁️‍🗨️';
+            }
+        }
+
+        // Update password strength
+        function updatePasswordStrength() {
+            const password = document.getElementById('register-password').value;
+            const strengthBar = document.getElementById('strength-bar');
+            
+            let strength = 0;
+            
+            if (password.length >= 8) strength++;
+            if (password.length >= 12) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+            
+            strengthBar.className = 'strength-bar';
+            
+            if (strength <= 2) {
+                strengthBar.classList.add('weak');
+            } else if (strength <= 4) {
+                strengthBar.classList.add('medium');
+            } else {
+                strengthBar.classList.add('strong');
+            }
+        }
+
+        // Handle login
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            console.log('Login attempt:', { email });
+            alert('Connexion réussie ! Redirection en cours...');
+            
+            // Ici vous ajouteriez votre logique de connexion
+        }
+
+        // Handle register
+        function handleRegister(event) {
+            event.preventDefault();
+            
+            const password = document.getElementById('register-password').value;
+            const confirmPassword = document.getElementById('register-confirm-password').value;
+            
+            // Vérifier la correspondance des mots de passe
+            if (password !== confirmPassword) {
+                alert('Les mots de passe ne correspondent pas.');
+                return;
+            }
+            
+            // Vérifier la force du mot de passe
+            if (password.length < 8) {
+                alert('Le mot de passe doit contenir au moins 8 caractères.');
+                return;
+            }
+            
+            if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+                alert('Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.');
+                return;
+            }
+            
+            const firstName = document.getElementById('register-firstname').value;
+            const lastName = document.getElementById('register-lastname').value;
+            const email = document.getElementById('register-email').value;
+            const specialty = document.getElementById('register-specialty').value;
+            
+            console.log('Register attempt:', { firstName, lastName, email, specialty });
+            alert('Inscription réussie ! Bienvenue sur SurgeryVR.');
+            
+            // Basculer vers l'onglet de connexion
+            switchTab('login');
+            
+            // Pré-remplir l'email
+            document.getElementById('login-email').value = email;
+        }
+
+        // Social login/register
+        function loginWithGoogle() {
+            alert('La connexion avec Google sera bientôt disponible !');
+        }
+
+        function loginWithMicrosoft() {
+            alert('La connexion avec Microsoft sera bientôt disponible !');
+        }
+
+        function registerWithGoogle() {
+            alert('L\'inscription avec Google sera bientôt disponible !');
+        }
+
+        function registerWithMicrosoft() {
+            alert('L\'inscription avec Microsoft sera bientôt disponible !');
+        }
     </script>
 </body>
 </html>
