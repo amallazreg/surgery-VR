@@ -1,102 +1,351 @@
-<!-- Navbar -->
-<nav class="navbar" [class.scrolled]="scrollY > 50">
-  <div class="nav-container">
-    <div class="logo">SurgeryVR</div>
 
-    <div class="nav-links">
-      <a href="#solutions">{{ t.nav.solutions }}</a>
-      <a href="#platform">{{ t.nav.platform }}</a>
-      <a href="#about">{{ t.nav.about }}</a>
+    
+    
+<body>  
+  
+  <nav id="navbar" [class.scrolled]="isScrolled">
+        <div class="nav-container">
+           <div class="logo">
+              <img src="assets/logo.png" alt="MedVR Logo" class="logo-img">
+           </div>        
+           <ul class="nav-links">
+                <li><a href="#solution">Solution</a></li>
+                <li><a href="#use-cases">Cas d'Usage</a></li>
+                <li><a href="#stats">Impact</a></li>
+                <li><a href="#demo" class="cta-nav">Demander une Démo</a></li>
+            </ul>
+        </div>
+    </nav>
 
-      <!-- Language -->
-      <button (click)="setLanguage('fr')">FR</button>
-      <button (click)="setLanguage('en')">EN</button>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="hero-grid"></div>
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+            </div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="hero-badge">🚀 Innovation en Formation Médicale</div>
+            <h1>
+                Révolutionnez la <span class="gradient-text">Formation Médicale</span><br>
+                avec la Réalité Virtuelle
+            </h1>
+            <p>
+                Une plateforme VR immersive qui transforme l'apprentissage médical en permettant 
+                aux professionnels de santé de s'entraîner dans des environnements ultra-réalistes, 
+                sans risque pour les patients.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#demo" class="btn btn-primary pulse-effect">Demander une Démo</a>
+                <a href="#solution" class="btn btn-secondary">Découvrir la Solution</a>
+            </div>
+        </div>
+    </section>
 
-      <button class="cta">{{ t.nav.demo }}</button>
-    </div>
+    <!-- Video Section -->
+    <section class="video-section">
+        <div class="video-container">
+            <div class="video-placeholder">
+                  <div class="play-button" (click)="onPlayVideo()"></div>
+            </div>
+        </div>
+    </section>
 
-    <button class="mobile-btn" (click)="toggleMobileMenu()">☰</button>
-  </div>
+    <!-- Problem Section -->
+    <section class="problem-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Le Défi</span>
+                <h2>Les Limites de la Formation Médicale Traditionnelle</h2>
+                <p>
+                    La formation médicale actuelle fait face à des défis majeurs qui impactent 
+                    directement la qualité des soins et la sécurité des patients.
+                </p>
+            </div>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">⚠️</div>
+                    <h3>Risque d'Erreurs Médicales</h3>
+                    <p>
+                        Les étudiants et jeunes praticiens manquent d'opportunités pour pratiquer 
+                        des procédures complexes avant de les réaliser sur de vrais patients.
+                    </p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">⏱️</div>
+                    <h3>Temps de Formation Limité</h3>
+                    <p>
+                        L'accès restreint aux salles de simulation et aux mannequins high-tech 
+                        ralentit considérablement le processus d'apprentissage.
+                    </p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">💰</div>
+                    <h3>Coûts Élevés</h3>
+                    <p>
+                        Les équipements de simulation traditionnels nécessitent des investissements 
+                        importants en infrastructure et maintenance.
+                    </p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">📉</div>
+                    <h3>Manque de Répétition</h3>
+                    <p>
+                        Les situations d'urgence rares ne peuvent être pratiquées suffisamment, 
+                        laissant les praticiens mal préparés face aux cas critiques.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
 
-  <div *ngIf="mobileMenuOpen" class="mobile-menu">
-    <a href="#solutions">{{ t.nav.solutions }}</a>
-    <a href="#platform">{{ t.nav.platform }}</a>
-    <a href="#about">{{ t.nav.about }}</a>
-  </div>
-</nav>
+    <!-- Solution Section -->
+    <section id="solution" class="solution-section ">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3); color: var(--primary);">La Solution</span>
+                <h2>Formation VR Immersive et Sécurisée</h2>
+                <p>
+                    Notre plateforme offre une expérience d'apprentissage révolutionnaire qui combine 
+                    réalisme, accessibilité et efficacité pédagogique.
+                </p>
+            </div>
+            
+            <div class="solution-content">
+                <div class="solution-image">
+                    <div class="video-placeholder">
+                        <div style="font-size: 6rem;">🥽</div>
+                    </div>
+                </div>
+                
+                <div class="solution-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">🏥</div>
+                        <div class="feature-content">
+                            <h3>Simulations Ultra-Réalistes</h3>
+                            <p>
+                                Des environnements 3D photoréalistes reproduisant fidèlement les blocs 
+                                opératoires, services d'urgence et salles de soins.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-content">
+                            <h3>Pratique Illimitée</h3>
+                            <p>
+                                Répétez les procédures autant de fois que nécessaire sans contraintes 
+                                de temps, d'espace ou de coût.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-content">
+                            <h3>Scénarios Personnalisables</h3>
+                            <p>
+                                Créez des cas cliniques sur mesure adaptés à vos objectifs pédagogiques 
+                                et spécialités médicales.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-content">
+                            <h3>Suivi des Performances</h3>
+                            <p>
+                                Analysez en détail les performances des apprenants avec des métriques 
+                                précises et des feedbacks instantanés.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-<!-- Hero -->
-<section class="hero">
-  <div class="hero-content">
-    <span class="badge">{{ t.hero.badge }}</span>
+    <!-- Stats Section -->
+    <section id="stats" class="stats-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Impact Mesurable</span>
+                <h2>Des Résultats qui Transforment les Soins</h2>
+                <p>
+                    Notre solution VR génère des améliorations significatives et mesurables 
+                    dans la qualité de la formation médicale.
+                </p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">-45%</div>
+                    <div class="stat-label">Réduction des Erreurs</div>
+                    <div class="stat-description">
+                        Diminution significative des erreurs médicales grâce à la pratique intensive
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">3x</div>
+                    <div class="stat-label">Gain de Temps</div>
+                    <div class="stat-description">
+                        Formation 3 fois plus rapide comparée aux méthodes traditionnelles
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Sécurité Patient</div>
+                    <div class="stat-description">
+                        Amélioration de la confiance et de la préparation des praticiens
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">-60%</div>
+                    <div class="stat-label">Réduction des Coûts</div>
+                    <div class="stat-description">
+                        Économies substantielles sur les coûts de formation et d'infrastructure
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <h1>
-      {{ t.hero.title }} <br />
-      <span>{{ t.hero.subtitle }}</span>
-    </h1>
+    <!-- Use Cases Section -->
+    <section id="use-cases" class="use-cases-section ">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Applications</span>
+                <h2>Cas d'Usage Médicaux</h2>
+                <p>
+                    Notre plateforme VR couvre l'ensemble du spectre de la formation médicale, 
+                    de la chirurgie aux urgences.
+                </p>
+            </div>
+            
+            <div class="use-cases-grid">
+                <div class="use-case-card">
+                    <div class="use-case-image">
+                        <div style="font-size: 5rem;">🔪</div>
+                    </div>
+                    <div class="use-case-content">
+                        <h3>Formation Chirurgicale</h3>
+                        <p>
+                            Pratiquez des procédures chirurgicales complexes dans un environnement 
+                            immersif et sans risque. Maîtrisez les gestes techniques avant le bloc opératoire.
+                        </p>
+                        <a href="#" class="use-case-link">
+                            En savoir plus →
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="use-case-card">
+                    <div class="use-case-image">
+                        <div style="font-size: 5rem;">🚑</div>
+                    </div>
+                    <div class="use-case-content">
+                        <h3>Médecine d'Urgence</h3>
+                        <p>
+                            Entraînez-vous à gérer des situations critiques et des polytraumatismes. 
+                            Développez vos réflexes et votre capacité de décision sous pression.
+                        </p>
+                        <a href="#" class="use-case-link">
+                            En savoir plus →
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="use-case-card">
+                    <div class="use-case-image">
+                        <div style="font-size: 5rem;">🎓</div>
+                    </div>
+                    <div class="use-case-content">
+                        <h3>Formation Continue</h3>
+                        <p>
+                            Perfectionnez vos compétences et restez à jour avec les dernières 
+                            techniques médicales. Formation accessible 24/7 depuis n'importe où.
+                        </p>
+                        <a href="#" class="use-case-link">
+                            En savoir plus →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
-    <p>{{ t.hero.description }}</p>
+    <!-- CTA Section -->
+    <section id="demo" class="cta-section ">
+        <div class="cta-container">
+            <h2>Prêt à Révolutionner Votre Formation ?</h2>
+            <p>
+                Demandez une démonstration personnalisée et découvrez comment notre solution VR 
+                peut transformer votre approche de la formation médicale.
+            </p>
+            <form class="cta-form" onsubmit="event.preventDefault(); alert('Merci! Notre équipe vous contactera sous 24h.');">
+                <input type="email" class="cta-input" placeholder="Votre adresse email professionnelle" required>
+                <button type="submit" class="btn btn-primary">Demander une Démo</button>
+            </form>
+        </div>
+    </section>
 
-    <div class="hero-actions">
-      <button class="primary">{{ t.hero.cta1 }}</button>
-      <button class="secondary">{{ t.hero.cta2 }}</button>
-    </div>
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>MedVR Solutions</h3>
+                <p style="color: var(--text-gray); line-height: 1.7;">
+                    Pionnier de la formation médicale en réalité virtuelle, nous transformons 
+                    l'apprentissage des professionnels de santé.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Solutions</h3>
+                <ul>
+                    <li><a href="#">Formation Chirurgicale</a></li>
+                    <li><a href="#">Médecine d'Urgence</a></li>
+                    <li><a href="#">Formation Continue</a></li>
+                    <li><a href="#">Simulations Personnalisées</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Ressources</h3>
+                <ul>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Études de Cas</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Support</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <ul>
+                    <li><a href="/cdn-cgi/l/email-protection#dcbfb3b2a8bdbfa89cb1b9b8aaaef2bfb3b1"><span class="__cf_email__" data-cfemail="2e4d41405a4f4d5a6e434b4a585c004d4143">[email&#160;protected]</span></a></li>
+                    <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
+                    <li><a href="#">Demander une Démo</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2026 MedVR Solutions. Tous droits réservés. | <a href="#" style="color: var(--primary);">Confidentialité</a> | <a href="#" style="color: var(--primary);">Mentions Légales</a></p>
+        </div>
+    </footer>
 
-    <div class="trust">
-      {{ t.hero.trust }}
-    </div>
-  </div>
-</section>
 
-
-<!-- SOLUTIONS -->
-<section id="solutions" class="solutions-section">
-  <h2 class="section-title">
-    Nos <span>Solutions</span>
-  </h2>
-
-  <!-- Tabs -->
-  <div class="solutions-tabs">
-    <button
-      *ngFor="let sol of solutions; let i = index"
-      (click)="setActiveTab(i)"
-      [class.active]="activeTab === i"
-    >
-      {{ sol.title }}
-    </button>
-  </div>
-
-  <!-- Content -->
-  <div class="solution-card" *ngFor="let sol of solutions; let i = index">
-    <div *ngIf="activeTab === i" class="solution-content">
-      <span class="solution-badge">{{ sol.subtitle }}</span>
-
-      <h3>{{ sol.title }}</h3>
-      <p>{{ sol.description }}</p>
-
-      <ul>
-        <li *ngFor="let f of sol.features">✔ {{ f }}</li>
-      </ul>
-
-      <button class="solution-btn">En savoir plus</button>
-    </div>
-  </div>
-</section>
-
-
-<!-- FEATURES -->
-<section id="platform" class="features-section">
-  <h2 class="section-title">
-    Technologie <span>sans compromis</span>
-  </h2>
-
-  <div class="features-grid">
-    <div class="feature-card" *ngFor="let f of features">
-      <div class="feature-icon">
-        {{ f.icon | uppercase }}
-      </div>
-      <h4>{{ f.title }}</h4>
-      <p>{{ f.text }}</p>
-    </div>
-  </div>
-</section>
+</body>

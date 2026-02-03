@@ -1,131 +1,89 @@
-import { CommonModule } from '@angular/common';
-import { Component, HostListener, OnInit } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { Component, HostListener, AfterViewInit, Inject, PLATFORM_ID } from '@angular/core';
 
 @Component({
   selector: 'app-landing-page',
-  standalone : true,
+  standalone: true,
   imports: [CommonModule],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.css',
 })
-export class LandingPage{
+export class LandingPage implements AfterViewInit {
 
-  mousePosition = { x: 0, y: 0 };
-  scrollY = 0;
-  activeTab = 0;
-  language: 'fr' | 'en' = 'fr';
-  mobileMenuOpen = false;
+  isScrolled = false;
+  isBrowser = false;
 
-  translations: any = {
-    fr: {
-      nav: { solutions: 'Solutions', platform: 'Plateforme', about: 'À propos', contact: 'Contact', demo: 'Essai gratuit' },
-      hero: {
-        badge: 'TECHNOLOGIE MÉDICALE VR',
-        pretitle: 'Bienvenue dans',
-        title: 'LE FUTUR',
-        subtitle: 'DE LA MÉDECINE',
-        description: "Une plateforme de simulation VR qui transforme radicalement l'apprentissage médical.",
-        cta1: 'Découvrir la plateforme',
-        cta2: 'Voir une démo live',
-        trust: 'Approuvé par 50+ institutions médicales'
-      }
-    },
-    en: {
-      nav: { solutions: 'Solutions', platform: 'Platform', about: 'About', contact: 'Contact', demo: 'Free Trial' },
-      hero: {
-        badge: 'VR MEDICAL TECHNOLOGY',
-        pretitle: 'Welcome to',
-        title: 'THE FUTURE',
-        subtitle: 'OF MEDICINE',
-        description: 'A VR simulation platform transforming medical learning.',
-        cta1: 'Explore Platform',
-        cta2: 'Watch Live Demo',
-        trust: 'Trusted by 50+ institutions'
-      }
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) {
+    this.isBrowser = isPlatformBrowser(this.platformId);
+  }
+
+  // =========================
+  // Scroll (only in browser)
+  // =========================
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    if (!this.isBrowser) return;
+
+    this.isScrolled = window.scrollY > 50;
+    this.applyParallax();
+  }
+
+  // =========================
+  // After view init
+  // =========================
+  ngAfterViewInit() {
+    if (!this.isBrowser) return;
+
+    this.initFadeInObserver();
+  }
+
+  // =========================
+  // Fade-in observer (SAFE)
+  // =========================
+  initFadeInObserver() {
+    if (!('IntersectionObserver' in window)) {
+      console.warn('IntersectionObserver not supported');
+      return;
     }
-  };
 
-  get t() {
-    return this.translations[this.language];
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.fade-in').forEach(el => {
+      observer.observe(el);
+    });
   }
 
-  setLanguage(lang: 'fr' | 'en') {
-    this.language = lang;
+  // =========================
+  // Play video
+  // =========================
+  onPlayVideo() {
+    if (!this.isBrowser) return;
+    alert('La vidéo de démonstration sera bientôt disponible!');
   }
 
-  toggleMobileMenu() {
-    this.mobileMenuOpen = !this.mobileMenuOpen;
-  }
+  // =========================
+  // Parallax
+  // =========================
+  applyParallax() {
+    if (!this.isBrowser) return;
 
-  setActiveTab(index: number) {
-    this.activeTab = index;
-  }
+    const shapes = document.querySelectorAll('.shape');
+    const scrolled = window.pageYOffset;
 
-  @HostListener('window:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
-    this.mousePosition = { x: event.clientX, y: event.clientY };
+    shapes.forEach((shape: any, index: number) => {
+      const speed = 0.5 + (index * 0.1);
+      shape.style.transform = `translateY(${scrolled * speed}px)`;
+    });
   }
-
-  @HostListener('window:scroll')
-  onScroll() {
-    this.scrollY = window.scrollY;
-  }
-
-  solutions = [
-  {
-    title: 'Chirurgie Immersive',
-    subtitle: 'Précision extrême',
-    description: 'Des simulations chirurgicales photoréalistes avec retour haptique avancé.',
-    features: ['500+ procédures', 'Retour temps réel', 'Protocoles validés'],
-    color: 'blue'
-  },
-  {
-    title: 'Gestion d\'Urgence',
-    subtitle: 'Décisions critiques',
-    description: 'Entraînement aux situations d\'urgence avec gestion du stress.',
-    features: ['Scénarios critiques', 'Travail d\'équipe', 'Analyse de performance'],
-    color: 'pink'
-  },
-  {
-    title: 'Formation Continue',
-    subtitle: 'Excellence durable',
-    description: 'Programmes de formation évolutifs pour tous les niveaux.',
-    features: ['Parcours personnalisés', 'Certifications', 'Suivi détaillé'],
-    color: 'purple'
-  }
-];
-
-features = [
-  {
-    icon: 'immersion',
-    title: 'Immersion totale 360°',
-    text: 'Environnements 3D photoréalistes avec physique médicale authentique'
-  },
-  {
-    icon: 'ai',
-    title: 'IA adaptative',
-    text: 'Scénarios qui évoluent selon vos décisions'
-  },
-  {
-    icon: 'collab',
-    title: 'Multi-joueurs temps réel',
-    text: 'Formez vos équipes ensemble'
-  },
-  {
-    icon: 'analytics',
-    title: 'Analytics avancées',
-    text: 'Données précises sur chaque geste'
-  },
-  {
-    icon: 'haptic',
-    title: 'Retour haptique',
-    text: 'Sensations tactiles réalistes'
-  },
-  {
-    icon: 'library',
-    title: 'Bibliothèque géante',
-    text: '1000+ cas cliniques prêts'
-  }
-];
-
 }

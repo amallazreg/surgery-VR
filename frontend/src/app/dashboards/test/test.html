@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedVR Solutions - Formation Médicale Immersive en Réalité Virtuelle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066FF;
+            --secondary: #00D9FF;
+            --accent: #FF006E;
+            --dark: #1A2B5F;
+            --dark-blue: #2D3E6F;
+            --light: #FFFFFF;
+            --bg-light: #F8FAFF;
+            --bg-gradient: linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
+            --success: #00C48C;
+            --gradient-1: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
+            --gradient-2: linear-gradient(135deg, #FF006E 0%, #FF6B00 100%);
+            --gradient-glow: radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.08), transparent 70%);
+            --text-dark: #1A2B5F;
+            --text-gray: #5A6B8C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 102, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        nav.scrolled {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 10px 40px rgba(0, 102, 255, 0.15);
+        }
+
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -0.02em;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            transition: width 0.3s ease;
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .cta-nav {
+            background: var(--gradient-1);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            color: white !important;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 102, 255, 0.3);
+        }
+
+        .cta-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(0, 102, 255, 0.5);
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding-top: 80px;
+        }
+
+        .hero-background {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 50%, rgba(0, 102, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(0, 217, 255, 0.08) 0%, transparent 50%),
+                linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
+            overflow: hidden;
+        }
+
+        .hero-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 102, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            opacity: 0.5;
+        }
+
+        @keyframes gridMove {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(50px, 50px); }
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 15s ease-in-out infinite;
+            opacity: 0.15;
+        }
+
+        .shape-1 {
+            width: 400px;
+            height: 400px;
+            background: var(--gradient-1);
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            background: var(--gradient-2);
+            bottom: 20%;
+            right: 15%;
+            animation-delay: 2s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(30px, -30px) rotate(5deg); }
+            50% { transform: translate(-20px, 20px) rotate(-5deg); }
+            75% { transform: translate(20px, 10px) rotate(3deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            max-width: 1400px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(0, 217, 255, 0.1);
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 2rem;
+            animation: fadeInDown 1s ease-out;
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 6vw, 5.5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            animation: fadeInUp 1s ease-out 0.2s backwards;
+            letter-spacing: -0.03em;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .gradient-text {
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: var(--text-gray);
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            animation: fadeInUp 1s ease-out 0.4s backwards;
+            line-height: 1.8;
+        }
+
+        .hero-cta-group {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeInUp 1s ease-out 0.6s backwards;
+        }
+
+        .btn {
+            padding: 1.2rem 3rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 50px;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+            cursor: pointer;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .btn-primary {
+            background: var(--gradient-1);
+            color: white;
+            box-shadow: 0 10px 40px rgba(0, 217, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 15px 50px rgba(0, 217, 255, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(0, 102, 255, 0.1);
+            border-color: var(--primary);
+            transform: translateY(-3px);
+        }
+
+        /* Video Section */
+        .video-section {
+            max-width: 1200px;
+            margin: -100px auto 0;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 20;
+            animation: fadeInUp 1s ease-out 0.8s backwards;
+        }
+
+        .video-container {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 
+                0 30px 80px rgba(0, 102, 255, 0.2),
+                0 0 0 1px rgba(0, 102, 255, 0.1);
+            aspect-ratio: 16/9;
+            background: #FFFFFF;
+        }
+
+        .video-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #F0F6FF 0%, #E6F0FF 100%);
+            position: relative;
+        }
+
+        .video-placeholder::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            opacity: 0.15;
+            filter: blur(40px);
+        }
+
+        .play-button {
+            width: 80px;
+            height: 80px;
+            background: var(--gradient-1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 102, 255, 0.3);
+            position: relative;
+            z-index: 10;
+        }
+
+        .play-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 50px rgba(0, 102, 255, 0.5);
+        }
+
+        .play-button::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 20px solid white;
+            border-top: 12px solid transparent;
+            border-bottom: 12px solid transparent;
+            margin-left: 5px;
+        }
+
+        /* Problem Section */
+        .problem-section {
+            padding: 150px 2rem 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100px;
+            background: linear-gradient(to bottom, transparent, var(--primary), transparent);
+        }
+
+        .section-container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-label {
+            display: inline-block;
+            background: rgba(255, 0, 110, 0.1);
+            border: 1px solid rgba(255, 0, 110, 0.3);
+            padding: 0.5rem 1.5rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-header p {
+            font-size: clamp(1rem, 2vw, 1.3rem);
+            color: var(--text-gray);
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .problem-card {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(0, 102, 255, 0.15);
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .problem-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--gradient-glow);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .problem-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 20px 60px rgba(0, 102, 255, 0.15);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .problem-card:hover::before {
+            opacity: 1;
+        }
+
+        .problem-icon {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .problem-card h3 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            color: var(--text-dark);
+        }
+
+        .problem-card p {
+            color: var(--text-gray);
+            line-height: 1.7;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Solution Section */
+        .solution-section {
+            padding: 100px 2rem;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.03) 0%, rgba(0, 217, 255, 0.03) 100%);
+            position: relative;
+        }
+
+        .solution-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+            margin-top: 4rem;
+        }
+
+        .solution-image {
+            position: relative;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 30px 80px rgba(0, 102, 255, 0.15);
+        }
+
+        .solution-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-1);
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .solution-image img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .solution-features {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 102, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .feature-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--primary);
+            transform: translateX(10px);
+            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.1);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-1);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            flex-shrink: 0;
+            box-shadow: 0 10px 30px rgba(0, 102, 255, 0.2);
+        }
+
+        .feature-content h3 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+
+        .feature-content p {
+            color: var(--text-gray);
+            line-height: 1.7;
+        }
+
+        /* Stats Section */
+        .stats-section {
+            padding: 100px 2rem;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(240, 246, 255, 0.5) 0%, rgba(255, 255, 255, 0.5) 100%);
+        }
+
+        .stats-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 30% 50%, rgba(0, 102, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 70% 50%, rgba(0, 217, 255, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-top: 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 3rem 2rem;
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid rgba(0, 102, 255, 0.1);
+            border-radius: 20px;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+
+        .stat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 70px rgba(0, 102, 255, 0.2);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .stat-card:hover::before {
+            opacity: 0.05;
+        }
+
+        .stat-number {
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 800;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 1.2rem;
+            color: var(--text-dark);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-description {
+            font-size: 0.95rem;
+            color: var(--text-gray);
+            position: relative;
+            z-index: 1;
+            line-height: 1.6;
+        }
+
+        /* Use Cases Section */
+        .use-cases-section {
+            padding: 100px 2rem;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(240, 246, 255, 0.3) 100%);
+        }
+
+        .use-cases-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .use-case-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 102, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .use-case-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--primary);
+            box-shadow: 0 25px 70px rgba(0, 102, 255, 0.2);
+        }
+
+        .use-case-image {
+            height: 250px;
+            background: linear-gradient(135deg, #E6F0FF 0%, #F0F6FF 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .use-case-image::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-1);
+            opacity: 0.05;
+        }
+
+        .use-case-content {
+            padding: 2.5rem;
+        }
+
+        .use-case-content h3 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-dark);
+        }
+
+        .use-case-content p {
+            color: var(--text-gray);
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
+        }
+
+        .use-case-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .use-case-link:hover {
+            gap: 1rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: 150px 2rem;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(180deg, rgba(240, 246, 255, 0.3) 0%, rgba(255, 255, 255, 0.8) 100%);
+        }
+
+        .cta-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: 
+                radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.08) 0%, transparent 60%);
+        }
+
+        .cta-container {
+            max-width: 900px;
+            margin: 0 auto;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(0, 102, 255, 0.2);
+            border-radius: 30px;
+            padding: 5rem 3rem;
+            position: relative;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 30px 80px rgba(0, 102, 255, 0.15);
+        }
+
+        .cta-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: var(--gradient-1);
+            opacity: 0.03;
+            border-radius: 30px;
+        }
+
+        .cta-container h2 {
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            color: var(--text-dark);
+        }
+
+        .cta-container p {
+            font-size: 1.3rem;
+            color: var(--text-gray);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        .cta-form {
+            display: flex;
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .cta-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 1.2rem 2rem;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(0, 102, 255, 0.2);
+            border-radius: 50px;
+            color: var(--text-dark);
+            font-size: 1rem;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+        }
+
+        .cta-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 5px 20px rgba(0, 102, 255, 0.1);
+        }
+
+        .cta-input::placeholder {
+            color: var(--text-gray);
+            opacity: 0.6;
+        }
+
+        /* Footer */
+        footer {
+            background: rgba(240, 246, 255, 0.8);
+            border-top: 1px solid rgba(0, 102, 255, 0.15);
+            padding: 4rem 2rem 2rem;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-section h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.8rem;
+        }
+
+        .footer-section ul li a {
+            color: var(--text-gray);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-section ul li a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 102, 255, 0.1);
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 0.9rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .nav-links {
+                display: none;
+            }
+
+            .solution-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .use-cases-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Scroll Animations */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Pulse Animation */
+        @keyframes pulse {
+            0%, 100% {
+                box-shadow: 0 10px 40px rgba(0, 102, 255, 0.3);
+            }
+            50% {
+                box-shadow: 0 15px 60px rgba(0, 102, 255, 0.5);
+            }
+        }
+
+        .pulse-effect {
+            animation: pulse 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav id="navbar">
+        <div class="nav-container">
+            <div class="logo">MedVR</div>
+            <ul class="nav-links">
+                <li><a href="#solution">Solution</a></li>
+                <li><a href="#use-cases">Cas d'Usage</a></li>
+                <li><a href="#stats">Impact</a></li>
+                <li><a href="#demo" class="cta-nav">Demander une Démo</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-background">
+            <div class="hero-grid"></div>
+            <div class="floating-shapes">
+                <div class="shape shape-1"></div>
+                <div class="shape shape-2"></div>
+            </div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="hero-badge">🚀 Innovation en Formation Médicale</div>
+            <h1>
+                Révolutionnez la <span class="gradient-text">Formation Médicale</span><br>
+                avec la Réalité Virtuelle
+            </h1>
+            <p>
+                Une plateforme VR immersive qui transforme l'apprentissage médical en permettant 
+                aux professionnels de santé de s'entraîner dans des environnements ultra-réalistes, 
+                sans risque pour les patients.
+            </p>
+            <div class="hero-cta-group">
+                <a href="#demo" class="btn btn-primary pulse-effect">Demander une Démo</a>
+                <a href="#solution" class="btn btn-secondary">Découvrir la Solution</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Video Section -->
+    <section class="video-section">
+        <div class="video-container">
+            <div class="video-placeholder">
+                <div class="play-button"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem Section -->
+    <section class="problem-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Le Défi</span>
+                <h2>Les Limites de la Formation Médicale Traditionnelle</h2>
+                <p>
+                    La formation médicale actuelle fait face à des défis majeurs qui impactent 
+                    directement la qualité des soins et la sécurité des patients.
+                </p>
+            </div>
+            
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-icon">⚠️</div>
+                    <h3>Risque d'Erreurs Médicales</h3>
+                    <p>
+                        Les étudiants et jeunes praticiens manquent d'opportunités pour pratiquer 
+                        des procédures complexes avant de les réaliser sur de vrais patients.
+                    </p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">⏱️</div>
+                    <h3>Temps de Formation Limité</h3>
+                    <p>
+                        L'accès restreint aux salles de simulation et aux mannequins high-tech 
+                        ralentit considérablement le processus d'apprentissage.
+                    </p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">💰</div>
+                    <h3>Coûts Élevés</h3>
+                    <p>
+                        Les équipements de simulation traditionnels nécessitent des investissements 
+                        importants en infrastructure et maintenance.
+                    </p>
+                </div>
+                
+                <div class="problem-card">
+                    <div class="problem-icon">📉</div>
+                    <h3>Manque de Répétition</h3>
+                    <p>
+                        Les situations d'urgence rares ne peuvent être pratiquées suffisamment, 
+                        laissant les praticiens mal préparés face aux cas critiques.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solution Section -->
+    <section id="solution" class="solution-section ">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3); color: var(--primary);">La Solution</span>
+                <h2>Formation VR Immersive et Sécurisée</h2>
+                <p>
+                    Notre plateforme offre une expérience d'apprentissage révolutionnaire qui combine 
+                    réalisme, accessibilité et efficacité pédagogique.
+                </p>
+            </div>
+            
+            <div class="solution-content">
+                <div class="solution-image">
+                    <div class="video-placeholder">
+                        <div style="font-size: 6rem;">🥽</div>
+                    </div>
+                </div>
+                
+                <div class="solution-features">
+                    <div class="feature-item">
+                        <div class="feature-icon">🏥</div>
+                        <div class="feature-content">
+                            <h3>Simulations Ultra-Réalistes</h3>
+                            <p>
+                                Des environnements 3D photoréalistes reproduisant fidèlement les blocs 
+                                opératoires, services d'urgence et salles de soins.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🔄</div>
+                        <div class="feature-content">
+                            <h3>Pratique Illimitée</h3>
+                            <p>
+                                Répétez les procédures autant de fois que nécessaire sans contraintes 
+                                de temps, d'espace ou de coût.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">🎯</div>
+                        <div class="feature-content">
+                            <h3>Scénarios Personnalisables</h3>
+                            <p>
+                                Créez des cas cliniques sur mesure adaptés à vos objectifs pédagogiques 
+                                et spécialités médicales.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="feature-item">
+                        <div class="feature-icon">📊</div>
+                        <div class="feature-content">
+                            <h3>Suivi des Performances</h3>
+                            <p>
+                                Analysez en détail les performances des apprenants avec des métriques 
+                                précises et des feedbacks instantanés.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section id="stats" class="stats-section">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Impact Mesurable</span>
+                <h2>Des Résultats qui Transforment les Soins</h2>
+                <p>
+                    Notre solution VR génère des améliorations significatives et mesurables 
+                    dans la qualité de la formation médicale.
+                </p>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number">-45%</div>
+                    <div class="stat-label">Réduction des Erreurs</div>
+                    <div class="stat-description">
+                        Diminution significative des erreurs médicales grâce à la pratique intensive
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">3x</div>
+                    <div class="stat-label">Gain de Temps</div>
+                    <div class="stat-description">
+                        Formation 3 fois plus rapide comparée aux méthodes traditionnelles
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Sécurité Patient</div>
+                    <div class="stat-description">
+                        Amélioration de la confiance et de la préparation des praticiens
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">-60%</div>
+                    <div class="stat-label">Réduction des Coûts</div>
+                    <div class="stat-description">
+                        Économies substantielles sur les coûts de formation et d'infrastructure
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section id="use-cases" class="use-cases-section ">
+        <div class="section-container">
+            <div class="section-header">
+                <span class="section-label">Applications</span>
+                <h2>Cas d'Usage Médicaux</h2>
+                <p>
+                    Notre plateforme VR couvre l'ensemble du spectre de la formation médicale, 
+                    de la chirurgie aux urgences.
+                </p>
+            </div>
+            
+            <div class="use-cases-grid">
+                <div class="use-case-card">
+                    <div class="use-case-image">
+                        <div style="font-size: 5rem;">🔪</div>
+                    </div>
+                    <div class="use-case-content">
+                        <h3>Formation Chirurgicale</h3>
+                        <p>
+                            Pratiquez des procédures chirurgicales complexes dans un environnement 
+                            immersif et sans risque. Maîtrisez les gestes techniques avant le bloc opératoire.
+                        </p>
+                        <a href="#" class="use-case-link">
+                            En savoir plus →
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="use-case-card">
+                    <div class="use-case-image">
+                        <div style="font-size: 5rem;">🚑</div>
+                    </div>
+                    <div class="use-case-content">
+                        <h3>Médecine d'Urgence</h3>
+                        <p>
+                            Entraînez-vous à gérer des situations critiques et des polytraumatismes. 
+                            Développez vos réflexes et votre capacité de décision sous pression.
+                        </p>
+                        <a href="#" class="use-case-link">
+                            En savoir plus →
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="use-case-card">
+                    <div class="use-case-image">
+                        <div style="font-size: 5rem;">🎓</div>
+                    </div>
+                    <div class="use-case-content">
+                        <h3>Formation Continue</h3>
+                        <p>
+                            Perfectionnez vos compétences et restez à jour avec les dernières 
+                            techniques médicales. Formation accessible 24/7 depuis n'importe où.
+                        </p>
+                        <a href="#" class="use-case-link">
+                            En savoir plus →
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section id="demo" class="cta-section ">
+        <div class="cta-container">
+            <h2>Prêt à Révolutionner Votre Formation ?</h2>
+            <p>
+                Demandez une démonstration personnalisée et découvrez comment notre solution VR 
+                peut transformer votre approche de la formation médicale.
+            </p>
+            <form class="cta-form" onsubmit="event.preventDefault(); alert('Merci! Notre équipe vous contactera sous 24h.');">
+                <input type="email" class="cta-input" placeholder="Votre adresse email professionnelle" required>
+                <button type="submit" class="btn btn-primary">Demander une Démo</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>MedVR Solutions</h3>
+                <p style="color: var(--text-gray); line-height: 1.7;">
+                    Pionnier de la formation médicale en réalité virtuelle, nous transformons 
+                    l'apprentissage des professionnels de santé.
+                </p>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Solutions</h3>
+                <ul>
+                    <li><a href="#">Formation Chirurgicale</a></li>
+                    <li><a href="#">Médecine d'Urgence</a></li>
+                    <li><a href="#">Formation Continue</a></li>
+                    <li><a href="#">Simulations Personnalisées</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Ressources</h3>
+                <ul>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">Études de Cas</a></li>
+                    <li><a href="#">Blog</a></li>
+                    <li><a href="#">Support</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Contact</h3>
+                <ul>
+                    <li><a href="/cdn-cgi/l/email-protection#dcbfb3b2a8bdbfa89cb1b9b8aaaef2bfb3b1"><span class="__cf_email__" data-cfemail="2e4d41405a4f4d5a6e434b4a585c004d4143">[email&#160;protected]</span></a></li>
+                    <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
+                    <li><a href="#">Demander une Démo</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2026 MedVR Solutions. Tous droits réservés. | <a href="#" style="color: var(--primary);">Confidentialité</a> | <a href="#" style="color: var(--primary);">Mentions Légales</a></p>
+        </div>
+    </footer>
+
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+        // Navbar scroll effect
+        const navbar = document.getElementById('navbar');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
+
+        // Fade-in animations on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Play button interaction
+        const playButton = document.querySelector('.play-button');
+        if (playButton) {
+            playButton.addEventListener('click', () => {
+                alert('La vidéo de démonstration sera bientôt disponible!');
+            });
+        }
+
+       // Add parallax effect to hero shapes
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const shapes = document.querySelectorAll('.shape');
+            shapes.forEach((shape, index) => {
+                const speed = 0.5 + (index * 0.1);
+                shape.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
