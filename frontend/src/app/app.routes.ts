@@ -5,6 +5,7 @@ import { Signin } from './dashboards/signin/signin';
 import { Demo } from './Demande/demo/demo';
 import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
 import { Devis } from './Demande/devis/devis';
+import { ExperienceSurMesure } from './Demande/experience-sur-mesure/experience-sur-mesure';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -13,7 +14,9 @@ export const routes: Routes = [
       { path: 'test', component : Test },
       { path: 'demanderDemo', component : Demo },
       {path: 'admin/dashboard', component: AdminDashboard},
-      { path: 'demanderDevi', component : Devis },
+      { path: 'demanderDevis', component : Devis },
+      { path: 'demanderExperience', component : ExperienceSurMesure },
+
 
 
 

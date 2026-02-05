@@ -1382,7 +1382,12 @@
     }
 }
 
-
-
-
-
+.cta-nav {
+  background: linear-gradient(135deg, rgb(0, 102, 255) 0%, rgb(0, 217, 255) 100%);
+  padding: 0.8rem 2rem;
+  border-radius: 50px;
+  color: white !important;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 102, 255, 0.3);
+}

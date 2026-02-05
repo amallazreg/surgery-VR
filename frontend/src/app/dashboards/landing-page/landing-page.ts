@@ -2,12 +2,12 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, AfterViewInit, Inject, PLATFORM_ID, ElementRef, ViewChild } from '@angular/core';
 import { Navbar } from "../../layout/navbar/navbar";
 import { Router } from '@angular/router';
-import { BrowserModule } from '@angular/platform-browser';
+import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [CommonModule, Navbar],
+  imports: [CommonModule, Navbar, ButtonModule],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.css',
 })
@@ -201,6 +201,14 @@ export class LandingPage implements AfterViewInit {
     console.log('click OK');
 
     this.router.navigate(['/demanderDemo']);
+  }
+
+  goToDevis(){
+    this.router.navigate(['/demanderDevis'])
+  }
+
+  goToExperience() {
+    this.router.navigate(['/demanderExperience'])
   }
 
 

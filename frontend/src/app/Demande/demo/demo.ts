@@ -2,6 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Navbar } from "../../layout/navbar/navbar";
+import { Router } from '@angular/router';
 
 interface WizardStep {
   id: number;
@@ -92,6 +93,8 @@ export class Demo implements OnInit {
   ngOnInit(): void {
     console.log('✅ Demo component initialized');
   }
+
+  constructor(private router : Router) {}
 
   // Obtenir l'étape actuelle
   get currentStep(): WizardStep {
@@ -322,5 +325,15 @@ export class Demo implements OnInit {
   // Vérifier si une étape est complétée
   isStepCompleted(stepIndex: number): boolean {
     return this.steps[stepIndex].isCompleted;
+  }
+
+    goToDemo() {
+    console.log('click OK');
+
+    this.router.navigate(['/demanderDemo']);
+  }
+
+  goToDevis(){
+    this.router.navigate(['/demanderDevis'])
   }
 }

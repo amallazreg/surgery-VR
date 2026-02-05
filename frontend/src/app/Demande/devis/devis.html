@@ -94,7 +94,6 @@
                     </select>
                 </div>
 
-                <div class="form-row">
                     <div class="form-group">
                         <label for="country">Pays *</label>
                         <input type="text" 
@@ -109,7 +108,7 @@
                                [(ngModel)]="formData.city" 
                                placeholder="Ex: Paris">
                     </div>
-                </div>
+                
             </div>
 
             <!-- Step 2: Besoins et Solutions -->
@@ -375,7 +374,7 @@
             <div class="success-icon">✓</div>
             <h2>Demande de Devis Envoyée !</h2>
             <p>Merci pour votre confiance. Notre équipe commerciale analysera votre demande et vous enverra un devis personnalisé détaillé sous 48-72 heures. Vous recevrez également un appel de notre expert pour affiner votre projet.</p>
-            <a routerLink="/" class="btn btn-primary">Retour à l'accueil</a>
+            <a routerLink="/landingPage" class="btn btn-primary">Retour à l'accueil</a>
         </div>
     </div>
 </section>
@@ -408,6 +407,43 @@
         </div>
     </div>
 </section>
+
+    <!-- Other Options CTA Section -->
+    <section class="other-options-section">
+        <div class="section-container">
+            <div class="section-header-cta">
+                <h2>Vous cherchez une autre solution ?</h2>
+                <p>Découvrez nos autres options pour démarrer votre transformation digitale</p>
+            </div>
+            
+            <div class="options-grid">
+                <div class="option-cta-card">
+                    <div class="option-icon">🎯</div>
+                    <h3>Demander une Démo</h3>
+                    <p>Découvrez notre plateforme en action avec une démonstration personnalisée de 30 minutes</p>
+                    <ul class="option-features">
+                        <li>✓ Présentation complète de la plateforme</li>
+                        <li>✓ Test des simulations VR</li>
+                        <li>✓ Session Questions & Réponses</li>
+                    </ul>
+                    <a href="demanderDemo" class="btn btn-primary">Demander une Démo</a>
+                </div>
+                
+                <div class="option-cta-card">
+                    <div class="option-icon">⚡</div>
+                    <h3>Expérience Sur Mesure</h3>
+                    <p>Créez des scénarios et simulations personnalisés pour vos objectifs 
+                    pédagogiques uniques</p>
+                    <ul class="option-features">
+                        <li>✓ Scénarios customisés</li>
+                        <li>✓ Développement dédié</li>
+                        <li>✓ Formation à la carte</li>
+                    </ul>
+                    <a href="demanderExperience" class="btn btn-primary">Créer Mon Expérience</a>
+                </div>
+            </div>
+        </div>
+    </section>
 
 <!-- Footer -->
 <footer>
