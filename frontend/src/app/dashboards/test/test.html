@@ -1,1184 +1,400 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - SurgeryVR</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #0066FF;
-            --secondary: #00D9FF;
-            --accent: #FF006E;
-            --dark: #1A2B5F;
-            --dark-blue: #0A1628;
-            --light: #FFFFFF;
-            --bg-light: #F8FAFF;
-            --success: #00C48C;
-            --gradient-1: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
-            --gradient-2: linear-gradient(135deg, #FF006E 0%, #FF6B00 100%);
-            --text-dark: #1A2B5F;
-            --text-gray: #5A6B8C;
-            --navbar-height: 70px;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Outfit', sans-serif;
-            overflow: hidden; /* Empêche le scroll */
-            background: var(--bg-light);
-        }
-
-        /* Page wrapper */
-        .page-wrapper {
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            padding-top: var(--navbar-height);
-        }
-
-        /* Main container */
-        .login-page {
-            flex: 1;
-            display: flex;
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* Background animé */
-        .login-background {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
-            z-index: 0;
-        }
-
-        .animated-grid {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                linear-gradient(rgba(0, 102, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 102, 255, 0.03) 1px, transparent 1px);
-            background-size: 40px 40px;
-            animation: gridSlide 20s linear infinite;
-        }
-
-        @keyframes gridSlide {
-            0% { transform: translate(0, 0); }
-            100% { transform: translate(40px, 40px); }
-        }
-
-        .floating-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .shape {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(80px);
-            animation: float 15s ease-in-out infinite;
-            opacity: 0.08;
-        }
-
-        .shape-1 {
-            width: 250px;
-            height: 250px;
-            background: var(--gradient-1);
-            top: 10%;
-            left: 5%;
-        }
-
-        .shape-2 {
-            width: 200px;
-            height: 200px;
-            background: var(--gradient-2);
-            bottom: 15%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        .shape-3 {
-            width: 180px;
-            height: 180px;
-            background: linear-gradient(135deg, #00C48C 0%, #00D9FF 100%);
-            top: 50%;
-            right: 30%;
-            animation-delay: 4s;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(30px, -30px) rotate(5deg); }
-            66% { transform: translate(-20px, 20px) rotate(-5deg); }
-        }
-
-        /* Left Panel - Welcome Section */
-        .welcome-panel {
-            flex: 0 0 52%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem 1.5rem;
-            position: relative;
-            z-index: 1;
-            background: linear-gradient(135deg, rgba(0, 102, 255, 0.02) 0%, rgba(0, 217, 255, 0.02) 100%);
-        }
-
-        .welcome-content {
-            max-width: 650px;
-            text-align: center;
-            animation: fadeInLeft 0.8s ease-out;
-        }
-
-        @keyframes fadeInLeft {
-            from {
-                opacity: 0;
-                transform: translateX(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        /* Logo Section */
-        .logo-container {
-            margin-bottom: 1.5rem;
-            animation: fadeInScale 1s ease-out;
-        }
-
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.8);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        .welcome-title {
-    font-size: clamp(2rem, 3.8vw, 2.8rem);
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 0.7rem;
-            line-height: 1.15;
-            letter-spacing: -0.02em;
-        }
-   
-
-
-        .gradient-text {
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .welcome-subtitle {
-            font-size: 1.05rem;
-            color: var(--text-gray);
-            line-height: 1.7;
-            margin-bottom: 2rem;
-        }
-
-
-
-        /* Stats decorative */
-        .welcome-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 1.2rem;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 2px solid rgba(0, 102, 255, 0.1);
-        }
-
-        .stat-item {
-            text-align: center;
-        }
-
-        .stat-number {
-            font-size: 1.5rem;
-            font-weight: 800;
-            background: var(--gradient-1);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 0.3rem;
-            font-family: 'Space Mono', monospace;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--text-gray);
-            font-weight: 500;
-        }
-
-        /* Feature badges */
-        .feature-badges {
-            display: flex;
-            justify-content: center;
-            gap: 0.8rem;
-            margin-top: 1.2rem;
-            flex-wrap: wrap;
-        }
-
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 0.5rem 1rem;
-            border-radius: 50px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            border: 2px solid rgba(0, 102, 255, 0.15);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .badge:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.2);
-        }
-
-       .badge {
-    padding: 0.6rem 1.3rem;
-}
-
-.badge-icon {
-    font-size: 1.2rem;
-}
-
-
-        /* Right Panel - Form Section */
-        .form-panel {
-            flex: 0 0 55%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 1.5rem 2.5rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .form-container {
-            width: 100%;
-            max-width: 550px;
-            animation: fadeInRight 0.8s ease-out 0.2s backwards;
-        }
-
-        @keyframes fadeInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
-        /* Carte de login */
-        .login-card {
-            width: 100%;
-            max-width: 500px;
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(0, 102, 255, 0.15);
-            border-radius: 20px;
-            padding: 1.2rem 2rem; /* ↓ réduit la hauteur */
-            box-shadow: 
-                0 20px 60px rgba(0, 102, 255, 0.15),
-                0 0 0 1px rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(20px);
-        }
-
-
-
-        .card-header {
-            text-align: center;
-            margin-bottom: 1.5rem;
-        }
-
-        .card-title {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--text-dark);
-            margin-bottom: 0.3rem;
-        }
-
-        .card-subtitle {
-            font-size: 0.9rem;
-            color: var(--text-gray);
-        }
-
-        /* Onglets */
-        .tabs {
-            display: flex;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-            background: rgba(0, 102, 255, 0.05);
-            padding: 0.4rem;
-            border-radius: 12px;
-        }
-
-        .tab {
-            flex: 1;
-            padding: 0.7rem 1.2rem;
-            background: transparent;
-            border: none;
-            border-radius: 10px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-gray);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab:hover {
-            background: rgba(0, 102, 255, 0.08);
-            color: var(--primary);
-        }
-
-        .tab.active {
-            background: white;
-            color: var(--primary);
-            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.1);
-        }
-
-        /* Formulaire */
-        .login-form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-        }
-
-        .form-hidden {
-            display: none;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.8rem;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 0.4rem;
-        }
-
-        .form-group label {
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-        }
-
-        .label-icon {
-            font-size: 1rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.8rem 1rem;
-            background: rgba(240, 246, 255, 0.5);
-            border: 2px solid rgba(0, 102, 255, 0.1);
-            border-radius: 10px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.9rem;
-            color: var(--text-dark);
-            transition: all 0.3s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            background: white;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
-        }
-
-        .form-input::placeholder {
-            color: var(--text-gray);
-            opacity: 0.6;
-        }
-
-        select.form-input {
-            cursor: pointer;
-        }
-
-        /* Password wrapper */
-        .password-wrapper {
-            position: relative;
-        }
-
-        .password-toggle {
-            position: absolute;
-            right: 0.8rem;
-            top: 50%;
-            transform: translateY(-50%);
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 1.1rem;
-            padding: 0.4rem;
-            transition: all 0.2s ease;
-        }
-
-        .password-toggle:hover {
-            transform: translateY(-50%) scale(1.1);
-        }
-
-        /* Password strength */
-        .password-strength {
-            height: 3px;
-            background: rgba(0, 102, 255, 0.1);
-            border-radius: 2px;
-            overflow: hidden;
-            margin-top: 0.4rem;
-        }
-
-        .strength-bar {
-            height: 100%;
-            width: 0%;
-            transition: all 0.3s ease;
-            border-radius: 2px;
-        }
-
-        .strength-bar.weak {
-            width: 33%;
-            background: #FF6B6B;
-        }
-
-        .strength-bar.medium {
-            width: 66%;
-            background: #FFA94D;
-        }
-
-        .strength-bar.strong {
-            width: 100%;
-            background: #00C48C;
-        }
-
-        .password-hint {
-            font-size: 0.75rem;
-            color: var(--text-gray);
-            margin-top: 0.2rem;
-        }
-
-        /* Options du formulaire */
-        .form-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 0.8rem;
-        }
-
-        .checkbox-label {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            cursor: pointer;
-            font-size: 0.85rem;
-            color: var(--text-dark);
-            position: relative;
-        }
-
-        .checkbox-label input[type="checkbox"] {
-            position: absolute;
-            opacity: 0;
-            cursor: pointer;
-        }
-
-        .checkbox-custom {
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(0, 102, 255, 0.3);
-            border-radius: 5px;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .checkbox-label input[type="checkbox"]:checked ~ .checkbox-custom {
-            background: var(--gradient-1);
-            border-color: var(--primary);
-        }
-
-        .checkbox-label input[type="checkbox"]:checked ~ .checkbox-custom::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .checkbox-label a {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .forgot-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 0.85rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .forgot-link:hover {
-            color: var(--secondary);
-        }
-
-        /* Boutons */
-        .btn {
-            padding: 0.9rem 1.5rem;
-            font-size: 0.95rem;
-            font-weight: 600;
-            border-radius: 10px;
-            border: none;
-            cursor: pointer;
-            font-family: 'Outfit', sans-serif;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-        }
-
-        .btn-primary {
-            background: var(--gradient-1);
-            color: white;
-            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 35px rgba(0, 102, 255, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0);
-        }
-
-        .btn-full {
-            width: 100%;
-        }
-
-        .btn-icon {
-            font-size: 1.2rem;
-            transition: transform 0.3s ease;
-        }
-
-        .btn-primary:hover .btn-icon {
-            transform: translateX(5px);
-        }
-
-        /* Divider */
-        .divider {
-            display: flex;
-            align-items: center;
-            text-align: center;
-            margin: 1rem 0;
-            color: var(--text-gray);
-            font-size: 0.8rem;
-        }
-
-        .divider::before,
-        .divider::after {
-            content: '';
-            flex: 1;
-            border-bottom: 1px solid rgba(0, 102, 255, 0.1);
-        }
-
-        .divider span {
-            padding: 0 0.8rem;
-        }
-
-        /* Boutons sociaux */
-        .social-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 0.8rem;
-        }
-
-        .btn-social {
-            padding: 0.8rem 1.2rem;
-            background: white;
-            border: 2px solid rgba(0, 102, 255, 0.15);
-            border-radius: 10px;
-            font-family: 'Outfit', sans-serif;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-dark);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.6rem;
-        }
-
-        .btn-social:hover {
-            border-color: var(--primary);
-            background: rgba(0, 102, 255, 0.05);
-            transform: translateY(-2px);
-        }
-
-        .social-icon {
-            width: 22px;
-            height: 22px;
-            background: var(--gradient-1);
-            border-radius: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 700;
-            font-size: 0.85rem;
-        }
-
-        /* Footer - FULL WIDTH */
-        .page-footer {
-            width: 100%;
-            background: rgba(255, 255, 255, 0.9);
-            border-top: 1px solid rgba(0, 102, 255, 0.1);
-            padding: 1rem 2rem;
-            text-align: center;
-            color: var(--text-gray);
-            font-size: 0.8rem;
-            backdrop-filter: blur(20px);
-            position: relative;
-            z-index: 2;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        /* Responsive */
-        @media (max-width: 1200px) {
-            .welcome-panel {
-                flex: 0 0 42%;
-            }
-            
-            .form-panel {
-                flex: 0 0 58%;
-            }
-        }
-
-        @media (max-width: 968px) {
-            body {
-                overflow-y: auto;
-            }
-
-            .page-wrapper {
-                height: auto;
-                min-height: 100vh;
-                padding-top: 65px;
-            }
-
-            .login-page {
-                flex-direction: column;
-            }
-
-            .welcome-panel,
-            .form-panel {
-                flex: 1 1 auto;
-            }
-
-            .welcome-panel {
-                padding: 2rem 1.5rem 1.5rem;
-            }
-
-            .form-panel {
-                padding: 1.5rem;
-            }
-
-            .login-card {
-                padding: 1.8rem;
-            }
-
-            .welcome-stats {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .form-row {
-                grid-template-columns: 1fr;
-            }
-            
-            .social-buttons {
-                grid-template-columns: 1fr;
-            }
-
-            .login-card {
-                padding: 1.5rem;
-            }
-
-            .page-footer {
-                padding: 1rem 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .welcome-title {
-                font-size: 1.5rem;
-            }
-            
-            .welcome-subtitle {
-                font-size: 0.9rem;
-            }
-            
-            .form-options {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .feature-badges {
-                flex-direction: column;
-            }
-
-            .badge {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
-</head>
-<body>
-    <app-navbar></app-navbar>
-
-    <div class="page-wrapper">
-        <div class="login-page">
-            <!-- Background animé -->
-            <div class="login-background">
-                <div class="animated-grid"></div>
-                <div class="floating-shapes">
-                    <div class="shape shape-1"></div>
-                    <div class="shape shape-2"></div>
-                    <div class="shape shape-3"></div>
-                </div>
-            </div>
-
-            <!-- Left Panel - Welcome Section -->
-            <div class="welcome-panel">
-                <div class="welcome-content">
-                    <!-- Welcome Text --><h1>
-                        
-                    </h1>
-                    <h1 class="welcome-title">
-                        Bienvenue sur <br>
-                        <span class="gradient-text">SurgeryVR</span>
-                    </h1>
-                    <p class="welcome-subtitle">
-                        Connectez-vous pour accéder à votre plateforme de formation VR et transformez votre apprentissage médical
-                    </p>
-
-                    <!-- Feature Badges -->
-                    <div class="feature-badges">
-                        <div class="badge">
-                            <span class="badge-icon">🎯</span>
-                            <span>Formation immersive</span>
-                        </div>
-                        <div class="badge">
-                            <span class="badge-icon">🔒</span>
-                            <span>100% sécurisé</span>
-                        </div>
-                    </div>
-
-                    <!-- Stats -->
-                    <div class="welcome-stats">
-                        <div class="stat-item">
-                            <div class="stat-number">15k+</div>
-                            <div class="stat-label">Utilisateurs</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">500+</div>
-                            <div class="stat-label">Scénarios</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-number">98%</div>
-                            <div class="stat-label">Satisfaction</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Panel - Form Section -->
-            <div class="form-panel">
-                <div class="form-container">
-                    <!-- Carte de login -->
-                    <div class="login-card">
-                        <!-- Header -->
-                        <div class="card-header">
-                            <h2 class="card-title">Accédez à votre compte</h2>
-                        </div>
-
-
-                        <!-- Formulaire de connexion -->
-                        <form id="loginForm" class="login-form" onsubmit="handleLogin(event)">
-                            
-                            <div class="form-group">
-                                <label for="login-email">
-                                    <span class="label-icon">📧</span>
-                                    Email professionnel
-                                </label>
-                                <input 
-                                    type="email" 
-                                    id="login-email"
-                                    class="form-input"
-                                    placeholder="votre.email@exemple.com"
-                                    required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="login-password">
-                                    <span class="label-icon">🔒</span>
-                                    Mot de passe
-                                </label>
-                                <div class="password-wrapper">
-                                    <input 
-                                        type="password" 
-                                        id="login-password"
-                                        class="form-input"
-                                        placeholder="••••••••"
-                                        required>
-                                    <button 
-                                        type="button" 
-                                        class="password-toggle"
-                                        onclick="togglePassword('login-password')">
-                                        👁️‍🗨️
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="form-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="remember-me">
-                                    <span class="checkbox-custom"></span>
-                                    Se souvenir de moi
-                                </label>
-                                <a href="#" class="forgot-link">Mot de passe oublié ?</a>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-full">
-                                <span class="btn-text">Se connecter</span>
-                                <span class="btn-icon">→</span>
-                            </button>
-
-                            <div class="divider">
-                                <span>ou continuer avec</span>
-                            </div>
-
-                            <div class="social-buttons">
-                                <button type="button" class="btn-social" onclick="loginWithGoogle()">
-                                    <span class="social-icon">G</span>
-                                    Google
-                                </button>
-                                <button type="button" class="btn-social" onclick="loginWithMicrosoft()">
-                                    <span class="social-icon">M</span>
-                                    Microsoft
-                                </button>
-                            </div>
-                        </form>
-
-                        <!-- Formulaire d'inscription -->
-                        <form id="registerForm" class="login-form form-hidden" onsubmit="handleRegister(event)">
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="register-firstname">
-                                        <span class="label-icon">👤</span>
-                                        Prénom
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="register-firstname"
-                                        class="form-input"
-                                        placeholder="Jean"
-                                        required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="register-lastname">
-                                        <span class="label-icon">👤</span>
-                                        Nom
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="register-lastname"
-                                        class="form-input"
-                                        placeholder="Dupont"
-                                        required>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-email">
-                                    <span class="label-icon">📧</span>
-                                    Email professionnel
-                                </label>
-                                <input 
-                                    type="email" 
-                                    id="register-email"
-                                    class="form-input"
-                                    placeholder="votre.email@exemple.com"
-                                    required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-specialty">
-                                    <span class="label-icon">🏥</span>
-                                    Spécialité
-                                </label>
-                                <select 
-                                    id="register-specialty"
-                                    class="form-input"
-                                    required>
-                                    <option value="">Sélectionnez votre spécialité</option>
-                                    <option value="chirurgie">Chirurgie</option>
-                                    <option value="urgences">Médecine d'urgence</option>
-                                    <option value="anesthesie">Anesthésie</option>
-                                    <option value="cardiologie">Cardiologie</option>
-                                    <option value="pediatrie">Pédiatrie</option>
-                                    <option value="autre">Autre</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-password">
-                                    <span class="label-icon">🔒</span>
-                                    Mot de passe
-                                </label>
-                                <div class="password-wrapper">
-                                    <input 
-                                        type="password" 
-                                        id="register-password"
-                                        class="form-input"
-                                        placeholder="••••••••"
-                                        oninput="updatePasswordStrength()"
-                                        required>
-                                    <button 
-                                        type="button" 
-                                        class="password-toggle"
-                                        onclick="togglePassword('register-password')">
-                                        👁️‍🗨️
-                                    </button>
-                                </div>
-                                <div class="password-strength">
-                                    <div id="strength-bar" class="strength-bar"></div>
-                                </div>
-                                <small class="password-hint">Minimum 8 caractères, incluant majuscules et chiffres</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-confirm-password">
-                                    <span class="label-icon">🔒</span>
-                                    Confirmer le mot de passe
-                                </label>
-                                <input 
-                                    type="password" 
-                                    id="register-confirm-password"
-                                    class="form-input"
-                                    placeholder="••••••••"
-                                    required>
-                            </div>
-
-                            <div class="form-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="accept-terms" required>
-                                    <span class="checkbox-custom"></span>
-                                    J'accepte les <a href="#">conditions d'utilisation</a>
-                                </label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-full">
-                                <span class="btn-text">Créer mon compte</span>
-                                <span class="btn-icon">→</span>
-                            </button>
-
-                            <div class="divider">
-                                <span>ou s'inscrire avec</span>
-                            </div>
-
-                            <div class="social-buttons">
-                                <button type="button" class="btn-social" onclick="registerWithGoogle()">
-                                    <span class="social-icon">G</span>
-                                    Google
-                                </button>
-                                <button type="button" class="btn-social" onclick="registerWithMicrosoft()">
-                                    <span class="social-icon">M</span>
-                                    Microsoft
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Footer - FULL WIDTH -->
-        <footer class="page-footer">
-            <div class="footer-content">
-                <p>© 2026 SurgeryVR. Tous droits réservés.</p>
-            </div>
-        </footer>
+<div class="demo-request-page">
+  <!-- Navbar -->
+<app-navbar>
+  <!-- Hero Section -->
+  <section class="demo-hero">
+    <div class="hero-background">
+      <div class="hero-grid"></div>
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+      </div>
     </div>
 
-    <script>
-        // Gestion des onglets
-        function switchTab(tab) {
-            const loginForm = document.getElementById('loginForm');
-            const registerForm = document.getElementById('registerForm');
-            const tabs = document.querySelectorAll('.tab');
+    <div class="demo-hero-content">
+      <h1>
+        Demandez Votre <span class="gradient-text">Démo Gratuite</span>
+      </h1>
+      <p>
+        Complétez le formulaire ci-dessous et notre équipe vous contactera dans
+        les 24 heures
+      </p>
+    </div>
+  </section>
 
-            tabs.forEach(t => t.classList.remove('active'));
-            
-            if (tab === 'login') {
-                loginForm.classList.remove('form-hidden');
-                registerForm.classList.add('form-hidden');
-                tabs[0].classList.add('active');
-            } else {
-                loginForm.classList.add('form-hidden');
-                registerForm.classList.remove('form-hidden');
-                tabs[1].classList.add('active');
-            }
-        }
+  <!-- Form Section -->
+  <section class="form-section">
+    <div class="form-container">
+      <!-- Progress Bar -->
+      <div class="progress-container" *ngIf="!showSuccessMessage">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+        </div>
+        <div class="progress-steps">
+          <div
+            *ngFor="let step of [1, 2, 3, 4, 5]"
+            class="progress-step"
+            [class.active]="isStepActive(step)"
+            [class.completed]="isStepCompleted(step)"
+            (click)="navigateToStep(step)"
+            [style.cursor]="step <= currentStep ? 'pointer' : 'default'"
+          >
+            <div class="step-circle">{{ step }}</div>
+            <span class="step-label" [ngSwitch]="step">
+              <ng-container *ngSwitchCase="1">Profil</ng-container>
+              <ng-container *ngSwitchCase="2">Intérêt</ng-container>
+              <ng-container *ngSwitchCase="3">Objectif</ng-container>
+              <ng-container *ngSwitchCase="4">Contact</ng-container>
+              <ng-container *ngSwitchCase="5">Message</ng-container>
+            </span>
+          </div>
+        </div>
+      </div>
 
-        // Toggle password visibility
-        function togglePassword(inputId) {
-            const input = document.getElementById(inputId);
-            const button = input.nextElementSibling;
-            
-            if (input.type === 'password') {
-                input.type = 'text';
-                button.textContent = '👁️';
-            } else {
-                input.type = 'password';
-                button.textContent = '👁️‍🗨️';
-            }
-        }
+      <!-- Form Steps -->
+      <form [formGroup]="demoForm" (ngSubmit)="onSubmit()" *ngIf="!showSuccessMessage">
+        
+        <!-- Step 1: Profil de l'établissement -->
+        <div class="form-step" *ngIf="currentStep === 1" >
+          <div class="step-header">
+            <div class="step-icon">🏥</div>
+            <h2>Profil de Votre Établissement</h2>
+            <p>Parlez-nous de votre organisation</p>
+          </div>
 
-        // Update password strength
-        function updatePasswordStrength() {
-            const password = document.getElementById('register-password').value;
-            const strengthBar = document.getElementById('strength-bar');
-            
-            let strength = 0;
-            
-            if (password.length >= 8) strength++;
-            if (password.length >= 12) strength++;
-            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
-            if (/\d/.test(password)) strength++;
-            if (/[^a-zA-Z\d]/.test(password)) strength++;
-            
-            strengthBar.className = 'strength-bar';
-            
-            if (strength <= 2) {
-                strengthBar.classList.add('weak');
-            } else if (strength <= 4) {
-                strengthBar.classList.add('medium');
-            } else {
-                strengthBar.classList.add('strong');
-            }
-        }
+          <div class="form-fields">
+            <!-- Message de validation -->
+            <div class="validation-alert" *ngIf="validationMessage">
+              {{ validationMessage }}
+            </div>
 
-        // Handle login
-        function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-            
-            console.log('Login attempt:', { email });
-            alert('Connexion réussie ! Redirection en cours...');
-            
-            // Ici vous ajouteriez votre logique de connexion
-        }
+            <div class="form-group">
+              <label for="establishmentType">Type d'établissement *</label>
+              <select
+                id="establishmentType"
+                formControlName="establishmentType"
+                [class.error]="hasError('establishmentType')"
+              >
+                <option *ngFor="let type of establishmentTypes" [value]="type.value">
+                  {{ type.label }}
+                </option>
+              </select>
+              <div class="error-message" *ngIf="hasError('establishmentType')">
+                {{ getErrorMessage('establishmentType') }}
+              </div>
+            </div>
 
-        // Handle register
-        function handleRegister(event) {
-            event.preventDefault();
-            
-            const password = document.getElementById('register-password').value;
-            const confirmPassword = document.getElementById('register-confirm-password').value;
-            
-            // Vérifier la correspondance des mots de passe
-            if (password !== confirmPassword) {
-                alert('Les mots de passe ne correspondent pas.');
-                return;
-            }
-            
-            // Vérifier la force du mot de passe
-            if (password.length < 8) {
-                alert('Le mot de passe doit contenir au moins 8 caractères.');
-                return;
-            }
-            
-            if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
-                alert('Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre.');
-                return;
-            }
-            
-            const firstName = document.getElementById('register-firstname').value;
-            const lastName = document.getElementById('register-lastname').value;
-            const email = document.getElementById('register-email').value;
-            const specialty = document.getElementById('register-specialty').value;
-            
-            console.log('Register attempt:', { firstName, lastName, email, specialty });
-            alert('Inscription réussie ! Bienvenue sur SurgeryVR.');
-            
-            // Basculer vers l'onglet de connexion
-            switchTab('login');
-            
-            // Pré-remplir l'email
-            document.getElementById('login-email').value = email;
-        }
+            <div class="form-row">
+              <div class="form-group">
+                <label for="country">Pays *</label>
+                <input
+                  type="text"
+                  id="country"
+                  formControlName="country"
+                  placeholder="Ex: France"
+                  [class.error]="hasError('country')"
+                />
+                <div class="error-message" *ngIf="hasError('country')">
+                  {{ getErrorMessage('country') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="city">Ville *</label>
+                <input
+                  type="text"
+                  id="city"
+                  formControlName="city"
+                  placeholder="Ex: Paris"
+                  [class.error]="hasError('city')"
+                />
+                <div class="error-message" *ngIf="hasError('city')">
+                  {{ getErrorMessage('city') }}
+                </div>
+              </div>
+            </div>
+          </div>
 
-        // Social login/register
-        function loginWithGoogle() {
-            alert('La connexion avec Google sera bientôt disponible !');
-        }
+          <div class="form-navigation">
+            <button type="button" class="btn btn-next" (click)="nextStep()">
+              Suivant →
+            </button>
+          </div>
+        </div>
 
-        function loginWithMicrosoft() {
-            alert('La connexion avec Microsoft sera bientôt disponible !');
-        }
+        <!-- Step 2: Domaine d'intérêt -->
+        <div class="form-step" *ngIf="currentStep === 2" >
+          <div class="step-header">
+            <div class="step-icon">🎯</div>
+            <h2>Domaine Principal d'Intérêt</h2>
+            <p>Quelle spécialité vous intéresse le plus ?</p>
+          </div>
 
-        function registerWithGoogle() {
-            alert('L\'inscription avec Google sera bientôt disponible !');
-        }
+          <div class="form-fields">
+            <!-- Message de validation -->
+            <div class="validation-alert" *ngIf="validationMessage">
+              {{ validationMessage }}
+            </div>
 
-        function registerWithMicrosoft() {
-            alert('L\'inscription avec Microsoft sera bientôt disponible !');
-        }
-    </script>
-</body>
-</html>
+            <div class="radio-cards">
+              <label
+                *ngFor="let domain of domains"
+                class="radio-card"
+                [class.selected]="demoForm.get('domain')?.value === domain.value"
+              >
+                <input
+                  type="radio"
+                  formControlName="domain"
+                  [value]="domain.value"
+                />
+                <div class="radio-card-content">
+                  <div class="radio-icon">{{ domain.icon }}</div>
+                  <h3>{{ domain.title }}</h3>
+                  <p>{{ domain.description }}</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
+              ← Précédent
+            </button>
+            <button type="button" class="btn btn-next" (click)="nextStep()">
+              Suivant →
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Objectif principal -->
+        <div class="form-step" *ngIf="currentStep === 3" >
+          <div class="step-header">
+            <div class="step-icon">🎯</div>
+            <h2>Objectif Principal</h2>
+            <p>Que souhaitez-vous accomplir avec notre solution ?</p>
+          </div>
+
+          <div class="form-fields">
+            <!-- Message de validation -->
+            <div class="validation-alert" *ngIf="validationMessage">
+              {{ validationMessage }}
+            </div>
+
+            <div class="checkbox-cards">
+              <label
+                *ngFor="let objective of objectives"
+                class="checkbox-card"
+                [class.selected]="isObjectiveSelected(objective.value)"
+              >
+                <input
+                  type="checkbox"
+                  [checked]="isObjectiveSelected(objective.value)"
+                  (change)="onObjectiveChange(objective.value, $any($event.target).checked)"
+                />
+                <div class="checkbox-card-content">
+                  <div class="checkbox-icon">{{ objective.icon }}</div>
+                  <h3>{{ objective.title }}</h3>
+                  <p>{{ objective.description }}</p>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
+              ← Précédent
+            </button>
+            <button type="button" class="btn btn-next" (click)="nextStep()">
+              Suivant →
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Informations de contact -->
+        <div class="form-step" *ngIf="currentStep === 4" >
+          <div class="step-header">
+            <div class="step-icon">📞</div>
+            <h2>Informations de Contact</h2>
+            <p>Comment pouvons-nous vous joindre ?</p>
+          </div>
+
+          <div class="form-fields">
+            <!-- Message de validation -->
+            <div class="validation-alert" *ngIf="validationMessage">
+              {{ validationMessage }}
+            </div>
+
+            <div class="form-group">
+              <label for="institutionName">Nom de l'Institution *</label>
+              <input
+                type="text"
+                id="institutionName"
+                formControlName="institutionName"
+                placeholder="Ex: Hôpital Universitaire de Paris"
+                [class.error]="hasError('institutionName')"
+              />
+              <div class="error-message" *ngIf="hasError('institutionName')">
+                {{ getErrorMessage('institutionName') }}
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label for="email">Email *</label>
+                <input
+                  type="email"
+                  id="email"
+                  formControlName="email"
+                  placeholder="votre.email@institution.fr"
+                  [class.error]="hasError('email')"
+                />
+                <div class="error-message" *ngIf="hasError('email')">
+                  {{ getErrorMessage('email') }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="phone">Téléphone *</label>
+                <input
+                  type="tel"
+                  id="phone"
+                  formControlName="phone"
+                  placeholder="+33 1 23 45 67 89"
+                  [class.error]="hasError('phone')"
+                />
+                <div class="error-message" *ngIf="hasError('phone')">
+                  {{ getErrorMessage('phone') }}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="contactName">Nom du Contact</label>
+              <input
+                type="text"
+                id="contactName"
+                formControlName="contactName"
+                placeholder="Prénom Nom"
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="position">Fonction</label>
+              <input
+                type="text"
+                id="position"
+                formControlName="position"
+                placeholder="Ex: Directeur de Formation"
+              />
+            </div>
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
+              ← Précédent
+            </button>
+            <button type="button" class="btn btn-next" (click)="nextStep()">
+              Suivant →
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 5: Message libre -->
+        <div class="form-step" *ngIf="currentStep === 5" >
+          <div class="step-header">
+            <div class="step-icon">💬</div>
+            <h2>Parlez-nous de Vos Besoins</h2>
+            <p>Décrivez brièvement votre projet et vos attentes</p>
+          </div>
+
+          <div class="form-fields">
+            <!-- Message de validation -->
+            <div class="validation-alert" *ngIf="validationMessage">
+              {{ validationMessage }}
+            </div>
+
+            <div class="form-group">
+              <label for="message">Votre Message</label>
+              <textarea
+                id="message"
+                formControlName="message"
+                rows="8"
+                placeholder="Décrivez vos besoins spécifiques, le nombre d'utilisateurs potentiels, vos contraintes ou toute autre information pertinente..."
+              ></textarea>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="newsletter" />
+                <span
+                  >Je souhaite recevoir des actualités et ressources de
+                  SurgeryVR Solutions</span
+                >
+              </label>
+            </div>
+
+            <div class="form-group checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="privacy" />
+                <span
+                  >J'accepte la politique de confidentialité et le traitement
+                  de mes données *</span
+                >
+              </label>
+              <div class="error-message" *ngIf="hasError('privacy')">
+                {{ getErrorMessage('privacy') }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-navigation">
+            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
+              ← Précédent
+            </button>
+            <button type="submit" class="btn btn-primary btn-submit">
+              Envoyer ma Demande 🚀
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <!-- Success Message -->
+      <div class="success-message" *ngIf="showSuccessMessage" >
+        <div class="success-icon">✓</div>
+        <h2>Demande Envoyée avec Succès !</h2>
+        <p>
+          Merci pour votre intérêt. Notre équipe vous contactera dans les 24
+          heures.
+        </p>
+        <button class="btn btn-primary" (click)="goHome()">
+          Retour à l'accueil
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>SurgeryVR Solutions</h3>
+        <p style="color: #5a6b8c; line-height: 1.7">
+          Pionnier de la formation médicale en réalité virtuelle.
+        </p>
+      </div>
+
+      <div class="footer-section">
+        <h3>Contact</h3>
+        <ul>
+          <li>
+            <a href="mailto:inheritedgames@gmail.com"
+              >inheritedgames@gmail.com</a
+            >
+          </li>
+          <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <p>© 2026 SurgeryVR Solutions. Tous droits réservés.</p>
+    </div>
+  </footer>

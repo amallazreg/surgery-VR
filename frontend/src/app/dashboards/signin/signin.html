@@ -70,7 +70,7 @@
 
 
                         <!-- Formulaire de connexion -->
-                        <form id="loginForm" class="login-form" onsubmit="handleLogin(event)">
+                        <form id="loginForm" class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
                             
                             <div class="form-group">
                                 <label for="login-email">
@@ -82,6 +82,7 @@
                                     id="login-email"
                                     class="form-input"
                                     placeholder="votre.email@exemple.com"
+                                    formControlName="email"
                                     required>
                             </div>
 
@@ -96,13 +97,10 @@
                                         id="login-password"
                                         class="form-input"
                                         placeholder="••••••••"
+                                       formControlName="password"
                                         required>
-                                    <button 
-                                        type="button" 
-                                        class="password-toggle"
-                                        onclick="togglePassword('login-password')">
-                                        👁️‍🗨️
-                                    </button>
+                               
+
                                 </div>
                             </div>
 
@@ -115,7 +113,7 @@
                                 <a href="#" class="forgot-link">Mot de passe oublié ?</a>
                             </div>
 
-                            <button type="submit" class="btn btn-primary btn-full">
+                            <button type="submit" class="btn btn-primary btn-full" [disabled]="loading || loginForm.invalid">
                                 <span class="btn-text">Se connecter</span>
                                 <span class="btn-icon">→</span>
                             </button>
@@ -136,136 +134,7 @@
                             </div>
                         </form>
 
-                        <!-- Formulaire d'inscription -->
-                        <form id="registerForm" class="login-form form-hidden" onsubmit="handleRegister(event)">
-                            
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="register-firstname">
-                                        <span class="label-icon">👤</span>
-                                        Prénom
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="register-firstname"
-                                        class="form-input"
-                                        placeholder="Jean"
-                                        required>
-                                </div>
-
-                                <div class="form-group">
-                                    <label for="register-lastname">
-                                        <span class="label-icon">👤</span>
-                                        Nom
-                                    </label>
-                                    <input 
-                                        type="text" 
-                                        id="register-lastname"
-                                        class="form-input"
-                                        placeholder="Dupont"
-                                        required>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-email">
-                                    <span class="label-icon">📧</span>
-                                    Email professionnel
-                                </label>
-                                <input 
-                                    type="email" 
-                                    id="register-email"
-                                    class="form-input"
-                                    placeholder="votre.email@exemple.com"
-                                    required>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-specialty">
-                                    <span class="label-icon">🏥</span>
-                                    Spécialité
-                                </label>
-                                <select 
-                                    id="register-specialty"
-                                    class="form-input"
-                                    required>
-                                    <option value="">Sélectionnez votre spécialité</option>
-                                    <option value="chirurgie">Chirurgie</option>
-                                    <option value="urgences">Médecine d'urgence</option>
-                                    <option value="anesthesie">Anesthésie</option>
-                                    <option value="cardiologie">Cardiologie</option>
-                                    <option value="pediatrie">Pédiatrie</option>
-                                    <option value="autre">Autre</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-password">
-                                    <span class="label-icon">🔒</span>
-                                    Mot de passe
-                                </label>
-                                <div class="password-wrapper">
-                                    <input 
-                                        type="password" 
-                                        id="register-password"
-                                        class="form-input"
-                                        placeholder="••••••••"
-                                        oninput="updatePasswordStrength()"
-                                        required>
-                                    <button 
-                                        type="button" 
-                                        class="password-toggle"
-                                        onclick="togglePassword('register-password')">
-                                        👁️‍🗨️
-                                    </button>
-                                </div>
-                                <div class="password-strength">
-                                    <div id="strength-bar" class="strength-bar"></div>
-                                </div>
-                                <small class="password-hint">Minimum 8 caractères, incluant majuscules et chiffres</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="register-confirm-password">
-                                    <span class="label-icon">🔒</span>
-                                    Confirmer le mot de passe
-                                </label>
-                                <input 
-                                    type="password" 
-                                    id="register-confirm-password"
-                                    class="form-input"
-                                    placeholder="••••••••"
-                                    required>
-                            </div>
-
-                            <div class="form-options">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="accept-terms" required>
-                                    <span class="checkbox-custom"></span>
-                                    J'accepte les <a href="#">conditions d'utilisation</a>
-                                </label>
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-full">
-                                <span class="btn-text">Créer mon compte</span>
-                                <span class="btn-icon">→</span>
-                            </button>
-
-                            <div class="divider">
-                                <span>ou s'inscrire avec</span>
-                            </div>
-
-                            <div class="social-buttons">
-                                <button type="button" class="btn-social" onclick="registerWithGoogle()">
-                                    <span class="social-icon">G</span>
-                                    Google
-                                </button>
-                                <button type="button" class="btn-social" onclick="registerWithMicrosoft()">
-                                    <span class="social-icon">M</span>
-                                    Microsoft
-                                </button>
-                            </div>
-                        </form>
+                      
                     </div>
                 </div>
             </div>

@@ -1,4 +1,4 @@
-const User = require('../models/userModel');
+const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 require('dotenv').config();
@@ -8,14 +8,14 @@ const secret = process.env.JWT_SECRET;
 
 const signupController = async (req, res) => {
   try {
-    const { name, email, password, confirmPassword, phone, dateOfBirth,address,nationality,role } = req.body;
+    const { name, email, password, confirmPassword, phone,role } = req.body;
 
-    console.log('Received signup request with:', { name, email, phone, dateOfBirth,address,nationality, role });
+    console.log('Received signup request with:', { name, email, phone, role });
 
     // Vérification des champs obligatoires
-    if (!name || !email || !password || !confirmPassword || !phone || !dateOfBirth || !address || !nationality) {
+    if (!name || !email || !password || !confirmPassword || !phone ) {
       console.log('Missing fields');
-      return res.status(400).json({ message: 'Ensure name, email, password, confirmPassword , dateOfBirth,address and nationality are provided' });
+      return res.status(400).json({ message: 'Ensure name, email, password, confirmPassword  are provided' });
     }
 
     // Vérifier que le mot de passe et la confirmation correspondent
@@ -49,7 +49,7 @@ const signupController = async (req, res) => {
     }
 
     // Créer un nouvel utilisateur
-    const user = new User({ name, email, password, phone, dateOfBirth,address,nationality , role: userRole });
+    const user = new User({ name, email, password, phone , role: userRole });
 
     const savedUser = await user.save();
     console.log('User saved:', savedUser);
@@ -66,14 +66,14 @@ const signupController = async (req, res) => {
 
 const signinController = async (req, res) => {
   try {
-    const { name, password } = req.body;
+    const { email, password } = req.body;
 
-    if (!name || !password) {
+    if (!email || !password) {
       return res.status(400).json({ success: false, message: "Nom et mot de passe requis" });
     }
 
   
-    let account = await User.findOne({ name }).select("email name password role _id profileStatus").exec();
+    let account = await User.findOne({ email }).select("email  password role _id profileStatus").exec();
     let accountType = "user";
 
 
@@ -99,7 +99,7 @@ const signinController = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: account._id, name: account.name, role: account.role },
+      { id: account._id, email: account.email, role: account.role },
       secret,
       { expiresIn: "24h" }
     );
@@ -114,7 +114,7 @@ const signinController = async (req, res) => {
         token,
         role: "user",
         userId: account._id,
-        name: account.name,
+        email: account.email,
         profileStatus: account.profileStatus,
       });
     }

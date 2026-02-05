@@ -1,0 +1,382 @@
+<body>
+  <!-- Navbar -->
+  <app-navbar></app-navbar>
+
+  <!-- Error Notification -->
+  <div *ngIf="errorMsg" class="error-notification">
+    <div class="error-content">
+      <span class="error-icon">⚠️</span>
+      <span class="error-message">{{ errorMsg }}</span>
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <section class="demo-hero">
+    <div class="hero-background">
+      <div class="hero-grid"></div>
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+      </div>
+    </div>
+
+    <div class="demo-hero-content">
+      <div class="hero-badge">🚀 Démarrez Votre Transformation</div>
+      <h1>Demandez Votre <span class="gradient-text">Démo Personnalisée</span></h1>
+      <p>
+        Découvrez comment notre solution VR peut révolutionner la formation médicale
+        dans votre établissement en quelques minutes.
+      </p>
+    </div>
+  </section>
+
+  <!-- Wizard Section -->
+  <section class="wizard-section">
+    <div class="wizard-container">
+      
+      <!-- Progress Bar -->
+      <div class="progress-bar-container" *ngIf="!showSuccessMessage">
+        <div class="progress-bar">
+          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+        </div>
+        
+        <div class="progress-steps">
+          <div *ngFor="let step of steps; let i = index"
+               class="step-indicator"
+               [class.active]="isStepActive(i)"
+               [class.completed]="isStepCompleted(i)">
+            <div class="step-number">{{ step.id }}</div>
+            <div class="step-label">
+              {{ step.id === 1 ? 'Profil' : 
+                 step.id === 2 ? 'Intérêt' : 
+                 step.id === 3 ? 'Objectif' : 
+                 step.id === 4 ? 'Contact' : 'Message' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Wizard Form -->
+      <div *ngIf="!showSuccessMessage">
+        
+        <!-- Step 1: Profil -->
+        <div class="wizard-step" [class.active]="currentStepNumber === 1" *ngIf="currentStepNumber === 1">
+          <div class="step-header">
+            <h2>{{ currentStep.title }}</h2>
+            <p>{{ currentStep.subtitle }}</p>
+          </div>
+
+          <div class="form-group">
+            <label for="establishmentType">Type d'établissement *</label>
+            <select 
+              id="establishmentType" 
+              [(ngModel)]="formData.establishmentType"
+              name="establishmentType">
+              <option value="">Sélectionnez un type</option>
+              <option value="hopital">Hôpital</option>
+              <option value="clinique">Clinique</option>
+              <option value="faculte">Faculté de Médecine</option>
+              <option value="centre-formation">Centre de Formation</option>
+              <option value="autre">Autre</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="country">Pays *</label>
+              <input 
+                type="text" 
+                id="country" 
+                [(ngModel)]="formData.country"
+                name="country"
+                placeholder="Ex: France">
+            </div>
+            <div class="form-group">
+              <label for="city">Ville *</label>
+              <input 
+                type="text" 
+                id="city" 
+                [(ngModel)]="formData.city"
+                name="city"
+                placeholder="Ex: Paris">
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2: Intérêt -->
+        <div class="wizard-step" [class.active]="currentStepNumber === 2" *ngIf="currentStepNumber === 2">
+          <div class="step-header">
+            <h2>{{ currentStep.title }}</h2>
+            <p>{{ currentStep.subtitle }}</p>
+          </div>
+
+          <div class="option-cards">
+            <label class="option-card">
+              <input 
+                type="radio" 
+                name="interest" 
+                value="chirurgie"
+                [(ngModel)]="formData.interest">
+              <div class="card-content">
+                <div class="card-icon">🔪</div>
+                <h3>Chirurgie</h3>
+                <p>Formation aux procédures chirurgicales avancées</p>
+              </div>
+            </label>
+
+            <label class="option-card">
+              <input 
+                type="radio" 
+                name="interest" 
+                value="urgences"
+                [(ngModel)]="formData.interest">
+              <div class="card-content">
+                <div class="card-icon">🚑</div>
+                <h3>Urgences</h3>
+                <p>Gestion des situations d'urgence et traumatologie</p>
+              </div>
+            </label>
+
+            <label class="option-card">
+              <input 
+                type="radio" 
+                name="interest" 
+                value="formation-medicale"
+                [(ngModel)]="formData.interest">
+              <div class="card-content">
+                <div class="card-icon">🎓</div>
+                <h3>Formation Médicale</h3>
+                <p>Formation continue et développement des compétences</p>
+              </div>
+            </label>
+
+            <label class="option-card">
+              <input 
+                type="radio" 
+                name="interest" 
+                value="mixte"
+                [(ngModel)]="formData.interest">
+              <div class="card-content">
+                <div class="card-icon">🏥</div>
+                <h3>Mixte</h3>
+                <p>Combinaison de plusieurs domaines</p>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 3: Objectifs -->
+        <div class="wizard-step" [class.active]="currentStepNumber === 3" *ngIf="currentStepNumber === 3">
+          <div class="step-header">
+            <h2>{{ currentStep.title }}</h2>
+            <p>{{ currentStep.subtitle }}</p>
+          </div>
+
+          <div class="checkbox-group">
+            <label class="checkbox-card">
+              <input 
+                type="checkbox" 
+                value="reduire-erreurs"
+                [checked]="isObjectiveSelected('reduire-erreurs')"
+                (change)="onObjectiveChange('reduire-erreurs', $event)">
+              <div class="checkbox-content">
+                <div class="checkbox-icon">⚠️</div>
+                <div class="checkbox-text">
+                  <h3>Réduire les Erreurs Médicales</h3>
+                  <p>Améliorer la sécurité des patients par la pratique</p>
+                </div>
+              </div>
+            </label>
+
+            <label class="checkbox-card">
+              <input 
+                type="checkbox" 
+                value="formation-pratique"
+                [checked]="isObjectiveSelected('formation-pratique')"
+                (change)="onObjectiveChange('formation-pratique', $event)">
+              <div class="checkbox-content">
+                <div class="checkbox-icon">💪</div>
+                <div class="checkbox-text">
+                  <h3>Améliorer la Formation Pratique</h3>
+                  <p>Offrir plus d'opportunités de pratique réaliste</p>
+                </div>
+              </div>
+            </label>
+
+            <label class="checkbox-card">
+              <input 
+                type="checkbox" 
+                value="gestion-stress"
+                [checked]="isObjectiveSelected('gestion-stress')"
+                (change)="onObjectiveChange('gestion-stress', $event)">
+              <div class="checkbox-content">
+                <div class="checkbox-icon">🎯</div>
+                <div class="checkbox-text">
+                  <h3>Gérer le Stress et Situations Critiques</h3>
+                  <p>Préparer aux situations d'urgence haute pression</p>
+                </div>
+              </div>
+            </label>
+
+            <label class="checkbox-card">
+              <input 
+                type="checkbox" 
+                value="standardiser-formation"
+                [checked]="isObjectiveSelected('standardiser-formation')"
+                (change)="onObjectiveChange('standardiser-formation', $event)">
+              <div class="checkbox-content">
+                <div class="checkbox-icon">📊</div>
+                <div class="checkbox-text">
+                  <h3>Standardiser la Formation</h3>
+                  <p>Assurer une formation homogène et mesurable</p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Step 4: Contact -->
+        <div class="wizard-step" [class.active]="currentStepNumber === 4" *ngIf="currentStepNumber === 4">
+          <div class="step-header">
+            <h2>{{ currentStep.title }}</h2>
+            <p>{{ currentStep.subtitle }}</p>
+          </div>
+
+          <div class="form-group">
+            <label for="institutionName">Nom de l'institution *</label>
+            <input 
+              type="text" 
+              id="institutionName"
+              [(ngModel)]="formData.institutionName"
+              name="institutionName"
+              placeholder="Ex: Hôpital Universitaire de Paris">
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email professionnel *</label>
+            <input 
+              type="email" 
+              id="email"
+              [(ngModel)]="formData.email"
+              name="email"
+              placeholder="votre.email@etablissement.fr">
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Téléphone *</label>
+            <input 
+              type="tel" 
+              id="phone"
+              [(ngModel)]="formData.phone"
+              name="phone"
+              placeholder="+33 1 23 45 67 89">
+          </div>
+        </div>
+
+        <!-- Step 5: Message -->
+        <div class="wizard-step" [class.active]="currentStepNumber === 5" *ngIf="currentStepNumber === 5">
+          <div class="step-header">
+            <h2>{{ currentStep.title }}</h2>
+            <p>{{ currentStep.subtitle }}</p>
+          </div>
+
+          <div class="form-group">
+            <label for="message">Votre message (optionnel)</label>
+            <textarea 
+              id="message"
+              [(ngModel)]="formData.message"
+              name="message"
+              rows="6"
+              [maxlength]="maxMessageLength"
+              (input)="onMessageInput($event)"
+              placeholder="Décrivez vos besoins spécifiques, le nombre d'utilisateurs prévus, vos contraintes particulières..."></textarea>
+            <div class="char-count">
+              <span>{{ messageCharCount }}</span> / {{ maxMessageLength }} caractères
+            </div>
+          </div>
+
+          <div class="consent-group">
+            <label class="consent-checkbox">
+              <input 
+                type="checkbox"
+                [(ngModel)]="formData.consent"
+                name="consent">
+              <span>J'accepte d'être contacté par SurgeryVR Solutions concernant cette demande de démo *</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="wizard-navigation">
+          <button 
+            type="button" 
+            class="btn btn-secondary"
+            (click)="goToPreviousStep()"
+            *ngIf="!isFirstStep">
+            ← Précédent
+          </button>
+
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            (click)="goToNextStep()"
+            *ngIf="!isLastStep">
+            Suivant →
+          </button>
+
+          <button 
+            type="button" 
+            class="btn btn-primary"
+            (click)="onSubmitForm()"
+            *ngIf="isLastStep">
+            🚀 Envoyer ma Demande
+          </button>
+        </div>
+      </div>
+
+      <!-- Success Message -->
+      <div *ngIf="showSuccessMessage" class="success-message">
+        <div class="success-icon">✓</div>
+        <h2>Demande Envoyée avec Succès !</h2>
+        <p>Merci pour votre intérêt. Notre équipe vous contactera dans les 24-48 heures pour organiser votre démonstration personnalisée.</p>
+        <a href="/" class="btn btn-primary">Retour à l'accueil</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Benefits Section -->
+  <section class="benefits-section">
+    <div class="section-container">
+      <h2>Ce qui vous attend lors de la démo</h2>
+      <div class="benefits-grid">
+        <div class="benefit-card">
+          <div class="benefit-icon">🎯</div>
+          <h3>Démonstration Personnalisée</h3>
+          <p>Une présentation adaptée à vos besoins spécifiques et votre domaine d'activité</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">⚡</div>
+          <h3>Test en Temps Réel</h3>
+          <p>Essayez directement notre plateforme VR avec nos experts</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">💡</div>
+          <h3>Conseils d'Experts</h3>
+          <p>Bénéficiez de recommandations sur mesure pour votre établissement</p>
+        </div>
+        <div class="benefit-card">
+          <div class="benefit-icon">📊</div>
+          <h3>Analyse ROI</h3>
+          <p>Découvrez l'impact financier et pédagogique pour votre institution</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-bottom">
+      <p>© 2026 SurgeryVR Solutions. Tous droits réservés.</p>
+    </div>
+  </footer>
+</body>

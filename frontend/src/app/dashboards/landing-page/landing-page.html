@@ -32,18 +32,27 @@
         </div>
     </section>
 
-    <!-- Video Section -->
-        <section id="video-section" class="video-section">
-        <video 
-            src="assets/videoAccueil.mp4" 
-            autoplay 
-            muted 
-            loop 
-            playsinline 
-            class="video-player">
-            Votre navigateur ne supporte pas la vidéo.
-        </video>
-        </section>
+<!-- Hero Image Section -->
+<section id="hero-image-section" class="hero-image-section">
+    <div class="hero-image-container">
+        <div class="hero-image-left">
+            <img 
+                src="assets/imagesAccueil.jpg" 
+                alt="Formation VR Médicale" 
+                class="hero-image">
+        </div>
+        <div class="hero-image-right">
+            <h2>L'Innovation au Service de la Formation Médicale</h2>
+            <p>
+                SurgeryVR Solutions repousse les limites de l'apprentissage médical grâce à 
+                la réalité virtuelle immersive. Notre plateforme offre une expérience 
+                d'entraînement sans précédent, permettant aux professionnels de santé de 
+                développer leurs compétences dans un environnement 100% sécurisé.
+            </p>
+           
+        </div>
+    </div>
+</section>
 
 
     <!-- Problem Section -->
@@ -77,12 +86,14 @@
                     </p>
                 </div>
                 
-                <div class="problem-card">
-                    <div class="problem-icon">💰</div>
-                    <h3>Coûts Élevés</h3>
+               <div class="problem-card">
+                    <div class="problem-icon">🧠</div>
+                    <h3>Expérience Limitée avec Anatomie Réelle</h3>
                     <p>
-                        Les équipements de simulation traditionnels nécessitent des investissements 
-                        importants en infrastructure et maintenance.
+                        Les mannequins de simulation ne reproduisent pas fidèlement la complexité 
+                        anatomique réelle. Les étudiants n'ont pas l'opportunité d'observer et 
+                        d'interagir avec de véritables organes comme le cerveau, limitant leur 
+                        compréhension de l'anatomie humaine.
                     </p>
                 </div>
                 
@@ -102,7 +113,7 @@
     <section id="solution" class="solution-section ">
         <div class="section-container">
             <div class="section-header">
-                <span class="section-label" style="background: rgba(0, 217, 255, 0.1); border-color: rgba(0, 217, 255, 0.3); color: var(--primary);">La Solution</span>
+                <span class="section-label" >La Solution</span>
                 <h2>Formation VR Immersive et Sécurisée</h2>
                 <p>
                     Notre plateforme offre une expérience d'apprentissage révolutionnaire qui combine 
@@ -221,7 +232,55 @@
             </div>
         </div>
     </section>
+<!-- Google Reviews Section -->
+<!-- Google Reviews Section -->
+<section class="reviews-section">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-label">Témoignages</span>
+            <h2>Ce que disent nos utilisateurs</h2>
+            <p>
+                Des professionnels de santé du monde entier font confiance à notre plateforme VR
+            </p>
+        </div>
+        
+        <div class="reviews-carousel-container">
+            <!-- Bouton Gauche -->
+         
+            
+            <!-- Carrousel -->
+            <div class="reviews-carousel">
+                <div class="reviews-wrapper">
+                    <!-- Afficher uniquement le slide actuel -->
+                    <div class="reviews-grid">
+                        <div 
+                            *ngFor="let review of reviewSlides[currentReviewIndex]" 
+                            class="review-card">
+                            <div class="review-header">
+                                <div class="stars">{{ getStars(review.stars) }}</div>
+                                <div class="review-source">Google</div>
+                            </div>
+                            <p class="review-text">{{ review.text }}</p>
+                            <div class="review-author">
+                                <div class="author-avatar">{{ review.avatar }}</div>
+                                <div class="author-info">
+                                    <div class="author-name">{{ review.name }}</div>
+                                    <div class="author-title">{{ review.title }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Bouton Droite -->
+       
+        </div>
+        
+  
 
+    </div>
+</section>
     <!-- Use Cases Section -->
     <section id="use-cases" class="use-cases-section ">
         <div class="section-container">
@@ -286,21 +345,72 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section id="demo" class="cta-section ">
-        <div class="cta-container">
+<!-- CTA Section -->
+<!-- CTA Section with 3 Options -->
+<section id="demo" class="cta-section">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-label" >Commencez Maintenant</span>
             <h2>Prêt à Révolutionner Votre Formation ?</h2>
             <p>
-                Demandez une démonstration personnalisée et découvrez comment notre solution VR 
-                peut transformer votre approche de la formation médicale.
+                Choisissez l'option qui correspond le mieux à vos besoins et découvrez 
+                comment notre solution VR peut transformer votre approche de la formation médicale.
             </p>
-            <form class="cta-form" onsubmit="event.preventDefault(); alert('Merci! Notre équipe vous contactera sous 24h.');">
-                <input type="email" class="cta-input" placeholder="Votre adresse email professionnelle" required>
-                <button type="submit" class="btn btn-primary">Demander une Démo</button>
-            </form>
         </div>
-    </section>
+        
+        <div class="cta-options-grid">
+            <div class="cta-option-card">
+                <div class="cta-icon">🎯</div>
+                <h3>Démo Gratuite</h3>
+                <p class="cta-description">
+                    Découvrez notre plateforme en action avec une démonstration personnalisée 
+                    de 30 minutes avec nos experts
+                </p>
+                <ul class="cta-features">
+                    <li>✓ Présentation complète</li>
+                    <li>✓ Test des simulations</li>
+                    <li>✓ Questions & réponses</li>
+                </ul>
+                <button class="btn btn-primary" (click)="goToDemo()">Demander une Démo</button>
 
+            </div>
+            
+            <div class="cta-option-card cta-featured">
+                <div class="cta-icon">💼</div>
+                <h3>Devis Personnalisé</h3>
+                <p class="cta-description">
+                    Obtenez une proposition tarifaire adaptée à la taille de votre établissement 
+                    et vos besoins spécifiques
+                </p>
+                <ul class="cta-features">
+                    <li>✓ Tarification sur mesure</li>
+                    <li>✓ Options de formation</li>
+                    <li>✓ Support dédié</li>
+                </ul>
+                <button class="btn btn-primary" onclick="alert('Formulaire de demande de devis à venir!')">
+                    Demander un Devis
+                </button>
+            </div>
+            
+            <div class="cta-option-card">
+                <div class="cta-icon">⚡</div>
+                <h3>Expérience Sur Mesure</h3>
+                <p class="cta-description">
+                    Créez des scénarios et simulations personnalisés pour vos objectifs 
+                    pédagogiques uniques
+                </p>
+                <ul class="cta-features">
+                    <li>✓ Scénarios customisés</li>
+                    <li>✓ Développement dédié</li>
+                    <li>✓ Formation à la carte</li>
+                </ul>
+                <button class="btn btn-primary" onclick="alert('Formulaire d\'expérience sur mesure à venir!')">
+                    Créer Mon Expérience
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
     <!-- Footer -->
     <footer>
         <div class="footer-content">
@@ -349,3 +459,5 @@
 
 
 </body>
+
+<button type="button" (click)="goToDemo()">Demander une Démo</button>

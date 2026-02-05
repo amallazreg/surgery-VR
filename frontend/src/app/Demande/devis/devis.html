@@ -1,0 +1,434 @@
+<!-- Navbar -->
+<app-navbar></app-navbar>
+
+<!-- Hero Section -->
+<section class="demo-hero">
+    <div class="hero-background">
+        <div class="hero-grid"></div>
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+        </div>
+    </div>
+    
+    <div class="demo-hero-content">
+        <div class="hero-badge">💼 Solution Sur Mesure</div>
+        <h1>Demandez Votre <span class="gradient-text">Devis Personnalisé</span></h1>
+        <p>
+            Obtenez une proposition tarifaire adaptée aux besoins spécifiques de votre établissement.
+            Nos experts vous accompagnent pour trouver la solution optimale.
+        </p>
+    </div>
+</section>
+
+<!-- Wizard Section -->
+<section class="wizard-section">
+    <div class="wizard-container">
+        <!-- Progress Bar -->
+        <div class="progress-bar-container" *ngIf="!showSuccessMessage">
+            <div class="progress-bar">
+                <div class="progress-fill" [style.width]="getProgressWidth()"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="step-indicator" 
+                     [class.active]="isStepActive(1)" 
+                     [class.completed]="isStepCompleted(1)">
+                    <div class="step-number">1</div>
+                    <div class="step-label">Établissement</div>
+                </div>
+                <div class="step-indicator" 
+                     [class.active]="isStepActive(2)" 
+                     [class.completed]="isStepCompleted(2)">
+                    <div class="step-number">2</div>
+                    <div class="step-label">Besoins</div>
+                </div>
+                <div class="step-indicator" 
+                     [class.active]="isStepActive(3)" 
+                     [class.completed]="isStepCompleted(3)">
+                    <div class="step-number">3</div>
+                    <div class="step-label">Utilisateurs</div>
+                </div>
+                <div class="step-indicator" 
+                     [class.active]="isStepActive(4)" 
+                     [class.completed]="isStepCompleted(4)">
+                    <div class="step-number">4</div>
+                    <div class="step-label">Contact</div>
+                </div>
+                <div class="step-indicator" 
+                     [class.active]="isStepActive(5)" 
+                     [class.completed]="isStepCompleted(5)">
+                    <div class="step-number">5</div>
+                    <div class="step-label">Finalisation</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wizard Form -->
+        <div class="wizard-form" *ngIf="!showSuccessMessage">
+            <!-- Step 1: Informations Établissement -->
+            <div class="wizard-step" *ngIf="currentStep === 1">
+                <div class="step-header">
+                    <h2>Informations sur votre Établissement</h2>
+                    <p>Parlez-nous de votre organisation</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="institutionName">Nom de l'établissement *</label>
+                    <input type="text" 
+                           id="institutionName" 
+                           [(ngModel)]="formData.institutionName" 
+                           placeholder="Ex: Hôpital Universitaire de Paris">
+                </div>
+
+                <div class="form-group">
+                    <label for="establishmentType">Type d'établissement *</label>
+                    <select id="establishmentType" [(ngModel)]="formData.establishmentType">
+                        <option value="">Sélectionnez un type</option>
+                        <option value="hopital-public">Hôpital Public</option>
+                        <option value="hopital-prive">Hôpital Privé</option>
+                        <option value="clinique">Clinique</option>
+                        <option value="faculte">Faculté de Médecine</option>
+                        <option value="centre-formation">Centre de Formation Médicale</option>
+                        <option value="groupe-hospitalier">Groupe Hospitalier</option>
+                        <option value="autre">Autre</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="country">Pays *</label>
+                        <input type="text" 
+                               id="country" 
+                               [(ngModel)]="formData.country" 
+                               placeholder="Ex: France">
+                    </div>
+                    <div class="form-group">
+                        <label for="city">Ville *</label>
+                        <input type="text" 
+                               id="city" 
+                               [(ngModel)]="formData.city" 
+                               placeholder="Ex: Paris">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Besoins et Solutions -->
+            <div class="wizard-step" *ngIf="currentStep === 2">
+                <div class="step-header">
+                    <h2>Vos Besoins en Formation</h2>
+                    <p>Sélectionnez les domaines qui vous intéressent (plusieurs choix possibles)</p>
+                </div>
+                
+                <div class="checkbox-group">
+                    <label class="checkbox-card">
+                        <input type="checkbox" 
+                               [checked]="isSolutionSelected('chirurgie')"
+                               (change)="toggleSolution('chirurgie', $event)">
+                        <div class="checkbox-content">
+                            <div class="checkbox-icon">🔪</div>
+                            <div class="checkbox-text">
+                                <h3>Formation Chirurgicale</h3>
+                                <p>Simulations de procédures chirurgicales complexes</p>
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="checkbox-card">
+                        <input type="checkbox" 
+                               [checked]="isSolutionSelected('urgences')"
+                               (change)="toggleSolution('urgences', $event)">
+                        <div class="checkbox-content">
+                            <div class="checkbox-icon">🚑</div>
+                            <div class="checkbox-text">
+                                <h3>Médecine d'Urgence</h3>
+                                <p>Gestion de situations critiques et traumatismes</p>
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="checkbox-card">
+                        <input type="checkbox" 
+                               [checked]="isSolutionSelected('anatomie')"
+                               (change)="toggleSolution('anatomie', $event)">
+                        <div class="checkbox-content">
+                            <div class="checkbox-icon">🧠</div>
+                            <div class="checkbox-text">
+                                <h3>Anatomie 3D Interactive</h3>
+                                <p>Exploration détaillée du corps humain en VR</p>
+                            </div>
+                        </div>
+                    </label>
+                    
+                    <label class="checkbox-card">
+                        <input type="checkbox" 
+                               [checked]="isSolutionSelected('diagnostic')"
+                               (change)="toggleSolution('diagnostic', $event)">
+                        <div class="checkbox-content">
+                            <div class="checkbox-icon">🔬</div>
+                            <div class="checkbox-text">
+                                <h3>Formation au Diagnostic</h3>
+                                <p>Cas cliniques et raisonnement médical</p>
+                            </div>
+                        </div>
+                    </label>
+
+                    <label class="checkbox-card">
+                        <input type="checkbox" 
+                               [checked]="isSolutionSelected('soins-infirmiers')"
+                               (change)="toggleSolution('soins-infirmiers', $event)">
+                        <div class="checkbox-content">
+                            <div class="checkbox-icon">💉</div>
+                            <div class="checkbox-text">
+                                <h3>Soins Infirmiers</h3>
+                                <p>Gestes techniques et protocoles de soins</p>
+                            </div>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Step 3: Nombre d'Utilisateurs et Équipement -->
+            <div class="wizard-step" *ngIf="currentStep === 3">
+                <div class="step-header">
+                    <h2>Dimensionnement de votre Projet</h2>
+                    <p>Aidez-nous à évaluer l'ampleur de votre projet</p>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-icon">💡</div>
+                    <div class="info-text">
+                        Ces informations nous permettent de calculer le nombre de licences et d'équipements VR nécessaires pour votre établissement.
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="userCount">Nombre d'utilisateurs prévus *</label>
+                    <select id="userCount" [(ngModel)]="formData.userCount">
+                        <option value="">Sélectionnez une tranche</option>
+                        <option value="1-10">1 à 10 utilisateurs</option>
+                        <option value="11-25">11 à 25 utilisateurs</option>
+                        <option value="26-50">26 à 50 utilisateurs</option>
+                        <option value="51-100">51 à 100 utilisateurs</option>
+                        <option value="101-200">101 à 200 utilisateurs</option>
+                        <option value="200+">Plus de 200 utilisateurs</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="vrHeadsets">Nombre de casques VR souhaités *</label>
+                    <select id="vrHeadsets" [(ngModel)]="formData.vrHeadsets">
+                        <option value="">Sélectionnez une quantité</option>
+                        <option value="1-2">1 à 2 casques</option>
+                        <option value="3-5">3 à 5 casques</option>
+                        <option value="6-10">6 à 10 casques</option>
+                        <option value="11-20">11 à 20 casques</option>
+                        <option value="20+">Plus de 20 casques</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="deploymentType">Type de déploiement *</label>
+                    <select id="deploymentType" [(ngModel)]="formData.deploymentType">
+                        <option value="">Sélectionnez une option</option>
+                        <option value="cloud">Cloud (accès en ligne)</option>
+                        <option value="on-premise">Sur site (serveurs locaux)</option>
+                        <option value="hybride">Solution hybride</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="timeline">Délai de mise en œuvre souhaité *</label>
+                    <select id="timeline" [(ngModel)]="formData.timeline">
+                        <option value="">Sélectionnez un délai</option>
+                        <option value="immediat">Immédiat (moins d'1 mois)</option>
+                        <option value="1-3-mois">1 à 3 mois</option>
+                        <option value="3-6-mois">3 à 6 mois</option>
+                        <option value="6-12-mois">6 à 12 mois</option>
+                        <option value="12-mois+">Plus de 12 mois</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Step 4: Informations de Contact -->
+            <div class="wizard-step" *ngIf="currentStep === 4">
+                <div class="step-header">
+                    <h2>Vos Coordonnées</h2>
+                    <p>Pour vous envoyer votre devis personnalisé</p>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="firstName">Prénom *</label>
+                        <input type="text" 
+                               id="firstName" 
+                               [(ngModel)]="formData.firstName" 
+                               placeholder="Votre prénom">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Nom *</label>
+                        <input type="text" 
+                               id="lastName" 
+                               [(ngModel)]="formData.lastName" 
+                               placeholder="Votre nom">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="position">Fonction *</label>
+                    <input type="text" 
+                           id="position" 
+                           [(ngModel)]="formData.position" 
+                           placeholder="Ex: Directeur des Formations, Chef de Service...">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email professionnel *</label>
+                    <input type="email" 
+                           id="email" 
+                           [(ngModel)]="formData.email" 
+                           placeholder="votre.email@etablissement.fr">
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Téléphone *</label>
+                    <input type="tel" 
+                           id="phone" 
+                           [(ngModel)]="formData.phone" 
+                           placeholder="+33 1 23 45 67 89">
+                </div>
+            </div>
+
+            <!-- Step 5: Budget et Message -->
+            <div class="wizard-step" *ngIf="currentStep === 5">
+                <div class="step-header">
+                    <h2>Finalisation de votre Demande</h2>
+                    <p>Dernières informations pour affiner votre devis</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="budget">Budget estimé (optionnel)</label>
+                    <select id="budget" [(ngModel)]="formData.budget">
+                        <option value="">Sélectionnez une fourchette (optionnel)</option>
+                        <option value="moins-10k">Moins de 10 000 €</option>
+                        <option value="10k-25k">10 000 € - 25 000 €</option>
+                        <option value="25k-50k">25 000 € - 50 000 €</option>
+                        <option value="50k-100k">50 000 € - 100 000 €</option>
+                        <option value="100k-250k">100 000 € - 250 000 €</option>
+                        <option value="250k+">Plus de 250 000 €</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Besoins spécifiques ou informations complémentaires (optionnel)</label>
+                    <textarea id="message" 
+                              [(ngModel)]="formData.message" 
+                              (input)="onMessageInput($event)"
+                              rows="6" 
+                              placeholder="Décrivez vos besoins particuliers, contraintes techniques, objectifs pédagogiques spécifiques..."></textarea>
+                    <div class="char-count">
+                        <span>{{ messageCharCount }}</span> / {{ maxMessageLength }} caractères
+                    </div>
+                </div>
+
+                <div class="consent-group">
+                    <label class="consent-checkbox">
+                        <input type="checkbox" 
+                               id="consent" 
+                               [(ngModel)]="formData.consent">
+                        <span>J'accepte d'être contacté par SurgeryVR Solutions pour recevoir mon devis personnalisé et discuter de mon projet *</span>
+                    </label>
+                </div>
+
+                <div class="info-box">
+                    <div class="info-icon">⏱️</div>
+                    <div class="info-text">
+                        <strong>Délai de réponse :</strong> Vous recevrez votre devis détaillé sous 48-72 heures ouvrées. Un expert vous contactera pour affiner votre projet si nécessaire.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Buttons -->
+            <div class="wizard-navigation">
+                <button type="button" 
+                        class="btn btn-secondary" 
+                        (click)="prevStep()"
+                        *ngIf="showPrevButton()">
+                    ← Précédent
+                </button>
+                <button type="button" 
+                        class="btn btn-primary" 
+                        (click)="nextStep()"
+                        *ngIf="showNextButton()">
+                    Suivant →
+                </button>
+                <button type="button" 
+                        class="btn btn-primary" 
+                        (click)="submitForm()"
+                        *ngIf="showSubmitButton()">
+                    💼 Envoyer ma Demande de Devis
+                </button>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div class="success-message" *ngIf="showSuccessMessage">
+            <div class="success-icon">✓</div>
+            <h2>Demande de Devis Envoyée !</h2>
+            <p>Merci pour votre confiance. Notre équipe commerciale analysera votre demande et vous enverra un devis personnalisé détaillé sous 48-72 heures. Vous recevrez également un appel de notre expert pour affiner votre projet.</p>
+            <a routerLink="/" class="btn btn-primary">Retour à l'accueil</a>
+        </div>
+    </div>
+</section>
+
+<!-- Benefits Section -->
+<section class="benefits-section">
+    <div class="section-container">
+        <h2>Ce qui est inclus dans votre devis</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <div class="benefit-icon">📋</div>
+                <h3>Analyse Détaillée</h3>
+                <p>Étude approfondie de vos besoins et recommandations personnalisées</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">💰</div>
+                <h3>Tarification Transparente</h3>
+                <p>Prix détaillés incluant licences, matériel, formation et support</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">🎓</div>
+                <h3>Plan de Formation</h3>
+                <p>Programme d'accompagnement et formation de vos équipes</p>
+            </div>
+            <div class="benefit-card">
+                <div class="benefit-icon">🔧</div>
+                <h3>Support Technique</h3>
+                <p>Maintenance, mises à jour et assistance incluses</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>SurgeryVR Solutions</h3>
+            <p style="color: var(--text-gray); line-height: 1.7;">
+                Pionnier de la formation médicale en réalité virtuelle, nous transformons 
+                l'apprentissage des professionnels de santé.
+            </p>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Contact</h3>
+            <ul>
+                <li><a href="mailto:inheritedgames@gmail.com">inheritedgames@gmail.com</a></li>
+                <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>© 2026 SurgeryVR Solutions. Tous droits réservés.</p>
+    </div>
+</footer>
