@@ -2,6 +2,14 @@
   <!-- Navbar -->
   <app-navbar></app-navbar>
 
+  <!-- Error Notification -->
+  <div *ngIf="errorMsg" class="error-notification">
+    <div class="error-content">
+      <span class="error-icon">⚠️</span>
+      <span class="error-message">{{ errorMsg }}</span>
+    </div>
+  </div>
+
   <!-- Hero Section -->
   <section class="demo-hero">
     <div class="hero-background">
@@ -26,9 +34,9 @@
   <section class="wizard-section">
     <div class="wizard-container">
       <!-- Progress Bar -->
-      <div class="progress-bar-container">
+      <div class="progress-bar-container" *ngIf="!showSuccessMessage">
         <div class="progress-bar">
-          <div class="progress-fill" id="progressFill" [style.width.%]="progressPercent()"></div>
+          <div class="progress-fill" [style.width.%]="progressPercent()"></div>
         </div>
         <div class="progress-steps">
           <div class="step-indicator" 

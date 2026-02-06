@@ -20,6 +20,9 @@ export class ExperienceSurMesure implements OnInit {
   charCount1 = 0;
   charCount2 = 0;
 
+    errorMsg = '';
+
+
   // Form data model
   formData = {
     projectType: '',
@@ -68,17 +71,74 @@ export class ExperienceSurMesure implements OnInit {
     }
   }
 
-  nextStep() {
-    if (this.validateStep(this.currentStep)) {
+  nextStep(): void {
+    if (this.validateCurrentStep()) {
       if (this.currentStep < this.totalSteps) {
         this.currentStep++;
-        this.updateUI();
-        this.scrollToTop();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } else {
-      this.showValidationErrors();
     }
   }
+
+  validateCurrentStep(): boolean {
+    switch (this.currentStep) {
+      case 1:
+        if (!this.formData.projectType || !this.formData.projectTitle.trim()) {
+          this.showError('Veuillez remplir tous les champs obligatoires');
+          return false;
+        }
+        break;
+      case 2:
+        if (!this.formData.clinicalScenarios.trim() || 
+            !this.formData.learningObjectives.trim() || 
+            !this.formData.targetAudience) {
+          this.showError('Veuillez remplir tous les champs obligatoires');
+          return false;
+        }
+        break;
+      case 3:
+        // Étape 3 n'a pas de champs obligatoires (checkboxes optionnelles)
+        break;
+      case 4:
+        if (!this.formData.interactionLevel || !this.formData.realism) {
+          this.showError('Veuillez remplir tous les champs obligatoires');
+          return false;
+        }
+        break;
+      case 5:
+        if (!this.formData.institutionName.trim() || 
+            !this.formData.firstName.trim() || 
+            !this.formData.lastName.trim() || 
+            !this.formData.position.trim() || 
+            !this.formData.email.trim() || 
+            !this.formData.phone.trim()) {
+          this.showError('Veuillez remplir tous les champs obligatoires');
+          return false;
+        }
+        // Validation email
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.formData.email)) {
+          this.showError('Veuillez entrer une adresse email valide');
+          return false;
+        }
+        break;
+      case 6:
+        if (!this.formData.timeline || !this.formData.consent) {
+          this.showError('Veuillez accepter d\'être contacté et remplir tous les champs obligatoires');
+          return false;
+        }
+        break;
+    }
+    return true;
+  }
+
+    showError(message: string): void {
+    this.errorMsg = message;
+    setTimeout(() => {
+      this.errorMsg = '';
+    }, 3000);
+  }
+
 
   goToStep(step: number) {
     if (step <= this.currentStep || this.isStepCompleted(step - 1)) {
@@ -241,63 +301,27 @@ export class ExperienceSurMesure implements OnInit {
   // Validation
   // =====================
 
-  validateStep(step: number): boolean {
-    switch (step) {
-      case 1:
-        return this.formData.projectType !== '' && this.formData.projectTitle.trim() !== '';
-      
-      case 2:
-        return this.formData.clinicalScenarios.trim() !== '' &&
-               this.formData.learningObjectives.trim() !== '' &&
-               this.formData.targetAudience !== '';
-      
-      case 3:
-        return true; // Les checkboxes sont optionnelles
-      
-      case 4:
-        return this.formData.interactionLevel !== '' && this.formData.realism !== '';
-      
-      case 5:
-        return this.formData.institutionName.trim() !== '' &&
-               this.formData.firstName.trim() !== '' &&
-               this.formData.lastName.trim() !== '' &&
-               this.formData.position.trim() !== '' &&
-               this.formData.email.trim() !== '' &&
-               this.validateEmail(this.formData.email) &&
-               this.formData.phone.trim() !== '';
-      
-      case 6:
-        return this.formData.timeline !== '' && this.formData.consent === true;
-      
-      default:
-        return true;
-    }
-  }
+ 
 
   validateEmail(email: string): boolean {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return re.test(email);
   }
 
-  showValidationErrors() {
-    if (isPlatformBrowser(this.platformId)) {
-      alert('Veuillez remplir tous les champs obligatoires avant de continuer.');
-    }
-  }
+
 
   // =====================
   // Submit
   // =====================
 onSubmit(event: Event) {
   event.preventDefault();
-
-  if (this.validateStep(this.currentStep)) {
+  
+  if (this.validateCurrentStep()) {
     console.log('Form submitted!', this.formData);
     
     // Envoyer les données au backend
     this.submitToBackend();
   } else {
-    this.showValidationErrors();
   }
 }
 
@@ -330,6 +354,7 @@ submitToBackend() {
     next: (res) => {
       console.log('Backend response:', res);
       this.showSuccessMessage = true;
+       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     error: (err: HttpErrorResponse) => {
       console.error('Erreur lors de l\'envoi:', err);
