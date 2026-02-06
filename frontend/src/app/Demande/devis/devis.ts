@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Navbar } from "../../layout/navbar/navbar";
+import { DemandesService } from '../../services/demandes-service';
 
 @Component({
   selector: 'app-devis',
@@ -16,39 +17,36 @@ export class Devis implements OnInit {
   showSuccessMessage: boolean = false;
 
   // Form data
-  formData = {
-    // Step 1
-    institutionName: '',
-    establishmentType: '',
-    country: '',
-    city: '',
-    
-    // Step 2
-    solutions: [] as string[],
-    
-    // Step 3
-    userCount: '',
-    vrHeadsets: '',
-    deploymentType: '',
-    timeline: '',
-    
-    // Step 4
-    firstName: '',
-    lastName: '',
-    position: '',
-    email: '',
-    phone: '',
-    
-    // Step 5
-    budget: '',
-    message: '',
-    consent: false
-  };
+formData = {
+  institutionName: '',
+  establishmentType: '',
+  country: '',
+  city: '',
+
+  besoins: [] as string[],
+
+  userCount: '',
+  vrHeadsets: '',
+  deploymentType: '',
+  timeline: '',
+
+  firstName: '',
+  lastName: '',
+  position: '',
+  email: '',
+  phone: '',
+
+  budget: '',
+  message: '',
+  consent: false
+};
+
 
   messageCharCount: number = 0;
   maxMessageLength: number = 1000;
+  errorMsg: any;
 
-  constructor() { }
+  constructor(private demandeDevisService :  DemandesService) { }
 
   ngOnInit(): void {
     this.updateProgressBar();
@@ -130,7 +128,7 @@ export class Devis implements OnInit {
         break;
         
       case 2:
-        if (this.formData.solutions.length === 0) {
+        if (this.formData.besoins.length === 0) {
           this.showError('Veuillez sélectionner au moins un domaine de formation');
           return false;
         }
@@ -201,19 +199,19 @@ export class Devis implements OnInit {
   // Solution checkbox handling
   toggleSolution(value: string, event: any): void {
     if (event.target.checked) {
-      if (!this.formData.solutions.includes(value)) {
-        this.formData.solutions.push(value);
+      if (!this.formData.besoins.includes(value)) {
+        this.formData.besoins.push(value);
       }
     } else {
-      const index = this.formData.solutions.indexOf(value);
+      const index = this.formData.besoins.indexOf(value);
       if (index > -1) {
-        this.formData.solutions.splice(index, 1);
+        this.formData.besoins.splice(index, 1);
       }
     }
   }
 
   isSolutionSelected(value: string): boolean {
-    return this.formData.solutions.includes(value);
+    return this.formData.besoins.includes(value);
   }
 
   // Message character count
@@ -228,20 +226,48 @@ export class Devis implements OnInit {
   }
 
   // Form submission
-  submitForm(): void {
-    if (this.validateStep(this.currentStep)) {
-      console.log('Quote Request Data:', this.formData);
-      
-      // Here you would typically send the data to your backend
-      // this.quoteService.submitQuoteRequest(this.formData).subscribe(...)
-      
-      // Show success message
-      setTimeout(() => {
-        this.showSuccessMessage = true;
-        this.scrollToTop();
-      }, 500);
+submitForm() {
+  const payload = {
+    // Étape 1
+    nomEtablissement: this.formData.institutionName,
+    typeEtablissement: this.formData.establishmentType,
+    pays: this.formData.country,
+    ville: this.formData.city,
+
+    // Étape 2
+    besoins: this.formData.besoins,
+
+    // Étape 3
+    nombreUtilisateurs: this.formData.userCount,
+    nombreCasquesVR: this.formData.vrHeadsets,
+    typeDeploiement: this.formData.deploymentType,
+    delaiMiseEnOeuvre: this.formData.timeline,
+
+    // Étape 4
+    prenom: this.formData.firstName,
+    nom: this.formData.lastName,
+    fonction: this.formData.position,
+    emailProfessionnel: this.formData.email,
+    telephone: this.formData.phone,
+
+    // Étape 5
+    budgetEstime: this.formData.budget,
+    message: this.formData.message,
+    consentement: this.formData.consent
+  };
+
+  this.demandeDevisService.envoyerDemandeDevis(payload).subscribe({
+    next: (res) => {
+      console.log('Demande de devis envoyée:', res);
+      this.showSuccessMessage = true;
+    },
+    error: (err) => {
+      console.error(err);
+      this.errorMsg = "Erreur lors de l'envoi de la demande de devis.";
     }
-  }
+  });
+}
+
 
   // Error handling
   showError(message: string): void {

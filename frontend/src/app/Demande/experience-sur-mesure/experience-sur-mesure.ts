@@ -2,6 +2,8 @@ import { Component, OnInit, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Navbar } from "../../layout/navbar/navbar";
+import { DemandesService } from '../../services/demandes-service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-experience-sur-mesure',
@@ -44,7 +46,7 @@ export class ExperienceSurMesure implements OnInit {
 
   showSuccessMessage = false;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object,private experienceService: DemandesService) {}
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {
@@ -286,40 +288,55 @@ export class ExperienceSurMesure implements OnInit {
   // =====================
   // Submit
   // =====================
+onSubmit(event: Event) {
+  event.preventDefault();
 
-  onSubmit(event: Event) {
-    event.preventDefault();
+  if (this.validateStep(this.currentStep)) {
+    console.log('Form submitted!', this.formData);
     
-    if (this.validateStep(this.currentStep)) {
-      console.log('Form submitted!', this.formData);
-      
-      // Envoyer les données au backend ici
-      this.submitToBackend();
-      
-      // Afficher le message de succès
-      this.showSuccessMessage = true;
-      
-      if (isPlatformBrowser(this.platformId)) {
-        setTimeout(() => {
-          const successMessage = document.getElementById('successMessage');
-          const wizardForm = document.getElementById('customForm');
-          
-          if (successMessage && wizardForm) {
-            wizardForm.style.display = 'none';
-            successMessage.style.display = 'block';
-            this.scrollToTop();
-          }
-        });
-      }
-    } else {
-      this.showValidationErrors();
-    }
+    // Envoyer les données au backend
+    this.submitToBackend();
+  } else {
+    this.showValidationErrors();
   }
+}
 
-  submitToBackend() {
-    // Implémente l'envoi au backend ici
-    console.log('Données à envoyer:', this.formData);
-  }
+submitToBackend() {
+  // Préparer le format attendu par le backend
+  const payload = {
+    typeProjet: this.formData.projectType,
+    titreProjet: this.formData.projectTitle,
+    scenariosCliniques: this.formData.clinicalScenarios,
+    objectifsPedagogiques: this.formData.learningObjectives,
+    publicCible: this.formData.targetAudience,
+    niveauInteraction: this.formData.interactionLevel,
+    niveauRealism: this.formData.realism,
+    medicalFeatures: this.formData.medicalFeatures,
+    technicalFeatures: this.formData.technicalFeatures,
+    nomEtablissement: this.formData.institutionName,
+    prenom: this.formData.firstName,
+    nom: this.formData.lastName,
+    fonction: this.formData.position,
+    emailProfessionnel: this.formData.email,
+    telephone: this.formData.phone,
+    delaiRealisation: this.formData.timeline,
+    inspiration: this.formData.inspiration,
+    contraintes: this.formData.constraints,
+    informationsComplementaires: this.formData.additionalInfo,
+    consentement: this.formData.consent
+  };
+
+  this.experienceService.creerExperience(payload).subscribe({
+    next: (res) => {
+      console.log('Backend response:', res);
+      this.showSuccessMessage = true;
+    },
+    error: (err: HttpErrorResponse) => {
+      console.error('Erreur lors de l\'envoi:', err);
+      alert(err.error?.message || 'Erreur serveur');
+    }
+  });
+}
 
   // =====================
   // Helpers template

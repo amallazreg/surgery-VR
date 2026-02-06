@@ -1,400 +1,1253 @@
-<div class="demo-request-page">
-  <!-- Navbar -->
-<app-navbar>
-  <!-- Hero Section -->
-  <section class="demo-hero">
-    <div class="hero-background">
-      <div class="hero-grid"></div>
-      <div class="floating-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-      </div>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inscription - SurgeryVR</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0066FF;
+            --secondary: #00D9FF;
+            --accent: #FF006E;
+            --dark: #1A2B5F;
+            --dark-blue: #0A1628;
+            --light: #FFFFFF;
+            --bg-light: #F8FAFF;
+            --success: #00C48C;
+            --gradient-1: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
+            --gradient-2: linear-gradient(135deg, #FF006E 0%, #FF6B00 100%);
+            --text-dark: #1A2B5F;
+            --text-gray: #5A6B8C;
+            --navbar-height: 90px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: var(--bg-light);
+            overflow-x: hidden;
+        }
+
+        /* Page wrapper */
+        .page-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-top: calc(var(--navbar-height) + 20px);
+        }
+
+        /* Main container */
+        .signup-page {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+            padding-bottom: 80px;
+        }
+
+        /* Background animé */
+        .signup-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
+            z-index: 0;
+        }
+
+        .animated-grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 102, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 102, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            animation: gridSlide 20s linear infinite;
+        }
+
+        @keyframes gridSlide {
+            0% { transform: translate(0, 0); }
+            100% { transform: translate(40px, 40px); }
+        }
+
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            animation: float 15s ease-in-out infinite;
+            opacity: 0.08;
+        }
+
+        .shape-1 {
+            width: 250px;
+            height: 250px;
+            background: var(--gradient-1);
+            top: 10%;
+            left: 5%;
+        }
+
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            background: var(--gradient-2);
+            bottom: 15%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+
+        .shape-3 {
+            width: 180px;
+            height: 180px;
+            background: linear-gradient(135deg, #00C48C 0%, #00D9FF 100%);
+            top: 50%;
+            right: 30%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(5deg); }
+            66% { transform: translate(-20px, 20px) rotate(-5deg); }
+        }
+
+        /* Left Panel - Welcome Section */
+        .welcome-panel {
+            flex: 0 0 40%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem 1.5rem;
+            position: relative;
+            z-index: 1;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.02) 0%, rgba(0, 217, 255, 0.02) 100%);
+        }
+
+        .welcome-content {
+            max-width: 550px;
+            text-align: center;
+            animation: fadeInLeft 0.8s ease-out;
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .logo-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .welcome-title {
+            font-size: clamp(1.8rem, 3.5vw, 2.5rem);
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.7rem;
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-subtitle {
+            font-size: 1rem;
+            color: var(--text-gray);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        /* Feature badges */
+        .feature-badges {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-top: 1.2rem;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.6rem 1.3rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            border: 2px solid rgba(0, 102, 255, 0.15);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .badge:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.2);
+        }
+
+        .badge-icon {
+            font-size: 1.2rem;
+        }
+
+        /* Stats */
+        .welcome-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid rgba(0, 102, 255, 0.1);
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.3rem;
+            font-family: 'Space Mono', monospace;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-gray);
+            font-weight: 500;
+        }
+
+        /* Right Panel - Form Section */
+        .form-panel {
+            flex: 0 0 60%;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 2rem 2.5rem;
+            position: relative;
+            z-index: 1;
+            overflow-y: auto;
+            max-height: calc(100vh - var(--navbar-height) - 100px);
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 650px;
+            animation: fadeInRight 0.8s ease-out 0.2s backwards;
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Carte de signup */
+        .signup-card {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 102, 255, 0.15);
+            border-radius: 20px;
+            padding: 2rem 2.5rem;
+            box-shadow: 
+                0 20px 60px rgba(0, 102, 255, 0.15),
+                0 0 0 1px rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(20px);
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 0.3rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        /* Tabs - Account Type Selection */
+        .tabs {
+            display: flex;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            background: rgba(0, 102, 255, 0.05);
+            padding: 0.4rem;
+            border-radius: 12px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 0.9rem 1.2rem;
+            background: transparent;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .tab-icon {
+            font-size: 1.5rem;
+        }
+
+        .tab:hover {
+            background: rgba(0, 102, 255, 0.08);
+            color: var(--primary);
+        }
+
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0, 102, 255, 0.15);
+        }
+
+        /* Forms */
+        .signup-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .form-hidden {
+            display: none;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .label-required {
+            color: var(--accent);
+        }
+
+        .label-icon {
+            font-size: 1rem;
+        }
+
+        .form-input,
+        .form-select,
+        .form-textarea {
+            width: 100%;
+            padding: 0.9rem 1rem;
+            background: rgba(240, 246, 255, 0.5);
+            border: 2px solid rgba(0, 102, 255, 0.1);
+            border-radius: 10px;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.9rem;
+            color: var(--text-dark);
+            transition: all 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-select:focus,
+        .form-textarea:focus {
+            outline: none;
+            background: white;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: var(--text-gray);
+            opacity: 0.6;
+        }
+
+        .form-select {
+            cursor: pointer;
+        }
+
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        /* File upload */
+        .file-upload-wrapper {
+            position: relative;
+        }
+
+        .file-upload-input {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+            padding: 1rem;
+            background: rgba(240, 246, 255, 0.5);
+            border: 2px dashed rgba(0, 102, 255, 0.3);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-gray);
+            font-size: 0.85rem;
+        }
+
+        .file-upload-label:hover {
+            background: rgba(0, 102, 255, 0.05);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .file-upload-label.has-file {
+            background: rgba(0, 200, 140, 0.05);
+            border-color: var(--success);
+            color: var(--success);
+            border-style: solid;
+        }
+
+        .file-name {
+            font-weight: 600;
+        }
+
+        /* Help text */
+        .help-text {
+            font-size: 0.75rem;
+            color: var(--text-gray);
+            margin-top: -0.3rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Outfit', sans-serif;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.6rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 102, 255, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(0, 102, 255, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-primary:hover:not(:disabled) .btn-icon {
+            transform: translateX(5px);
+        }
+
+        /* Login link */
+        .login-link {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--text-gray);
+        }
+
+        .login-link a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        .login-link a:hover {
+            color: var(--secondary);
+        }
+
+        /* Success Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(26, 43, 95, 0.8);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 30px 80px rgba(0, 102, 255, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            margin-bottom: 1rem;
+        }
+
+        .modal-text {
+            font-size: 1rem;
+            color: var(--text-gray);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+        }
+
+        .modal-highlight {
+            background: rgba(0, 102, 255, 0.05);
+            border-left: 4px solid var(--primary);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1.5rem 0;
+            text-align: left;
+        }
+
+        .modal-highlight-title {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .modal-highlight-text {
+            font-size: 0.85rem;
+            color: var(--text-gray);
+        }
+
+        /* Footer */
+        .page-footer {
+            width: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            border-top: 1px solid rgba(0, 102, 255, 0.1);
+            padding: 1rem 2rem;
+            text-align: center;
+            color: var(--text-gray);
+            font-size: 0.8rem;
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .welcome-panel {
+                flex: 0 0 35%;
+            }
+            
+            .form-panel {
+                flex: 0 0 65%;
+            }
+        }
+
+        @media (max-width: 968px) {
+            .page-wrapper {
+                padding-top: 85px;
+            }
+
+            .signup-page {
+                flex-direction: column;
+                padding-bottom: 0;
+            }
+
+            .welcome-panel,
+            .form-panel {
+                flex: 1 1 auto;
+            }
+
+            .welcome-panel {
+                padding: 2rem 1.5rem 1.5rem;
+            }
+
+            .form-panel {
+                padding: 1.5rem;
+                max-height: none;
+                overflow-y: visible;
+            }
+
+            .signup-card {
+                padding: 1.8rem;
+            }
+
+            .welcome-stats {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .signup-card {
+                padding: 1.5rem;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .page-footer {
+                padding: 1rem 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .welcome-title {
+                font-size: 1.5rem;
+            }
+            
+            .welcome-subtitle {
+                font-size: 0.9rem;
+            }
+
+            .feature-badges {
+                flex-direction: column;
+            }
+
+            .badge {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-wrapper">
+        <div class="signup-page">
+            <!-- Background animé -->
+            <div class="signup-background">
+                <div class="animated-grid"></div>
+                <div class="floating-shapes">
+                    <div class="shape shape-1"></div>
+                    <div class="shape shape-2"></div>
+                    <div class="shape shape-3"></div>
+                </div>
+            </div>
+
+            <!-- Left Panel - Welcome Section -->
+            <div class="welcome-panel">
+                <div class="welcome-content">
+                    <div class="logo-icon">🥽</div>
+                    <h1 class="welcome-title">
+                        Rejoignez <br>
+                        <span class="gradient-text">SurgeryVR</span>
+                    </h1>
+                    <p class="welcome-subtitle">
+                        Créez votre compte et accédez à la meilleure plateforme de formation médicale en réalité virtuelle
+                    </p>
+
+                    <!-- Feature Badges -->
+                    <div class="feature-badges">
+                        <div class="badge">
+                            <span class="badge-icon">✨</span>
+                            <span>Formation innovante</span>
+                        </div>
+                        <div class="badge">
+                            <span class="badge-icon">🎓</span>
+                            <span>Certification officielle</span>
+                        </div>
+                        <div class="badge">
+                            <span class="badge-icon">🌍</span>
+                            <span>Communauté mondiale</span>
+                        </div>
+                    </div>
+
+                    <!-- Stats -->
+                    <div class="welcome-stats">
+                        <div class="stat-item">
+                            <div class="stat-number">15k+</div>
+                            <div class="stat-label">Professionnels</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">500+</div>
+                            <div class="stat-label">Scénarios VR</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number">98%</div>
+                            <div class="stat-label">Taux de réussite</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Form Section -->
+            <div class="form-panel">
+                <div class="form-container">
+                    <!-- Carte de signup -->
+                    <div class="signup-card">
+                        <!-- Header -->
+                        <div class="card-header">
+                            <h2 class="card-title">Créez votre compte</h2>
+                            <p class="card-subtitle">Sélectionnez votre profil pour commencer</p>
+                        </div>
+
+                        <!-- Account Type Tabs -->
+                        <div class="tabs">
+                            <button class="tab active" data-tab="doctor" onclick="switchTab('doctor')">
+                                <span class="tab-icon">🩺</span>
+                                <span>Médecin</span>
+                            </button>
+                            <button class="tab" data-tab="student" onclick="switchTab('student')">
+                                <span class="tab-icon">🎓</span>
+                                <span>Étudiant</span>
+                            </button>
+                        </div>
+
+                        <!-- FORMULAIRE MÉDECIN -->
+                        <form id="doctorForm" class="signup-form" onsubmit="handleSubmit(event, 'doctor')">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="doctor-firstname">
+                                        <span class="label-icon">👤</span>
+                                        Prénom <span class="label-required">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="doctor-firstname"
+                                        class="form-input"
+                                        placeholder="Votre prénom"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="doctor-lastname">
+                                        <span class="label-icon">👤</span>
+                                        Nom <span class="label-required">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="doctor-lastname"
+                                        class="form-input"
+                                        placeholder="Votre nom"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctor-email">
+                                    <span class="label-icon">📧</span>
+                                    Email professionnel <span class="label-required">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="doctor-email"
+                                    class="form-input"
+                                    placeholder="dr.nom@hopital.tn"
+                                    required>
+                                <p class="help-text">Utilisez votre adresse email professionnelle</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctor-order-number">
+                                    <span class="label-icon">🆔</span>
+                                    Numéro d'inscription à l'Ordre des Médecins <span class="label-required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="doctor-order-number"
+                                    class="form-input"
+                                    placeholder="Ex: 12345/2024"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctor-document">
+                                    <span class="label-icon">📄</span>
+                                    Carte professionnelle / Attestation <span class="label-required">*</span>
+                                </label>
+                                <div class="file-upload-wrapper">
+                                    <input 
+                                        type="file" 
+                                        id="doctor-document"
+                                        class="file-upload-input"
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        onchange="handleFileUpload(this, 'doctor')"
+                                        required>
+                                    <label for="doctor-document" class="file-upload-label" id="doctor-file-label">
+                                        <span>📎</span>
+                                        <span>Cliquez pour télécharger (PDF, JPG, PNG)</span>
+                                    </label>
+                                </div>
+                                <p class="help-text">Document justifiant votre statut de médecin</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctor-specialty">
+                                    <span class="label-icon">⚕️</span>
+                                    Spécialité <span class="label-required">*</span>
+                                </label>
+                                <select id="doctor-specialty" class="form-select" required>
+                                    <option value="">Sélectionnez votre spécialité</option>
+                                    <option value="chirurgie-generale">Chirurgie générale</option>
+                                    <option value="orthopédie">Orthopédie</option>
+                                    <option value="neurochirurgie">Neurochirurgie</option>
+                                    <option value="chirurgie-cardiaque">Chirurgie cardiaque</option>
+                                    <option value="chirurgie-vasculaire">Chirurgie vasculaire</option>
+                                    <option value="chirurgie-thoracique">Chirurgie thoracique</option>
+                                    <option value="urologie">Urologie</option>
+                                    <option value="ophtalmologie">Ophtalmologie</option>
+                                    <option value="orl">ORL</option>
+                                    <option value="chirurgie-plastique">Chirurgie plastique et reconstructrice</option>
+                                    <option value="autre">Autre</option>
+                                </select>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="doctor-hospital">
+                                        <span class="label-icon">🏥</span>
+                                        Établissement <span class="label-required">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="doctor-hospital"
+                                        class="form-input"
+                                        placeholder="Hôpital / Clinique"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="doctor-city">
+                                        <span class="label-icon">📍</span>
+                                        Ville <span class="label-required">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="doctor-city"
+                                        class="form-input"
+                                        placeholder="Tunis"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctor-motivation">
+                                    <span class="label-icon">💡</span>
+                                    Objectif d'utilisation <span class="label-required">*</span>
+                                </label>
+                                <textarea 
+                                    id="doctor-motivation"
+                                    class="form-textarea"
+                                    placeholder="Décrivez brièvement pourquoi vous souhaitez utiliser SurgeryVR (formation continue, enseignement, pratique...)"
+                                    required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="doctor-password">
+                                    <span class="label-icon">🔒</span>
+                                    Mot de passe <span class="label-required">*</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    id="doctor-password"
+                                    class="form-input"
+                                    placeholder="••••••••"
+                                    minlength="8"
+                                    required>
+                                <p class="help-text">Minimum 8 caractères</p>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <span class="btn-text">Créer mon compte médecin</span>
+                                <span class="btn-icon">→</span>
+                            </button>
+                        </form>
+
+                        <!-- FORMULAIRE ÉTUDIANT -->
+                        <form id="studentForm" class="signup-form form-hidden" onsubmit="handleSubmit(event, 'student')">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="student-firstname">
+                                        <span class="label-icon">👤</span>
+                                        Prénom <span class="label-required">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="student-firstname"
+                                        class="form-input"
+                                        placeholder="Votre prénom"
+                                        required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="student-lastname">
+                                        <span class="label-icon">👤</span>
+                                        Nom <span class="label-required">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="student-lastname"
+                                        class="form-input"
+                                        placeholder="Votre nom"
+                                        required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-email">
+                                    <span class="label-icon">📧</span>
+                                    Email universitaire <span class="label-required">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    id="student-email"
+                                    class="form-input"
+                                    placeholder="prenom.nom@medecine.rnu.tn"
+                                    required>
+                                <p class="help-text">Utilisez votre adresse email universitaire</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-university">
+                                    <span class="label-icon">🎓</span>
+                                    Université / Faculté <span class="label-required">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="student-university"
+                                    class="form-input"
+                                    placeholder="Ex: Faculté de Médecine de Tunis"
+                                    required>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-document">
+                                    <span class="label-icon">📄</span>
+                                    Carte étudiant / Certificat de scolarité <span class="label-required">*</span>
+                                </label>
+                                <div class="file-upload-wrapper">
+                                    <input 
+                                        type="file" 
+                                        id="student-document"
+                                        class="file-upload-input"
+                                        accept=".pdf,.jpg,.jpeg,.png"
+                                        onchange="handleFileUpload(this, 'student')"
+                                        required>
+                                    <label for="student-document" class="file-upload-label" id="student-file-label">
+                                        <span>📎</span>
+                                        <span>Cliquez pour télécharger (PDF, JPG, PNG)</span>
+                                    </label>
+                                </div>
+                                <p class="help-text">Document justifiant votre statut d'étudiant</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-year">
+                                    <span class="label-icon">📚</span>
+                                    Année d'étude <span class="label-required">*</span>
+                                </label>
+                                <select id="student-year" class="form-select" required>
+                                    <option value="">Sélectionnez votre année</option>
+                                    <option value="1ere-annee">1ère année (PACES/PASS)</option>
+                                    <option value="2eme-annee">2ème année</option>
+                                    <option value="3eme-annee">3ème année</option>
+                                    <option value="4eme-annee">4ème année</option>
+                                    <option value="5eme-annee">5ème année</option>
+                                    <option value="6eme-annee">6ème année</option>
+                                    <option value="externat">Externat</option>
+                                    <option value="internat">Internat</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-supervisor">
+                                    <span class="label-icon">👨‍⚕️</span>
+                                    Encadrant / Responsable pédagogique
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="student-supervisor"
+                                    class="form-input"
+                                    placeholder="Pr. Nom Prénom (optionnel)">
+                                <p class="help-text">Nom d'un professeur ou responsable (optionnel)</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-objective">
+                                    <span class="label-icon">🎯</span>
+                                    Objectif d'utilisation <span class="label-required">*</span>
+                                </label>
+                                <textarea 
+                                    id="student-objective"
+                                    class="form-textarea"
+                                    placeholder="Décrivez brièvement vos objectifs (apprentissage, préparation aux stages, recherche...)"
+                                    required></textarea>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="student-password">
+                                    <span class="label-icon">🔒</span>
+                                    Mot de passe <span class="label-required">*</span>
+                                </label>
+                                <input 
+                                    type="password" 
+                                    id="student-password"
+                                    class="form-input"
+                                    placeholder="••••••••"
+                                    minlength="8"
+                                    required>
+                                <p class="help-text">Minimum 8 caractères</p>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-full">
+                                <span class="btn-text">Créer mon compte étudiant</span>
+                                <span class="btn-icon">→</span>
+                            </button>
+                        </form>
+
+                        <!-- Login Link -->
+                        <div class="login-link">
+                            Vous avez déjà un compte ? 
+                            <a href="login.html">Connectez-vous ici</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="page-footer">
+            <div class="footer-content">
+                <p>© 2026 SurgeryVR. Tous droits réservés.</p>
+            </div>
+        </footer>
     </div>
 
-    <div class="demo-hero-content">
-      <h1>
-        Demandez Votre <span class="gradient-text">Démo Gratuite</span>
-      </h1>
-      <p>
-        Complétez le formulaire ci-dessous et notre équipe vous contactera dans
-        les 24 heures
-      </p>
-    </div>
-  </section>
-
-  <!-- Form Section -->
-  <section class="form-section">
-    <div class="form-container">
-      <!-- Progress Bar -->
-      <div class="progress-container" *ngIf="!showSuccessMessage">
-        <div class="progress-bar">
-          <div class="progress-fill" [style.width.%]="progressPercentage"></div>
-        </div>
-        <div class="progress-steps">
-          <div
-            *ngFor="let step of [1, 2, 3, 4, 5]"
-            class="progress-step"
-            [class.active]="isStepActive(step)"
-            [class.completed]="isStepCompleted(step)"
-            (click)="navigateToStep(step)"
-            [style.cursor]="step <= currentStep ? 'pointer' : 'default'"
-          >
-            <div class="step-circle">{{ step }}</div>
-            <span class="step-label" [ngSwitch]="step">
-              <ng-container *ngSwitchCase="1">Profil</ng-container>
-              <ng-container *ngSwitchCase="2">Intérêt</ng-container>
-              <ng-container *ngSwitchCase="3">Objectif</ng-container>
-              <ng-container *ngSwitchCase="4">Contact</ng-container>
-              <ng-container *ngSwitchCase="5">Message</ng-container>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Form Steps -->
-      <form [formGroup]="demoForm" (ngSubmit)="onSubmit()" *ngIf="!showSuccessMessage">
-        
-        <!-- Step 1: Profil de l'établissement -->
-        <div class="form-step" *ngIf="currentStep === 1" >
-          <div class="step-header">
-            <div class="step-icon">🏥</div>
-            <h2>Profil de Votre Établissement</h2>
-            <p>Parlez-nous de votre organisation</p>
-          </div>
-
-          <div class="form-fields">
-            <!-- Message de validation -->
-            <div class="validation-alert" *ngIf="validationMessage">
-              {{ validationMessage }}
-            </div>
-
-            <div class="form-group">
-              <label for="establishmentType">Type d'établissement *</label>
-              <select
-                id="establishmentType"
-                formControlName="establishmentType"
-                [class.error]="hasError('establishmentType')"
-              >
-                <option *ngFor="let type of establishmentTypes" [value]="type.value">
-                  {{ type.label }}
-                </option>
-              </select>
-              <div class="error-message" *ngIf="hasError('establishmentType')">
-                {{ getErrorMessage('establishmentType') }}
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="country">Pays *</label>
-                <input
-                  type="text"
-                  id="country"
-                  formControlName="country"
-                  placeholder="Ex: France"
-                  [class.error]="hasError('country')"
-                />
-                <div class="error-message" *ngIf="hasError('country')">
-                  {{ getErrorMessage('country') }}
+    <!-- Success Modal -->
+    <div class="modal-overlay" id="successModal">
+        <div class="modal-content">
+            <div class="modal-icon">✅</div>
+            <h3 class="modal-title">Inscription réussie !</h3>
+            <p class="modal-text">
+                Votre demande de création de compte a bien été reçue.
+            </p>
+            <div class="modal-highlight">
+                <div class="modal-highlight-title">⏳ Étape suivante</div>
+                <div class="modal-highlight-text">
+                    Votre compte est en attente de validation par notre équipe. 
+                    Vous recevrez un email de confirmation une fois votre compte activé.
+                    Ce processus prend généralement 24 à 48 heures.
                 </div>
-              </div>
-              <div class="form-group">
-                <label for="city">Ville *</label>
-                <input
-                  type="text"
-                  id="city"
-                  formControlName="city"
-                  placeholder="Ex: Paris"
-                  [class.error]="hasError('city')"
-                />
-                <div class="error-message" *ngIf="hasError('city')">
-                  {{ getErrorMessage('city') }}
-                </div>
-              </div>
             </div>
-          </div>
-
-          <div class="form-navigation">
-            <button type="button" class="btn btn-next" (click)="nextStep()">
-              Suivant →
+            <button class="btn btn-primary btn-full" onclick="closeModal()">
+                <span class="btn-text">Compris</span>
+                <span class="btn-icon">✓</span>
             </button>
-          </div>
         </div>
-
-        <!-- Step 2: Domaine d'intérêt -->
-        <div class="form-step" *ngIf="currentStep === 2" >
-          <div class="step-header">
-            <div class="step-icon">🎯</div>
-            <h2>Domaine Principal d'Intérêt</h2>
-            <p>Quelle spécialité vous intéresse le plus ?</p>
-          </div>
-
-          <div class="form-fields">
-            <!-- Message de validation -->
-            <div class="validation-alert" *ngIf="validationMessage">
-              {{ validationMessage }}
-            </div>
-
-            <div class="radio-cards">
-              <label
-                *ngFor="let domain of domains"
-                class="radio-card"
-                [class.selected]="demoForm.get('domain')?.value === domain.value"
-              >
-                <input
-                  type="radio"
-                  formControlName="domain"
-                  [value]="domain.value"
-                />
-                <div class="radio-card-content">
-                  <div class="radio-icon">{{ domain.icon }}</div>
-                  <h3>{{ domain.title }}</h3>
-                  <p>{{ domain.description }}</p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div class="form-navigation">
-            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
-              ← Précédent
-            </button>
-            <button type="button" class="btn btn-next" (click)="nextStep()">
-              Suivant →
-            </button>
-          </div>
-        </div>
-
-        <!-- Step 3: Objectif principal -->
-        <div class="form-step" *ngIf="currentStep === 3" >
-          <div class="step-header">
-            <div class="step-icon">🎯</div>
-            <h2>Objectif Principal</h2>
-            <p>Que souhaitez-vous accomplir avec notre solution ?</p>
-          </div>
-
-          <div class="form-fields">
-            <!-- Message de validation -->
-            <div class="validation-alert" *ngIf="validationMessage">
-              {{ validationMessage }}
-            </div>
-
-            <div class="checkbox-cards">
-              <label
-                *ngFor="let objective of objectives"
-                class="checkbox-card"
-                [class.selected]="isObjectiveSelected(objective.value)"
-              >
-                <input
-                  type="checkbox"
-                  [checked]="isObjectiveSelected(objective.value)"
-                  (change)="onObjectiveChange(objective.value, $any($event.target).checked)"
-                />
-                <div class="checkbox-card-content">
-                  <div class="checkbox-icon">{{ objective.icon }}</div>
-                  <h3>{{ objective.title }}</h3>
-                  <p>{{ objective.description }}</p>
-                </div>
-              </label>
-            </div>
-          </div>
-
-          <div class="form-navigation">
-            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
-              ← Précédent
-            </button>
-            <button type="button" class="btn btn-next" (click)="nextStep()">
-              Suivant →
-            </button>
-          </div>
-        </div>
-
-        <!-- Step 4: Informations de contact -->
-        <div class="form-step" *ngIf="currentStep === 4" >
-          <div class="step-header">
-            <div class="step-icon">📞</div>
-            <h2>Informations de Contact</h2>
-            <p>Comment pouvons-nous vous joindre ?</p>
-          </div>
-
-          <div class="form-fields">
-            <!-- Message de validation -->
-            <div class="validation-alert" *ngIf="validationMessage">
-              {{ validationMessage }}
-            </div>
-
-            <div class="form-group">
-              <label for="institutionName">Nom de l'Institution *</label>
-              <input
-                type="text"
-                id="institutionName"
-                formControlName="institutionName"
-                placeholder="Ex: Hôpital Universitaire de Paris"
-                [class.error]="hasError('institutionName')"
-              />
-              <div class="error-message" *ngIf="hasError('institutionName')">
-                {{ getErrorMessage('institutionName') }}
-              </div>
-            </div>
-
-            <div class="form-row">
-              <div class="form-group">
-                <label for="email">Email *</label>
-                <input
-                  type="email"
-                  id="email"
-                  formControlName="email"
-                  placeholder="votre.email@institution.fr"
-                  [class.error]="hasError('email')"
-                />
-                <div class="error-message" *ngIf="hasError('email')">
-                  {{ getErrorMessage('email') }}
-                </div>
-              </div>
-              <div class="form-group">
-                <label for="phone">Téléphone *</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  formControlName="phone"
-                  placeholder="+33 1 23 45 67 89"
-                  [class.error]="hasError('phone')"
-                />
-                <div class="error-message" *ngIf="hasError('phone')">
-                  {{ getErrorMessage('phone') }}
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group">
-              <label for="contactName">Nom du Contact</label>
-              <input
-                type="text"
-                id="contactName"
-                formControlName="contactName"
-                placeholder="Prénom Nom"
-              />
-            </div>
-
-            <div class="form-group">
-              <label for="position">Fonction</label>
-              <input
-                type="text"
-                id="position"
-                formControlName="position"
-                placeholder="Ex: Directeur de Formation"
-              />
-            </div>
-          </div>
-
-          <div class="form-navigation">
-            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
-              ← Précédent
-            </button>
-            <button type="button" class="btn btn-next" (click)="nextStep()">
-              Suivant →
-            </button>
-          </div>
-        </div>
-
-        <!-- Step 5: Message libre -->
-        <div class="form-step" *ngIf="currentStep === 5" >
-          <div class="step-header">
-            <div class="step-icon">💬</div>
-            <h2>Parlez-nous de Vos Besoins</h2>
-            <p>Décrivez brièvement votre projet et vos attentes</p>
-          </div>
-
-          <div class="form-fields">
-            <!-- Message de validation -->
-            <div class="validation-alert" *ngIf="validationMessage">
-              {{ validationMessage }}
-            </div>
-
-            <div class="form-group">
-              <label for="message">Votre Message</label>
-              <textarea
-                id="message"
-                formControlName="message"
-                rows="8"
-                placeholder="Décrivez vos besoins spécifiques, le nombre d'utilisateurs potentiels, vos contraintes ou toute autre information pertinente..."
-              ></textarea>
-            </div>
-
-            <div class="form-group checkbox-group">
-              <label class="checkbox-label">
-                <input type="checkbox" formControlName="newsletter" />
-                <span
-                  >Je souhaite recevoir des actualités et ressources de
-                  SurgeryVR Solutions</span
-                >
-              </label>
-            </div>
-
-            <div class="form-group checkbox-group">
-              <label class="checkbox-label">
-                <input type="checkbox" formControlName="privacy" />
-                <span
-                  >J'accepte la politique de confidentialité et le traitement
-                  de mes données *</span
-                >
-              </label>
-              <div class="error-message" *ngIf="hasError('privacy')">
-                {{ getErrorMessage('privacy') }}
-              </div>
-            </div>
-          </div>
-
-          <div class="form-navigation">
-            <button type="button" class="btn btn-secondary btn-prev" (click)="prevStep()">
-              ← Précédent
-            </button>
-            <button type="submit" class="btn btn-primary btn-submit">
-              Envoyer ma Demande 🚀
-            </button>
-          </div>
-        </div>
-      </form>
-
-      <!-- Success Message -->
-      <div class="success-message" *ngIf="showSuccessMessage" >
-        <div class="success-icon">✓</div>
-        <h2>Demande Envoyée avec Succès !</h2>
-        <p>
-          Merci pour votre intérêt. Notre équipe vous contactera dans les 24
-          heures.
-        </p>
-        <button class="btn btn-primary" (click)="goHome()">
-          Retour à l'accueil
-        </button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <div class="footer-content">
-      <div class="footer-section">
-        <h3>SurgeryVR Solutions</h3>
-        <p style="color: #5a6b8c; line-height: 1.7">
-          Pionnier de la formation médicale en réalité virtuelle.
-        </p>
-      </div>
-
-      <div class="footer-section">
-        <h3>Contact</h3>
-        <ul>
-          <li>
-            <a href="mailto:inheritedgames@gmail.com"
-              >inheritedgames@gmail.com</a
-            >
-          </li>
-          <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
-        </ul>
-      </div>
     </div>
 
-    <div class="footer-bottom">
-      <p>© 2026 SurgeryVR Solutions. Tous droits réservés.</p>
-    </div>
-  </footer>
+    <script>
+        // Switch between doctor and student forms
+        function switchTab(type) {
+            // Update tabs
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.tab === type) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Update forms
+            const doctorForm = document.getElementById('doctorForm');
+            const studentForm = document.getElementById('studentForm');
+
+            if (type === 'doctor') {
+                doctorForm.classList.remove('form-hidden');
+                studentForm.classList.add('form-hidden');
+                // Clear student form required when hidden
+                studentForm.querySelectorAll('[required]').forEach(input => {
+                    input.removeAttribute('required');
+                });
+                // Add required back to doctor form
+                doctorForm.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.id !== 'doctor-supervisor' && input.type !== 'file') {
+                        input.setAttribute('required', 'required');
+                    }
+                });
+            } else {
+                studentForm.classList.remove('form-hidden');
+                doctorForm.classList.add('form-hidden');
+                // Clear doctor form required when hidden
+                doctorForm.querySelectorAll('[required]').forEach(input => {
+                    input.removeAttribute('required');
+                });
+                // Add required back to student form
+                studentForm.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.id !== 'student-supervisor' && input.type !== 'file') {
+                        input.setAttribute('required', 'required');
+                    }
+                });
+            }
+        }
+
+        // Handle file upload display
+        function handleFileUpload(input, type) {
+            const label = document.getElementById(`${type}-file-label`);
+            if (input.files && input.files[0]) {
+                const fileName = input.files[0].name;
+                label.classList.add('has-file');
+                label.innerHTML = `
+                    <span>✓</span>
+                    <span class="file-name">${fileName}</span>
+                `;
+            }
+        }
+
+        // Handle form submission
+        function handleSubmit(event, type) {
+            event.preventDefault();
+            
+            // Here you would normally send the data to your backend
+            console.log(`Submitting ${type} form...`);
+            
+            // Show success modal
+            document.getElementById('successModal').classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('successModal').classList.remove('active');
+            // Optionally redirect to login page
+            // window.location.href = 'login.html';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('successModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // Initialize with doctor form
+        document.addEventListener('DOMContentLoaded', function() {
+            switchTab('doctor');
+        });
+    </script>
+</body>
+</html>
