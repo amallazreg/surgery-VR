@@ -7,6 +7,8 @@ const userRoute = require('./routes/userRoutes');
 const demandeDemoRoutes = require('./routes/demandeDemo');
 const demandeDevisRoutes = require('./routes/demandeDevis') ; 
 const experienceSurMesureRoutes = require('./routes/experienceSurMesure') ; 
+const authRoute = require('./routes/authRoutes'); 
+const adminRoute = require('./routes/adminRoutes') ; 
 
 
 const app = express();
@@ -48,6 +50,8 @@ app.use('/user', userRoute);
 app.use('/demande',demandeDemoRoutes); 
 app.use('/demande',demandeDevisRoutes); 
 app.use('/demande',experienceSurMesureRoutes) ; 
+app.use('/auth',authRoute) ; 
+app.use('/admin',adminRoute)
 
 
 // Démarrage du serveur

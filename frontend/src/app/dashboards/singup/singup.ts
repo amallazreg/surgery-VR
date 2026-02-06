@@ -2,11 +2,12 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Navbar } from "../../layout/navbar/navbar";
 
 @Component({
   selector: 'app-singup',
   standalone : true ,
-  imports: [CommonModule,FormsModule,ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar],
   templateUrl: './singup.html',
   styleUrl: './singup.css',
 })
