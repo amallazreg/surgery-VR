@@ -4,6 +4,8 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 
 const userRoute = require('./routes/userRoutes');
+const demandeDemoRoutes = require('./routes/demandeDemo');
+
 
 
 const app = express();
@@ -42,6 +44,7 @@ app.get('/', (req, res) => {
 });
 
 app.use('/user', userRoute); 
+app.use('/demande',demandeDemoRoutes); 
 
 // Démarrage du serveur
 const port = process.env.PORT || 3000;

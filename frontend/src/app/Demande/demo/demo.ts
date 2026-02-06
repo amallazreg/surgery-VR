@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Navbar } from "../../layout/navbar/navbar";
 import { Router } from '@angular/router';
+import { DemandesService } from '../../services/demandes-service';
 
 interface WizardStep {
   id: number;
@@ -94,7 +95,7 @@ export class Demo implements OnInit {
     console.log('✅ Demo component initialized');
   }
 
-  constructor(private router : Router) {}
+  constructor(private router : Router,private demandeDemoService: DemandesService) {}
 
   // Obtenir l'étape actuelle
   get currentStep(): WizardStep {
@@ -296,26 +297,37 @@ export class Demo implements OnInit {
   }
 
   // Soumettre le formulaire
-  onSubmitForm(): void {
-    console.log('📤 Attempting to submit form...');
+onSubmitForm() {
+  const payload = {
+    typeEtablissement: this.formData.establishmentType,
+    pays: this.formData.country,
+    ville: this.formData.city,
 
-    if (this.validateCurrentStep()) {
-      console.log('✅ Final validation passed');
-      console.log('📦 Form data to submit:', this.formData);
+    domaineInteret: this.formData.interest,
 
-      // Marquer la dernière étape comme complétée
-      this.steps[this.currentStepIndex].isCompleted = true;
+    objectifs: this.formData.objectives,
 
-      // Simuler l'envoi du formulaire
-      setTimeout(() => {
-        this.showSuccessMessage = true;
-        this.scrollToWizard();
-        console.log('🎉 Form submitted successfully!');
-      }, 500);
-    } else {
-      console.log('❌ Final validation failed');
+    nomInstitution: this.formData.institutionName,
+    emailProfessionnel: this.formData.email,
+    telephone: this.formData.phone,
+
+    message: this.formData.message,
+    consentement: this.formData.consent
+  };
+
+  this.demandeDemoService.envoyerDemandeDemo(payload).subscribe({
+    next: (res) => {
+      console.log('Demande envoyée:', res);
+      this.showSuccessMessage = true;
+    },
+    error: (err) => {
+      console.error('Erreur envoi:', err);
+      this.errorMsg = "Erreur lors de l'envoi de la demande.";
     }
-  }
+  });
+}
+
+
 
   // Vérifier si une étape est active
   isStepActive(stepIndex: number): boolean {

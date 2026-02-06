@@ -6,11 +6,13 @@ import { Demo } from './Demande/demo/demo';
 import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
 import { Devis } from './Demande/devis/devis';
 import { ExperienceSurMesure } from './Demande/experience-sur-mesure/experience-sur-mesure';
+import { Singup } from './dashboards/singup/singup';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
       { path: '', redirectTo: 'landingPage', pathMatch: 'full' },
       { path: 'signin', component: Signin },
+      { path: 'signup', component: Singup },
       { path: 'test', component : Test },
       { path: 'demanderDemo', component : Demo },
       {path: 'admin/dashboard', component: AdminDashboard},
