@@ -1,0 +1,261 @@
+
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar (à inclure depuis votre composant) -->
+     <app-side-bar></app-side-bar>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <h2>Gestion des Comptes 👥</h2>
+          <p>Gérez et validez les demandes d'inscription</p>
+        </div>
+        <div class="header-right">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Rechercher par nom, email, établissement...">
+          </div>
+          <div class="user-profile">
+            <div class="avatar">AD</div>
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem;">Admin</div>
+              <div style="font-size: 0.85rem; color: #5A6B8C;">Gestionnaire</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card stat-pending" style="animation-delay: 0.1s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-pending">⏳</div>
+            <div class="stat-change neutral">
+              <span id="pendingCount">0</span>
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalPending">0</div>
+            <div class="stat-label">En attente</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-approved" style="animation-delay: 0.2s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-approved">✅</div>
+            <div class="stat-change positive">
+              ↗ +15%
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalApproved">0</div>
+            <div class="stat-label">Approuvés</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-rejected" style="animation-delay: 0.3s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-rejected">❌</div>
+            <div class="stat-change negative">
+              ↘ -5%
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalRejected">0</div>
+            <div class="stat-label">Rejetés</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-total" style="animation-delay: 0.4s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-total">📊</div>
+            <div class="stat-change positive">
+              ↗ +12%
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalUsers">0</div>
+            <div class="stat-label">Total Comptes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-section">
+        <div class="filter-tabs">
+          <button class="filter-tab active" data-filter="tous">
+            <span class="tab-icon">📋</span>
+            <span class="tab-text">Tous</span>
+            <span class="tab-badge" id="badge-tous">0</span>
+          </button>
+          <button class="filter-tab" data-filter="en_attente">
+            <span class="tab-icon">⏳</span>
+            <span class="tab-text">En attente</span>
+            <span class="tab-badge pending" id="badge-attente">0</span>
+          </button>
+          <button class="filter-tab" data-filter="approuve">
+            <span class="tab-icon">✅</span>
+            <span class="tab-text">Approuvés</span>
+            <span class="tab-badge approved" id="badge-approuve">0</span>
+          </button>
+          <button class="filter-tab" data-filter="rejete">
+            <span class="tab-icon">❌</span>
+            <span class="tab-text">Rejetés</span>
+            <span class="tab-badge rejected" id="badge-rejete">0</span>
+          </button>
+        </div>
+
+        <div class="filter-actions">
+          <select class="filter-select" id="roleFilter">
+            <option value="tous">Tous les rôles</option>
+            <option value="medecin">Médecins</option>
+            <option value="etudiant">Étudiants</option>
+          </select>
+          <button class="btn btn-primary" id="refreshBtn">
+            <span class="refresh-icon">🔄</span>
+            Actualiser
+          </button>
+        </div>
+      </div>
+
+      <!-- Users Table -->
+      <div class="section-card table-section">
+        <div class="table-header">
+          <h3 class="section-title">Liste des Comptes</h3>
+          <div class="table-actions">
+            <button class="btn btn-secondary" id="exportBtn">
+              📥 Exporter CSV
+            </button>
+          </div>
+        </div>
+
+       <div class="table-container" *ngIf="allUsers.length; else emptyState">
+  <table id="usersTable">
+    <thead>
+      <tr>
+        <th>
+          <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleSelectAll()">
+        </th>
+        <th>Utilisateur</th>
+        <th>Contact</th>
+        <th>Rôle</th>
+        <th>Établissement</th>
+        <th>Date d'inscription</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of filteredUsers">
+        <td>
+          <input type="checkbox" [(ngModel)]="user.selected" (change)="toggleUserSelection(user)">
+        </td>
+        <td>{{ user.prenom }} {{ user.nom }}</td>
+        <td>
+          <div>Email: {{ user.email }}</div>
+          <div *ngIf="user.phone">Tel: {{ user.phone }}</div>
+        </td>
+        <td>{{ user.role }}</td>
+        <td>
+          <span *ngIf="user.role === 'medecin'">{{ user.etablissement }}</span>
+          <span *ngIf="user.role === 'etudiant'">{{ user.universite }}</span>
+        </td>
+        <td>{{ user.createdAt | date:'short' }}</td>
+        <td>
+          <span [ngClass]="{
+            'badge-pending': user.statut === 'en_attente',
+            'badge-approved': user.statut === 'approuve',
+            'badge-rejected': user.statut === 'rejete'
+          }">{{ user.statut }}</span>
+        </td>
+        <td>
+          <button  [disabled]="user.statut !== 'en_attente'">Approuver</button>
+          <button  [disabled]="user.statut !== 'en_attente'">Rejeter</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<ng-template #emptyState>
+  <p>Aucun utilisateur disponible.</p>
+</ng-template>
+
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display: none;">
+          <div class="empty-icon">🔍</div>
+          <h3>Aucun compte trouvé</h3>
+          <p>Essayez de modifier vos filtres de recherche</p>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" id="loadingState">
+          <div class="spinner"></div>
+          <p>Chargement des comptes...</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination">
+        <button class="pagination-btn" id="prevPage" disabled>
+          ← Précédent
+        </button>
+        <div class="pagination-info" id="paginationInfo">
+          Page 1 sur 1
+        </div>
+        <button class="pagination-btn" id="nextPage" disabled>
+          Suivant →
+        </button>
+      </div>
+    </main>
+
+    <!-- Animated Background -->
+    <div class="bg-animated">
+      <div class="bg-circle"></div>
+      <div class="bg-circle"></div>
+      <div class="bg-circle"></div>
+    </div>
+  </div>
+
+  <!-- Modal de Détails -->
+  <div class="modal" id="detailsModal">
+    <div class="modal-overlay" id="modalOverlay"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3 id="modalTitle">Détails du Compte</h3>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <!-- Contenu dynamique -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Rejet -->
+  <div class="modal" id="rejectModal">
+    <div class="modal-overlay" id="rejectOverlay"></div>
+    <div class="modal-content modal-reject">
+      <div class="modal-header">
+        <h3>Rejeter le Compte</h3>
+        <button class="modal-close" id="rejectClose">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Motif du rejet *</label>
+          <textarea id="motifRefus" rows="4" placeholder="Expliquez la raison du rejet..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="cancelReject">Annuler</button>
+          <button class="btn btn-danger" id="confirmReject">Confirmer le Rejet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+</body>

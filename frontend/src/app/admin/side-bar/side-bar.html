@@ -1,0 +1,65 @@
+<aside class="sidebar">
+  <div class="logo">
+    <h1>
+      <div class="logo-icon">🥽</div>
+      MedVR Pro
+    </h1>
+  </div>
+  <nav>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a routerLink="/admin/dashboard" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+          <span class="nav-icon">📊</span>
+          <span>Tableau de bord</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/demo-requests" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">📝</span>
+          <span>Demandes Démo</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/quotes" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">💼</span>
+          <span>Devis & Sur-mesure</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/clients" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">👥</span>
+          <span>Comptes Clients</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/statistics" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">📈</span>
+          <span>Statistiques</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/leads" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">🎯</span>
+          <span>Leads</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/content" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">📄</span>
+          <span>Contenu du Site</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/admin/settings" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">⚙️</span>
+          <span>Paramètres</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>
+
+<!-- Mobile Toggle Button -->
+<button class="sidebar-toggle" (click)="toggleSidebar()">
+  <span>☰</span>
+</button>

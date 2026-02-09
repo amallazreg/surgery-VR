@@ -1,1 +1,406 @@
-<p>admin-dashboard works!</p>
+
+<div class="admin-layout">
+  <app-side-bar></app-side-bar>
+<!-- Main Content -->
+<main class="main-content">
+  <!-- Header -->
+  <header class="header">
+    <div class="header-left">
+      <h2>Bienvenue, Admin 👋</h2>
+      <p>Voici un aperçu de votre plateforme MedVR</p>
+    </div>
+    <div class="header-right">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" placeholder="Rechercher...">
+      </div>
+      <div class="user-profile">
+        <div class="avatar">AD</div>
+        <div>
+          <div style="font-weight: 600; font-size: 0.95rem;">Admin</div>
+          <div style="font-size: 0.85rem; color: var(--text-gray);">Gestionnaire</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Stats Grid -->
+  <div class="stats-grid">
+    <div class="stat-card" style="animation-delay: 0.1s;">
+      <div class="stat-header">
+        <div class="stat-icon stat-icon-1">📋</div>
+        <div class="stat-change positive">
+          ↗ +12%
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value">47</div>
+        <div class="stat-label">Demandes de démo</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="animation-delay: 0.2s;">
+      <div class="stat-header">
+        <div class="stat-icon stat-icon-2">💰</div>
+        <div class="stat-change positive">
+          ↗ +8%
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value">23</div>
+        <div class="stat-label">Devis en attente</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="animation-delay: 0.3s;">
+      <div class="stat-header">
+        <div class="stat-icon stat-icon-3">✅</div>
+        <div class="stat-change positive">
+          ↗ +24%
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value">156</div>
+        <div class="stat-label">Clients actifs</div>
+      </div>
+    </div>
+
+    <div class="stat-card" style="animation-delay: 0.4s;">
+      <div class="stat-header">
+        <div class="stat-icon stat-icon-4">🎯</div>
+        <div class="stat-change negative">
+          ↘ -3%
+        </div>
+      </div>
+      <div class="stat-body">
+        <div class="stat-value">892</div>
+        <div class="stat-label">Leads totaux</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Grid -->
+  <div class="content-grid">
+    <!-- Recent Requests -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">Demandes récentes</h3>
+        <button class="btn btn-secondary">Voir tout</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Client</th>
+              <th>Type</th>
+              <th>Spécialité</th>
+              <th>Date</th>
+              <th>Statut</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Dr. Sarah Martin</div>
+                <div style="font-size: 0.85rem; color: var(--text-gray);">CHU de Lyon</div>
+              </td>
+              <td>Démo</td>
+              <td>Chirurgie</td>
+              <td>09/02/2026</td>
+              <td><span class="status-badge status-pending">En attente</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                  <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                  <button class="action-btn btn-delete" data-tooltip="Supprimer">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Institut Curie Paris</div>
+                <div style="font-size: 0.85rem; color: var(--text-gray);">Service Oncologie</div>
+              </td>
+              <td>Sur-mesure</td>
+              <td>Formation</td>
+              <td>08/02/2026</td>
+              <td><span class="status-badge status-approved">Approuvé</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                  <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                  <button class="action-btn btn-delete" data-tooltip="Supprimer">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Dr. Marc Dubois</div>
+                <div style="font-size: 0.85rem; color: var(--text-gray);">Hôpital Necker</div>
+              </td>
+              <td>Devis</td>
+              <td>Urgences</td>
+              <td>07/02/2026</td>
+              <td><span class="status-badge status-pending">En cours</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                  <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                  <button class="action-btn btn-delete" data-tooltip="Supprimer">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Hôpital Saint-Louis</div>
+                <div style="font-size: 0.85rem; color: var(--text-gray);">Formation continue</div>
+              </td>
+              <td>Démo</td>
+              <td>Multi</td>
+              <td>06/02/2026</td>
+              <td><span class="status-badge status-approved">Confirmé</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                  <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                  <button class="action-btn btn-delete" data-tooltip="Supprimer">🗑️</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="font-weight: 600;">Dr. Sophie Bernard</div>
+                <div style="font-size: 0.85rem; color: var(--text-gray);">Clinique Pasteur</div>
+              </td>
+              <td>Démo</td>
+              <td>Anesthésie</td>
+              <td>05/02/2026</td>
+              <td><span class="status-badge status-pending">En attente</span></td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                  <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                  <button class="action-btn btn-delete" data-tooltip="Supprimer">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">Activité récente</h3>
+      </div>
+      <div class="activity-feed">
+        <div class="activity-item activity-demo">
+          <div class="activity-icon">🎥</div>
+          <div class="activity-content">
+            <div class="activity-title">Nouvelle demande de démo</div>
+            <div class="activity-desc">CHU de Marseille - Cardiologie</div>
+            <div class="activity-time">Il y a 2 heures</div>
+          </div>
+        </div>
+        <div class="activity-item activity-user">
+          <div class="activity-icon">👤</div>
+          <div class="activity-content">
+            <div class="activity-title">Nouveau compte activé</div>
+            <div class="activity-desc">Dr. Emma Laurent - Neurochirurgie</div>
+            <div class="activity-time">Il y a 4 heures</div>
+          </div>
+        </div>
+        <div class="activity-item activity-quote">
+          <div class="activity-icon">📄</div>
+          <div class="activity-content">
+            <div class="activity-title">Devis signé</div>
+            <div class="activity-desc">Institut Pasteur - 15 000€</div>
+            <div class="activity-time">Il y a 6 heures</div>
+          </div>
+        </div>
+        <div class="activity-item activity-demo">
+          <div class="activity-icon">🎯</div>
+          <div class="activity-content">
+            <div class="activity-title">Expérience sur-mesure</div>
+            <div class="activity-desc">Simulation pédiatrique urgences</div>
+            <div class="activity-time">Il y a 1 jour</div>
+          </div>
+        </div>
+        <div class="activity-item activity-user">
+          <div class="activity-icon">✅</div>
+          <div class="activity-content">
+            <div class="activity-title">Compte validé</div>
+            <div class="activity-desc">Service Formation - AP-HP</div>
+            <div class="activity-time">Il y a 1 jour</div>
+          </div>
+        </div>
+        <div class="activity-item activity-quote">
+          <div class="activity-icon">💰</div>
+          <div class="activity-content">
+            <div class="activity-title">Nouveau devis</div>
+            <div class="activity-desc">Hôpital Européen - 25 000€</div>
+            <div class="activity-time">Il y a 2 jours</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comptes Clients Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3 class="section-title">Gestion des comptes clients</h3>
+      <button class="btn btn-primary">➕ Nouveau compte</button>
+    </div>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Organisation</th>
+            <th>Contact</th>
+            <th>Email</th>
+            <th>Type</th>
+            <th>Statut</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <div style="font-weight: 600;">CHU de Bordeaux</div>
+              <div style="font-size: 0.85rem; color: var(--text-gray);">Hôpital Pellegrin</div>
+            </td>
+            <td>Dr. Pierre Lemoine</td>
+            <td>p.lemoine@chu-bordeaux.fr</td>
+            <td>Premium</td>
+            <td><span class="status-badge status-active">Actif</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                <button class="action-btn btn-delete" data-tooltip="Désactiver">❌</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-weight: 600;">Université Paris Descartes</div>
+              <div style="font-size: 0.85rem; color: var(--text-gray);">Faculté de Médecine</div>
+            </td>
+            <td>Prof. Marie Durand</td>
+            <td>m.durand@parisdescartes.fr</td>
+            <td>Éducation</td>
+            <td><span class="status-badge status-active">Actif</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                <button class="action-btn btn-delete" data-tooltip="Désactiver">❌</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-weight: 600;">Clinique Saint-Jean</div>
+              <div style="font-size: 0.85rem; color: var(--text-gray);">Montpellier</div>
+            </td>
+            <td>Dr. Thomas Rousseau</td>
+            <td>t.rousseau@stjean.fr</td>
+            <td>Standard</td>
+            <td><span class="status-badge status-inactive">En attente</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                <button class="action-btn btn-edit" data-tooltip="Activer">✅</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-weight: 600;">AP-HP Pitié-Salpêtrière</div>
+              <div style="font-size: 0.85rem; color: var(--text-gray);">Service Neurologie</div>
+            </td>
+            <td>Dr. Amélie Fontaine</td>
+            <td>a.fontaine@aphp.fr</td>
+            <td>Premium</td>
+            <td><span class="status-badge status-active">Actif</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                <button class="action-btn btn-delete" data-tooltip="Désactiver">❌</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-weight: 600;">CHU de Lille</div>
+              <div style="font-size: 0.85rem; color: var(--text-gray);">Centre de Formation</div>
+            </td>
+            <td>Dr. Laurent Mercier</td>
+            <td>l.mercier@chu-lille.fr</td>
+            <td>Standard</td>
+            <td><span class="status-badge status-active">Actif</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                <button class="action-btn btn-delete" data-tooltip="Désactiver">❌</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <div style="font-weight: 600;">Hôpital Européen Georges-Pompidou</div>
+              <div style="font-size: 0.85rem; color: var(--text-gray);">Département Cardiologie</div>
+            </td>
+            <td>Dr. Claire Beaumont</td>
+            <td>c.beaumont@hegp.fr</td>
+            <td>Premium</td>
+            <td><span class="status-badge status-inactive">Suspendu</span></td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn btn-view" data-tooltip="Voir">👁️</button>
+                <button class="action-btn btn-edit" data-tooltip="Modifier">✏️</button>
+                <button class="action-btn btn-edit" data-tooltip="Activer">✅</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Statistics Chart Section -->
+  <div class="section-card" style="margin-top: 2rem;">
+    <div class="section-header">
+      <h3 class="section-title">Statistiques & Performance</h3>
+      <select class="btn btn-secondary" style="padding: 0.8rem 1.2rem;">
+        <option value="30">30 derniers jours</option>
+        <option value="90">3 derniers mois</option>
+        <option value="365">Cette année</option>
+      </select>
+    </div>
+    <div class="chart-container">
+      <div class="chart-placeholder">
+        <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+        <div>Graphiques d'évolution</div>
+        <div style="font-size: 0.9rem; margin-top: 0.5rem; color: var(--text-gray);">
+          Intégration des données en temps réel
+        </div>
+      </div>
+      <div class="loading-bar"></div>
+    </div>
+  </div>
+</main>
+
+<!-- Animated Background -->
+<div class="bg-animated">
+  <div class="bg-circle"></div>
+  <div class="bg-circle"></div>
+  <div class="bg-circle"></div>
+</div>
+</div>

@@ -960,3 +960,12 @@
         gap: 0.5rem;
     }
 }
+
+.form-row {
+    display: flex;
+    gap: 16px; /* espace entre les champs */
+}
+
+.form-row .form-group {
+    flex: 1; /* chaque champ prend la moitié de la ligne */
+}

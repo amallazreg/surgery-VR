@@ -37,7 +37,7 @@ export class Signin  {
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
-      password: ['', Validators.required]
+      motDePasse: ['', Validators.required]
     });
   }
   showPassword = false;
@@ -45,7 +45,7 @@ export class Signin  {
 togglePasswordVisibility() {
   this.showPassword = !this.showPassword;
   const pwdInput = document.getElementById('login-password') as HTMLInputElement;
-  pwdInput.type = this.showPassword ? 'text' : 'password';
+  pwdInput.type = this.showPassword ? 'text' : 'motDePasse';
 }
 
 
@@ -61,12 +61,15 @@ togglePasswordVisibility() {
       next: (res) => {
         console.log('Login success:', res);
 
+        const role = res.user.role;
+
+
         // Sauvegarde token + role
         this.authService.saveToken(res.token);
-        this.authService.saveRole(res.role);
+        this.authService.saveRole(role);
 
         // REDIRECTION SELON ROLE
-        if (res.role === 'admin') {
+        if (role === 'admin') {
           this.router.navigate(['/admin/dashboard']);
         } else {
           this.router.navigate(['/user/dashboard']);

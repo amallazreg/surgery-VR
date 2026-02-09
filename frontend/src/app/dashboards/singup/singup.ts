@@ -51,6 +51,8 @@ export class Singup implements OnInit {
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(8)]],
+      confirmPassword: ['', Validators.required],
+
       // Doctor specific fields
       specialty: [''],
       hospital: [''],
@@ -193,6 +195,7 @@ export class Singup implements OnInit {
       lastName: infoData.lastName,
       email: infoData.email,
       password: infoData.password,
+      confirmPassword: infoData.confirmPassword,
       objective: verificationData.objective
     };
 
