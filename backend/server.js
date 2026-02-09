@@ -3,7 +3,6 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const userRoute = require('./routes/userRoutes');
 const demandeDemoRoutes = require('./routes/demandeDemo');
 const demandeDevisRoutes = require('./routes/demandeDevis') ; 
 const experienceSurMesureRoutes = require('./routes/experienceSurMesure') ; 
@@ -46,7 +45,6 @@ app.get('/', (req, res) => {
   res.send('Recrutement API is running!');
 });
 
-app.use('/user', userRoute); 
 app.use('/demande',demandeDemoRoutes); 
 app.use('/demande',demandeDevisRoutes); 
 app.use('/demande',experienceSurMesureRoutes) ; 

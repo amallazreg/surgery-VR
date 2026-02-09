@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
-const Schema = mongoose.Schema;
+const userSchema = new mongoose.Schema({
 
-// Schéma principal de l'utilisateur
-const UserSchema = new Schema({
-  // Informations personnelles
-  name: { type: String, required: true, trim: true },
+  // =========================
+  // Commun à TOUS
+  // =========================
+  prenom: { type: String, required: true },
+  nom: { type: String, required: true },
 
   email: { 
     type: String, 
@@ -16,52 +17,69 @@ const UserSchema = new Schema({
     trim: true
   },
 
-  password: { type: String, required: true },
+  motDePasse: { type: String, required: true },
 
-  phone: { type: String, trim: true },
- 
-  // Rôle utilisateur
-  role: { 
-    type: String, 
-    enum: ['admin', 'user'], 
-    default: 'user' 
+  phone: { type: String },
+
+  role: {
+    type: String,
+    enum: ['admin', 'medecin', 'etudiant'],
+    required: true
   },
 
-  // Date d’inscription
-  createdAt: { type: Date, default: Date.now },
+  statut: {
+    type: String,
+    enum: ['en_attente', 'approuve', 'rejete'],
+    default: 'en_attente'
+  },
+
+  // =========================
+  // Champs Médecin
+  // =========================
+  specialite: String,
+  etablissement: String,
+  ville: String,
+  numeroOrdre: String,
+
+  // =========================
+  // Champs Étudiant
+  // =========================
+  universite: String,
+  anneeEtude: String,
+  encadrant: String,
+
+  // =========================
+  // Vérification
+  // =========================
+  objectif: String,
+
+  documentVerification: String,
+
+  createdAt: {
+    type: Date,
+    default: Date.now
+  }
+
 });
 
 
 // ===============================
-// Méthode de comparaison de mot de passe
+// Hash mot de passe
 // ===============================
-UserSchema.methods.comparePassword = async function (userPassword) {
-  try {
-    return await bcrypt.compare(userPassword, this.password);
-  } catch (error) {
-    console.error('Erreur lors de la comparaison du mot de passe :', error);
-    return false;
-  }
+userSchema.pre('save', async function () {
+  if (!this.isModified('motDePasse')) return;
+
+  const salt = await bcrypt.genSalt(10);
+  this.motDePasse = await bcrypt.hash(this.motDePasse, salt);
+});
+
+
+// ===============================
+// Compare mot de passe
+// ===============================
+userSchema.methods.comparePassword = function (plainPassword) {
+  return bcrypt.compare(plainPassword, this.motDePasse);
 };
 
 
-// ===============================
-// Hashage du mot de passe avant sauvegarde
-// ===============================
-UserSchema.pre('save', async function () {
-  try {
-    // Si le mot de passe n'a pas été modifié, ne rien faire
-    if (!this.isModified('password')) return;
-
-    const saltRounds = 10;
-    const hash = await bcrypt.hash(this.password, saltRounds);
-
-    this.password = hash;
-  } catch (err) {
-    throw err;
-  }
-});
-
-
-// Export du modèle
-module.exports = mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', userSchema);

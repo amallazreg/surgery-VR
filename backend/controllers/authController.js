@@ -1,136 +1,170 @@
-const Client = require('../models/clientModel');
-const bcrypt = require('bcrypt');
+const User = require('../models/userModels');
 const jwt = require('jsonwebtoken');
 
 
-const inscription = async (req, res) => {
+const signup = async (req, res) => {
   try {
-    const data = req.body;
+    const {
+      prenom,
+      nom,
+      email,
+      motDePasse,
+      confirmPassword,
+      phone,
+      role, 
 
-    if (!req.file) {
-      return res.status(400).json({
-        message: 'Le document de vérification est obligatoire'
-      });
+      // champs medecin
+      specialite,
+      etablissement,
+      ville,
+      numeroOrdre,
+
+      // champs etudiant
+      universite,
+      anneeEtude,
+      encadrant,
+
+      objectif
+    } = req.body;
+
+
+    if (!prenom || !nom || !email || !motDePasse || !confirmPassword) {
+      return res.status(400).json({ message: "Champs obligatoires manquants" });
     }
 
-    // Vérifier email
-    const clientExistant = await Client.findOne({ email: data.email });
-    if (clientExistant) {
-      return res.status(400).json({
-        message: 'Cet email est déjà utilisé'
-      });
+    if (motDePasse !== confirmPassword) {
+      return res.status(400).json({ message: "Les mots de passe ne correspondent pas" });
     }
 
-    const motDePasseHash = await bcrypt.hash(data.motDePasse, 10);
+    const adminExiste = await User.findOne({ role: 'admin' });
 
-    const nouvelClient = new Client({
-      typeCompte: data.typeCompte,
-      prenom: data.prenom,
-      nom: data.nom,
-      email: data.email,
-      motDePasse: motDePasseHash,
+    let finalRole;
+    let finalStatut;
 
-      // Médecin
-      specialite: data.specialite,
-      etablissement: data.etablissement,
-      ville: data.ville,
-      numeroOrdre: data.numeroOrdre,
+    if (!adminExiste) {
+      finalRole = 'admin';
+      finalStatut = 'approuve';
+    } else {
+      // Médecin ou étudiant
+      finalRole = role; // medecin | etudiant
+      finalStatut = 'en_attente';
+    }
 
-      // Étudiant
-      universite: data.universite,
-      anneeEtude: data.anneeEtude,
-      encadrant: data.encadrant,
+    
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ message: "Email déjà utilisé" });
+    }
 
-      objectif: data.objectif,
-      documentVerification: req.file.path,
+    let documentVerification = null;
+    if (finalRole !== 'admin') {
+      if (!req.file) {
+        return res.status(400).json({
+          message: "Document de vérification obligatoire"
+        });
+      }
+      documentVerification = req.file.path;
+    }
 
-      statut: 'en_attente'
+ 
+    const user = new User({
+      prenom,
+      nom,
+      email,
+      motDePasse,
+      phone,
+      role: finalRole,
+      statut: finalStatut,
+
+      // médecin
+      specialite,
+      etablissement,
+      ville,
+      numeroOrdre,
+
+      // étudiant
+      universite,
+      anneeEtude,
+      encadrant,
+
+      objectif,
+      documentVerification
     });
 
-    await nouvelClient.save();
+    await user.save();
 
     res.status(201).json({
-      message: 'Inscription réussie. Votre compte est en attente de validation.',
-      idClient: nouvelClient._id
+      message:
+        finalRole === 'admin'
+          ? "Compte admin créé avec succès"
+          : "Inscription réussie. Compte en attente de validation.",
+      userId: user._id,
+      role: user.role,
+      statut: user.statut
     });
 
-  } catch (erreur) {
-    console.error(erreur);
-    res.status(500).json({
-      message: 'Erreur serveur lors de l’inscription'
-    });
+  } catch (err) {
+    console.error("Erreur signup:", err);
+    res.status(500).json({ message: "Erreur serveur lors de l'inscription" });
   }
 };
 
 
-const login = async (req, res) => {
+const signin = async (req, res) => {
   try {
     const { email, motDePasse } = req.body;
 
     if (!email || !motDePasse) {
       return res.status(400).json({
-        message: 'Email et mot de passe sont obligatoires'
+        message: "Email et mot de passe obligatoires"
       });
     }
 
-    // Vérifier si le client existe
-    const client = await Client.findOne({ email });
-    if (!client) {
-      return res.status(404).json({
-        message: 'Email ou mot de passe incorrect'
-      });
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ message: "Email ou mot de passe incorrect" });
     }
 
-    // Vérifier mot de passe
-    const motDePasseValide = await bcrypt.compare(motDePasse, client.motDePasse);
-    if (!motDePasseValide) {
-      return res.status(401).json({
-        message: 'Email ou mot de passe incorrect'
-      });
+    const isValid = await user.comparePassword(motDePasse);
+    if (!isValid) {
+      return res.status(401).json({ message: "Email ou mot de passe incorrect" });
     }
 
-    // 🔒 Vérifier statut
-    if (client.statut !== 'approuve') {
+    // 🔒 Blocage si pas approuvé (sauf admin)
+    if (user.role !== 'admin' && user.statut !== 'approuve') {
       return res.status(403).json({
-        message: 'Votre compte n’est pas encore approuvé par l’administrateur'
+        message: "Votre compte est en attente de validation par l'administrateur"
       });
     }
 
-    // 🔑 Générer JWT
     const token = jwt.sign(
-      {
-        id: client._id,
-        email: client.email,
-        typeCompte: client.typeCompte,
-        role: 'client'
-      },
-      process.env.JWT_SECRET || 'SECRET_KEY_DEV',
-      { expiresIn: '1d' }
+      { id: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: '24h' }
     );
 
     res.json({
-      message: 'Connexion réussie',
+      message: "Connexion réussie",
       token,
-      client: {
-        id: client._id,
-        prenom: client.prenom,
-        nom: client.nom,
-        email: client.email,
-        typeCompte: client.typeCompte,
-        statut: client.statut
+      user: {
+        id: user._id,
+        prenom: user.prenom,
+        nom: user.nom,
+        email: user.email,
+        role: user.role,
+        statut: user.statut
       }
     });
 
-  } catch (erreur) {
-    console.error(erreur);
-    res.status(500).json({
-      message: 'Erreur serveur lors de la connexion'
-    });
+  } catch (err) {
+    console.error("Erreur signin:", err);
+    res.status(500).json({ message: "Erreur serveur lors de la connexion" });
   }
 };
 
 
+
 module.exports = {
-    inscription,
-    login
+  signup,
+  signin
 }

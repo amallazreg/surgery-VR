@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/upload');
-const {inscription,login} = require('../controllers/authController');
+const {signup,signin} = require('../controllers/authController');
 
 router.post(
-  '/inscription',
+  '/signup',
   upload.single('documentVerification'),
-  inscription
+  signup
 );
 
-router.post('/login', login);
+router.post('/login', signin);
 
 
 module.exports = router;
