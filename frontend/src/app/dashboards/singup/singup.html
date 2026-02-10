@@ -1,72 +1,37 @@
-<div class="page-wrapper">
+<body>
     <app-navbar></app-navbar>
 
     <div class="signup-page">
         <!-- Background animé -->
         <div class="signup-background">
             <div class="animated-grid"></div>
-            <div class="floating-shapes">
-                <div class="shape shape-1"></div>
-                <div class="shape shape-2"></div>
-                <div class="shape shape-3"></div>
+            <div class="gradient-orbs">
+                <div class="orb orb-1"></div>
+                <div class="orb orb-2"></div>
+                <div class="orb orb-3"></div>
+                <div class="orb orb-4"></div>
+            </div>
+            <div class="floating-particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
             </div>
         </div>
 
-        <!-- Left Panel - Welcome Section -->
-        <div class="welcome-panel">
-            <div class="welcome-content">
-                <div class="logo-icon">🥽</div>
-                <h1 class="welcome-title">
-                    Rejoignez <br>
-                    <span class="gradient-text">SurgeryVR</span>
-                </h1>
-                <p class="welcome-subtitle">
-                    Créez votre compte et accédez à la meilleure plateforme de formation médicale en réalité virtuelle
-                </p>
-
-                <!-- Feature Badges -->
-                <div class="feature-badges">
-                    <div class="badge">
-                        <span class="badge-icon">✨</span>
-                        <span>Formation innovante</span>
-                    </div>
-                    <div class="badge">
-                        <span class="badge-icon">🎓</span>
-                        <span>Certification officielle</span>
-                    </div>
-                    <div class="badge">
-                        <span class="badge-icon">🌍</span>
-                        <span>Communauté mondiale</span>
-                    </div>
-                </div>
-
-                <!-- Stats -->
-                <div class="welcome-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">15k+</div>
-                        <div class="stat-label">Professionnels</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">500+</div>
-                        <div class="stat-label">Scénarios VR</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">98%</div>
-                        <div class="stat-label">Taux de réussite</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Panel - Form Section -->
-        <div class="form-panel">
+        <!-- Form Section Centered -->
+        <div class="form-section">
             <div class="form-container">
                 <!-- Carte de signup -->
                 <div class="signup-card">
                     <!-- Header -->
                     <div class="card-header">
                         <h2 class="card-title">Créez votre compte</h2>
-                        <p class="card-subtitle">Suivez les étapes pour compléter votre inscription</p>
+                        <p class="card-subtitle">Rejoignez la communauté SurgeryVR</p>
                     </div>
 
                     <!-- Progress Stepper -->
@@ -75,39 +40,61 @@
                             <div class="progress-line-fill" [style.width.%]="progressWidth"></div>
                         </div>
                         <div class="step-item" [class.active]="currentStep === 1" [class.completed]="currentStep > 1">
-                            <div class="step-circle">{{ currentStep > 1 ? '✓' : '1' }}</div>
+                            <div class="step-circle">
+                                <span class="step-number">{{ currentStep > 1 ? '✓' : '1' }}</span>
+                            </div>
                             <div class="step-label">Type de compte</div>
                         </div>
                         <div class="step-item" [class.active]="currentStep === 2" [class.completed]="currentStep > 2">
-                            <div class="step-circle">{{ currentStep > 2 ? '✓' : '2' }}</div>
+                            <div class="step-circle">
+                                <span class="step-number">{{ currentStep > 2 ? '✓' : '2' }}</span>
+                            </div>
                             <div class="step-label">Informations</div>
                         </div>
                         <div class="step-item" [class.active]="currentStep === 3" [class.completed]="currentStep > 3">
-                            <div class="step-circle">3</div>
-                            <div class="step-label">Vérification</div>
+                            <div class="step-circle">
+                                <span class="step-number">3</span>
+                            </div>
+                            <div class="step-label">Validation</div>
                         </div>
                     </div>
 
-                    <!-- Step 1: Account Type Selection -->
+                    <!-- STEP 1: Account Type Selection -->
                     <div class="step-content" [class.active]="currentStep === 1">
                         <div class="account-type-selection">
-                            <div class="account-type-card" 
-                                 [class.selected]="selectedAccountType === 'doctor'"
-                                 (click)="selectAccountType('doctor')">
-                                <div class="account-type-icon">🩺</div>
-                                <div class="account-type-title">Médecin</div>
-                                <div class="account-type-desc">Professionnel de santé certifié</div>
-                            </div>
-                            <div class="account-type-card" 
+                            <div class="account-type-card modern-card" 
                                  [class.selected]="selectedAccountType === 'student'"
                                  (click)="selectAccountType('student')">
+                                <div class="card-check">✓</div>
                                 <div class="account-type-icon">🎓</div>
                                 <div class="account-type-title">Étudiant</div>
-                                <div class="account-type-desc">Étudiant en médecine</div>
+                                <div class="account-type-desc">
+                                    Formation académique en médecine, soins infirmiers ou sciences médicales
+                                </div>
+                                <div class="card-features">
+                                    <span class="feature-tag">Accès éducatif</span>
+                                    <span class="feature-tag">Suivi académique</span>
+                                </div>
+                            </div>
+
+                            <div class="account-type-card modern-card" 
+                                 [class.selected]="selectedAccountType === 'professional'"
+                                 (click)="selectAccountType('professional')">
+                                <div class="card-check">✓</div>
+                                <div class="account-type-icon">🏥</div>
+                                <div class="account-type-title">Professionnel / Institution</div>
+                                <div class="account-type-desc">
+                                    Professionnels de santé, cliniques, hôpitaux ou centres de formation
+                                </div>
+                                <div class="card-features">
+                                    <span class="feature-tag">Accès complet</span>
+                                    <span class="feature-tag">Certification</span>
+                                </div>
                             </div>
                         </div>
+
                         <div class="step-navigation">
-                            <button class="btn btn-primary" 
+                            <button class="btn btn-primary btn-large" 
                                     [disabled]="!selectedAccountType"
                                     (click)="nextStep()">
                                 <span class="btn-text">Continuer</span>
@@ -116,174 +103,332 @@
                         </div>
                     </div>
 
-                    <!-- Step 2: Personal Information -->
+                    <!-- STEP 2: Personal Information -->
                     <div class="step-content" [class.active]="currentStep === 2">
                         <form class="signup-form" [formGroup]="infoForm">
-                            <!-- Doctor Form -->
-                            <div *ngIf="selectedAccountType === 'doctor'">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>
-                                            <span class="label-icon">👤</span>
-                                            Prénom <span class="label-required">*</span>
+                            
+                            <!-- ============================================ -->
+                            <!-- PROFESSIONNEL / INSTITUTION FORM -->
+                            <!-- ============================================ -->
+                            <div *ngIf="selectedAccountType === 'professional'">
+                                
+                                <!-- Type de compte professionnel -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">🏢</span>
+                                        Type de compte
+                                    </h3>
+                                    
+                                    <div class="radio-group">
+                                        <label class="radio-card" [class.selected]="professionalType === 'health_professional'">
+                                            <input type="radio" 
+                                                   name="professionalType" 
+                                                   value="health_professional"
+                                                   [(ngModel)]="professionalType"
+                                                   [ngModelOptions]="{standalone: true}">
+                                            <div class="radio-content">
+                                                <span class="radio-icon">👨‍⚕️</span>
+                                                <span class="radio-label">Professionnel de santé</span>
+                                            </div>
+                                            <div class="radio-check">✓</div>
                                         </label>
-                                        <input type="text" class="form-input" placeholder="Votre prénom" formControlName="firstName">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            <span class="label-icon">👤</span>
-                                            Nom <span class="label-required">*</span>
-                                        </label>
-                                        <input type="text" class="form-input" placeholder="Votre nom" formControlName="lastName">
-                                    </div>
-                                </div>
 
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">📧</span>
-                                        Email professionnel <span class="label-required">*</span>
-                                    </label>
-                                    <input type="email" class="form-input" placeholder="dr.nom@hopital.tn" formControlName="email">
-                                    <p class="help-text">Utilisez votre adresse email professionnelle</p>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">⚕️</span>
-                                        Spécialité <span class="label-required">*</span>
-                                    </label>
-                                    <select class="form-select" formControlName="specialty">
-                                        <option value="">Sélectionnez votre spécialité</option>
-                                        <option value="chirurgie-generale">Chirurgie générale</option>
-                                        <option value="orthopédie">Orthopédie</option>
-                                        <option value="neurochirurgie">Neurochirurgie</option>
-                                        <option value="chirurgie-cardiaque">Chirurgie cardiaque</option>
-                                        <option value="urologie">Urologie</option>
-                                        <option value="autre">Autre</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>
-                                            <span class="label-icon">🏥</span>
-                                            Établissement <span class="label-required">*</span>
+                                        <label class="radio-card" [class.selected]="professionalType === 'institution'">
+                                            <input type="radio" 
+                                                   name="professionalType" 
+                                                   value="institution"
+                                                   [(ngModel)]="professionalType"
+                                                   [ngModelOptions]="{standalone: true}">
+                                            <div class="radio-content">
+                                                <span class="radio-icon">🏥</span>
+                                                <span class="radio-label">Institution (Clinique, Hôpital, Centre)</span>
+                                            </div>
+                                            <div class="radio-check">✓</div>
                                         </label>
-                                        <input type="text" class="form-input" placeholder="Hôpital / Clinique" formControlName="hospital">
-                                    </div>
-                                    <div class="form-group">
-                                        <label>
-                                            <span class="label-icon">📍</span>
-                                            Ville <span class="label-required">*</span>
-                                        </label>
-                                        <input type="text" class="form-input" placeholder="Tunis" formControlName="city">
                                     </div>
                                 </div>
 
-                             <div class="form-row">
-                            <!-- Mot de passe -->
-                            <div class="form-group">
-                                <label>
-                                    <span class="label-icon">🔒</span>
-                                    Mot de passe <span class="label-required">*</span>
-                                </label>
-                                <input type="password" class="form-input" placeholder="••••••••" formControlName="password">
-                                <p class="help-text">Minimum 8 caractères</p>
+                                <!-- Informations du responsable -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">👤</span>
+                                        Informations du responsable
+                                    </h3>
+                                    
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Nom <span class="required">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-input" 
+                                                   placeholder="Nom du responsable" 
+                                                   formControlName="lastName">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Prénom <span class="required">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-input" 
+                                                   placeholder="Prénom du responsable" 
+                                                   formControlName="firstName">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Fonction <span class="required">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-input" 
+                                               placeholder="Ex: Médecin, Directeur, Responsable formation..." 
+                                               formControlName="position">
+                                    </div>
+                                </div>
+
+                                <!-- Informations de la structure -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">🏥</span>
+                                        Informations de la structure
+                                    </h3>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Nom de l'établissement / Cabinet / Structure <span class="required">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-input" 
+                                               placeholder="Nom complet de votre établissement" 
+                                               formControlName="establishment">
+                                    </div>
+
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Email professionnel <span class="required">*</span>
+                                            </label>
+                                            <input type="email" 
+                                                   class="form-input" 
+                                                   placeholder="contact@etablissement.tn" 
+                                                   formControlName="email">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Téléphone <span class="required">*</span>
+                                            </label>
+                                            <input type="tel" 
+                                                   class="form-input" 
+                                                   placeholder="+216 XX XXX XXX" 
+                                                   formControlName="phone">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Adresse <span class="required">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-input" 
+                                               placeholder="Adresse complète de l'établissement" 
+                                               formControlName="address">
+                                    </div>
+                                </div>
+
+                                <!-- Mot de passe -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">🔒</span>
+                                        Sécurité du compte
+                                    </h3>
+                                    
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Mot de passe <span class="required">*</span>
+                                            </label>
+                                            <div class="password-input-wrapper">
+                                                <input [type]="showPassword ? 'text' : 'password'" 
+                                                       class="form-input" 
+                                                       placeholder="Minimum 8 caractères" 
+                                                       formControlName="password">
+                                                <button type="button" 
+                                                        class="password-toggle" 
+                                                        (click)="togglePassword()">
+                                                    {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                                                </button>
+                                            </div>
+                                            <div class="password-strength">
+                                                <div class="strength-bar" [class]="passwordStrength"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Confirmer le mot de passe <span class="required">*</span>
+                                            </label>
+                                            <input type="password" 
+                                                   class="form-input" 
+                                                   placeholder="Ressaisir le mot de passe" 
+                                                   formControlName="confirmPassword">
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
 
-                            <!-- Confirmer le mot de passe -->
-                            <div class="form-group">
-                                <label>
-                                    <span class="label-icon">🔒</span>
-                                    Confirmer mot de passe <span class="label-required">*</span>
-                                </label>
-                                <input type="password" class="form-input" placeholder="••••••••" formControlName="confirmPassword">
-                                <p class="help-text">Saisissez le même mot de passe</p>
-                            </div>
-                        </div>
-
-                            </div>
-
-                            <!-- Student Form -->
+                            <!-- ============================================ -->
+                            <!-- STUDENT FORM -->
+                            <!-- ============================================ -->
                             <div *ngIf="selectedAccountType === 'student'">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label>
-                                            <span class="label-icon">👤</span>
-                                            Prénom <span class="label-required">*</span>
-                                        </label>
-                                        <input type="text" class="form-input" placeholder="Votre prénom" formControlName="firstName">
+                                
+                                <!-- Informations personnelles -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">👤</span>
+                                        Informations personnelles
+                                    </h3>
+                                    
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Prénom <span class="required">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-input" 
+                                                   placeholder="Votre prénom" 
+                                                   formControlName="firstName">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Nom <span class="required">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-input" 
+                                                   placeholder="Votre nom" 
+                                                   formControlName="lastName">
+                                        </div>
                                     </div>
+
                                     <div class="form-group">
-                                        <label>
-                                            <span class="label-icon">👤</span>
-                                            Nom <span class="label-required">*</span>
+                                        <label class="form-label">
+                                            Email <span class="required">*</span>
                                         </label>
-                                        <input type="text" class="form-input" placeholder="Votre nom" formControlName="lastName">
+                                        <input type="email" 
+                                               class="form-input" 
+                                               placeholder="votre.email@exemple.tn" 
+                                               formControlName="email">
+                                        <p class="help-text">Utilisez de préférence votre email universitaire</p>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Téléphone <span class="optional-label">(optionnel)</span>
+                                        </label>
+                                        <input type="tel" 
+                                               class="form-input" 
+                                               placeholder="+216 XX XXX XXX" 
+                                               formControlName="phone">
                                     </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">📧</span>
-                                        Email universitaire <span class="label-required">*</span>
-                                    </label>
-                                    <input type="email" class="form-input" placeholder="prenom.nom@medecine.rnu.tn" formControlName="email">
-                                    <p class="help-text">Utilisez votre adresse email universitaire</p>
+                                <!-- Mot de passe -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">🔒</span>
+                                        Sécurité du compte
+                                    </h3>
+                                    
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Mot de passe <span class="required">*</span>
+                                            </label>
+                                            <div class="password-input-wrapper">
+                                                <input [type]="showPassword ? 'text' : 'password'" 
+                                                       class="form-input" 
+                                                       placeholder="Minimum 8 caractères" 
+                                                       formControlName="password">
+                                                <button type="button" 
+                                                        class="password-toggle" 
+                                                        (click)="togglePassword()">
+                                                    {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                                                </button>
+                                            </div>
+                                            <div class="password-strength">
+                                                <div class="strength-bar" [class]="passwordStrength"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Confirmer le mot de passe <span class="required">*</span>
+                                            </label>
+                                            <input type="password" 
+                                                   class="form-input" 
+                                                   placeholder="Ressaisir le mot de passe" 
+                                                   formControlName="confirmPassword">
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">🎓</span>
-                                        Université / Faculté <span class="label-required">*</span>
-                                    </label>
-                                    <input type="text" class="form-input" placeholder="Faculté de Médecine de Tunis" formControlName="university">
+                                <!-- Informations académiques -->
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">🎓</span>
+                                        Informations académiques
+                                    </h3>
+                                    
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Établissement (Université / Institut) <span class="required">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-input" 
+                                               placeholder="Ex: Faculté de Médecine de Tunis" 
+                                               formControlName="university">
+                                    </div>
+
+                                    <div class="form-grid">
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Spécialité <span class="required">*</span>
+                                            </label>
+                                            <select class="form-select" formControlName="specialty">
+                                                <option value="">Sélectionnez votre spécialité</option>
+                                                <option value="medecine">Médecine</option>
+                                                <option value="infirmier">Soins infirmiers</option>
+                                                <option value="pharmacie">Pharmacie</option>
+                                                <option value="biomedicale">Sciences biomédicales</option>
+                                                <option value="dentaire">Médecine dentaire</option>
+                                                <option value="kinesitherapie">Kinésithérapie</option>
+                                                <option value="autre">Autre</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Niveau d'étude <span class="required">*</span>
+                                            </label>
+                                            <select class="form-select" formControlName="studyLevel">
+                                                <option value="">Sélectionnez votre niveau</option>
+                                                <option value="l1">L1 - Licence 1ère année</option>
+                                                <option value="l2">L2 - Licence 2ème année</option>
+                                                <option value="l3">L3 - Licence 3ème année</option>
+                                                <option value="m1">M1 - Master 1ère année</option>
+                                                <option value="m2">M2 - Master 2ème année</option>
+                                                <option value="doctorat">Doctorat</option>
+                                                <option value="externat">Externat</option>
+                                                <option value="internat">Internat</option>
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
 
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">📚</span>
-                                        Année d'étude <span class="label-required">*</span>
-                                    </label>
-                                    <select class="form-select" formControlName="year">
-                                        <option value="">Sélectionnez votre année</option>
-                                        <option value="1ere-annee">1ère année</option>
-                                        <option value="2eme-annee">2ème année</option>
-                                        <option value="3eme-annee">3ème année</option>
-                                        <option value="externat">Externat</option>
-                                        <option value="internat">Internat</option>
-                                    </select>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">👨‍⚕️</span>
-                                        Encadrant / Responsable
-                                    </label>
-                                    <input type="text" class="form-input" placeholder="Pr. Nom Prénom (optionnel)" formControlName="supervisor">
-                                </div>
-
-                               <div class="form-row">
-                            <!-- Mot de passe -->
-                            <div class="form-group">
-                                <label>
-                                    <span class="label-icon">🔒</span>
-                                    Mot de passe <span class="label-required">*</span>
-                                </label>
-                                <input type="password" class="form-input" placeholder="••••••••" formControlName="password">
-                                <p class="help-text">Minimum 8 caractères</p>
-                            </div>
-
-                            <!-- Confirmer le mot de passe -->
-                            <div class="form-group">
-                                <label>
-                                    <span class="label-icon">🔒</span>
-                                    Confirmer mot de passe <span class="label-required">*</span>
-                                </label>
-                                <input type="password" class="form-input" placeholder="••••••••" formControlName="confirmPassword">
-                                <p class="help-text">Saisissez le même mot de passe</p>
-                            </div>
-                        </div>
                             </div>
                         </form>
 
@@ -301,86 +446,176 @@
                         </div>
                     </div>
 
-                    <!-- Step 3: Verification Documents -->
+                    <!-- STEP 3: Verification Documents -->
                     <div class="step-content" [class.active]="currentStep === 3">
                         <form class="signup-form" [formGroup]="verificationForm">
-                            <!-- Doctor Verification -->
-                            <div *ngIf="selectedAccountType === 'doctor'">
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">🆔</span>
-                                        Numéro d'inscription à l'Ordre <span class="label-required">*</span>
-                                    </label>
-                                    <input type="text" class="form-input" placeholder="Ex: 12345/2024" formControlName="orderNumber">
-                                </div>
+                            
+                            <!-- ============================================ -->
+                            <!-- PROFESSIONNEL / INSTITUTION VERIFICATION -->
+                            <!-- ============================================ -->
+                            <div *ngIf="selectedAccountType === 'professional'">
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">✅</span>
+                                        Validation de votre compte
+                                    </h3>
 
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">📄</span>
-                                        Carte professionnelle <span class="label-required">*</span>
-                                    </label>
-                                    <div class="file-upload-wrapper">
-                                        <input type="file" 
-                                               #doctorFileInput
-                                               class="file-upload-input" 
-                                               accept=".pdf,.jpg,.jpeg,.png" 
-                                               (change)="onFileSelected($event, 'doctor')">
-                                        <label class="file-upload-label" 
-                                               [class.has-file]="doctorFileName"
-                                               (click)="doctorFileInput.click()">
-                                            <span>{{ doctorFileName ? '✓' : '📎' }}</span>
-                                            <span [class.file-name]="doctorFileName">
-                                                {{ doctorFileName || 'Télécharger (PDF, JPG, PNG)' }}
-                                            </span>
-                                        </label>
+                                    <!-- Pour institution -->
+                                    <div *ngIf="professionalType === 'institution'">
+                                        <div class="info-banner">
+                                            <span class="banner-icon">ℹ️</span>
+                                            <div class="banner-content">
+                                                <strong>Validation institution</strong>
+                                                <p>Merci de fournir votre numéro d'immatriculation officiel</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Numéro d'immatriculation <span class="required">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-input" 
+                                                   placeholder="Ex: 123456789" 
+                                                   formControlName="registrationNumber">
+                                            <p class="help-text">Numéro officiel d'enregistrement de votre institution</p>
+                                        </div>
                                     </div>
-                                    <p class="help-text">Document justifiant votre statut de médecin</p>
-                                </div>
 
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">💡</span>
-                                        Objectif d'utilisation <span class="label-required">*</span>
-                                    </label>
-                                    <textarea class="form-textarea" 
-                                              placeholder="Pourquoi souhaitez-vous utiliser SurgeryVR ?" 
-                                              formControlName="objective"></textarea>
+                                    <!-- Pour professionnel -->
+                                    <div *ngIf="professionalType === 'health_professional'">
+                                        <div class="info-banner">
+                                            <span class="banner-icon">ℹ️</span>
+                                            <div class="banner-content">
+                                                <strong>Validation professionnelle</strong>
+                                                <p>Merci de fournir votre numéro d'ordre professionnel</p>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Numéro d'ordre professionnel <span class="required">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-input" 
+                                                   placeholder="Ex: 12345/2024" 
+                                                   formControlName="professionalOrderNumber">
+                                            <p class="help-text">Numéro d'inscription à votre ordre professionnel</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Document upload -->
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Document justificatif <span class="required">*</span>
+                                        </label>
+                                        <div class="file-upload-zone" 
+                                             [class.has-file]="professionalFileName"
+                                             (click)="professionalFileInput.click()">
+                                            <input type="file" 
+                                                   #professionalFileInput
+                                                   class="file-input-hidden" 
+                                                   accept=".pdf,.jpg,.jpeg,.png" 
+                                                   (change)="onFileSelected($event, 'professional')">
+                                            
+                                            <div class="upload-content" *ngIf="!professionalFileName">
+                                                <div class="upload-icon">📎</div>
+                                                <div class="upload-text">
+                                                    <strong>Cliquez pour télécharger</strong>
+                                                    <span>ou glissez-déposez votre fichier</span>
+                                                </div>
+                                                <div class="upload-formats">PDF, JPG, PNG (max. 5MB)</div>
+                                            </div>
+
+                                            <div class="upload-success" *ngIf="professionalFileName">
+                                                <div class="success-icon">✓</div>
+                                                <div class="success-text">
+                                                    <strong>{{ professionalFileName }}</strong>
+                                                    <span>Fichier prêt à être envoyé</span>
+                                                </div>
+                                                <button type="button" 
+                                                        class="btn-remove" 
+                                                        (click)="removeFile('professional'); $event.stopPropagation()">
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p class="help-text">
+                                            {{ professionalType === 'institution' ? 
+                                               'Document officiel d\'immatriculation' : 
+                                               'Carte professionnelle ou justificatif d\'inscription à l\'ordre' }}
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Student Verification -->
+                            <!-- ============================================ -->
+                            <!-- STUDENT VERIFICATION -->
+                            <!-- ============================================ -->
                             <div *ngIf="selectedAccountType === 'student'">
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">📄</span>
-                                        Carte étudiant / Certificat <span class="label-required">*</span>
-                                    </label>
-                                    <div class="file-upload-wrapper">
-                                        <input type="file" 
-                                               #studentFileInput
-                                               class="file-upload-input" 
-                                               accept=".pdf,.jpg,.jpeg,.png" 
-                                               (change)="onFileSelected($event, 'student')">
-                                        <label class="file-upload-label" 
-                                               [class.has-file]="studentFileName"
-                                               (click)="studentFileInput.click()">
-                                            <span>{{ studentFileName ? '✓' : '📎' }}</span>
-                                            <span [class.file-name]="studentFileName">
-                                                {{ studentFileName || 'Télécharger (PDF, JPG, PNG)' }}
-                                            </span>
-                                        </label>
-                                    </div>
-                                    <p class="help-text">Document justifiant votre statut d'étudiant</p>
-                                </div>
+                                <div class="form-section">
+                                    <h3 class="section-title">
+                                        <span class="title-icon">✅</span>
+                                        Validation de votre statut étudiant
+                                    </h3>
 
-                                <div class="form-group">
-                                    <label>
-                                        <span class="label-icon">🎯</span>
-                                        Objectif d'utilisation <span class="label-required">*</span>
-                                    </label>
-                                    <textarea class="form-textarea" 
-                                              placeholder="Décrivez vos objectifs d'apprentissage..." 
-                                              formControlName="objective"></textarea>
+                                    <div class="info-banner">
+                                        <span class="banner-icon">ℹ️</span>
+                                        <div class="banner-content">
+                                            <strong>Documents requis</strong>
+                                            <p>Fournissez votre numéro d'inscription et votre carte étudiante</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Numéro d'inscription universitaire <span class="required">*</span>
+                                        </label>
+                                        <input type="text" 
+                                               class="form-input" 
+                                               placeholder="Ex: 2024/12345" 
+                                               formControlName="studentNumber">
+                                        <p class="help-text">Votre numéro d'inscription officiel</p>
+                                    </div>
+
+                                    <!-- Document upload -->
+                                    <div class="form-group">
+                                        <label class="form-label">
+                                            Carte étudiant <span class="required">*</span>
+                                        </label>
+                                        <div class="file-upload-zone" 
+                                             [class.has-file]="studentFileName"
+                                             (click)="studentFileInput.click()">
+                                            <input type="file" 
+                                                   #studentFileInput
+                                                   class="file-input-hidden" 
+                                                   accept=".pdf,.jpg,.jpeg,.png" 
+                                                   (change)="onFileSelected($event, 'student')">
+                                            
+                                            <div class="upload-content" *ngIf="!studentFileName">
+                                                <div class="upload-icon">📎</div>
+                                                <div class="upload-text">
+                                                    <strong>Cliquez pour télécharger</strong>
+                                                    <span>ou glissez-déposez votre fichier</span>
+                                                </div>
+                                                <div class="upload-formats">PDF, JPG, PNG (max. 5MB)</div>
+                                            </div>
+
+                                            <div class="upload-success" *ngIf="studentFileName">
+                                                <div class="success-icon">✓</div>
+                                                <div class="success-text">
+                                                    <strong>{{ studentFileName }}</strong>
+                                                    <span>Fichier prêt à être envoyé</span>
+                                                </div>
+                                                <button type="button" 
+                                                        class="btn-remove" 
+                                                        (click)="removeFile('student'); $event.stopPropagation()">
+                                                    ✕
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <p class="help-text">Votre carte étudiante ou certificat de scolarité en cours de validité</p>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -390,7 +625,7 @@
                                 <span class="btn-icon">←</span>
                                 <span class="btn-text">Retour</span>
                             </button>
-                            <button class="btn btn-primary" 
+                            <button class="btn btn-primary btn-large" 
                                     [disabled]="verificationForm.invalid"
                                     (click)="submitForm()">
                                 <span class="btn-text">Créer mon compte</span>
@@ -402,7 +637,7 @@
                     <!-- Login Link -->
                     <div class="login-link">
                         Vous avez déjà un compte ? 
-                        <a href="['/singin']">Connectez-vous ici</a>
+                        <a routerLink="/signin">Connectez-vous ici</a>
                     </div>
                 </div>
             </div>
@@ -415,7 +650,6 @@
             <p>© 2026 SurgeryVR. Tous droits réservés.</p>
         </div>
     </footer>
-</div>
 
 <!-- Success Modal -->
 <div class="modal-overlay" [class.active]="showSuccessModal" (click)="closeModal()">
@@ -426,16 +660,21 @@
             Votre demande de création de compte a bien été reçue.
         </p>
         <div class="modal-highlight">
-            <div class="modal-highlight-title">⏳ Étape suivante</div>
-            <div class="modal-highlight-text">
-                Votre compte est en attente de validation par notre équipe. 
-                Vous recevrez un email de confirmation une fois votre compte activé.
-                Ce processus prend généralement 24 à 48 heures.
+            <div class="modal-highlight-icon">⏳</div>
+            <div class="modal-highlight-content">
+                <div class="modal-highlight-title">Étape suivante</div>
+                <div class="modal-highlight-text">
+                    Votre compte est en attente de validation par notre équipe. 
+                    Vous recevrez un email de confirmation une fois votre compte activé.
+                    Ce processus prend généralement 24 à 48 heures.
+                </div>
             </div>
         </div>
-        <button class="btn btn-primary" (click)="closeModal()" style="width: 100%;">
+        <button class="btn btn-primary btn-large" (click)="closeModal()">
             <span class="btn-text">Compris</span>
             <span class="btn-icon">✓</span>
         </button>
     </div>
 </div>
+
+</body>
