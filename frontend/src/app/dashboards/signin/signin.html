@@ -94,5 +94,16 @@
         </footer>
     </div>
 
+    <!-- Error Modal -->
+<div class="modal-overlay" [class.active]="showErrorModal" (click)="closeErrorModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-icon" style="background: #fee; color: #c00;">❌</div>
+        <h3 class="modal-title">Erreur</h3>
+        <p class="modal-text">{{ errorMessage }}</p>
+        <button class="btn btn-primary btn-large" (click)="closeErrorModal()">
+            <span class="btn-text">Fermer</span>
+        </button>
+    </div>
+</div>
    
 </body>

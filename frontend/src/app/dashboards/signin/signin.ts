@@ -29,6 +29,7 @@ export class Signin  {
    loginForm!: FormGroup;
   errorMessage = '';
   loading = false;
+  showErrorModal: boolean = false;
 
   constructor(
     private fb: FormBuilder,
@@ -84,4 +85,19 @@ togglePasswordVisibility() {
       }
     });
   }
+
+   showError(message: string): void {
+    this.errorMessage = message;
+    this.showErrorModal = true;
+  }
+
+  /**
+   * Close error modal
+   */
+  closeErrorModal(): void {
+    this.showErrorModal = false;
+    this.errorMessage = '';
+  }
+
+
 }

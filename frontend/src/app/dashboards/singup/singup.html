@@ -63,8 +63,8 @@
                     <div class="step-content" [class.active]="currentStep === 1">
                         <div class="account-type-selection">
                             <div class="account-type-card modern-card" 
-                                 [class.selected]="selectedAccountType === 'student'"
-                                 (click)="selectAccountType('student')">
+                                 [class.selected]="selectedAccountType === 'etudiant'"
+                                 (click)="selectAccountType('etudiant')">
                                 <div class="card-check">✓</div>
                                 <div class="account-type-icon">🎓</div>
                                 <div class="account-type-title">Étudiant</div>
@@ -78,8 +78,8 @@
                             </div>
 
                             <div class="account-type-card modern-card" 
-                                 [class.selected]="selectedAccountType === 'professional'"
-                                 (click)="selectAccountType('professional')">
+                                 [class.selected]="selectedAccountType === 'professionnel'"
+                                 (click)="selectAccountType('professionnel')">
                                 <div class="card-check">✓</div>
                                 <div class="account-type-icon">🏥</div>
                                 <div class="account-type-title">Professionnel / Institution</div>
@@ -110,7 +110,7 @@
                             <!-- ============================================ -->
                             <!-- PROFESSIONNEL / INSTITUTION FORM -->
                             <!-- ============================================ -->
-                            <div *ngIf="selectedAccountType === 'professional'">
+                            <div *ngIf="selectedAccountType === 'professionnel'">
                                 
                                 <!-- Type de compte professionnel -->
                                 <div class="form-section">
@@ -120,10 +120,10 @@
                                     </h3>
                                     
                                     <div class="radio-group">
-                                        <label class="radio-card" [class.selected]="professionalType === 'health_professional'">
+                                        <label class="radio-card" [class.selected]="professionalType === 'professionnel'">
                                             <input type="radio" 
                                                    name="professionalType" 
-                                                   value="health_professional"
+                                                   value="professionnel"
                                                    [(ngModel)]="professionalType"
                                                    [ngModelOptions]="{standalone: true}">
                                             <div class="radio-content">
@@ -158,22 +158,22 @@
                                     <div class="form-grid">
                                         <div class="form-group">
                                             <label class="form-label">
-                                                Nom <span class="required">*</span>
-                                            </label>
-                                            <input type="text" 
-                                                   class="form-input" 
-                                                   placeholder="Nom du responsable" 
-                                                   formControlName="lastName">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="form-label">
                                                 Prénom <span class="required">*</span>
                                             </label>
                                             <input type="text" 
                                                    class="form-input" 
                                                    placeholder="Prénom du responsable" 
-                                                   formControlName="firstName">
+                                                   formControlName="prenom">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="form-label">
+                                                Nom <span class="required">*</span>
+                                            </label>
+                                            <input type="text" 
+                                                   class="form-input" 
+                                                   placeholder="Nom du responsable" 
+                                                   formControlName="nom">
                                         </div>
                                     </div>
 
@@ -184,7 +184,7 @@
                                         <input type="text" 
                                                class="form-input" 
                                                placeholder="Ex: Médecin, Directeur, Responsable formation..." 
-                                               formControlName="position">
+                                               formControlName="fonctionResponsable">
                                     </div>
                                 </div>
 
@@ -202,7 +202,7 @@
                                         <input type="text" 
                                                class="form-input" 
                                                placeholder="Nom complet de votre établissement" 
-                                               formControlName="establishment">
+                                               formControlName="nomEtablissement">
                                     </div>
 
                                     <div class="form-grid">
@@ -223,7 +223,7 @@
                                             <input type="tel" 
                                                    class="form-input" 
                                                    placeholder="+216 XX XXX XXX" 
-                                                   formControlName="phone">
+                                                   formControlName="telephone">
                                         </div>
                                     </div>
 
@@ -234,7 +234,7 @@
                                         <input type="text" 
                                                class="form-input" 
                                                placeholder="Adresse complète de l'établissement" 
-                                               formControlName="address">
+                                               formControlName="adresse">
                                     </div>
                                 </div>
 
@@ -254,7 +254,7 @@
                                                 <input [type]="showPassword ? 'text' : 'password'" 
                                                        class="form-input" 
                                                        placeholder="Minimum 8 caractères" 
-                                                       formControlName="password">
+                                                       formControlName="motDePasse">
                                                 <button type="button" 
                                                         class="password-toggle" 
                                                         (click)="togglePassword()">
@@ -283,7 +283,7 @@
                             <!-- ============================================ -->
                             <!-- STUDENT FORM -->
                             <!-- ============================================ -->
-                            <div *ngIf="selectedAccountType === 'student'">
+                            <div *ngIf="selectedAccountType === 'etudiant'">
                                 
                                 <!-- Informations personnelles -->
                                 <div class="form-section">
@@ -300,7 +300,7 @@
                                             <input type="text" 
                                                    class="form-input" 
                                                    placeholder="Votre prénom" 
-                                                   formControlName="firstName">
+                                                   formControlName="prenom">
                                         </div>
 
                                         <div class="form-group">
@@ -310,7 +310,7 @@
                                             <input type="text" 
                                                    class="form-input" 
                                                    placeholder="Votre nom" 
-                                                   formControlName="lastName">
+                                                   formControlName="nom">
                                         </div>
                                     </div>
 
@@ -332,7 +332,7 @@
                                         <input type="tel" 
                                                class="form-input" 
                                                placeholder="+216 XX XXX XXX" 
-                                               formControlName="phone">
+                                               formControlName="telephone">
                                     </div>
                                 </div>
 
@@ -352,7 +352,7 @@
                                                 <input [type]="showPassword ? 'text' : 'password'" 
                                                        class="form-input" 
                                                        placeholder="Minimum 8 caractères" 
-                                                       formControlName="password">
+                                                       formControlName="motDePasse">
                                                 <button type="button" 
                                                         class="password-toggle" 
                                                         (click)="togglePassword()">
@@ -390,7 +390,7 @@
                                         <input type="text" 
                                                class="form-input" 
                                                placeholder="Ex: Faculté de Médecine de Tunis" 
-                                               formControlName="university">
+                                               formControlName="universite">
                                     </div>
 
                                     <div class="form-grid">
@@ -398,7 +398,7 @@
                                             <label class="form-label">
                                                 Spécialité <span class="required">*</span>
                                             </label>
-                                            <select class="form-select" formControlName="specialty">
+                                            <select class="form-select" formControlName="specialite">
                                                 <option value="">Sélectionnez votre spécialité</option>
                                                 <option value="medecine">Médecine</option>
                                                 <option value="infirmier">Soins infirmiers</option>
@@ -414,7 +414,7 @@
                                             <label class="form-label">
                                                 Niveau d'étude <span class="required">*</span>
                                             </label>
-                                            <select class="form-select" formControlName="studyLevel">
+                                            <select class="form-select" formControlName="niveauEtude">
                                                 <option value="">Sélectionnez votre niveau</option>
                                                 <option value="l1">L1 - Licence 1ère année</option>
                                                 <option value="l2">L2 - Licence 2ème année</option>
@@ -453,7 +453,7 @@
                             <!-- ============================================ -->
                             <!-- PROFESSIONNEL / INSTITUTION VERIFICATION -->
                             <!-- ============================================ -->
-                            <div *ngIf="selectedAccountType === 'professional'">
+                            <div *ngIf="selectedAccountType === 'professionnel'">
                                 <div class="form-section">
                                     <h3 class="section-title">
                                         <span class="title-icon">✅</span>
@@ -477,13 +477,13 @@
                                             <input type="text" 
                                                    class="form-input" 
                                                    placeholder="Ex: 123456789" 
-                                                   formControlName="registrationNumber">
+                                                   formControlName="numeroImmatriculation">
                                             <p class="help-text">Numéro officiel d'enregistrement de votre institution</p>
                                         </div>
                                     </div>
 
                                     <!-- Pour professionnel -->
-                                    <div *ngIf="professionalType === 'health_professional'">
+                                    <div *ngIf="professionalType === 'professionnel'">
                                         <div class="info-banner">
                                             <span class="banner-icon">ℹ️</span>
                                             <div class="banner-content">
@@ -499,7 +499,7 @@
                                             <input type="text" 
                                                    class="form-input" 
                                                    placeholder="Ex: 12345/2024" 
-                                                   formControlName="professionalOrderNumber">
+                                                   formControlName="numeroOrdreProfessionnel">
                                             <p class="help-text">Numéro d'inscription à votre ordre professionnel</p>
                                         </div>
                                     </div>
@@ -552,7 +552,7 @@
                             <!-- ============================================ -->
                             <!-- STUDENT VERIFICATION -->
                             <!-- ============================================ -->
-                            <div *ngIf="selectedAccountType === 'student'">
+                            <div *ngIf="selectedAccountType === 'etudiant'">
                                 <div class="form-section">
                                     <h3 class="section-title">
                                         <span class="title-icon">✅</span>
@@ -574,7 +574,7 @@
                                         <input type="text" 
                                                class="form-input" 
                                                placeholder="Ex: 2024/12345" 
-                                               formControlName="studentNumber">
+                                               formControlName="numeroInscription">
                                         <p class="help-text">Votre numéro d'inscription officiel</p>
                                     </div>
 
@@ -626,9 +626,9 @@
                                 <span class="btn-text">Retour</span>
                             </button>
                             <button class="btn btn-primary btn-large" 
-                                    [disabled]="verificationForm.invalid"
+                                    [disabled]="verificationForm.invalid || isSubmitting"
                                     (click)="submitForm()">
-                                <span class="btn-text">Créer mon compte</span>
+                                <span class="btn-text">{{ isSubmitting ? 'Envoi en cours...' : 'Créer mon compte' }}</span>
                                 <span class="btn-icon">✓</span>
                             </button>
                         </div>
@@ -673,6 +673,18 @@
         <button class="btn btn-primary btn-large" (click)="closeModal()">
             <span class="btn-text">Compris</span>
             <span class="btn-icon">✓</span>
+        </button>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div class="modal-overlay" [class.active]="showErrorModal" (click)="closeErrorModal()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="modal-icon" style="background: #fee; color: #c00;">❌</div>
+        <h3 class="modal-title">Erreur</h3>
+        <p class="modal-text">{{ errorMessage }}</p>
+        <button class="btn btn-primary btn-large" (click)="closeErrorModal()">
+            <span class="btn-text">Fermer</span>
         </button>
     </div>
 </div>
