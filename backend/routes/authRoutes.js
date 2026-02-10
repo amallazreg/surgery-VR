@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const upload = require('../middlewares/upload');
+const upload = require('../middlewares/cloudinary');
 const {signup,signin} = require('../controllers/authController');
 
 router.post(
   '/signup',
-  upload.single('documentVerification'),
+    upload.single('documentVerification'),
   signup
 );
 

@@ -10,23 +10,25 @@ const signup = async (req, res) => {
       email,
       motDePasse,
       confirmPassword,
-      phone,
+      telephone,
       role, 
 
-      // champs medecin
-      specialite,
-      etablissement,
-      ville,
-      numeroOrdre,
+      // champs professionnel
+      typeProfessionnel,         
+      fonctionResponsable,
+      nomEtablissement,
+      adresse,
+      numeroOrdreProfessionnel, //pour un professionnel
+      numeroImmatriculation, // pour un hopital par exemple
 
-      // champs etudiant
+      // champs étudiant
       universite,
-      anneeEtude,
-      encadrant,
+      specialite,
+      niveauEtude,
+      numeroInscription,
 
       objectif
     } = req.body;
-
 
     if (!prenom || !nom || !email || !motDePasse || !confirmPassword) {
       return res.status(400).json({ message: "Champs obligatoires manquants" });
@@ -36,6 +38,9 @@ const signup = async (req, res) => {
       return res.status(400).json({ message: "Les mots de passe ne correspondent pas" });
     }
 
+    // =======================
+    // Vérifier si admin existe
+    // =======================
     const adminExiste = await User.findOne({ role: 'admin' });
 
     let finalRole;
@@ -45,62 +50,73 @@ const signup = async (req, res) => {
       finalRole = 'admin';
       finalStatut = 'approuve';
     } else {
-      // Médecin ou étudiant
-      finalRole = role; // medecin | etudiant
+      finalRole = role; // 'etudiant' ou 'professionnel'
       finalStatut = 'en_attente';
     }
 
-    
+    // =======================
+    // Vérifier email déjà existant
+    // =======================
     const existing = await User.findOne({ email });
     if (existing) {
       return res.status(400).json({ message: "Email déjà utilisé" });
     }
 
-    let documentVerification = null;
-    if (finalRole !== 'admin') {
-      if (!req.file) {
-        return res.status(400).json({
-          message: "Document de vérification obligatoire"
-        });
-      }
-      documentVerification = req.file.path;
-    }
+    // =======================
+    // Gestion du document de vérification
+    // =======================
+let documentVerification = null;
 
- 
-    const user = new User({
+if (finalRole !== 'admin') {
+  if (!req.file) {
+    return res.status(400).json({ message: "Document obligatoire" });
+  }
+
+  documentVerification = req.file.path; // URL Cloudinary ✅
+}
+
+
+
+    // =======================
+    // Création de l'utilisateur
+    // =======================
+    const utilisateur = new User({
       prenom,
       nom,
       email,
       motDePasse,
-      phone,
+      telephone,
       role: finalRole,
       statut: finalStatut,
-
-      // médecin
-      specialite,
-      etablissement,
-      ville,
-      numeroOrdre,
-
-      // étudiant
-      universite,
-      anneeEtude,
-      encadrant,
-
       objectif,
-      documentVerification
+      
+      // Champs Professionnel
+      typeProfessionnel,
+      fonctionResponsable,
+      nomEtablissement,
+      adresse,
+      numeroOrdreProfessionnel,
+      numeroImmatriculation,
+      documentProfessionnel: documentVerification,
+
+      // Champs Étudiant
+      universite,
+      specialite,
+      niveauEtude,
+      numeroInscription,
+      documentEtudiant: documentVerification
     });
 
-    await user.save();
+    await utilisateur.save();
 
     res.status(201).json({
       message:
         finalRole === 'admin'
           ? "Compte admin créé avec succès"
           : "Inscription réussie. Compte en attente de validation.",
-      userId: user._id,
-      role: user.role,
-      statut: user.statut
+      userId: utilisateur._id,
+      role: utilisateur.role,
+      statut: utilisateur.statut
     });
 
   } catch (err) {
@@ -108,6 +124,8 @@ const signup = async (req, res) => {
     res.status(500).json({ message: "Erreur serveur lors de l'inscription" });
   }
 };
+
+
 
 
 const signin = async (req, res) => {

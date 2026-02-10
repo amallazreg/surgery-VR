@@ -19,11 +19,11 @@ const userSchema = new mongoose.Schema({
 
   motDePasse: { type: String, required: true },
 
-  phone: { type: String },
+  telephone: { type: String },
 
   role: {
     type: String,
-    enum: ['admin', 'medecin', 'etudiant'],
+    enum: ['admin', 'professionnel', 'etudiant'],
     required: true
   },
 
@@ -34,26 +34,27 @@ const userSchema = new mongoose.Schema({
   },
 
   // =========================
-  // Champs Médecin
+  // Champs Professionnel / Institution
   // =========================
-  specialite: String,
-  etablissement: String,
-  ville: String,
-  numeroOrdre: String,
+  typeProfessionnel: {
+    type: String,
+    enum: ['professionnel', 'institution'] 
+  },
+  fonctionResponsable: String,        
+  nomEtablissement: String,           
+  adresse: String,                    
+  numeroOrdreProfessionnel: String,  
+  numeroImmatriculation: String,      
+  documentProfessionnel: String,      
 
   // =========================
   // Champs Étudiant
   // =========================
-  universite: String,
-  anneeEtude: String,
-  encadrant: String,
-
-  // =========================
-  // Vérification
-  // =========================
-  objectif: String,
-
-  documentVerification: String,
+  universite: String,                  
+  specialite: String,                 
+  niveauEtude: String,                
+  numeroInscription: String,           
+  documentEtudiant: String,            
 
   createdAt: {
     type: Date,
@@ -63,9 +64,6 @@ const userSchema = new mongoose.Schema({
 });
 
 
-// ===============================
-// Hash mot de passe
-// ===============================
 userSchema.pre('save', async function () {
   if (!this.isModified('motDePasse')) return;
 
@@ -74,12 +72,8 @@ userSchema.pre('save', async function () {
 });
 
 
-// ===============================
-// Compare mot de passe
-// ===============================
-userSchema.methods.comparePassword = function (plainPassword) {
-  return bcrypt.compare(plainPassword, this.motDePasse);
+userSchema.methods.comparePassword = function (motDePassePlain) {
+  return bcrypt.compare(motDePassePlain, this.motDePasse);
 };
 
-
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Utilisateur', userSchema);

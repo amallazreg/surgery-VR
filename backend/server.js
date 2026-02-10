@@ -51,6 +51,15 @@ app.use('/demande',experienceSurMesureRoutes) ;
 app.use('/auth',authRoute) ; 
 app.use('/admin',adminRoute)
 
+app.use((err, req, res, next) => {
+  console.error("Erreur globale:", err);
+
+  res.status(err.status || 500).json({
+    message: err.message || "Erreur interne",
+  });
+});
+
+
 
 // Démarrage du serveur
 const port = process.env.PORT || 3000;
