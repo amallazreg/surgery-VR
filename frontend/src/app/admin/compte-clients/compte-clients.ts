@@ -1,40 +1,44 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { SideBar } from "../side-bar/side-bar";
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 import { AdminService } from '../../services/admin-service';
-import { CommonEngine } from '@angular/ssr/node';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
+import { Inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+
 
 export interface User {
   _id: string;
   prenom: string;
   nom: string;
   email: string;
-  phone?: string;
-  role: 'medecin' | 'etudiant';
+  telephone?: string;
+  role: 'professionnel' | 'etudiant';
   statut: 'en_attente' | 'approuve' | 'rejete';
   
-  // Champs Médecin
-  specialite?: string;
-  etablissement?: string;
-  ville?: string;
-  numeroOrdre?: string;
+  // Champs Médecin/Professionnel
+  typeProfessionnel?: string;
+  nomEtablissement?: string;
+  fonctionResponsable?: string;
+  numeroOrdreProfessionnel?: string;
+  numeroImmatriculation?: string;
+  adresse?: string;
   
   // Champs Étudiant
+  specialite?: string;
   universite?: string;
-  anneeEtude?: string;
-  encadrant?: string;
+  niveauEtude?: string;
+  numeroInscription?: string;
   
   // Commun
   objectif?: string;
   documentVerification?: string;
+  documentEtudiant?:string ; 
   motifRefus?: string;
   createdAt: Date;
-
-    selected?: boolean;
-
+  selected?: boolean;
 }
 
 export interface Stats {
@@ -45,18 +49,20 @@ export interface Stats {
 }
 
 export type FilterType = 'tous' | 'en_attente' | 'approuve' | 'rejete';
-export type RoleFilterType = 'tous' | 'medecin' | 'etudiant';
+export type RoleFilterType = 'tous' | 'professionnel' | 'etudiant';
 
 @Component({
   selector: 'app-compte-clients',
-  standalone : true,
-  imports: [SideBar,CommonModule,FormsModule],
+  standalone: true,
+  imports: [SideBar, CommonModule, FormsModule],
   templateUrl: './compte-clients.html',
   styleUrl: './compte-clients.css',
 })
 export class CompteClients implements OnInit, OnDestroy {
   
-
+  // ========================================
+  // Propriétés de Données
+  // ========================================
   allUsers: User[] = [];
   filteredUsers: User[] = [];
   paginatedUsers: User[] = [];
@@ -68,45 +74,79 @@ export class CompteClients implements OnInit, OnDestroy {
     totalUsers: 0
   };
   
+  // ========================================
+  // Filtres et Recherche
+  // ========================================
   currentFilter: FilterType = 'tous';
   currentRoleFilter: RoleFilterType = 'tous';
   searchQuery: string = '';
   
+  // ========================================
+  // Pagination
+  // ========================================
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalPages: number = 1;
   
+  // ========================================
+  // États UI
+  // ========================================
   isLoading: boolean = false;
   showEmptyState: boolean = false;
   
+  // ========================================
+  // Modales
+  // ========================================
   showDetailsModal: boolean = false;
   showRejectModal: boolean = false;
   selectedUser: User | null = null;
   motifRefus: string = '';
   
+  // ========================================
+  // Sélection Multiple
+  // ========================================
   selectedUserIds: Set<string> = new Set();
   selectAll: boolean = false;
   
+  // ========================================
+  // RxJS
+  // ========================================
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
+  private autoRefreshInterval: any;
+
+  // Configuration du rechargement automatique (optionnel)
+  // Mettre à 0 pour désactiver
+  private autoRefreshMinutes: number = 0; // Changez à 5 pour recharger toutes les 5 minutes
 
   
   constructor(
-    private adminService : AdminService
+    private adminService: AdminService,
+      @Inject(PLATFORM_ID) private platformId: Object
+
   ) {}
 
-
+  // ========================================
+  // Lifecycle Hooks
+  // ========================================
   ngOnInit(): void {
+
+    console.log('=== CompteClients ngOnInit ===');
+    console.log('Service AdminService disponible:', !!this.adminService);
     this.loadUsers();
     this.setupSearchDebounce();
+    this.setupAutoRefresh();
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+    this.clearAutoRefresh();
   }
 
-
+  // ========================================
+  // Initialisation
+  // ========================================
   private setupSearchDebounce(): void {
     this.searchSubject
       .pipe(
@@ -116,46 +156,90 @@ export class CompteClients implements OnInit, OnDestroy {
       )
       .subscribe(query => {
         this.searchQuery = query;
+        this.currentPage = 1;
         this.applyFilters();
       });
   }
 
-  toggleSelectAll() {
-  this.filteredUsers.forEach(user => user.selected = this.selectAll);
-  this.selectedUserIds = new Set(this.filteredUsers.filter(u => u.selected).map(u => u._id));
-}
+  private setupAutoRefresh(): void {
+    if (this.autoRefreshMinutes > 0) {
+      console.log(`Auto-refresh activé: toutes les ${this.autoRefreshMinutes} minutes`);
+      this.autoRefreshInterval = setInterval(() => {
+        console.log('Rechargement automatique des données...');
+        this.loadUsers();
+      }, this.autoRefreshMinutes * 60 * 1000);
+    }
+  }
 
-toggleUserSelection(user: User) {
-  if (user.selected) this.selectedUserIds.add(user._id);
-  else this.selectedUserIds.delete(user._id);
-}
+  private clearAutoRefresh(): void {
+    if (this.autoRefreshInterval) {
+      clearInterval(this.autoRefreshInterval);
+      this.autoRefreshInterval = null;
+    }
+  }
+
+  // ========================================
+  // Sélection Multiple
+  // ========================================
+  toggleSelectAll(): void {
+    this.paginatedUsers.forEach(user => user.selected = this.selectAll);
+    this.updateSelectedUserIds();
+  }
+
+  toggleUserSelection(user: User): void {
+    this.updateSelectedUserIds();
+    this.updateSelectAllState();
+  }
+
+  private updateSelectedUserIds(): void {
+    this.selectedUserIds = new Set(
+      this.allUsers.filter(u => u.selected).map(u => u._id)
+    );
+  }
+
+  private updateSelectAllState(): void {
+    this.selectAll = this.paginatedUsers.length > 0 && 
+                     this.paginatedUsers.every(u => u.selected);
+  }
+
+  isUserSelected(userId: string): boolean {
+    return this.selectedUserIds.has(userId);
+  }
 
 
+
+  // ========================================
+  // Chargement des Données
+  // ========================================
   loadUsers(): void {
     this.isLoading = true;
     
     this.adminService.tousclients()
       .pipe(takeUntil(this.destroy$))
-         .subscribe({
-         next: (users: User[]) => {
-          this.allUsers = users;
+      .subscribe({
+        next: (users: User[]) => {
+          
+          this.allUsers = users.map(user => ({ ...user, selected: false }));
+          this.currentPage = 1; // Reset à la page 1
           this.applyFilters();
           this.updateStats();
           this.isLoading = false;
-       //   this.toastService.show('Données chargées avec succès', 'success');
-       console.log(users)
-       console.log('Données chargées avec succès', 'success')
+       
         },
-       error: (error) => {
+        error: (error) => {
           console.error('Erreur chargement comptes:', error);
           this.isLoading = false;
-         // this.toastService.show('Erreur lors du chargement', 'error');
-         console.log('Erreur lors du chargement', 'error')
+          this.allUsers = [];
+          this.filteredUsers = [];
+          this.paginatedUsers = [];
+          this.showToast('Erreur lors du chargement des comptes', 'error');
         }
       });
   }
 
-
+  // ========================================
+  // Filtres
+  // ========================================
   setActiveFilter(filter: FilterType): void {
     this.currentFilter = filter;
     this.currentPage = 1;
@@ -191,25 +275,44 @@ toggleUserSelection(user: User) {
       filtered = filtered.filter(user => {
         const fullName = `${user.prenom} ${user.nom}`.toLowerCase();
         const email = user.email.toLowerCase();
-        const etablissement = (user.etablissement || user.universite || '').toLowerCase();
+        const etablissement = (user.nomEtablissement || user.universite || '').toLowerCase();
+        const telephone = (user.telephone || '').toLowerCase();
         
         return fullName.includes(query) || 
                email.includes(query) || 
-               etablissement.includes(query);
+               etablissement.includes(query) ||
+               telephone.includes(query);
       });
     }
 
     this.filteredUsers = filtered;
+    console.log('Filtres appliqués - Résultats:', this.filteredUsers.length);
     this.updatePagination();
-    this.showEmptyState = filtered.length === 0;
+    this.showEmptyState = filtered.length === 0 && !this.isLoading;
   }
 
-
+  // ========================================
+  // Pagination
+  // ========================================
   updatePagination(): void {
     this.totalPages = Math.ceil(this.filteredUsers.length / this.itemsPerPage);
+    
+    // S'assurer que la page actuelle est valide
+    if (this.currentPage > this.totalPages && this.totalPages > 0) {
+      this.currentPage = this.totalPages;
+    }
+    if (this.currentPage < 1) {
+      this.currentPage = 1;
+    }
+    
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
     this.paginatedUsers = this.filteredUsers.slice(startIndex, endIndex);
+    
+
+    
+    // Mettre à jour l'état de sélection globale
+    this.updateSelectAllState();
   }
 
   goToPage(page: number): void {
@@ -220,14 +323,14 @@ toggleUserSelection(user: User) {
   }
 
   previousPage(): void {
-    if (this.currentPage > 1) {
+    if (this.canGoPrevious) {
       this.currentPage--;
       this.updatePagination();
     }
   }
 
   nextPage(): void {
-    if (this.currentPage < this.totalPages) {
+    if (this.canGoNext) {
       this.currentPage++;
       this.updatePagination();
     }
@@ -241,7 +344,9 @@ toggleUserSelection(user: User) {
     return this.currentPage < this.totalPages;
   }
 
-  
+  // ========================================
+  // Statistiques
+  // ========================================
   updateStats(): void {
     this.stats = {
       totalPending: this.allUsers.filter(u => u.statut === 'en_attente').length,
@@ -260,39 +365,21 @@ toggleUserSelection(user: User) {
     };
   }
 
-
+  // ========================================
+  // Gestion des Modales
+  // ========================================
   viewUserDetails(user: User): void {
     this.selectedUser = user;
     this.showDetailsModal = true;
+      console.log('documentEtudiant:', user.documentEtudiant);
+
   }
 
   closeDetailsModal(): void {
     this.showDetailsModal = false;
-    this.selectedUser = null;
-  }
-
-  approveUser(user: User): void {
-    if (!confirm(`Êtes-vous sûr de vouloir approuver le compte de ${user.prenom} ${user.nom} ?`)) {
-      return;
-    }
-
- //   this.comptesService.approuverCompte(user._id)
-   //   .pipe(takeUntil(this.destroy$))
-   //   .subscribe({
-   //     next: (updatedUser: User) => {
-   //       const index = this.allUsers.findIndex(u => u._id === user._id);
-   //       if (index !== -1) {
-     //       this.allUsers[index] = updatedUser;
-       //   }
-    //      this.applyFilters();
-      //    this.updateStats();
-     //     this.toastService.show(`Compte de ${user.prenom} ${user.nom} approuvé !`, 'success');
-     //   },
-      //  error: (error) => {
-      //    console.error('Erreur approbation:', error);
-       //   this.toastService.show('Erreur lors de l\'approbation', 'error');
-        //}
-    //  });
+    setTimeout(() => {
+      this.selectedUser = null;
+    }, 300);
   }
 
   openRejectModal(user: User): void {
@@ -303,78 +390,227 @@ toggleUserSelection(user: User) {
 
   closeRejectModal(): void {
     this.showRejectModal = false;
-    this.selectedUser = null;
-    this.motifRefus = '';
+    setTimeout(() => {
+      this.selectedUser = null;
+      this.motifRefus = '';
+    }, 300);
+  }
+
+  // ========================================
+  // Actions sur les Comptes
+  // ========================================
+  approveUser(user: User): void {
+    if (!confirm(`Êtes-vous sûr de vouloir approuver le compte de ${user.prenom} ${user.nom} ?`)) {
+      return;
+    }
+
+    this.adminService.approuverCompte(user._id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedUser: User) => {
+          this.updateUserInList(updatedUser);
+          this.showToast(`Compte de ${user.prenom} ${user.nom} approuvé avec succès !`, 'success');
+          // Recharger automatiquement les données
+          this.loadUsers();
+        },
+        error: (error) => {
+          console.error('Erreur approbation:', error);
+          this.showToast('Erreur lors de l\'approbation du compte', 'error');
+        }
+      });
+  }
+
+  approveUserFromModal(user: User): void {
+    this.closeDetailsModal();
+    this.approveUser(user);
+  }
+
+  rejectUserFromModal(user: User): void {
+    this.closeDetailsModal();
+    setTimeout(() => {
+      this.openRejectModal(user);
+    }, 300);
   }
 
   confirmReject(): void {
     if (!this.motifRefus.trim()) {
-     // this.toastService.show('Veuillez indiquer un motif de rejet', 'error');
+      this.showToast('Veuillez indiquer un motif de rejet', 'error');
       return;
     }
 
     if (!this.selectedUser) return;
 
-//    this.comptesService.rejeterCompte(this.selectedUser._id, this.motifRefus)
-  //    .pipe(takeUntil(this.destroy$))
-    //  .subscribe({
-      //  next: (updatedUser: User) => {
-     //     const index = this.allUsers.findIndex(u => u._id === this.selectedUser!._id);
-       //   if (index !== -1) {
-        //    this.allUsers[index] = updatedUser;
-     //     }
-       //   this.applyFilters();
-         // this.updateStats();
-   //       this.closeRejectModal();
-     //     this.toastService.show('Compte rejeté', 'success');
-       // },
-     //   error: (error) => {
-       //   console.error('Erreur rejet:', error);
-         // this.toastService.show('Erreur lors du rejet', 'error');
-     //   }
-     // });
+    const userId = this.selectedUser._id;
+    const userName = `${this.selectedUser.prenom} ${this.selectedUser.nom}`;
+
+    this.adminService.rejeterCompte(userId, this.motifRefus)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (updatedUser: User) => {
+          this.updateUserInList(updatedUser);
+          this.closeRejectModal();
+          this.showToast(`Compte de ${userName} rejeté`, 'success');
+          // Recharger automatiquement les données
+          this.loadUsers();
+        },
+        error: (error) => {
+          console.error('Erreur rejet:', error);
+          this.showToast('Erreur lors du rejet du compte', 'error');
+        }
+      });
+  }
+
+  // Méthode helper pour mettre à jour un utilisateur dans la liste
+  private updateUserInList(updatedUser: User): void {
+    const index = this.allUsers.findIndex(u => u._id === updatedUser._id);
+    if (index !== -1) {
+      this.allUsers[index] = { ...updatedUser, selected: this.allUsers[index].selected };
+      this.applyFilters();
+      this.updateStats();
+    }
   }
 
   // ========================================
-  // Sélection Multiple
+  // Gestion des Documents
   // ========================================
+getDocumentUrl(documentPath: string): string {
+  // Si c'est déjà une URL complète, renvoyer telle quelle
+  if (!documentPath) return '';
+  if (documentPath.startsWith('http')) {
+    return documentPath;
+  }
+  // Sinon construire l'URL vers le backend
+  return `${this.getBackendUrl()}/uploads/${documentPath}`;
+}
 
-  isUserSelected(userId: string): boolean {
-    return this.selectedUserIds.has(userId);
+
+  getDocumentName(documentPath: string): string {
+    if (!documentPath) return 'Document';
+    
+    // Extraire le nom du fichier du chemin
+    const fileName = documentPath.split('/').pop() || documentPath;
+    
+    // Décoder les caractères URL encodés
+    try {
+      return decodeURIComponent(fileName);
+    } catch {
+      return fileName;
+    }
+  }
+
+  downloadDocument(documentPath: string): void {
+    const url = this.getDocumentUrl(documentPath);
+    const fileName = this.getDocumentName(documentPath);
+    
+    // Créer un lien temporaire pour télécharger
+    fetch(url)
+      .then(response => response.blob())
+      .then(blob => {
+        const link = document.createElement('a');
+        const objectUrl = URL.createObjectURL(blob);
+        
+        link.href = objectUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        
+        // Nettoyer
+        document.body.removeChild(link);
+        URL.revokeObjectURL(objectUrl);
+        
+        this.showToast('Document téléchargé avec succès', 'success');
+      })
+      .catch(error => {
+        console.error('Erreur téléchargement:', error);
+        this.showToast('Erreur lors du téléchargement du document', 'error');
+        
+        // Fallback: ouvrir dans un nouvel onglet
+        window.open(url, '_blank');
+      });
+  }
+
+  private getBackendUrl(): string {
+    // Ajustez cette URL selon votre configuration
+    // Exemple: return 'http://localhost:3000';
+    // Ou récupérez depuis un fichier de configuration
+    return window.location.origin;
   }
 
   // ========================================
   // Export
   // ========================================
-  exportToCSV(): void {
-    const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Établissement', 'Statut', 'Date'];
-    const rows = this.filteredUsers.map(user => [
-      user.prenom,
-      user.nom,
-      user.email,
-      user.phone || '',
-      user.role,
-      user.etablissement || user.universite || '',
-      this.getStatusLabel(user.statut),
-      this.formatDate(user.createdAt)
-    ]);
+exportToCSV(): void {
 
-    let csvContent = headers.join(',') + '\n';
-    csvContent += rows.map(row => 
-      row.map(cell => `"${cell}"`).join(',')
-    ).join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.href = url;
-    link.download = `comptes_medvr_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    
-    URL.revokeObjectURL(url);
- //   this.toastService.show('Export CSV réussi !', 'success');
+  if (!isPlatformBrowser(this.platformId)) {
+    return; // SSR protection
   }
+
+  const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Établissement', 'Statut', 'Date d\'inscription'];
+  const rows = this.filteredUsers.map(user => [
+    user.prenom,
+    user.nom,
+    user.email,
+    user.telephone || '',
+    this.capitalizeFirst(user.role),
+    this.getEtablissement(user),
+    this.getStatusLabel(user.statut),
+    this.formatDateTime(user.createdAt)
+  ]);
+
+  let csvContent = headers.join(',') + '\n';
+  csvContent += rows.map(row => 
+    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
+  ).join('\n');
+
+  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement('a');
+  const url = URL.createObjectURL(blob);
+
+  link.href = url;
+  link.download = `comptes_medvr_${new Date().toISOString().split('T')[0]}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(url);
+  this.showToast('Export CSV réussi !', 'success');
+}
+
+  // ========================================
+  // Notifications Toast
+  // ========================================
+private showToast(
+  message: string, 
+  type: 'success' | 'error' | 'warning' = 'success'
+): void {
+
+  if (!isPlatformBrowser(this.platformId)) {
+    return; // ❌ côté serveur → on sort
+  }
+
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+
+  const icon = type === 'success' ? '✅' : type === 'error' ? '❌' : '⚠️';
+
+  toast.innerHTML = `
+    <span class="toast-icon">${icon}</span>
+    <span class="toast-message">${message}</span>
+  `;
+
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'slideOutRight 0.4s ease';
+    setTimeout(() => {
+      container.removeChild(toast);
+    }, 400);
+  }, 3000);
+}
+
 
   // ========================================
   // Helpers / Utilitaires
@@ -406,7 +642,7 @@ toggleUserSelection(user: User) {
   }
 
   getRoleIcon(role: User['role']): string {
-    return role === 'medecin' ? '👨‍⚕️' : '🎓';
+    return role === 'professionnel' ? '👨‍⚕️' : '🎓';
   }
 
   formatDate(date: Date | string): string {
@@ -430,14 +666,14 @@ toggleUserSelection(user: User) {
   }
 
   getEtablissement(user: User): string {
-    return user.etablissement || user.universite || 'N/A';
+    return user.nomEtablissement || user.universite || 'Non renseigné';
   }
 
   getSecondaryInfo(user: User): string {
-    if (user.role === 'medecin') {
-      return user.specialite || '';
+    if (user.role === 'professionnel') {
+      return user.typeProfessionnel || 'Professionnel';
     } else {
-      return user.anneeEtude || '';
+      return user.niveauEtude || 'Étudiant';
     }
   }
 
