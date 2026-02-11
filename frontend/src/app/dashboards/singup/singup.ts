@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { Navbar } from "../../layout/navbar/navbar";
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AuthServiceService } from '../../services/auth-services';
 
 @Component({
   selector: 'app-singup',
   standalone : true ,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar,HttpClientModule],
+  imports: [CommonModule, FormsModule, Navbar, ReactiveFormsModule, RouterModule],
   templateUrl: './singup.html',
   styleUrl: './singup.css',
 })
@@ -39,8 +39,15 @@ export class Singup implements OnInit {
   // Modals
   showSuccessModal: boolean = false;
   showErrorModal: boolean = false;
+  showValidationModal: boolean = false;
   errorMessage: string = '';
+  validationMessage: string = '';
   isSubmitting: boolean = false;
+
+  // Validation tracking
+  formSubmitted: boolean = false;
+  step2Submitted: boolean = false;
+  step3Submitted: boolean = false;
 
   // API URL - ajustez selon votre configuration
   private apiUrl = 'http://localhost:3000/api/auth';
@@ -80,7 +87,7 @@ export class Singup implements OnInit {
       universite: [''],
       specialite: [''],
       niveauEtude: ['']
-    }, { validators: this.passwordMatchValidator });
+    });
 
     // Verification Form
     this.verificationForm = this.fb.group({
@@ -95,22 +102,27 @@ export class Singup implements OnInit {
     // Watch password changes for strength indicator
     this.infoForm.get('motDePasse')?.valueChanges.subscribe(password => {
       this.updatePasswordStrength(password);
+      this.checkPasswordsMatch();
+    });
+
+    // Watch confirm password changes
+    this.infoForm.get('confirmPassword')?.valueChanges.subscribe(() => {
+      this.checkPasswordsMatch();
     });
   }
 
   /**
-   * Custom validator to check if passwords match
+   * Check if passwords match
    */
-  passwordMatchValidator(group: FormGroup): { [key: string]: boolean } | null {
-    const password = group.get('motDePasse')?.value;
-    const confirmPassword = group.get('confirmPassword')?.value;
+  checkPasswordsMatch(): void {
+    const password = this.infoForm.get('motDePasse')?.value;
+    const confirmPassword = this.infoForm.get('confirmPassword')?.value;
     
-    if (password && confirmPassword && password !== confirmPassword) {
-      group.get('confirmPassword')?.setErrors({ passwordMismatch: true });
-      return { passwordMismatch: true };
+    if (confirmPassword && password !== confirmPassword) {
+      this.infoForm.get('confirmPassword')?.setErrors({ passwordMismatch: true });
+    } else if (confirmPassword && password === confirmPassword) {
+      this.infoForm.get('confirmPassword')?.setErrors(null);
     }
-    
-    return null;
   }
 
   /**
@@ -151,6 +163,7 @@ export class Singup implements OnInit {
    */
   selectAccountType(type: 'etudiant' | 'professionnel'): void {
     this.selectedAccountType = type;
+    this.professionalType = null; // Reset professional type when changing account type
     this.updateFormValidators();
   }
 
@@ -178,7 +191,10 @@ export class Singup implements OnInit {
       this.infoForm.get('niveauEtude')?.setValidators([Validators.required]);
     }
 
-    this.infoForm.updateValueAndValidity();
+    // Update validity
+    Object.keys(this.infoForm.controls).forEach(key => {
+      this.infoForm.get(key)?.updateValueAndValidity();
+    });
   }
 
   /**
@@ -199,31 +215,158 @@ export class Singup implements OnInit {
       this.verificationForm.get('numeroInscription')?.setValidators([Validators.required]);
     }
 
-    this.verificationForm.updateValueAndValidity();
+    // Update validity
+    Object.keys(this.verificationForm.controls).forEach(key => {
+      this.verificationForm.get(key)?.updateValueAndValidity();
+    });
+  }
+
+  /**
+   * Get missing fields for step 2
+   */
+  getMissingFieldsStep2(): string[] {
+    const missingFields: string[] = [];
+    
+    const prenomControl = this.infoForm.get('prenom');
+    const nomControl = this.infoForm.get('nom');
+    const emailControl = this.infoForm.get('email');
+    const passwordControl = this.infoForm.get('motDePasse');
+    const confirmPasswordControl = this.infoForm.get('confirmPassword');
+    
+    if (!prenomControl?.value || prenomControl.invalid) {
+      missingFields.push('Prénom');
+    }
+    if (!nomControl?.value || nomControl.invalid) {
+      missingFields.push('Nom');
+    }
+    if (!emailControl?.value) {
+      missingFields.push('Email');
+    } else if (emailControl.hasError('email')) {
+      missingFields.push('Email valide');
+    }
+    if (!passwordControl?.value) {
+      missingFields.push('Mot de passe');
+    } else if (passwordControl.hasError('minlength')) {
+      missingFields.push('Mot de passe (minimum 8 caractères)');
+    }
+    if (!confirmPasswordControl?.value) {
+      missingFields.push('Confirmation du mot de passe');
+    } else if (confirmPasswordControl.hasError('passwordMismatch')) {
+      missingFields.push('Les mots de passe doivent correspondre');
+    }
+
+    if (this.selectedAccountType === 'professionnel') {
+      if (!this.professionalType) {
+        missingFields.push('Type de compte professionnel');
+      }
+      if (!this.infoForm.get('fonctionResponsable')?.value) {
+        missingFields.push('Fonction');
+      }
+      if (!this.infoForm.get('nomEtablissement')?.value) {
+        missingFields.push('Nom de l\'établissement');
+      }
+      if (!this.infoForm.get('telephone')?.value) {
+        missingFields.push('Téléphone');
+      }
+      if (!this.infoForm.get('adresse')?.value) {
+        missingFields.push('Adresse');
+      }
+    } else if (this.selectedAccountType === 'etudiant') {
+      if (!this.infoForm.get('universite')?.value) {
+        missingFields.push('Établissement');
+      }
+      if (!this.infoForm.get('specialite')?.value) {
+        missingFields.push('Spécialité');
+      }
+      if (!this.infoForm.get('niveauEtude')?.value) {
+        missingFields.push('Niveau d\'étude');
+      }
+    }
+
+    return missingFields;
+  }
+
+  /**
+   * Get missing fields for step 3
+   */
+  getMissingFieldsStep3(): string[] {
+    const missingFields: string[] = [];
+
+    if (this.selectedAccountType === 'professionnel') {
+      if (this.professionalType === 'professionnel') {
+        if (!this.verificationForm.get('numeroOrdreProfessionnel')?.value) {
+          missingFields.push('Numéro d\'ordre professionnel');
+        }
+      } else if (this.professionalType === 'institution') {
+        if (!this.verificationForm.get('numeroImmatriculation')?.value) {
+          missingFields.push('Numéro d\'immatriculation');
+        }
+      }
+      if (!this.professionalFile) {
+        missingFields.push('Document justificatif');
+      }
+    } else if (this.selectedAccountType === 'etudiant') {
+      if (!this.verificationForm.get('numeroInscription')?.value) {
+        missingFields.push('Numéro d\'inscription universitaire');
+      }
+      if (!this.studentFile) {
+        missingFields.push('Carte étudiant');
+      }
+    }
+
+    return missingFields;
+  }
+
+  /**
+   * Show validation popup
+   */
+  showValidationError(missingFields: string[]): void {
+    if (missingFields.length === 1) {
+      this.validationMessage = `Veuillez remplir le champ manquant : ${missingFields[0]}`;
+    } else {
+      this.validationMessage = `Veuillez remplir les champs manquants :\n• ${missingFields.join('\n• ')}`;
+    }
+    this.showValidationModal = true;
+  }
+
+  /**
+   * Close validation modal
+   */
+  closeValidationModal(): void {
+    this.showValidationModal = false;
+    this.validationMessage = '';
   }
 
   /**
    * Navigate to next step
    */
   nextStep(): void {
-    if (this.currentStep < 3) {
-      if (this.currentStep === 1 && !this.selectedAccountType) {
+    if (this.currentStep === 1) {
+      if (!this.selectedAccountType) {
+        this.showValidationError(['Type de compte']);
         return;
       }
+      this.currentStep++;
+      this.updateProgressWidth();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    if (this.currentStep === 2) {
+      this.step2Submitted = true;
+      const missingFields = this.getMissingFieldsStep2();
       
-      if (this.currentStep === 2 && this.infoForm.invalid) {
+      if (missingFields.length > 0) {
         this.markFormGroupTouched(this.infoForm);
+        this.showValidationError(missingFields);
         return;
       }
 
       this.currentStep++;
       this.updateProgressWidth();
-      
-      if (this.currentStep === 3) {
-        this.updateVerificationValidators();
-      }
-
+      this.updateVerificationValidators();
       window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
     }
   }
 
@@ -252,11 +395,71 @@ export class Singup implements OnInit {
     Object.keys(formGroup.controls).forEach(key => {
       const control = formGroup.get(key);
       control?.markAsTouched();
+      control?.markAsDirty();
 
       if (control instanceof FormGroup) {
         this.markFormGroupTouched(control);
       }
     });
+  }
+
+  /**
+   * Check if a field has error and should show error message
+   */
+  hasError(fieldName: string, formGroup: FormGroup = this.infoForm): boolean {
+    const field = formGroup.get(fieldName);
+    
+    if (!field) {
+      return false;
+    }
+
+    // For step 2
+    if (formGroup === this.infoForm) {
+      return field.invalid && (field.touched || field.dirty || this.step2Submitted);
+    }
+    
+    // For step 3
+    if (formGroup === this.verificationForm) {
+      return field.invalid && (field.touched || field.dirty || this.step3Submitted);
+    }
+
+    return false;
+  }
+
+  /**
+   * Get error message for a field
+   */
+  getErrorMessage(fieldName: string, formGroup: FormGroup = this.infoForm): string {
+    const field = formGroup.get(fieldName);
+    
+    if (!field || !field.errors) {
+      return '';
+    }
+
+    if (field.errors['required']) {
+      return 'Ce champ est requis';
+    }
+    if (field.errors['email']) {
+      return 'Email invalide';
+    }
+    if (field.errors['minlength']) {
+      const requiredLength = field.errors['minlength'].requiredLength;
+      return `Minimum ${requiredLength} caractères`;
+    }
+    if (field.errors['passwordMismatch']) {
+      return 'Les mots de passe ne correspondent pas';
+    }
+
+    return 'Champ invalide';
+  }
+
+  /**
+   * Check if passwords match for display
+   */
+  get passwordsDoNotMatch(): boolean {
+    const confirmPassword = this.infoForm.get('confirmPassword');
+    return !!(confirmPassword && confirmPassword.hasError('passwordMismatch') && 
+             (confirmPassword.touched || confirmPassword.dirty || this.step2Submitted));
   }
 
   /**
@@ -307,18 +510,12 @@ export class Singup implements OnInit {
    * Submit the complete form
    */
   submitForm(): void {
-    if (this.verificationForm.invalid) {
-      this.markFormGroupTouched(this.verificationForm);
-      return;
-    }
+    this.step3Submitted = true;
+    const missingFields = this.getMissingFieldsStep3();
 
-    if (this.selectedAccountType === 'etudiant' && !this.studentFile) {
-      this.showError('Veuillez télécharger votre carte étudiant');
-      return;
-    }
-    
-    if (this.selectedAccountType === 'professionnel' && !this.professionalFile) {
-      this.showError('Veuillez télécharger votre document justificatif');
+    if (missingFields.length > 0) {
+      this.markFormGroupTouched(this.verificationForm);
+      this.showValidationError(missingFields);
       return;
     }
 
@@ -379,7 +576,7 @@ export class Singup implements OnInit {
       formData.append('specialite', this.infoForm.get('specialite')?.value);
       formData.append('niveauEtude', this.infoForm.get('niveauEtude')?.value);
       formData.append('numeroInscription', 
-        this.verificationForm.get('numeroInscription')?.value);
+      this.verificationForm.get('numeroInscription')?.value);
 
       if (this.studentFile) {
         formData.append('documentVerification', this.studentFile);

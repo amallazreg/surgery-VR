@@ -95,7 +95,6 @@
 
                         <div class="step-navigation">
                             <button class="btn btn-primary btn-large" 
-                                    [disabled]="!selectedAccountType"
                                     (click)="nextStep()">
                                 <span class="btn-text">Continuer</span>
                                 <span class="btn-icon">→</span>
@@ -146,6 +145,9 @@
                                             <div class="radio-check">✓</div>
                                         </label>
                                     </div>
+                                    <div class="error-message" *ngIf="step2Submitted && !professionalType">
+                                        Veuillez sélectionner un type de compte
+                                    </div>
                                 </div>
 
                                 <!-- Informations du responsable -->
@@ -162,8 +164,12 @@
                                             </label>
                                             <input type="text" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('prenom')"
                                                    placeholder="Prénom du responsable" 
                                                    formControlName="prenom">
+                                            <div class="error-message" *ngIf="hasError('prenom')">
+                                                {{ getErrorMessage('prenom') }}
+                                            </div>
                                         </div>
 
                                         <div class="form-group">
@@ -172,8 +178,12 @@
                                             </label>
                                             <input type="text" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('nom')"
                                                    placeholder="Nom du responsable" 
                                                    formControlName="nom">
+                                            <div class="error-message" *ngIf="hasError('nom')">
+                                                {{ getErrorMessage('nom') }}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -183,8 +193,12 @@
                                         </label>
                                         <input type="text" 
                                                class="form-input" 
+                                               [class.error]="hasError('fonctionResponsable')"
                                                placeholder="Ex: Médecin, Directeur, Responsable formation..." 
                                                formControlName="fonctionResponsable">
+                                        <div class="error-message" *ngIf="hasError('fonctionResponsable')">
+                                            {{ getErrorMessage('fonctionResponsable') }}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -201,8 +215,12 @@
                                         </label>
                                         <input type="text" 
                                                class="form-input" 
+                                               [class.error]="hasError('nomEtablissement')"
                                                placeholder="Nom complet de votre établissement" 
                                                formControlName="nomEtablissement">
+                                        <div class="error-message" *ngIf="hasError('nomEtablissement')">
+                                            {{ getErrorMessage('nomEtablissement') }}
+                                        </div>
                                     </div>
 
                                     <div class="form-grid">
@@ -212,8 +230,12 @@
                                             </label>
                                             <input type="email" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('email')"
                                                    placeholder="contact@etablissement.tn" 
                                                    formControlName="email">
+                                            <div class="error-message" *ngIf="hasError('email')">
+                                                {{ getErrorMessage('email') }}
+                                            </div>
                                         </div>
 
                                         <div class="form-group">
@@ -222,8 +244,12 @@
                                             </label>
                                             <input type="tel" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('telephone')"
                                                    placeholder="+216 XX XXX XXX" 
                                                    formControlName="telephone">
+                                            <div class="error-message" *ngIf="hasError('telephone')">
+                                                {{ getErrorMessage('telephone') }}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -233,8 +259,12 @@
                                         </label>
                                         <input type="text" 
                                                class="form-input" 
+                                               [class.error]="hasError('adresse')"
                                                placeholder="Adresse complète de l'établissement" 
                                                formControlName="adresse">
+                                        <div class="error-message" *ngIf="hasError('adresse')">
+                                            {{ getErrorMessage('adresse') }}
+                                        </div>
                                     </div>
                                 </div>
 
@@ -253,6 +283,7 @@
                                             <div class="password-input-wrapper">
                                                 <input [type]="showPassword ? 'text' : 'password'" 
                                                        class="form-input" 
+                                                       [class.error]="hasError('motDePasse')"
                                                        placeholder="Minimum 8 caractères" 
                                                        formControlName="motDePasse">
                                                 <button type="button" 
@@ -261,8 +292,11 @@
                                                     {{ showPassword ? '👁️' : '👁️‍🗨️' }}
                                                 </button>
                                             </div>
-                                            <div class="password-strength">
+                                            <div class="password-strength" *ngIf="infoForm.get('motDePasse')?.value">
                                                 <div class="strength-bar" [class]="passwordStrength"></div>
+                                            </div>
+                                            <div class="error-message" *ngIf="hasError('motDePasse')">
+                                                {{ getErrorMessage('motDePasse') }}
                                             </div>
                                         </div>
 
@@ -272,8 +306,15 @@
                                             </label>
                                             <input type="password" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('confirmPassword') || infoForm.hasError('passwordMismatch')"
                                                    placeholder="Ressaisir le mot de passe" 
                                                    formControlName="confirmPassword">
+                                            <div class="error-message" *ngIf="hasError('confirmPassword')">
+                                                {{ getErrorMessage('confirmPassword') }}
+                                            </div>
+                                            <div class="error-message" *ngIf="infoForm.hasError('passwordMismatch') && (infoForm.get('confirmPassword')?.touched || step2Submitted)">
+                                                Les mots de passe ne correspondent pas
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -299,8 +340,12 @@
                                             </label>
                                             <input type="text" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('prenom')"
                                                    placeholder="Votre prénom" 
                                                    formControlName="prenom">
+                                            <div class="error-message" *ngIf="hasError('prenom')">
+                                                {{ getErrorMessage('prenom') }}
+                                            </div>
                                         </div>
 
                                         <div class="form-group">
@@ -309,8 +354,12 @@
                                             </label>
                                             <input type="text" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('nom')"
                                                    placeholder="Votre nom" 
                                                    formControlName="nom">
+                                            <div class="error-message" *ngIf="hasError('nom')">
+                                                {{ getErrorMessage('nom') }}
+                                            </div>
                                         </div>
                                     </div>
 
@@ -320,8 +369,12 @@
                                         </label>
                                         <input type="email" 
                                                class="form-input" 
+                                               [class.error]="hasError('email')"
                                                placeholder="votre.email@exemple.tn" 
                                                formControlName="email">
+                                        <div class="error-message" *ngIf="hasError('email')">
+                                            {{ getErrorMessage('email') }}
+                                        </div>
                                         <p class="help-text">Utilisez de préférence votre email universitaire</p>
                                     </div>
 
@@ -351,6 +404,7 @@
                                             <div class="password-input-wrapper">
                                                 <input [type]="showPassword ? 'text' : 'password'" 
                                                        class="form-input" 
+                                                       [class.error]="hasError('motDePasse')"
                                                        placeholder="Minimum 8 caractères" 
                                                        formControlName="motDePasse">
                                                 <button type="button" 
@@ -359,8 +413,11 @@
                                                     {{ showPassword ? '👁️' : '👁️‍🗨️' }}
                                                 </button>
                                             </div>
-                                            <div class="password-strength">
+                                            <div class="password-strength" *ngIf="infoForm.get('motDePasse')?.value">
                                                 <div class="strength-bar" [class]="passwordStrength"></div>
+                                            </div>
+                                            <div class="error-message" *ngIf="hasError('motDePasse')">
+                                                {{ getErrorMessage('motDePasse') }}
                                             </div>
                                         </div>
 
@@ -370,8 +427,15 @@
                                             </label>
                                             <input type="password" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('confirmPassword') || infoForm.hasError('passwordMismatch')"
                                                    placeholder="Ressaisir le mot de passe" 
                                                    formControlName="confirmPassword">
+                                            <div class="error-message" *ngIf="hasError('confirmPassword')">
+                                                {{ getErrorMessage('confirmPassword') }}
+                                            </div>
+                                            <div class="error-message" *ngIf="infoForm.hasError('passwordMismatch') && (infoForm.get('confirmPassword')?.touched || step2Submitted)">
+                                                Les mots de passe ne correspondent pas
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -389,8 +453,12 @@
                                         </label>
                                         <input type="text" 
                                                class="form-input" 
+                                               [class.error]="hasError('universite')"
                                                placeholder="Ex: Faculté de Médecine de Tunis" 
                                                formControlName="universite">
+                                        <div class="error-message" *ngIf="hasError('universite')">
+                                            {{ getErrorMessage('universite') }}
+                                        </div>
                                     </div>
 
                                     <div class="form-grid">
@@ -398,7 +466,9 @@
                                             <label class="form-label">
                                                 Spécialité <span class="required">*</span>
                                             </label>
-                                            <select class="form-select" formControlName="specialite">
+                                            <select class="form-select" 
+                                                    [class.error]="hasError('specialite')"
+                                                    formControlName="specialite">
                                                 <option value="">Sélectionnez votre spécialité</option>
                                                 <option value="medecine">Médecine</option>
                                                 <option value="infirmier">Soins infirmiers</option>
@@ -408,13 +478,18 @@
                                                 <option value="kinesitherapie">Kinésithérapie</option>
                                                 <option value="autre">Autre</option>
                                             </select>
+                                            <div class="error-message" *ngIf="hasError('specialite')">
+                                                {{ getErrorMessage('specialite') }}
+                                            </div>
                                         </div>
 
                                         <div class="form-group">
                                             <label class="form-label">
                                                 Niveau d'étude <span class="required">*</span>
                                             </label>
-                                            <select class="form-select" formControlName="niveauEtude">
+                                            <select class="form-select" 
+                                                    [class.error]="hasError('niveauEtude')"
+                                                    formControlName="niveauEtude">
                                                 <option value="">Sélectionnez votre niveau</option>
                                                 <option value="l1">L1 - Licence 1ère année</option>
                                                 <option value="l2">L2 - Licence 2ème année</option>
@@ -425,6 +500,9 @@
                                                 <option value="externat">Externat</option>
                                                 <option value="internat">Internat</option>
                                             </select>
+                                            <div class="error-message" *ngIf="hasError('niveauEtude')">
+                                                {{ getErrorMessage('niveauEtude') }}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -438,7 +516,6 @@
                                 <span class="btn-text">Retour</span>
                             </button>
                             <button class="btn btn-primary" 
-                                    [disabled]="infoForm.invalid"
                                     (click)="nextStep()">
                                 <span class="btn-text">Continuer</span>
                                 <span class="btn-icon">→</span>
@@ -476,8 +553,12 @@
                                             </label>
                                             <input type="text" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('numeroImmatriculation', verificationForm)"
                                                    placeholder="Ex: 123456789" 
                                                    formControlName="numeroImmatriculation">
+                                            <div class="error-message" *ngIf="hasError('numeroImmatriculation', verificationForm)">
+                                                {{ getErrorMessage('numeroImmatriculation', verificationForm) }}
+                                            </div>
                                             <p class="help-text">Numéro officiel d'enregistrement de votre institution</p>
                                         </div>
                                     </div>
@@ -498,8 +579,12 @@
                                             </label>
                                             <input type="text" 
                                                    class="form-input" 
+                                                   [class.error]="hasError('numeroOrdreProfessionnel', verificationForm)"
                                                    placeholder="Ex: 12345/2024" 
                                                    formControlName="numeroOrdreProfessionnel">
+                                            <div class="error-message" *ngIf="hasError('numeroOrdreProfessionnel', verificationForm)">
+                                                {{ getErrorMessage('numeroOrdreProfessionnel', verificationForm) }}
+                                            </div>
                                             <p class="help-text">Numéro d'inscription à votre ordre professionnel</p>
                                         </div>
                                     </div>
@@ -511,6 +596,7 @@
                                         </label>
                                         <div class="file-upload-zone" 
                                              [class.has-file]="professionalFileName"
+                                             [class.error]="step3Submitted && !professionalFile"
                                              (click)="professionalFileInput.click()">
                                             <input type="file" 
                                                    #professionalFileInput
@@ -539,6 +625,9 @@
                                                     ✕
                                                 </button>
                                             </div>
+                                        </div>
+                                        <div class="error-message" *ngIf="step3Submitted && !professionalFile">
+                                            Veuillez télécharger un document justificatif
                                         </div>
                                         <p class="help-text">
                                             {{ professionalType === 'institution' ? 
@@ -573,8 +662,12 @@
                                         </label>
                                         <input type="text" 
                                                class="form-input" 
+                                               [class.error]="hasError('numeroInscription', verificationForm)"
                                                placeholder="Ex: 2024/12345" 
                                                formControlName="numeroInscription">
+                                        <div class="error-message" *ngIf="hasError('numeroInscription', verificationForm)">
+                                            {{ getErrorMessage('numeroInscription', verificationForm) }}
+                                        </div>
                                         <p class="help-text">Votre numéro d'inscription officiel</p>
                                     </div>
 
@@ -585,6 +678,7 @@
                                         </label>
                                         <div class="file-upload-zone" 
                                              [class.has-file]="studentFileName"
+                                             [class.error]="step3Submitted && !studentFile"
                                              (click)="studentFileInput.click()">
                                             <input type="file" 
                                                    #studentFileInput
@@ -614,6 +708,9 @@
                                                 </button>
                                             </div>
                                         </div>
+                                        <div class="error-message" *ngIf="step3Submitted && !studentFile">
+                                            Veuillez télécharger votre carte étudiant
+                                        </div>
                                         <p class="help-text">Votre carte étudiante ou certificat de scolarité en cours de validité</p>
                                     </div>
                                 </div>
@@ -626,7 +723,6 @@
                                 <span class="btn-text">Retour</span>
                             </button>
                             <button class="btn btn-primary btn-large" 
-                                    [disabled]="verificationForm.invalid || isSubmitting"
                                     (click)="submitForm()">
                                 <span class="btn-text">{{ isSubmitting ? 'Envoi en cours...' : 'Créer mon compte' }}</span>
                                 <span class="btn-icon">✓</span>
@@ -650,6 +746,19 @@
             <p>© 2026 SurgeryVR. Tous droits réservés.</p>
         </div>
     </footer>
+
+<!-- Validation Error Modal -->
+<div class="modal-overlay" [class.active]="showValidationModal" (click)="closeValidationModal()">
+    <div class="modal-content validation-modal" (click)="$event.stopPropagation()">
+        <div class="modal-icon error-icon">⚠️</div>
+        <h3 class="modal-title">Champs manquants</h3>
+        <p class="modal-text validation-text">{{ validationMessage }}</p>
+        <button class="btn btn-primary btn-large" (click)="closeValidationModal()">
+            <span class="btn-text">Compris</span>
+            <span class="btn-icon">✓</span>
+        </button>
+    </div>
+</div>
 
 <!-- Success Modal -->
 <div class="modal-overlay" [class.active]="showSuccessModal" (click)="closeModal()">

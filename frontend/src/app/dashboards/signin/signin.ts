@@ -4,12 +4,14 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Navbar } from "../../layout/navbar/navbar";
 import { AuthServiceService } from '../../services/auth-services';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
+
 
 @Component({
   selector: 'app-signin',
   standalone : true,
-  imports: [CommonModule, FormsModule, Navbar,ReactiveFormsModule],
+  imports: [CommonModule, FormsModule, Navbar,ReactiveFormsModule,RouterModule],
   templateUrl: './signin.html',
   styleUrl: './signin.css',
   animations: [
@@ -34,7 +36,8 @@ export class Signin  {
   constructor(
     private fb: FormBuilder,
     private authService: AuthServiceService,
-    private router: Router
+    private router: Router,
+    private http: HttpClient
   ) {
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
@@ -78,11 +81,17 @@ togglePasswordVisibility() {
 
         this.loading = false;
       },
-      error: (err) => {
-        console.error(err);
-        this.errorMessage = err.error?.message || 'Erreur de connexion';
-        this.loading = false;
+        error: (err) => {
+      console.error(err);
+      this.loading = false;
+
+      if (err.error?.message === 'Compte non approuvé') {
+        this.showError('Votre compte n\'est pas encore approuvé par l\'administrateur.');
+      } else {
+        this.showError(err.error?.message || 'Erreur de connexion');
       }
+    }
+
     });
   }
 
