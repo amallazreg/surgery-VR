@@ -5,7 +5,6 @@ const mongoose = require('mongoose');
 
 const demandeDemoRoutes = require('./routes/demandeDemo');
 const demandeDevisRoutes = require('./routes/demandeDevis') ; 
-const experienceSurMesureRoutes = require('./routes/experienceSurMesure') ; 
 const authRoute = require('./routes/authRoutes'); 
 const adminRoute = require('./routes/adminRoutes') ; 
 
@@ -20,8 +19,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors({
-  origin: 'http://localhost:4200', // Autorise uniquement les requêtes venant de cette origine
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Méthodes autorisées
+  origin: 'http://localhost:4200', 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
   allowedHeaders: ['Content-Type', 'Authorization'], 
 }));
 
@@ -47,7 +46,6 @@ app.get('/', (req, res) => {
 
 app.use('/demande',demandeDemoRoutes); 
 app.use('/demande',demandeDevisRoutes); 
-app.use('/demande',experienceSurMesureRoutes) ; 
 app.use('/auth',authRoute) ; 
 app.use('/admin',adminRoute)
 
