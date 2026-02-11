@@ -91,6 +91,9 @@ export class Demo implements OnInit {
     consent: false
   };
 
+    isSubmitting: boolean = false;
+
+
   ngOnInit(): void {
     console.log('✅ Demo component initialized');
   }
@@ -315,12 +318,19 @@ onSubmitForm() {
     consentement: this.formData.consent
   };
 
+    this.isSubmitting = true;
+
+
   this.demandeDemoService.envoyerDemandeDemo(payload).subscribe({
     next: (res) => {
+          this.isSubmitting = false;
+
       console.log('Demande envoyée:', res);
       this.showSuccessMessage = true;
     },
     error: (err) => {
+          this.isSubmitting = false;
+
       console.error('Erreur envoi:', err);
       this.errorMsg = "Erreur lors de l'envoi de la demande.";
     }

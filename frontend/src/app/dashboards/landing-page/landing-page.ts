@@ -1,13 +1,13 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Component, HostListener, AfterViewInit, Inject, PLATFORM_ID, ElementRef, ViewChild } from '@angular/core';
 import { Navbar } from "../../layout/navbar/navbar";
-import { Router } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 
 @Component({
   selector: 'app-landing-page',
   standalone: true,
-  imports: [CommonModule, Navbar, ButtonModule],
+  imports: [CommonModule, Navbar, ButtonModule,RouterModule],
   templateUrl: './landing-page.html',
   styleUrl: './landing-page.css',
 })

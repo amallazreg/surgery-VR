@@ -329,8 +329,8 @@
             class="btn btn-primary"
             (click)="onSubmitForm()"
             *ngIf="isLastStep">
-            🚀 Envoyer ma Demande
-          </button>
+ <span class="btn-text">{{ isSubmitting ? 'Envoi en cours...' : 'Demander un démo' }}</span>
+                                <span class="btn-icon">✓</span>          </button>
         </div>
       </div>
 
@@ -381,19 +381,7 @@
             </div>
             
             <div class="options-grid">
-                <div class="option-cta-card">
-                    <div class="option-icon">⚡</div>
-                    <h3>Expérience Sur Mesure</h3>
-                    <p>Créez des scénarios et simulations personnalisés pour vos objectifs 
-                    pédagogiques uniques</p>
-                    <ul class="option-features">
-                        <li>✓ Scénarios customisés</li>
-                        <li>✓ Développement dédié</li>
-                        <li>✓ Formation à la carte</li>
-                    </ul>
-                    <a href="demanderExperience" class="btn btn-primary">Créer Mon Expérience</a>
-                </div>
-                 
+                
                 
                 <div class="option-cta-card option-featured">
                     <div class="option-icon">💼</div>
@@ -412,9 +400,27 @@
 
 
   <!-- Footer -->
-  <footer>
-    <div class="footer-bottom">
-      <p>© 2026 SurgeryVR Solutions. Tous droits réservés.</p>
+<!-- Footer -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-section">
+            <h3>SurgeryVR Solutions</h3>
+            <p style="color: var(--text-gray); line-height: 1.7;">
+                Pionnier de la formation médicale en réalité virtuelle, nous transformons 
+                l'apprentissage des professionnels de santé.
+            </p>
+        </div>
+        
+        <div class="footer-section">
+            <h3>Contact</h3>
+            <ul>
+                <li><a href="mailto:inheritedgames@gmail.com">inheritedgames@gmail.com</a></li>
+                <li><a href="tel:+33123456789">+33 1 23 45 67 89</a></li>
+            </ul>
+        </div>
     </div>
-  </footer>
+    <div class="footer-bottom">
+        <p>© 2026 SurgeryVR Solutions. Tous droits réservés.</p>
+    </div>
+</footer>
 </body>
