@@ -8,6 +8,7 @@ import { Devis } from './Demande/devis/devis';
 import { Singup } from './dashboards/singup/singup';
 import { CompteClients } from './admin/compte-clients/compte-clients';
 import { DemandeDemo } from './admin/demande-demo/demande-demo';
+import { DemandeDevis } from './admin/demande-devis/demande-devis';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -20,7 +21,9 @@ export const routes: Routes = [
       { path: 'demanderDevis', component : Devis },
 
       { path: 'admin/clients', component : CompteClients },
-      {path : 'admin/demande-demo' , component : DemandeDemo}
+      {path : 'admin/demande-demo' , component : DemandeDemo} ,
+      {path : 'admin/demande-devis' , component : DemandeDevis}
+
 
 
 

@@ -35,7 +35,9 @@ export class AdminService {
   
 
     private apiUrl = 'http://localhost:3000/admin'
-   private apiUrl2 = 'http://localhost:3000'
+   private apiUrlDemo = 'http://localhost:3000/adminDemoRoute'
+  private apiUrlDevis = 'http://localhost:3000/adminDevisRoute'
+
 
 
   constructor(private http: HttpClient,) {}
@@ -56,12 +58,53 @@ export class AdminService {
       return this.http.put(`${this.apiUrl}/clients/${userId}/rejeter`,{ motifRefus });
     }
 
+
+
+
     tousDemandeDemo() : Observable<any>{
-      return this.http.get(`${this.apiUrl2}/demande/getToutes-demande-demo`)
+      return this.http.get(`${this.apiUrl}/demande/getToutes-demande-demo`)
     }
 
     contacterDemo(message : any,id: any) : Observable<any> {
-      return this.http.patch(`${this.apiUrl2}/adminDemoRoute/${id}/contacter`,message)
+      return this.http.patch(`${this.apiUrlDemo}/${id}/contacter`,message)
     }
+
+
+
+
+    toutesDemandesDevis(): Observable<any> {
+      return this.http.get(`${this.apiUrl}/demande/getToutes-demande-devis` );
+   }
+
+
+   calculerDevis(demandeId: string): Observable<any> {
+      return this.http.post( `${this.apiUrlDevis}/demandes-devis/${demandeId}/calculer`,{},);
+   }
+
+    envoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
+        return this.http.post( `${this.apiUrlDevis}/demandes-devis/${demandeId}/envoyer`, { messagePersonnalise } );
+    }
+
+    calculerEtEnvoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
+      return this.http.post( `${this.apiUrlDevis}/demandes-devis/${demandeId}/calculer-et-envoyer`, { messagePersonnalise }, );
+    }
+
+
+
+    demandesDevisParStatut(statut: 'nouvelle' | 'en_cours' | 'envoyee'): Observable<any> {
+     return this.http.get(`${this.apiUrlDevis}/statut/${statut}`);
+   }
+
+  statistiquesDevis(): Observable<any> {
+     return this.http.get(`${this.apiUrlDevis}/admin/demandes-devis/statistiques`);
+  }
+
+
+supprimerDemandeDevis(demandeId: string): Observable<any> {
+  return this.http.delete(
+    `${this.apiUrlDevis}/admin/demandes-devis/${demandeId}`,
+  
+  );
+}
 
 }

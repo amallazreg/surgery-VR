@@ -1,0 +1,400 @@
+<body>
+  <div class="admin-layout">
+    <app-side-bar></app-side-bar>
+
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <h2>Demandes de Devis 💰</h2>
+          <p>Calculez et envoyez des devis personnalisés</p>
+        </div>
+        <div class="header-right">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" placeholder="Rechercher..." [(ngModel)]="searchQuery" (input)="onSearchInput(searchQuery)">
+          </div>
+          <div class="user-profile">
+            <div class="avatar">AD</div>
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem;">Admin</div>
+              <div style="font-size: 0.85rem; color: #5A6B8C;">Gestionnaire</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card stat-nouvelle" style="animation-delay: 0.1s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-nouvelle">🆕</div>
+            <div class="stat-change neutral">
+              <span>{{stats.totalNouvelle}}</span>
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{stats.totalNouvelle}}</div>
+            <div class="stat-label">Nouvelles</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-en-cours" style="animation-delay: 0.2s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-en-cours">⏳</div>
+            <div class="stat-change positive">↗ +15%</div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{stats.totalEnCours}}</div>
+            <div class="stat-label">En cours</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-envoyee" style="animation-delay: 0.3s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-envoyee">✅</div>
+            <div class="stat-change positive">↗ +22%</div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{stats.totalEnvoyee}}</div>
+            <div class="stat-label">Envoyées</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-total" style="animation-delay: 0.4s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-total">💰</div>
+            <div class="stat-change positive">↗ +18%</div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value">{{formatCurrency(stats.montantTotal)}}</div>
+            <div class="stat-label">Montant Total</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-section">
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.active]="currentFilter === 'tous'" (click)="setActiveFilter('tous')">
+            <span class="tab-icon">📋</span>
+            <span class="tab-text">Toutes</span>
+            <span class="tab-badge">{{badgeCounts.tous}}</span>
+          </button>
+          <button class="filter-tab" [class.active]="currentFilter === 'nouvelle'" (click)="setActiveFilter('nouvelle')">
+            <span class="tab-icon">🆕</span>
+            <span class="tab-text">Nouvelles</span>
+            <span class="tab-badge nouvelle">{{badgeCounts.nouvelle}}</span>
+          </button>
+          <button class="filter-tab" [class.active]="currentFilter === 'en_cours'" (click)="setActiveFilter('en_cours')">
+            <span class="tab-icon">⏳</span>
+            <span class="tab-text">En cours</span>
+            <span class="tab-badge en-cours">{{badgeCounts.en_cours}}</span>
+          </button>
+          <button class="filter-tab" [class.active]="currentFilter === 'envoyee'" (click)="setActiveFilter('envoyee')">
+            <span class="tab-icon">✅</span>
+            <span class="tab-text">Envoyées</span>
+            <span class="tab-badge envoyee">{{badgeCounts.envoyee}}</span>
+          </button>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn btn-secondary" (click)="exportToCSV()">
+            📥 Exporter CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Demandes Table -->
+      <div class="section-card table-section">
+        <div class="table-header">
+          <h3 class="section-title">Liste des Demandes</h3>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoading">
+          <div class="spinner"></div>
+          <p>Chargement des demandes...</p>
+        </div>
+
+        <!-- Table Content -->
+        <div class="table-container" *ngIf="!isLoading && filteredDemandes.length > 0">
+          <table>
+            <thead>
+              <tr>
+                <th><input type="checkbox" [(ngModel)]="selectAll" (change)="toggleSelectAll()"></th>
+                <th>Établissement</th>
+                <th>Contact</th>
+                <th>Dimensionnement</th>
+                <th>Montant TTC</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let demande of paginatedDemandes; trackBy: trackByDemandeId">
+                <td><input type="checkbox" [(ngModel)]="demande.selected" (change)="toggleDemandeSelection(demande)"></td>
+                <td>
+                  <div class="user-info">
+                    <div class="user-avatar">{{getInitials(demande.nomEtablissement)}}</div>
+                    <div class="user-details">
+                      <h4>{{demande.nomEtablissement}}</h4>
+                      <p>🏥 {{demande.typeEtablissement}}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-info">
+                    <div class="nom">{{demande.prenom}} {{demande.nom}}</div>
+                    <div class="email">{{demande.emailProfessionnel}}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="dimension-info">
+                    <div>👥 {{demande.nombreUtilisateurs}} utilisateurs</div>
+                    <div class="secondary">🥽 {{demande.nombreCasquesVR}} casques VR</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="montant-info">
+                    <span class="montant" *ngIf="hasDevis(demande)">
+                      {{formatCurrency(demande.devisCalcule!.totalTTC)}}
+                    </span>
+                    <span class="montant-na" *ngIf="!hasDevis(demande)">
+                      À calculer
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  <div class="date-info">{{formatDate(demande.dateCreation)}}</div>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="{
+                    'status-nouvelle': demande.statut === 'nouvelle',
+                    'status-en-cours': demande.statut === 'en_cours',
+                    'status-envoyee': demande.statut === 'envoyee'
+                  }">
+                    {{getStatusIcon(demande.statut)}} {{getStatusLabel(demande.statut)}}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <div class="action-buttons">
+                    <button class="action-btn btn-view" (click)="viewDemandeDetails(demande)" title="Voir détails">
+                      <span>👁️</span>
+                    </button>
+                    <button class="action-btn btn-calculate" 
+                            [disabled]="demande.statut === 'envoyee'" 
+                            (click)="openDevisModal(demande)"
+                            title="Calculer et envoyer">
+                      <span>💰</span>
+                    </button>
+                    <button class="action-btn btn-notes" 
+                            (click)="openNotesModal(demande)"
+                            title="Notes">
+                      <span>📝</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!isLoading && filteredDemandes.length === 0">
+          <div class="empty-icon">🔍</div>
+          <h3>Aucune demande trouvée</h3>
+          <p>Essayez de modifier vos filtres</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button class="pagination-btn" [disabled]="!canGoPrevious" (click)="previousPage()">
+          ← Précédent
+        </button>
+        <div class="pagination-info">
+          Page {{currentPage}} sur {{totalPages}}
+        </div>
+        <button class="pagination-btn" [disabled]="!canGoNext" (click)="nextPage()">
+          Suivant →
+        </button>
+      </div>
+    </main>
+
+    <div class="bg-animated">
+      <div class="bg-circle"></div>
+      <div class="bg-circle"></div>
+      <div class="bg-circle"></div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+</body>
+  <!-- Modal Détails -->
+  <div class="modal" [class.active]="showDetailsModal" *ngIf="showDetailsModal">
+    <div class="modal-overlay" (click)="closeDetailsModal()"></div>
+    <div class="modal-content modal-details">
+      <div class="modal-header">
+        <h3><span class="modal-icon">📋</span> Détails de la Demande</h3>
+        <button class="modal-close" (click)="closeDetailsModal()">✕</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedDemande">
+        <div class="user-header-modal">
+          <div class="user-avatar-large">{{getInitials(selectedDemande.nomEtablissement)}}</div>
+          <div class="user-info-header">
+            <h2>{{selectedDemande.nomEtablissement}}</h2>
+            <span class="status-badge-large" [ngClass]="{
+              'status-nouvelle': selectedDemande.statut === 'nouvelle',
+              'status-en-cours': selectedDemande.statut === 'en_cours',
+              'status-envoyee': selectedDemande.statut === 'envoyee'
+            }">
+              {{getStatusIcon(selectedDemande.statut)}} {{getStatusLabel(selectedDemande.statut)}}
+            </span>
+          </div>
+        </div>
+
+        <!-- Informations Établissement -->
+        <div class="detail-section">
+          <h4 class="section-subtitle"><span class="subtitle-icon">🏥</span> Établissement</h4>
+          <div class="detail-grid">
+            <div class="detail-item"><label>Type</label><div class="value">{{selectedDemande.typeEtablissement}}</div></div>
+            <div class="detail-item"><label>Pays</label><div class="value">{{selectedDemande.pays}}</div></div>
+            <div class="detail-item"><label>Ville</label><div class="value">{{selectedDemande.ville}}</div></div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="detail-section">
+          <h4 class="section-subtitle"><span class="subtitle-icon">👤</span> Contact</h4>
+          <div class="detail-grid">
+            <div class="detail-item"><label>Nom</label><div class="value">{{selectedDemande.prenom}} {{selectedDemande.nom}}</div></div>
+            <div class="detail-item"><label>Fonction</label><div class="value">{{selectedDemande.fonction}}</div></div>
+            <div class="detail-item"><label>Email</label><div class="value">{{selectedDemande.emailProfessionnel}}</div></div>
+            <div class="detail-item"><label>Téléphone</label><div class="value">{{selectedDemande.telephone}}</div></div>
+          </div>
+        </div>
+
+        <!-- Dimensionnement -->
+        <div class="detail-section">
+          <h4 class="section-subtitle"><span class="subtitle-icon">📊</span> Dimensionnement</h4>
+          <div class="detail-grid">
+            <div class="detail-item"><label>Utilisateurs</label><div class="value">{{selectedDemande.nombreUtilisateurs}}</div></div>
+            <div class="detail-item"><label>Casques VR</label><div class="value">{{selectedDemande.nombreCasquesVR}}</div></div>
+            <div class="detail-item"><label>Déploiement</label><div class="value">{{selectedDemande.typeDeploiement}}</div></div>
+            <div class="detail-item"><label>Délai</label><div class="value">{{selectedDemande.delaiMiseEnOeuvre}}</div></div>
+          </div>
+        </div>
+
+        <!-- Besoins -->
+        <div class="detail-section" *ngIf="selectedDemande.besoins && selectedDemande.besoins.length > 0">
+          <h4 class="section-subtitle"><span class="subtitle-icon">🎯</span> Besoins</h4>
+          <div class="detail-full">
+            <div class="besoins-list">
+              <div class="besoin-item" *ngFor="let besoin of selectedDemande.besoins">
+                <span class="besoin-icon">✓</span><span>{{besoin}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Devis Calculé 
+        <div class="detail-section devis-section" *ngIf="hasDevis(selectedDemande)">
+          <h4 class="section-subtitle"><span class="subtitle-icon">💰</span> Devis Calculé</h4>
+          <div class="devis-detail">
+            <table class="devis-table">
+              <tr><td>Licences utilisateurs</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.coutLicences)}}</td></tr>
+              <tr><td>Casques VR</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.coutCasquesVR)}}</td></tr>
+              <tr><td>Déploiement</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.coutDeploiement)}}</td></tr>
+              <tr><td>Formation</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.coutFormation)}}</td></tr>
+              <tr><td>Support annuel</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.coutSupport)}}</td></tr>
+              <tr class="separator"><td colspan="2"></td></tr>
+              <tr class="subtotal"><td>Sous-total</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.sousTotal)}}</td></tr>
+              <tr *ngIf="selectedDemande.devisCalcule!.remisePourcentage > 0" class="remise">
+                <td>Remise ({{selectedDemande.devisCalcule!.remisePourcentage}}%)</td>
+                <td class="montant">- {{formatCurrency(selectedDemande.devisCalcule!.montantRemise)}}</td>
+              </tr>
+              <tr class="separator"><td colspan="2"></td></tr>
+              <tr class="total-ht"><td>TOTAL HT</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.totalHT)}}</td></tr>
+              <tr><td>TVA ({{selectedDemande.devisCalcule!.tauxTVA}}%)</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.montantTVA)}}</td></tr>
+              <tr class="total-ttc"><td>TOTAL TTC</td><td class="montant">{{formatCurrency(selectedDemande.devisCalcule!.totalTTC)}}</td></tr>
+            </table>
+          </div>
+        </div>
+-->
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeDetailsModal()">Fermer</button>
+          <button class="btn btn-primary" *ngIf="selectedDemande.statut !== 'envoyee'" (click)="openDevisModal(selectedDemande); closeDetailsModal();">
+            <span>💰</span> Calculer et Envoyer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Devis -->
+  <div class="modal" [class.active]="showDevisModal" *ngIf="showDevisModal">
+    <div class="modal-overlay" (click)="closeDevisModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><span class="modal-icon">💰</span> Calculer et Envoyer le Devis</h3>
+        <button class="modal-close" (click)="closeDevisModal()">✕</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedDemande">
+        <div class="devis-warning">
+          <div class="warning-icon">💰</div>
+          <div class="warning-text">
+            <strong>Action :</strong> Le devis sera calculé automatiquement et envoyé par email à
+            <strong>{{selectedDemande.emailProfessionnel}}</strong><br><br>
+            <strong>Établissement :</strong> {{selectedDemande.nomEtablissement}}<br>
+            <strong>Contact :</strong> {{selectedDemande.prenom}} {{selectedDemande.nom}}
+          </div>
+        </div>
+
+        <div class="dimension-summary">
+          <h4>📊 Données de calcul</h4>
+          <ul>
+            <li>👥 <strong>{{selectedDemande.nombreUtilisateurs}}</strong> utilisateurs</li>
+            <li>🥽 <strong>{{selectedDemande.nombreCasquesVR}}</strong> casques VR</li>
+            <li>🔧 Déploiement : <strong>{{selectedDemande.typeDeploiement}}</strong></li>
+            <li>🌍 Pays : <strong>{{selectedDemande.pays}}</strong></li>
+          </ul>
+        </div>
+
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeDevisModal()" [disabled]="isCalculating || isSending">Annuler</button>
+          <button class="btn btn-calculate-large" (click)="calculerEtEnvoyerDevis()" [disabled]="isCalculating || isSending">
+            <span *ngIf="!isCalculating && !isSending">💰</span>
+            <span *ngIf="isCalculating || isSending" class="spinner-small"></span>
+            {{ (isCalculating || isSending) ? 'Envoi en cours...' : 'Calculer et Envoyer' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Notes -->
+  <div class="modal" [class.active]="showNotesModal" *ngIf="showNotesModal">
+    <div class="modal-overlay" (click)="closeNotesModal()"></div>
+    <div class="modal-content">
+      <div class="modal-header">
+        <h3><span class="modal-icon">📝</span> Notes Administrateur</h3>
+        <button class="modal-close" (click)="closeNotesModal()">✕</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedDemande">
+        <div class="form-group">
+          <label>Notes internes</label>
+          <textarea [(ngModel)]="notesAdmin" rows="8" placeholder="Ajoutez vos notes ici..." class="form-textarea"></textarea>
+          <div class="form-hint">Ces notes ne sont visibles que par les administrateurs.</div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeNotesModal()">Annuler</button>
+          <button class="btn btn-primary" (click)="sauvegarderNotes()">
+            <span>💾</span> Sauvegarder
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>

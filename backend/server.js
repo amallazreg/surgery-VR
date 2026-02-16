@@ -8,6 +8,8 @@ const demandeDevisRoutes = require('././routes/demandeDevis') ;
 const authRoute = require('././routes/authRoutes'); 
 const adminRoute = require('././routes/adminRoutes') ; 
 const adminDemoRoute = require('././routes/admin/demandeDemo')
+const adminDevisRoute = require('././routes/admin/demandeDevis')
+
 
 
 const app = express();
@@ -45,11 +47,12 @@ app.get('/', (req, res) => {
   res.send('Recrutement API is running!');
 });
 
-app.use('/demande',demandeDemoRoutes); 
-app.use('/demande',demandeDevisRoutes); 
+app.use('/admin/demande',demandeDemoRoutes); 
+app.use('/admin/demande',demandeDevisRoutes); 
 app.use('/auth',authRoute) ; 
 app.use('/admin',adminRoute);
 app.use('/adminDemoRoute',adminDemoRoute);
+app.use('/adminDevisRoute',adminDevisRoute);
 
 app.use((err, req, res, next) => {
   console.error("Erreur globale:", err);
