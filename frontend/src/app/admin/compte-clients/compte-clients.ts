@@ -130,6 +130,7 @@ export class CompteClients implements OnInit, OnDestroy {
   // Lifecycle Hooks
   // ========================================
   ngOnInit(): void {
+    this.currentFilter = 'tous'
 
     console.log('=== CompteClients ngOnInit ===');
     console.log('Service AdminService disponible:', !!this.adminService);
@@ -530,10 +531,8 @@ getDocumentUrl(documentPath: string): string {
   }
 
   private getBackendUrl(): string {
-    // Ajustez cette URL selon votre configuration
-    // Exemple: return 'http://localhost:3000';
-    // Ou récupérez depuis un fichier de configuration
-    return window.location.origin;
+  
+    return'http://localhost:3000';
   }
 
   // ========================================

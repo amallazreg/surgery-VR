@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {listerTous,listerParStatut,approuverCompte,rejeterCompte} = require('../controllers/adminController');
+const {listerTous,listerParStatut,approuverCompte,rejeterCompte} = require('../controllers/admin/CompteClient');
 
 // 📋 Tous les comptes
 router.get('/Tousclients', listerTous);

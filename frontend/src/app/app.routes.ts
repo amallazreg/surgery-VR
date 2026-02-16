@@ -7,6 +7,7 @@ import { AdminDashboard } from './admin/admin-dashboard/admin-dashboard';
 import { Devis } from './Demande/devis/devis';
 import { Singup } from './dashboards/singup/singup';
 import { CompteClients } from './admin/compte-clients/compte-clients';
+import { DemandeDemo } from './admin/demande-demo/demande-demo';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -19,6 +20,7 @@ export const routes: Routes = [
       { path: 'demanderDevis', component : Devis },
 
       { path: 'admin/clients', component : CompteClients },
+      {path : 'admin/demande-demo' , component : DemandeDemo}
 
 
 

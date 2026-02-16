@@ -35,6 +35,8 @@ export class AdminService {
   
 
     private apiUrl = 'http://localhost:3000/admin'
+   private apiUrl2 = 'http://localhost:3000'
+
 
   constructor(private http: HttpClient,) {}
 
@@ -52,6 +54,14 @@ export class AdminService {
 
      rejeterCompte(userId: string,motifRefus?: string): Observable<any> {
       return this.http.put(`${this.apiUrl}/clients/${userId}/rejeter`,{ motifRefus });
+    }
+
+    tousDemandeDemo() : Observable<any>{
+      return this.http.get(`${this.apiUrl2}/demande/getToutes-demande-demo`)
+    }
+
+    contacterDemo(message : any,id: any) : Observable<any> {
+      return this.http.patch(`${this.apiUrl2}/adminDemoRoute/${id}/contacter`,message)
     }
 
 }

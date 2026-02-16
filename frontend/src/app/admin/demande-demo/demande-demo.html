@@ -1,0 +1,495 @@
+<body>
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <app-side-bar></app-side-bar>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <h2>Demandes de Démo 🎯</h2>
+          <p>Gérez et suivez les demandes de démonstration</p>
+        </div>
+        <div class="header-right">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Rechercher par institution, email, ville..." [(ngModel)]="searchQuery" (input)="onSearchInput(searchQuery)">
+          </div>
+          <div class="user-profile">
+            <div class="avatar">AD</div>
+            <div>
+              <div style="font-weight: 600; font-size: 0.95rem;">Admin</div>
+              <div style="font-size: 0.85rem; color: #5A6B8C;">Gestionnaire</div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Stats Overview -->
+      <div class="stats-grid">
+        <div class="stat-card stat-nouvelle" style="animation-delay: 0.1s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-nouvelle">🆕</div>
+            <div class="stat-change neutral">
+              <span id="nouvelleCount">{{stats.totalNouvelle}}</span>
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalNouvelle">{{stats.totalNouvelle}}</div>
+            <div class="stat-label">Nouvelles</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-contactee" style="animation-delay: 0.2s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-contactee">📧</div>
+            <div class="stat-change positive">
+              ↗ +25%
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalContactee">{{stats.totalContactee}}</div>
+            <div class="stat-label">Contactées</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-cloturee" style="animation-delay: 0.3s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-cloturee">✅</div>
+            <div class="stat-change positive">
+              ↗ +18%
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalCloturee">{{stats.totalCloturee}}</div>
+            <div class="stat-label">Clôturées</div>
+          </div>
+        </div>
+
+        <div class="stat-card stat-total" style="animation-delay: 0.4s;">
+          <div class="stat-header">
+            <div class="stat-icon stat-icon-total">📊</div>
+            <div class="stat-change positive">
+              ↗ +22%
+            </div>
+          </div>
+          <div class="stat-body">
+            <div class="stat-value" id="totalDemandes">{{stats.totalDemandes}}</div>
+            <div class="stat-label">Total Demandes</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="filter-section">
+        <div class="filter-tabs">
+          <button class="filter-tab" [class.active]="currentFilter === 'tous'" (click)="setActiveFilter('tous')">
+            <span class="tab-icon">📋</span>
+            <span class="tab-text">Toutes</span>
+            <span class="tab-badge" id="badge-tous">{{badgeCounts.tous}}</span>
+          </button>
+          <button class="filter-tab" [class.active]="currentFilter === 'nouvelle'" (click)="setActiveFilter('nouvelle')">
+            <span class="tab-icon">🆕</span>
+            <span class="tab-text">Nouvelles</span>
+            <span class="tab-badge nouvelle" id="badge-nouvelle">{{badgeCounts.nouvelle}}</span>
+          </button>
+          <button class="filter-tab" [class.active]="currentFilter === 'contactee'" (click)="setActiveFilter('contactee')">
+            <span class="tab-icon">📧</span>
+            <span class="tab-text">Contactées</span>
+            <span class="tab-badge contactee" id="badge-contactee">{{badgeCounts.contactee}}</span>
+          </button>
+          <button class="filter-tab" [class.active]="currentFilter === 'cloturee'" (click)="setActiveFilter('cloturee')">
+            <span class="tab-icon">✅</span>
+            <span class="tab-text">Clôturées</span>
+            <span class="tab-badge cloturee" id="badge-cloturee">{{badgeCounts.cloturee}}</span>
+          </button>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn btn-secondary" id="exportBtn" (click)="exportToCSV()">
+            📥 Exporter CSV
+          </button>
+        </div>
+      </div>
+
+      <!-- Demandes Table -->
+      <div class="section-card table-section">
+        <div class="table-header">
+          <h3 class="section-title">Liste des Demandes</h3>
+        </div>
+
+        <!-- Loading State -->
+        <div class="loading-state" *ngIf="isLoading">
+          <div class="spinner"></div>
+          <p>Chargement des demandes...</p>
+        </div>
+
+        <!-- Table Content -->
+        <div class="table-container" *ngIf="!isLoading && filteredDemandes.length > 0">
+          <table id="demandesTable">
+            <thead>
+              <tr>
+                <th>
+                  <input type="checkbox" [(ngModel)]="selectAll" (change)="toggleSelectAll()">
+                </th>
+                <th>Institution</th>
+                <th>Contact</th>
+                <th>Localisation</th>
+                <th>Type & Domaine</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th class="actions-column">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let demande of paginatedDemandes; trackBy: trackByDemandeId">
+                <td>
+                  <input type="checkbox" [(ngModel)]="demande.selected" (change)="toggleDemandeSelection(demande)">
+                </td>
+                <td>
+                  <div class="user-info">
+                    <div class="user-avatar">{{getInitials(demande.nomInstitution)}}</div>
+                    <div class="user-details">
+                      <h4>{{demande.nomInstitution}}</h4>
+                      <p>🏥 {{demande.typeEtablissement}}</p>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div class="contact-info">
+                    <div class="email">{{demande.emailProfessionnel}}</div>
+                    <div class="phone">📱 {{demande.telephone}}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="localisation-info">
+                    <div>🌍 {{demande.pays}}</div>
+                    <div class="ville">📍 {{demande.ville}}</div>
+                  </div>
+                </td>
+                <td>
+                  <div class="domaine-info">
+                    <span class="domaine-badge">🎓 {{demande.domaineInteret}}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="date-info">{{formatDate(demande.dateCreation)}}</div>
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="{
+                    'status-nouvelle': demande.statut === 'nouvelle',
+                    'status-contactee': demande.statut === 'contactee',
+                    'status-cloturee': demande.statut === 'cloturee'
+                  }">
+                    {{getStatusIcon(demande.statut)}} {{getStatusLabel(demande.statut)}}
+                  </span>
+                </td>
+                <td class="actions-cell">
+                  <div class="action-buttons">
+                    <button class="action-btn btn-view" (click)="viewDemandeDetails(demande)" title="Voir les détails">
+                      <span>👁️</span>
+                    </button>
+                    <button class="action-btn btn-contact" 
+                            [disabled]="demande.statut !== 'nouvelle'" 
+                            (click)="openContactModal(demande)"
+                            title="Contacter">
+                      <span>📧</span>
+                    </button>
+                    <button class="action-btn btn-close" 
+                            [disabled]="demande.statut === 'cloturee'" 
+                            (click)="openCloseModal(demande)"
+                            title="Clôturer">
+                      <span>✅</span>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="!isLoading && filteredDemandes.length === 0">
+          <div class="empty-icon">🔍</div>
+          <h3>Aucune demande trouvée</h3>
+          <p>Essayez de modifier vos filtres de recherche</p>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" id="pagination" *ngIf="totalPages > 1">
+        <button class="pagination-btn" id="prevPage" [disabled]="!canGoPrevious" (click)="previousPage()">
+          ← Précédent
+        </button>
+        <div class="pagination-info" id="paginationInfo">
+          Page {{currentPage}} sur {{totalPages}}
+        </div>
+        <button class="pagination-btn" id="nextPage" [disabled]="!canGoNext" (click)="nextPage()">
+          Suivant →
+        </button>
+      </div>
+    </main>
+
+    <!-- Animated Background -->
+    <div class="bg-animated">
+      <div class="bg-circle"></div>
+      <div class="bg-circle"></div>
+      <div class="bg-circle"></div>
+    </div>
+  </div>
+
+  <!-- Modal de Détails -->
+  <div class="modal" [class.active]="showDetailsModal" *ngIf="showDetailsModal">
+    <div class="modal-overlay" (click)="closeDetailsModal()"></div>
+    <div class="modal-content modal-details">
+      <div class="modal-header">
+        <h3>
+          <span class="modal-icon">🎯</span>
+          Détails de la Demande
+        </h3>
+        <button class="modal-close" (click)="closeDetailsModal()">✕</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedDemande">
+        <!-- Header Institution -->
+        <div class="user-header-modal">
+          <div class="user-avatar-large">{{getInitials(selectedDemande.nomInstitution)}}</div>
+          <div class="user-info-header">
+            <h2>{{selectedDemande.nomInstitution}}</h2>
+            <span class="status-badge-large" [ngClass]="{
+              'status-nouvelle': selectedDemande.statut === 'nouvelle',
+              'status-contactee': selectedDemande.statut === 'contactee',
+              'status-cloturee': selectedDemande.statut === 'cloturee'
+            }">
+              {{getStatusIcon(selectedDemande.statut)}} {{getStatusLabel(selectedDemande.statut)}}
+            </span>
+          </div>
+        </div>
+
+        <!-- Informations de Contact -->
+        <div class="detail-section">
+          <h4 class="section-subtitle">
+            <span class="subtitle-icon">📞</span>
+            Informations de Contact
+          </h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Email Professionnel</label>
+              <div class="value">{{selectedDemande.emailProfessionnel}}</div>
+            </div>
+            <div class="detail-item">
+              <label>Téléphone</label>
+              <div class="value">{{selectedDemande.telephone}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations Géographiques -->
+        <div class="detail-section">
+          <h4 class="section-subtitle">
+            <span class="subtitle-icon">🌍</span>
+            Localisation
+          </h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Pays</label>
+              <div class="value">{{selectedDemande.pays}}</div>
+            </div>
+            <div class="detail-item">
+              <label>Ville</label>
+              <div class="value">{{selectedDemande.ville}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Informations Établissement -->
+        <div class="detail-section">
+          <h4 class="section-subtitle">
+            <span class="subtitle-icon">🏥</span>
+            Informations Établissement
+          </h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>Type d'Établissement</label>
+              <div class="value">{{selectedDemande.typeEtablissement}}</div>
+            </div>
+            <div class="detail-item">
+              <label>Domaine d'Intérêt</label>
+              <div class="value">{{selectedDemande.domaineInteret}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Objectifs -->
+        <div class="detail-section" *ngIf="selectedDemande.objectifs && selectedDemande.objectifs.length > 0">
+          <h4 class="section-subtitle">
+            <span class="subtitle-icon">🎯</span>
+            Objectifs
+          </h4>
+          <div class="detail-full">
+            <div class="objectifs-list">
+              <div class="objectif-item" *ngFor="let objectif of selectedDemande.objectifs">
+                <span class="objectif-icon">✓</span>
+                <span>{{objectif}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vidéos Envoyées (si contactée) -->
+<div class="detail-section" *ngIf="selectedDemande.statut !== 'nouvelle' && selectedDemande.videosEnvoyees && selectedDemande.videosEnvoyees.length > 0">
+  <h4 class="section-subtitle">
+    <span class="subtitle-icon">🎬</span>
+    Vidéos Envoyées ({{selectedDemande.videosEnvoyees.length}})
+  </h4>
+  <div class="videos-envoyees-list">
+    <div class="video-item" *ngFor="let video of selectedDemande.videosEnvoyees; let i = index">
+      <div class="video-number">{{i + 1}}</div>
+      <div class="video-details">
+        <div class="video-titre">{{video.titre}}</div>
+        <div class="video-meta">
+          <span>📅 Envoyée le {{formatDateTime(video.dateEnvoi)}}</span>
+        </div>
+        <a [href]="video.urlVideo" target="_blank" class="btn-voir-video">
+          <span>▶️</span> Voir la vidéo
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+        <!-- Message -->
+        <div class="detail-section" *ngIf="selectedDemande.message">
+          <h4 class="section-subtitle">
+            <span class="subtitle-icon">💬</span>
+            Message
+          </h4>
+          <div class="detail-full">
+            <div class="value-text">{{selectedDemande.message}}</div>
+          </div>
+        </div>
+
+        <!-- Informations Système -->
+        <div class="detail-section">
+          <h4 class="section-subtitle">
+            <span class="subtitle-icon">⚙️</span>
+            Informations Système
+          </h4>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <label>ID Demande</label>
+              <div class="value value-code">{{selectedDemande._id}}</div>
+            </div>
+            <div class="detail-item">
+              <label>Date de création</label>
+              <div class="value">{{formatDateTime(selectedDemande.dateCreation)}}</div>
+            </div>
+            <div class="detail-item">
+              <label>Consentement</label>
+              <div class="value">{{selectedDemande.consentement ? '✅ Accepté' : '❌ Refusé'}}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="modal-actions" *ngIf="selectedDemande.statut === 'nouvelle'">
+          <button class="btn btn-secondary" (click)="closeDetailsModal()">
+            Fermer
+          </button>
+          <button class="btn btn-contact-large" (click)="contactFromModal(selectedDemande)">
+            <span>📧</span> Envoyer les Démos
+          </button>
+        </div>
+        <div class="modal-actions" *ngIf="selectedDemande.statut === 'contactee'">
+          <button class="btn btn-secondary" (click)="closeDetailsModal()">
+            Fermer
+          </button>
+          <button class="btn btn-close-large" (click)="closeFromModal(selectedDemande)">
+            <span>✅</span> Clôturer la Demande
+          </button>
+        </div>
+        <div class="modal-actions" *ngIf="selectedDemande.statut === 'cloturee'">
+          <button class="btn btn-primary" (click)="closeDetailsModal()">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Contact -->
+  <div class="modal" [class.active]="showContactModal" *ngIf="showContactModal">
+    <div class="modal-overlay" (click)="closeContactModal()"></div>
+    <div class="modal-content modal-contact">
+      <div class="modal-header">
+        <h3>
+          <span class="modal-icon">📧</span>
+          Envoyer les Démos
+        </h3>
+        <button class="modal-close" (click)="closeContactModal()">✕</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedDemande">
+        <div class="contact-info-box">
+          <div class="info-icon">📩</div>
+          <div class="info-text">
+            <strong>Destinataire :</strong> {{selectedDemande.nomInstitution}}<br>
+            <strong>Email :</strong> {{selectedDemande.emailProfessionnel}}
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Message de l'email <span class="required">*</span></label>
+          <textarea 
+            [(ngModel)]="emailMessage" 
+            rows="10" 
+            placeholder="Rédigez votre message..."
+            class="form-textarea">
+          </textarea>
+          <div class="form-hint">Ce message sera envoyé avec les liens vers les démos vidéo.</div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeContactModal()">Annuler</button>
+          <button class="btn btn-contact-large" (click)="contactDemande()">
+            <span>📧</span> Envoyer l'Email
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Clôture -->
+  <div class="modal" [class.active]="showCloseModal" *ngIf="showCloseModal">
+    <div class="modal-overlay" (click)="closeCloseModal()"></div>
+    <div class="modal-content modal-close">
+      <div class="modal-header">
+        <h3>
+          <span class="modal-icon">✅</span>
+          Clôturer la Demande
+        </h3>
+        <button class="modal-close" (click)="closeCloseModal()">✕</button>
+      </div>
+      <div class="modal-body" *ngIf="selectedDemande">
+        <div class="close-warning">
+          <div class="warning-icon">✅</div>
+          <div class="warning-text">
+            <strong>Confirmation :</strong> Vous êtes sur le point de clôturer la demande de 
+            <strong>{{selectedDemande.nomInstitution}}</strong>.<br><br>
+            Cette action indique que le visiteur s'est authentifié et a souscrit à un forfait.
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeCloseModal()">Annuler</button>
+          <button class="btn btn-close-large" (click)="closeDemande()">
+            <span>✅</span> Confirmer la Clôture
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notifications -->
+  <div class="toast-container" id="toastContainer"></div>
+
+</body>

@@ -1,5 +1,5 @@
-const User = require('../models/userModels');
-const { envoyerEmailApprobation, envoyerEmailRejet } = require('../services/emailService');
+const User = require('../../models/userModels');
+const { envoyerEmailApprobation, envoyerEmailRejet } = require('../../services/emailCompteClient');
 
 // ===============================
 // Lister tous les comptes (hors admin)

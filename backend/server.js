@@ -3,10 +3,11 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const demandeDemoRoutes = require('./routes/demandeDemo');
-const demandeDevisRoutes = require('./routes/demandeDevis') ; 
-const authRoute = require('./routes/authRoutes'); 
-const adminRoute = require('./routes/adminRoutes') ; 
+const demandeDemoRoutes = require('././routes/demandeDemo');
+const demandeDevisRoutes = require('././routes/demandeDevis') ; 
+const authRoute = require('././routes/authRoutes'); 
+const adminRoute = require('././routes/adminRoutes') ; 
+const adminDemoRoute = require('././routes/admin/demandeDemo')
 
 
 const app = express();
@@ -47,7 +48,8 @@ app.get('/', (req, res) => {
 app.use('/demande',demandeDemoRoutes); 
 app.use('/demande',demandeDevisRoutes); 
 app.use('/auth',authRoute) ; 
-app.use('/admin',adminRoute)
+app.use('/admin',adminRoute);
+app.use('/adminDemoRoute',adminDemoRoute);
 
 app.use((err, req, res, next) => {
   console.error("Erreur globale:", err);

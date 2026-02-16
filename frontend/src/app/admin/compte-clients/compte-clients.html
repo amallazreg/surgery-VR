@@ -223,7 +223,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="pagination" id="pagination" *ngIf="totalPages > 1">
+      <div class="pagination" id="pagination" *ngIf="totalPages > 0">
         <button class="pagination-btn" id="prevPage" [disabled]="!canGoPrevious" (click)="previousPage()">
           ← Précédent
         </button>
