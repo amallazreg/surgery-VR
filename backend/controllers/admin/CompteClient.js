@@ -11,6 +11,7 @@ const listerTous = async (req, res) => {
 
     res.json(users);
   } catch (err) {
+    console.error("ERREUR LISTER TOUS:", err); 
     res.status(500).json({ message: "Erreur récupération comptes" });
   }
 };
