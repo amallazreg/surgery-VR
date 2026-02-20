@@ -35,7 +35,7 @@ app.get('/api', (req, res) => {
 
 // Gestion des erreurs MongoDB
 // Connexion à la base de données MongoDB
-mongoose.connect('mongodb://127.0.0.1:27017/SurgeryVitrine')
+mongoose.connect(process.env.MONGO_URI)
   .then(() => {
     console.log('Connexion à la base de données réussie');
   })
