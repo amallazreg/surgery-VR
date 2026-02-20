@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>SurveyVR — Dashboard Client</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
 <style>
@@ -31,23 +31,34 @@
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
+html {
+  overflow: hidden;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
 body {
   font-family: 'DM Sans', sans-serif;
   background: var(--bg-light);
   color: var(--text-dark);
   display: flex;
-  min-height: 100vh;
+  height: 100vh; width: 100vw;
   overflow: hidden;
 }
 
 /* ─── SIDEBAR ─── */
 .sidebar {
   width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
   background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   position: fixed;
   top: 0; left: 0; bottom: 0;
+  height: 100vh;
   z-index: 100;
   border-right: 1px solid var(--sidebar-border);
   overflow: hidden;
@@ -283,10 +294,11 @@ body {
 /* ─── MAIN ─── */
 .main {
   margin-left: var(--sidebar-width);
+  width: calc(100vw - var(--sidebar-width));
   flex: 1;
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
+  height: 100vh;
   overflow-y: auto;
   background: var(--bg-gradient);
 }
@@ -510,7 +522,7 @@ body {
 .stat-card.green .stat-icon-wrap { background: rgba(0,196,140,0.1); }
 
 .stat-value {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Syne', ;
   font-size: 30px;
   font-weight: 800;
   color: var(--text-dark);
