@@ -34,9 +34,9 @@ export interface User {
 export class AdminService {
   
 
-    private apiUrl = 'http://localhost:3000/admin'
-   private apiUrlDemo = 'http://localhost:3000/adminDemoRoute'
-  private apiUrlDevis = 'http://localhost:3000/adminDevisRoute'
+    private apiUrl = 'https://surgery-vr.onrender.com/admin'
+   private apiUrlDemo = 'https://surgery-vr.onrender.com/adminDemoRoute'
+  private apiUrlDevis = 'https://surgery-vr.onrender.com/adminDevisRoute'
 
 
 

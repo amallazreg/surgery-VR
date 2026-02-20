@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class DemandesService {
 
-    private apiUrl = 'http://localhost:3000/admin/demande';
+    private apiUrl = 'https://surgery-vr.onrender.com/admin/demande';
 
       constructor(private http: HttpClient) {}
 

@@ -9,7 +9,7 @@ import { Router } from '@angular/router';
 export class AuthServiceService {
 
 
-  private apiUrl = 'http://localhost:3000'
+  private apiUrl = 'https://surgery-vr.onrender.com'
 
   constructor(private http: HttpClient,) {}
 
