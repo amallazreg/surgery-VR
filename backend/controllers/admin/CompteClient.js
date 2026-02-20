@@ -1,4 +1,5 @@
-const User = require('../../models/userModels');
+const mongoose = require('mongoose');
+const User = mongoose.model('Utilisateur'); 
 const { envoyerEmailApprobation, envoyerEmailRejet } = require('../../services/emailCompteClient');
 
 // ===============================
@@ -6,13 +7,14 @@ const { envoyerEmailApprobation, envoyerEmailRejet } = require('../../services/e
 // ===============================
 const listerTous = async (req, res) => {
   try {
-    const users = await User.find({ role: { $ne: 'admin' } })
-      .sort({ createdAt: -1 });
-
+    const users = await User.find({ role: { $ne: 'admin' } }).sort({ createdAt: -1 });
     res.json(users);
   } catch (err) {
-    console.error("ERREUR LISTER TOUS:", err); 
-    res.status(500).json({ message: "Erreur récupération comptes" });
+    console.error("🔥 ERREUR LISTER TOUS :", err); 
+    res.status(500).json({ 
+      message: "Erreur récupération comptes", 
+      error: err.message 
+    });
   }
 };
 
