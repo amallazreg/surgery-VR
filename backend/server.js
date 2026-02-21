@@ -3,69 +3,99 @@ const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-const demandeDemoRoutes = require('././routes/demandeDemo');
-const demandeDevisRoutes = require('././routes/demandeDevis') ; 
-const authRoute = require('././routes/authRoutes'); 
-const adminRoute = require('././routes/adminRoutes') ; 
-const adminDemoRoute = require('././routes/admin/demandeDemo')
-const adminDevisRoute = require('././routes/admin/demandeDevis')
-
-
+const demandeDemoRoutes = require('./routes/demandeDemo');
+const demandeDevisRoutes = require('./routes/demandeDevis');
+const authRoute = require('./routes/authRoutes');
+const adminRoute = require('./routes/adminRoutes');
+const adminDemoRoute = require('./routes/admin/demandeDemo');
+const adminDevisRoute = require('./routes/admin/demandeDevis');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Connexion à la base de données
+/* ========================
+   CONFIGURATION CORS
+======================== */
 
-// Middlewares
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const allowedOrigins = [
+  'http://localhost:4200',
+  'https://surgery-czdnp0r4u-amals-projects-e7d165d9.vercel.app'
+];
+
 app.use(cors({
-  origin: 'http://localhost:4200', 
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
-  allowedHeaders: ['Content-Type', 'Authorization'], 
+  origin: function (origin, callback) {
+    // Autorise les requêtes sans origin (Postman, mobile apps, etc.)
+    if (!origin) return callback(null, true);
+
+    if (!allowedOrigins.includes(origin)) {
+      return callback(new Error('Origine non autorisée par CORS'), false);
+    }
+
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
 }));
 
+/* ========================
+   MIDDLEWARES
+======================== */
 
-// Route de test
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+/* ========================
+   ROUTES TEST
+======================== */
+
+app.get('/', (req, res) => {
+  res.send('API is running!');
+});
+
 app.get('/api', (req, res) => {
   res.json({ message: 'API fonctionne!', database: 'MongoDB connecté' });
 });
 
-// Gestion des erreurs MongoDB
-// Connexion à la base de données MongoDB
+/* ========================
+   CONNEXION MONGODB
+======================== */
+
 mongoose.connect(process.env.MONGO_URI)
   .then(() => {
-    console.log('Connexion à la base de données réussie');
+    console.log('✅ Connexion à la base de données réussie');
   })
   .catch((error) => {
-    console.error('Erreur de connexion à la base de données:', error);
+    console.error('❌ Erreur de connexion à la base de données:', error);
   });
-// Définition d’une route de test
-app.get('/', (req, res) => {
-  res.send('Recrutement API is running!');
-});
 
-app.use('/admin/demande',demandeDemoRoutes); 
-app.use('/admin/demande',demandeDevisRoutes); 
-app.use('/auth',authRoute) ; 
-app.use('/admin',adminRoute);
-app.use('/adminDemoRoute',adminDemoRoute);
-app.use('/adminDevisRoute',adminDevisRoute);
+/* ========================
+   ROUTES PRINCIPALES
+======================== */
+
+app.use('/admin/demande', demandeDemoRoutes);
+app.use('/admin/demande', demandeDevisRoutes);
+app.use('/auth', authRoute);
+app.use('/admin', adminRoute);
+app.use('/adminDemoRoute', adminDemoRoute);
+app.use('/adminDevisRoute', adminDevisRoute);
+
+/* ========================
+   GESTION DES ERREURS
+======================== */
 
 app.use((err, req, res, next) => {
-  console.error("Erreur globale:", err);
+  console.error("Erreur globale:", err.message);
 
   res.status(err.status || 500).json({
-    message: err.message || "Erreur interne",
+    message: err.message || "Erreur interne serveur"
   });
 });
 
+/* ========================
+   LANCEMENT SERVEUR
+======================== */
 
-
-// Démarrage du serveur
-const port = process.env.PORT || 3000;
-app.listen(process.env.PORT || 3000, () => {
-  console.log(`✅ Serveur en cours d'exécution `);
+app.listen(PORT, () => {
+  console.log(`🚀 Serveur en cours d'exécution sur le port ${PORT}`);
 });
