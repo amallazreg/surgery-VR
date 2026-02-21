@@ -1,7 +1,6 @@
 const mongoose = require('mongoose');
-const EchantillonVideo = require('../models/echantillonVideo');
-require('dotenv').config();
-
+const EchantillonVideo = require('../models/echantillonVideo'); 
+require('dotenv').config({ path: '../.env' });
 // ===============================
 // SCRIPT D'INITIALISATION DES ÉCHANTILLONS VIDÉO
 // ===============================
@@ -96,7 +95,7 @@ const echantillonsInitiaux = [
 const initialiserEchantillons = async () => {
   try {
     // Connexion à MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/SurgeryVitrine');
+    await mongoose.connect(process.env.MONGO_URI);
 
     console.log('✅ Connexion à MongoDB établie');
 
