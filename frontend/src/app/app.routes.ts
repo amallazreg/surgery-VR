@@ -22,7 +22,9 @@ export const routes: Routes = [
 
       { path: 'admin/clients', component : CompteClients },
       {path : 'admin/demande-demo' , component : DemandeDemo} ,
-      {path : 'admin/demande-devis' , component : DemandeDevis}
+      {path : 'admin/demande-devis' , component : DemandeDevis},
+
+       { path: '**', redirectTo: '' }
 
 
 
