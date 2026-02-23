@@ -1,0 +1,247 @@
+
+<body>
+
+<app-side-bar></app-side-bar>
+<main class="main">
+  
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Dashboard</h1>
+      <p>Vendredi, 20 Février 2026</p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-btn notif-btn">
+        🔔
+        <div class="notif-dot"></div>
+      </div>
+      <div class="topbar-btn">💬</div>
+      <button class="btn-primary" style="padding: 9px 18px; font-size: 12.5px;">+ Nouvelle enquête</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- Hero -->
+    <div class="hero-welcome">
+      <div class="hero-text">
+        <div class="hero-badge">
+          <span>●</span> Compte actif — Forfait Pro
+        </div>
+        <h2>Bonjour, Ahmed 👋</h2>
+        <p>Vous avez 2 enquêtes VR en cours et 1 APK prêt à télécharger. Continuez sur votre lancée !</p>
+      </div>
+      <div class="hero-actions">
+        <button class="btn-primary">🥽 Lancer une enquête</button>
+        <button class="btn-outline">Voir les résultats</button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card blue">
+        <div class="stat-icon-wrap">🥽</div>
+        <div class="stat-value">8</div>
+        <div class="stat-label">Enquêtes totales</div>
+        <div class="stat-trend trend-up">↑ +2 ce mois-ci</div>
+      </div>
+      <div class="stat-card cyan">
+        <div class="stat-icon-wrap">👥</div>
+        <div class="stat-value">342</div>
+        <div class="stat-label">Répondants</div>
+        <div class="stat-trend trend-up">↑ +18% vs. mois dernier</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-icon-wrap">📋</div>
+        <div class="stat-value">2</div>
+        <div class="stat-label">Demandes en cours</div>
+        <div class="stat-trend trend-down">⏳ 1 en attente de réponse</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon-wrap">📱</div>
+        <div class="stat-value">5</div>
+        <div class="stat-label">APK disponibles</div>
+        <div class="stat-trend trend-up">✓ Dernier: v2.4.1</div>
+      </div>
+    </div>
+
+    <!-- Two col -->
+    <div class="two-col">
+      
+      <!-- Tâches récentes -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Activités récentes</span>
+          <a class="section-action" href="#">Tout voir</a>
+        </div>
+        <div class="task-list">
+          <div class="task-item">
+            <div class="task-status-dot status-progress"></div>
+            <div class="task-info">
+              <div class="task-name">Enquête Satisfaction Client — Magasin Tunis Centre</div>
+              <div class="task-meta">Mise à jour il y a 2h • 47 réponses collectées</div>
+            </div>
+            <span class="task-tag tag-vr">VR Live</span>
+          </div>
+          <div class="task-item">
+            <div class="task-status-dot status-review"></div>
+            <div class="task-info">
+              <div class="task-name">Demande de support — APK v2.3 crash Oculus</div>
+              <div class="task-meta">Soumis hier • En révision par l'équipe</div>
+            </div>
+            <span class="task-tag tag-support">Support</span>
+          </div>
+          <div class="task-item">
+            <div class="task-status-dot status-done"></div>
+            <div class="task-info">
+              <div class="task-name">Enquête Parcours Magasin — Sfax Point de Vente</div>
+              <div class="task-meta">Terminé le 17 Fév • 128 réponses</div>
+            </div>
+            <span class="task-tag tag-survey">Terminé</span>
+          </div>
+          <div class="task-item">
+            <div class="task-status-dot status-done"></div>
+            <div class="task-info">
+              <div class="task-name">APK SurveyVR v2.4.1 téléchargé</div>
+              <div class="task-meta">15 Fév • Compatible Oculus Quest 2 & 3</div>
+            </div>
+            <span class="task-tag tag-apk">APK</span>
+          </div>
+          <div class="task-item">
+            <div class="task-status-dot status-pending"></div>
+            <div class="task-info">
+              <div class="task-name">Enquête Test Produit — Campagne Ramadan</div>
+              <div class="task-meta">Créé le 10 Fév • En attente de lancement</div>
+            </div>
+            <span class="task-tag tag-survey">Brouillon</span>
+          </div>
+          <div class="task-item">
+            <div class="task-status-dot status-progress"></div>
+            <div class="task-info">
+              <div class="task-name">Renouvellement Forfait Pro — Mars 2026</div>
+              <div class="task-meta">Expire dans 8 jours • Renouvellement auto activé</div>
+            </div>
+            <span class="task-tag tag-vr">Forfait</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Forfait -->
+      <div class="forfait-card">
+        <div class="forfait-header">
+          <div class="forfait-name">Abonnement actuel</div>
+          <div class="forfait-plan">Forfait Pro</div>
+          <div class="forfait-expiry">Expire le 28 Mars 2026</div>
+        </div>
+        <div class="forfait-body">
+          <div class="forfait-feature">
+            <div class="feat-icon">🥽</div>
+            Enquêtes VR actives
+            <span class="feat-count">3 / 5</span>
+          </div>
+          <div class="forfait-feature">
+            <div class="feat-icon">👥</div>
+            Répondants / mois
+            <span class="feat-count">500</span>
+          </div>
+          <div class="forfait-feature">
+            <div class="feat-icon">📱</div>
+            APK inclus
+            <span class="feat-count">5</span>
+          </div>
+          <div class="forfait-feature">
+            <div class="feat-icon">☁️</div>
+            Stockage cloud
+            <span class="feat-count">5 Go</span>
+          </div>
+          <div class="forfait-feature">
+            <div class="feat-icon">🎧</div>
+            Support prioritaire
+            <span class="feat-count" style="color:var(--success)">✓</span>
+          </div>
+          <button class="upgrade-btn">⚡ Passer à Enterprise</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom row -->
+    <div class="bottom-row">
+      
+      <!-- APK -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Mes APK disponibles</span>
+          <a class="section-action" href="#">Gérer</a>
+        </div>
+        <div class="apk-list">
+          <div class="apk-item">
+            <div class="apk-icon">📱</div>
+            <div class="apk-info">
+              <div class="apk-name">SurveyVR Player v2.4.1</div>
+              <div class="apk-size">124 Mo • Oculus Quest 2 & 3 • 15 Fév 2026</div>
+            </div>
+            <button class="apk-dl-btn">↓</button>
+          </div>
+          <div class="apk-item">
+            <div class="apk-icon">📱</div>
+            <div class="apk-info">
+              <div class="apk-name">SurveyVR Player v2.3.0</div>
+              <div class="apk-size">118 Mo • Oculus Quest 2 • 2 Jan 2026</div>
+            </div>
+            <button class="apk-dl-btn">↓</button>
+          </div>
+          <div class="apk-item">
+            <div class="apk-icon">📱</div>
+            <div class="apk-info">
+              <div class="apk-name">SurveyVR Admin v1.9.2</div>
+              <div class="apk-size">87 Mo • Android 11+ • 20 Déc 2025</div>
+            </div>
+            <button class="apk-dl-btn">↓</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Timeline -->
+      <div class="section-card activity-section">
+        <div class="section-header">
+          <span class="section-title">Historique du compte</span>
+        </div>
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="tl-dot">🥽</div>
+            <div class="tl-content">
+              <div class="tl-text"><strong>Enquête lancée</strong> — Satisfaction Tunis Centre</div>
+              <div class="tl-time">Aujourd'hui, 09:14</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-dot">📋</div>
+            <div class="tl-content">
+              <div class="tl-text"><strong>Demande de support</strong> créée #SR-0042</div>
+              <div class="tl-time">Hier, 16:30</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-dot">📱</div>
+            <div class="tl-content">
+              <div class="tl-text"><strong>APK v2.4.1</strong> téléchargé avec succès</div>
+              <div class="tl-time">15 Fév, 11:02</div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="tl-dot">💎</div>
+            <div class="tl-content">
+              <div class="tl-text"><strong>Forfait Pro</strong> renouvelé pour 1 mois</div>
+              <div class="tl-time">28 Jan, 08:00</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+
+</body>

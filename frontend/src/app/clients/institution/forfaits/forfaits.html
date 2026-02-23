@@ -1,0 +1,355 @@
+<div class="app-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+<app-side-bar></app-side-bar>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Forfaits & Abonnements</h1>
+        <p>Choisissez le plan adapté à vos besoins</p>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-btn">🔔</div>
+        <div class="topbar-btn">💬</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Hero -->
+      <div class="page-hero">
+        <h2>Des forfaits <span>pensés pour vous</span></h2>
+        <p>Des solutions flexibles pour déployer vos enquêtes VR en magasin, du démarrage à l'échelle enterprise.</p>
+      </div>
+
+      <!-- Billing Toggle -->
+      <div class="billing-toggle-wrap">
+        <span class="billing-label" [class.active]="!isYearly">Mensuel</span>
+        <div class="toggle-switch" [class.yearly]="isYearly" (click)="toggleBilling()">
+          <div class="toggle-knob"></div>
+        </div>
+        <span class="billing-label" [class.active]="isYearly">Annuel</span>
+        <span class="save-badge">Économisez 20%</span>
+      </div>
+
+      <!-- Current plan banner -->
+      <div class="current-plan-banner">
+        <div class="dot"></div>
+        Votre abonnement actuel : <strong>&nbsp;Forfait Pro</strong> — expire le 28 Mars 2026
+        <div class="banner-spacer"></div>
+        <span class="banner-link">Gérer la facturation →</span>
+      </div>
+
+      <!-- ── Plans Grid ── -->
+      <div class="forfaits-grid">
+        <div
+          *ngFor="let plan of plans"
+          class="plan-card"
+          [ngClass]="[plan.cardClass, plan.isPopular ? 'popular' : '', plan.isCurrent ? 'current' : '']"
+          (click)="openModal(plan)"
+        >
+          <!-- Badges -->
+          <div *ngIf="plan.isPopular" class="popular-badge">Populaire</div>
+          <div *ngIf="plan.isCurrent" class="current-badge">✓ Actuel</div>
+
+          <!-- Header -->
+          <div class="plan-header">
+            <span class="plan-icon">{{ plan.icon }}</span>
+            <div class="plan-name">{{ plan.name }}</div>
+            <div class="plan-tagline">{{ plan.tagline }}</div>
+            <div class="plan-price-wrap">
+              <ng-container *ngIf="plan.key !== 'enterprise'">
+                <span class="plan-currency">DT</span>
+                <span class="plan-price">{{ getPlanPrice(plan) }}</span>
+                <span class="plan-period">/mois</span>
+              </ng-container>
+              <ng-container *ngIf="plan.key === 'enterprise'">
+                <span class="plan-price" style="font-size:26px;letter-spacing:-0.5px">Sur devis</span>
+              </ng-container>
+            </div>
+          </div>
+
+          <!-- Body -->
+          <div class="plan-body">
+            <ul class="plan-features">
+              <li *ngFor="let feature of plan.features">
+                <div class="feat-check" [ngClass]="feature.yes ? 'check-yes' : 'check-no'">
+                  {{ feature.yes ? '✓' : '✕' }}
+                </div>
+                <div class="feat-text" [style.opacity]="feature.yes ? 1 : 0.45">{{ feature.text }}</div>
+              </li>
+            </ul>
+
+            <!-- CTA Button -->
+            <button class="plan-cta" [ngClass]="{'current-cta': plan.isCurrent}">
+              <ng-container *ngIf="plan.isCurrent">✓ Plan actuel</ng-container>
+              <ng-container *ngIf="!plan.isCurrent && plan.key !== 'enterprise'">Choisir {{ plan.name }}</ng-container>
+              <ng-container *ngIf="plan.key === 'enterprise'">Contacter l'équipe</ng-container>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Compare Table -->
+      <div class="compare-section">
+        <div class="compare-title">📊 Comparaison détaillée</div>
+        <table class="compare-table">
+          <thead>
+            <tr>
+              <th>Fonctionnalité</th>
+              <th>Starter</th>
+              <th class="highlight-col">Pro</th>
+              <th>Business</th>
+              <th>Enterprise</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of compareRows">
+              <td>{{ row.label }}</td>
+              <ng-container *ngIf="row.vals">
+                <td *ngFor="let val of row.vals; let i = index" [class.highlight-col]="i === 1">
+                  <span class="val-cell">{{ val }}</span>
+                </td>
+              </ng-container>
+              <ng-container *ngIf="row.bools">
+                <td *ngFor="let b of row.bools; let i = index" [class.highlight-col]="i === 1">
+                  <span [ngClass]="b ? 'tick' : 'cross'">{{ b ? '✓' : '✕' }}</span>
+                </td>
+              </ng-container>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- FAQ -->
+      <div class="faq-section">
+        <div class="faq-title">Questions fréquentes</div>
+        <div
+          *ngFor="let faq of faqs"
+          class="faq-item"
+          [class.open]="faq.open"
+          (click)="toggleFaq(faq)"
+        >
+          <div class="faq-q">
+            {{ faq.q }}
+            <span class="faq-chevron">▾</span>
+          </div>
+          <div class="faq-a" *ngIf="faq.open">{{ faq.a }}</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MODAL
+═══════════════════════════════════════ -->
+<div class="modal-overlay" [class.open]="isModalOpen" (click)="onOverlayClick($event)">
+  <div class="modal" *ngIf="selectedPlan">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-hero" [style.background]="modalHeaderBg">
+        <button class="modal-close" (click)="closeModal()">✕</button>
+        <span class="modal-plan-icon">{{ selectedPlan.icon }}</span>
+        <div class="modal-plan-name">Forfait {{ selectedPlan.name }}</div>
+        <div class="modal-plan-desc">{{ selectedPlan.desc }}</div>
+        <div class="modal-price-row">
+          <span class="modal-price">{{ currentPrice }}</span>
+          <span class="modal-price-sub">{{ selectedPlan.priceSub }}</span>
+        </div>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="modal-steps">
+        <div class="step" [class.active]="isStepActive(1)" [class.done]="isStepDone(1)">
+          <div class="step-num">{{ isStepDone(1) ? '✓' : '1' }}</div>
+          <div class="step-label">Détails</div>
+        </div>
+        <div class="step" [class.active]="isStepActive(2)" [class.done]="isStepDone(2)">
+          <div class="step-num">{{ isStepDone(2) ? '✓' : '2' }}</div>
+          <div class="step-label">Paiement</div>
+        </div>
+        <div class="step" [class.active]="isStepActive(3)" [class.done]="isStepDone(3)">
+          <div class="step-num">3</div>
+          <div class="step-label">Confirmation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+
+      <!-- SUCCESS screen -->
+      <div class="success-screen" *ngIf="isSuccess">
+        <div class="success-anim">🎉</div>
+        <div class="success-title">Paiement confirmé !</div>
+        <div class="success-text">
+          Votre forfait <strong>{{ selectedPlan.name }}</strong> est maintenant actif.
+          Un email de confirmation vous a été envoyé. Profitez de toutes vos fonctionnalités dès maintenant.
+        </div>
+        <button class="btn-success-close" (click)="closeModal()">Accéder au Dashboard</button>
+      </div>
+
+      <!-- STEP 1 : Details -->
+      <div class="step-content" *ngIf="!isSuccess && currentStep === 1">
+        <div class="detail-grid">
+          <div class="detail-card">
+            <div class="detail-icon">🥽</div>
+            <div class="detail-info">
+              <div class="detail-label">Enquêtes VR actives</div>
+              <div class="detail-value">{{ selectedPlan.surveys }}</div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-icon">👥</div>
+            <div class="detail-info">
+              <div class="detail-label">Répondants / mois</div>
+              <div class="detail-value">{{ selectedPlan.respondents }}</div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-icon">📱</div>
+            <div class="detail-info">
+              <div class="detail-label">APK inclus</div>
+              <div class="detail-value">{{ selectedPlan.apk }}</div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-icon">☁️</div>
+            <div class="detail-info">
+              <div class="detail-label">Stockage cloud</div>
+              <div class="detail-value">{{ selectedPlan.storage }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="features-full">
+          <div class="features-full-title">✦ Ce qui est inclus</div>
+          <div class="features-cols">
+            <div class="feature-row" *ngFor="let f of selectedPlan.features">
+              <span class="check" [ngClass]="f.yes ? 'yes' : 'no'">{{ f.yes ? '✓' : '✕' }}</span>
+              <span [style.color]="f.yes ? 'var(--text-dark)' : '#aaa'">{{ f.text }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 : Payment -->
+      <div class="step-content" *ngIf="!isSuccess && currentStep === 2">
+        <div class="pay-section-title">Choisissez votre moyen de paiement</div>
+
+        <div class="payment-methods">
+          <div class="pay-method" [class.selected]="selectedPayMethod === 'card'" (click)="selectPayMethod('card')">
+            <div class="pay-icon">💳</div>
+            <div><div class="pay-name">Carte bancaire</div><div class="pay-desc">Visa, Mastercard</div></div>
+          </div>
+          <div class="pay-method" [class.selected]="selectedPayMethod === 'virement'" (click)="selectPayMethod('virement')">
+            <div class="pay-icon">🏦</div>
+            <div><div class="pay-name">Virement bancaire</div><div class="pay-desc">Paiement via RIB</div></div>
+          </div>
+          <div class="pay-method" [class.selected]="selectedPayMethod === 'd17'" (click)="selectPayMethod('d17')">
+            <div class="pay-icon">📲</div>
+            <div><div class="pay-name">D17</div><div class="pay-desc">Paiement mobile D17</div></div>
+          </div>
+          <div class="pay-method" [class.selected]="selectedPayMethod === 'flouci'" (click)="selectPayMethod('flouci')">
+            <div class="pay-icon">🟢</div>
+            <div><div class="pay-name">Flouci</div><div class="pay-desc">Wallet mobile Flouci</div></div>
+          </div>
+        </div>
+
+        <!-- Carte bancaire -->
+        <div class="card-form" *ngIf="selectedPayMethod === 'card'">
+          <div class="form-group">
+            <label class="form-label">NUMÉRO DE CARTE</label>
+            <input class="form-input" [(ngModel)]="cardNumber" (input)="formatCard($event)" placeholder="1234 5678 9012 3456" maxlength="19">
+            <div class="card-icons">
+              <span class="card-icon-badge">VISA</span>
+              <span class="card-icon-badge">MC</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">DATE D'EXPIRATION</label>
+              <input class="form-input" [(ngModel)]="cardExpiry" (input)="formatExpiry($event)" placeholder="MM / AA" maxlength="7">
+            </div>
+            <div class="form-group">
+              <label class="form-label">CVV</label>
+              <input class="form-input" [(ngModel)]="cardCvv" type="password" placeholder="•••" maxlength="3">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">NOM SUR LA CARTE</label>
+            <input class="form-input" [(ngModel)]="cardName" placeholder="Ahmed Karim">
+          </div>
+        </div>
+
+        <!-- Virement -->
+        <div class="alt-pay-box" *ngIf="selectedPayMethod === 'virement'">
+          <div class="alt-pay-title">Coordonnées bancaires</div>
+          <div class="alt-pay-info">
+            <div><strong>Banque :</strong> Banque Nationale Agricole (BNA)</div>
+            <div><strong>Bénéficiaire :</strong> SurveyVR SARL</div>
+            <div><strong>RIB :</strong> 08 006 0123456789 12</div>
+            <div><strong>Référence :</strong> <span class="ref-code">SVR-AK-2026</span></div>
+          </div>
+          <div class="alt-pay-warning">⚠ Votre abonnement sera activé sous 24–48h après réception du virement.</div>
+        </div>
+
+        <!-- D17 -->
+        <div class="alt-pay-box center" *ngIf="selectedPayMethod === 'd17'">
+          <div style="font-size:48px;margin-bottom:12px;">📲</div>
+          <div class="alt-pay-title">Payer via D17</div>
+          <p>Envoyez le montant au numéro suivant :</p>
+          <div class="phone-number">+216 71 234 567</div>
+          <div class="ref-note">Référence : <strong>SVR-AK-2026</strong></div>
+        </div>
+
+        <!-- Flouci -->
+        <div class="alt-pay-box center" *ngIf="selectedPayMethod === 'flouci'">
+          <div style="font-size:48px;margin-bottom:12px;">🟢</div>
+          <div class="alt-pay-title">Payer via Flouci</div>
+          <p>Scannez le QR code ou entrez le lien de paiement :</p>
+          <div class="qr-placeholder">QR Code</div>
+          <div class="ref-note">Référence : <strong>SVR-AK-2026</strong></div>
+        </div>
+      </div>
+
+      <!-- STEP 3 : Confirm -->
+      <div class="step-content" *ngIf="!isSuccess && currentStep === 3">
+        <div class="confirm-summary">
+          <div class="confirm-row"><span class="label">Forfait</span><span class="value">{{ selectedPlan.name }}</span></div>
+          <div class="confirm-row"><span class="label">Facturation</span><span class="value">{{ billingLabel }}</span></div>
+          <div class="confirm-row"><span class="label">Moyen de paiement</span><span class="value">{{ payMethodLabel }}</span></div>
+          <div class="confirm-row"><span class="label">Date de début</span><span class="value">20 Février 2026</span></div>
+          <div class="confirm-row"><span class="label">Prochaine facturation</span><span class="value">20 Mars 2026</span></div>
+          <div class="confirm-row total">
+            <span class="label">Total à payer</span>
+            <span class="value">{{ currentPrice }} {{ selectedPlan.priceSub ? 'DT' : '' }}</span>
+          </div>
+        </div>
+
+        <div class="security-note">
+          🔒 Paiement 100% sécurisé — Vos données sont chiffrées SSL 256-bit. SurveyVR ne stocke jamais vos informations bancaires.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer" *ngIf="!isSuccess">
+      <button class="btn-back" [style.visibility]="currentStep > 1 ? 'visible' : 'hidden'" (click)="prevStep()">← Retour</button>
+      <div class="step-hint">{{ stepHint }}</div>
+      <button class="btn-next" [ngClass]="{'btn-pay': currentStep === 3}" [disabled]="isProcessing" (click)="nextStep()">
+        {{ nextBtnLabel }}
+      </button>
+    </div>
+
+  </div>
+</div>

@@ -75,8 +75,8 @@ togglePasswordVisibility() {
         // REDIRECTION SELON ROLE
         if (role === 'admin') {
           this.router.navigate(['/admin/dashboard']);
-        } else {
-          this.router.navigate(['/user/dashboard']);
+        } else if (role === 'professionnel') {
+          this.router.navigate(['client/dashborad']);
         }
 
         this.loading = false;
