@@ -2,6 +2,10 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 const mongoose = require('mongoose');
+const Stripe = require('stripe');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const User = require('./models/userModels');
+const Forfait = require('./models/forfait');
 
 const demandeDemoRoutes = require('./routes/demandeDemo');
 const demandeDevisRoutes = require('./routes/demandeDevis');
@@ -9,6 +13,9 @@ const authRoute = require('./routes/authRoutes');
 const adminRoute = require('./routes/adminRoutes');
 const adminDemoRoute = require('./routes/admin/demandeDemo');
 const adminDevisRoute = require('./routes/admin/demandeDevis');
+const paymentRoute = require('./routes/clients/payment')
+const forfaitRoutes = require('./routes/clients/forfait');
+
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -79,6 +86,45 @@ app.use('/auth', authRoute);
 app.use('/admin', adminRoute);
 app.use('/adminDemoRoute', adminDemoRoute);
 app.use('/adminDevisRoute', adminDevisRoute);
+
+app.use('/client/forfaits', forfaitRoutes);
+app.use('/client/payment',paymentRoute) ; 
+
+
+app.post(
+  '/webhook',
+  express.raw({ type: 'application/json' }), 
+  async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+    let event;
+
+    try {
+      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+
+        const userId = session.metadata.userId;
+        const forfaitId = session.metadata.forfaitId;
+        const forfait = await Forfait.findById(forfaitId);
+
+        await User.findByIdAndUpdate(userId, {
+          abonnement: forfait.name,
+          experiencesRestantes: forfait.experiencesIncluded,
+          features: forfait.features,
+          status: 'active'
+        });
+
+        console.log('Abonnement activé pour l’utilisateur !');
+      }
+
+      res.json({ received: true });
+    } catch (err) {
+      console.log(err);
+      res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+  }
+);
 
 /* ========================
    GESTION DES ERREURS

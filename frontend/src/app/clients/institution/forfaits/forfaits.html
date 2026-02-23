@@ -102,10 +102,9 @@
           <thead>
             <tr>
               <th>Fonctionnalité</th>
-              <th>Starter</th>
+              <th>Standard</th>
               <th class="highlight-col">Pro</th>
               <th>Business</th>
-              <th>Enterprise</th>
             </tr>
           </thead>
           <tbody>
@@ -204,16 +203,10 @@
             <div class="detail-icon">🥽</div>
             <div class="detail-info">
               <div class="detail-label">Enquêtes VR actives</div>
-              <div class="detail-value">{{ selectedPlan.surveys }}</div>
+              <div class="detail-value">{{ selectedPlan.experiences }}</div>
             </div>
           </div>
-          <div class="detail-card">
-            <div class="detail-icon">👥</div>
-            <div class="detail-info">
-              <div class="detail-label">Répondants / mois</div>
-              <div class="detail-value">{{ selectedPlan.respondents }}</div>
-            </div>
-          </div>
+        
           <div class="detail-card">
             <div class="detail-icon">📱</div>
             <div class="detail-info">
@@ -221,13 +214,7 @@
               <div class="detail-value">{{ selectedPlan.apk }}</div>
             </div>
           </div>
-          <div class="detail-card">
-            <div class="detail-icon">☁️</div>
-            <div class="detail-info">
-              <div class="detail-label">Stockage cloud</div>
-              <div class="detail-value">{{ selectedPlan.storage }}</div>
-            </div>
-          </div>
+         
         </div>
 
         <div class="features-full">

@@ -18,10 +18,8 @@ export interface Plan {
   priceSub: string;
   desc: string;
   tagline: string;
-  surveys: string;
-  respondents: string;
+  experiences: string;
   apk: string;
-  storage: string;
   features: PlanFeature[];
   headerBg: string;
   isPopular?: boolean;
@@ -45,29 +43,29 @@ export class Forfaits  implements OnInit {
 
   plans: Plan[] = [
     {
-      key: 'starter',
+      key: 'Standard',
       icon: '🌱',
-      name: 'Starter',
+      name: 'Standard',
       tagline: 'Parfait pour commencer',
       price: '149',
       priceYearly: '119',
       priceSub: 'DT / mois',
-      desc: 'Parfait pour découvrir la puissance des enquêtes VR. Idéal pour un point de vente unique.',
-      surveys: '1 enquête',
-      respondents: '100 / mois',
-      apk: '1 APK',
-      storage: '1 Go',
+      desc: 'Parfait pour découvrir la puissance des expériences VR.',
+      experiences: '5 expériences',
+      apk: '5 APK',
       headerBg: 'linear-gradient(145deg, #1A2B5F, #2D3E6F)',
       cardClass: 'starter',
       features: [
-        { text: '1 enquête VR active', yes: true },
-        { text: '1 APK fourni', yes: true },
-        { text: 'Tableau de bord basique', yes: true },
-        { text: 'Support par email', yes: true },
-        { text: 'Export Excel / CSV', yes: false },
-        { text: 'Support prioritaire', yes: false },
-        { text: 'Multi-sites', yes: false },
-        { text: 'API & Intégrations', yes: false },
+        { text: 'simulations standards', yes: true },
+        { text: 'Accès aux expériences VR de base', yes: true },
+        { text: 'Tutoriels interactifs VR', yes: true },
+        { text: 'Possibilité de visualiser les résultats simples', yes: true },
+        { text: 'Accès aux expériences VR avancées', yes: false },
+        { text: 'interactions et scénarios complexes', yes: false },
+        { text: 'Rapports PDF de synthèse des expériences', yes: false },
+        { text: 'Simulation Esthétique Médicale par IA', yes: false },
+        { text: 'recommandations personnalisées et prédictions des résultats', yes: false },
+
       ]
     },
     {
@@ -78,24 +76,24 @@ export class Forfaits  implements OnInit {
       price: '349',
       priceYearly: '279',
       priceSub: 'DT / mois',
-      desc: 'Idéal pour les équipes actives qui déploient des enquêtes VR en multi-points de vente.',
-      surveys: '5 enquêtes',
-      respondents: '500 / mois',
-      apk: '5 APK',
-      storage: '5 Go',
+      desc: 'Idéal pour les équipes actives qui déploient des expériences VR en multi-points de vente.',
+      experiences: '12 expériences',
+      apk: '12 APK',
       headerBg: 'linear-gradient(145deg, #0A1635, #1a2d5a)',
       cardClass: 'pro',
       isPopular: true,
       isCurrent: true,
-      features: [
-        { text: '5 enquêtes VR actives', yes: true },
-        { text: '5 APK fournis', yes: true },
-        { text: 'Dashboard analytique avancé', yes: true },
-        { text: 'Support prioritaire', yes: true },
-        { text: 'Export Excel / CSV', yes: true },
-        { text: 'Notifications temps réel', yes: true },
-        { text: 'Multi-sites', yes: false },
-        { text: 'API & Intégrations', yes: false },
+        features: [
+        { text: 'simulations standards', yes: true },
+        { text: 'Accès aux expériences VR de base', yes: true },
+        { text: 'Tutoriels interactifs VR', yes: true },
+        { text: 'Possibilité de visualiser les résultats simples', yes: true },
+        { text: 'Accès aux expériences VR avancées', yes: true },
+        { text: 'interactions et scénarios complexes', yes: true },
+        { text: 'Rapports PDF de synthèse des expériences', yes: true },
+        { text: 'Simulation Esthétique Médicale par IA', yes: false },
+        { text: 'recommandations personnalisées et prédictions des résultats', yes: false },
+
       ]
     },
     {
@@ -107,23 +105,21 @@ export class Forfaits  implements OnInit {
       priceYearly: '559',
       priceSub: 'DT / mois',
       desc: 'Pour les grandes enseignes et les équipes multi-sites. Toutes les fonctionnalités Pro plus un support dédié.',
-      surveys: '20 enquêtes',
-      respondents: '2 000 / mois',
+      experiences: '20 experiences',
       apk: '20 APK',
-      storage: '20 Go',
       headerBg: 'linear-gradient(135deg, #B45309, #D97706)',
       cardClass: 'business',
-      features: [
-        { text: '20 enquêtes VR actives', yes: true },
-        { text: '2 000 répondants par mois', yes: true },
-        { text: '20 APK fournis', yes: true },
-        { text: '20 Go de stockage cloud', yes: true },
-        { text: 'Dashboard multi-sites', yes: true },
-        { text: 'Support dédié', yes: true },
-        { text: 'Export Excel / CSV', yes: true },
-        { text: 'Rapports personnalisés', yes: true },
-        { text: 'Intégrations avancées', yes: true },
-        { text: 'API (lecture)', yes: true },
+     features: [
+        { text: 'simulations standards', yes: true },
+        { text: 'Accès aux expériences VR de base', yes: true },
+        { text: 'Tutoriels interactifs VR', yes: true },
+        { text: 'Possibilité de visualiser les résultats simples', yes: true },
+        { text: 'Accès aux expériences VR avancées', yes: true },
+        { text: 'interactions et scénarios complexes', yes: true },
+        { text: 'Rapports PDF de synthèse des expériences', yes: true },
+        { text: 'Simulation Esthétique Médicale par IA', yes: true },
+        { text: 'recommandations personnalisées et prédictions des résultats', yes: true },
+
       ]
     },
   
@@ -131,14 +127,12 @@ export class Forfaits  implements OnInit {
 
   // ── Compare table data ──────────────────────────────────
   compareRows = [
-    { label: 'Enquêtes VR actives',  vals: ['1', '5', '20', '∞'] },
-    { label: 'Répondants / mois',    vals: ['100', '500', '2 000', '∞'] },
-    { label: 'APK inclus',           vals: ['1', '5', '20', '∞'] },
-    { label: 'Stockage cloud',       vals: ['1 Go', '5 Go', '20 Go', '∞'] },
-    { label: 'Support prioritaire',  bools: [false, true, true, true] },
-    { label: 'Export Excel / CSV',   bools: [false, true, true, true] },
-    { label: 'Dashboard multi-sites',bools: [false, false, true, true] },
-    { label: 'API & Intégrations',   bools: [false, false, false, true] },
+    { label: 'Expériences VR actives',  vals: ['1', '5', '20'] },
+    { label: 'APK inclus',           vals: ['1', '5', '20'] },
+    { label: 'Accès aux expériences VR avancées',  bools: [false, true, true] },
+    { label: 'interactions et scénarios complexes',   bools: [false, true, true] },
+    { label: 'Rapports PDF de synthèse des expériences',bools: [false, true, true] },
+    { label: 'Simulation Esthétique Médicale par IA',   bools: [false, false, false] },
   ];
 
   // ── FAQ ─────────────────────────────────────────────────
