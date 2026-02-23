@@ -6,6 +6,7 @@ const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const User = require('./models/userModels');
 const Forfait = require('./models/forfait');
+const Abonnement = require ('./models/abonnement') ; 
 
 const demandeDemoRoutes = require('./routes/demandeDemo');
 const demandeDevisRoutes = require('./routes/demandeDevis');
@@ -49,7 +50,6 @@ app.use(cors({
    MIDDLEWARES
 ======================== */
 
-app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* ========================
@@ -110,11 +110,11 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 
       const forfait = await Forfait.findById(forfaitId);
 
-      // 1️⃣ Créer Subscription
-      const subscription = await Subscription.create({
+      // 1️⃣ Créer abonnement
+      const abonnement = await Abonnement.create({
         user: userId,
         forfait: forfaitId,
-        experiencesRestantes: forfait.experiencesIncluded,
+        experiencesRestantes: forfait.experiences,
         stripeSessionId: session.id,
         status: 'active'
       });
@@ -122,14 +122,14 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
       // 2️⃣ Créer Payment
       await Payment.create({
         user: userId,
-        abonnement: subscription._id,
+        abonnement: abonnement._id,
         amount: session.amount_total,
         currency: session.currency,
         stripeSessionId: session.id,
         status: 'paid'
       });
 
-      console.log("✅ Subscription + Payment créés !");
+      console.log("✅ Abonnement + Payment créés !");
     }
 
     res.json({ received: true });
@@ -139,6 +139,10 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
     res.status(400).send(`Webhook Error: ${err.message}`);
   }
 });
+
+
+app.use(express.json());
+
 /* ========================
    GESTION DES ERREURS
 ======================== */
