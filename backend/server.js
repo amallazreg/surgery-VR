@@ -13,7 +13,7 @@ const authRoute = require('./routes/authRoutes');
 const adminRoute = require('./routes/adminRoutes');
 const adminDemoRoute = require('./routes/admin/demandeDemo');
 const adminDevisRoute = require('./routes/admin/demandeDevis');
-const paymentRoute = require('./routes/clients/payment')
+const paymentRoute = require('./routes/clients/paiement')
 const forfaitRoutes = require('./routes/clients/forfait');
 
 
@@ -91,41 +91,54 @@ app.use('/client/forfaits', forfaitRoutes);
 app.use('/client/payment',paymentRoute) ; 
 
 
-app.post(
-  '/webhook',
-  express.raw({ type: 'application/json' }), 
-  async (req, res) => {
-    const sig = req.headers['stripe-signature'];
-    let event;
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
 
-    try {
-      event = stripe.webhooks.constructEvent(req.body, sig, process.env.STRIPE_WEBHOOK_SECRET);
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
 
-      if (event.type === 'checkout.session.completed') {
-        const session = event.data.object;
+    if (event.type === 'checkout.session.completed') {
 
-        const userId = session.metadata.userId;
-        const forfaitId = session.metadata.forfaitId;
-        const forfait = await Forfait.findById(forfaitId);
+      const session = event.data.object;
+      const userId = session.metadata.userId;
+      const forfaitId = session.metadata.forfaitId;
 
-        await User.findByIdAndUpdate(userId, {
-          abonnement: forfait.name,
-          experiencesRestantes: forfait.experiencesIncluded,
-          features: forfait.features,
-          status: 'active'
-        });
+      const forfait = await Forfait.findById(forfaitId);
 
-        console.log('Abonnement activé pour l’utilisateur !');
-      }
+      // 1️⃣ Créer Subscription
+      const subscription = await Subscription.create({
+        user: userId,
+        forfait: forfaitId,
+        experiencesRestantes: forfait.experiencesIncluded,
+        stripeSessionId: session.id,
+        status: 'active'
+      });
 
-      res.json({ received: true });
-    } catch (err) {
-      console.log(err);
-      res.status(400).send(`Webhook Error: ${err.message}`);
+      // 2️⃣ Créer Payment
+      await Payment.create({
+        user: userId,
+        abonnement: subscription._id,
+        amount: session.amount_total,
+        currency: session.currency,
+        stripeSessionId: session.id,
+        status: 'paid'
+      });
+
+      console.log("✅ Subscription + Payment créés !");
     }
-  }
-);
 
+    res.json({ received: true });
+
+  } catch (err) {
+    console.log(err);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
 /* ========================
    GESTION DES ERREURS
 ======================== */

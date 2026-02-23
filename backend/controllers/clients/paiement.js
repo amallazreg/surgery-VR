@@ -1,6 +1,7 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const User = require('../../models/userModels'); 
+const Forfait = require('../../models/forfait')
 
 const createCheckoutSession = async (req, res) => {
   try {
