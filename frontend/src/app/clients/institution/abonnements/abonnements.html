@@ -1,0 +1,417 @@
+
+
+
+<body>
+
+<app-side-bar></app-side-bar>
+
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Mes Abonnements</h1>
+      <p>Gérez tous vos abonnements en un seul endroit</p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-btn notif-wrap">🔔<div class="notif-dot"></div></div>
+      <div class="topbar-btn">💬</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Stat Strip -->
+    <div class="stat-strip">
+      <div class="stat-pill">
+        <div class="stat-pill-icon spi-blue">📦</div>
+        <div class="stat-pill-info">
+          <div class="stat-pill-val" id="countTotal">3</div>
+          <div class="stat-pill-lbl">Abonnements total</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-icon spi-green">✅</div>
+        <div class="stat-pill-info">
+          <div class="stat-pill-val">1</div>
+          <div class="stat-pill-lbl">Actif en cours</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-icon spi-gold">⏳</div>
+        <div class="stat-pill-info">
+          <div class="stat-pill-val">1</div>
+          <div class="stat-pill-lbl">Expire bientôt</div>
+        </div>
+      </div>
+      <div class="stat-pill">
+        <div class="stat-pill-icon spi-red">💸</div>
+        <div class="stat-pill-info">
+          <div class="stat-pill-val">1 197 DT</div>
+          <div class="stat-pill-lbl">Dépensé total</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section header -->
+    <div class="section-title-row">
+      <div class="section-title">
+        Tous les abonnements 
+      </div>
+      <div class="filter-pills">
+        <div class="filter-pill active" onclick="filterSubs(this,'all')">Tous</div>
+        <div class="filter-pill" onclick="filterSubs(this,'active')">Actifs</div>
+        <div class="filter-pill" onclick="filterSubs(this,'expiring')">Expirent bientôt</div>
+        <div class="filter-pill" onclick="filterSubs(this,'expired')">Expirés</div>
+      </div>
+    </div>
+
+    <!-- ══ ABONNEMENTS LIST ══ -->
+    <div class="abonnements-list" id="subList">
+
+      <!-- ── Card 1 : Pro ACTIF ── -->
+      <div class="sub-card status-active" data-status="active">
+        <div class="sub-card-header">
+          <div class="plan-badge-big pbb-pro">⚡</div>
+          <div class="sub-card-meta">
+            <div class="sub-plan-name">
+              Forfait Pro
+              <span class="status-chip chip-active"><span class="chip-dot"></span>Actif</span>
+            </div>
+            <div class="sub-plan-id">Réf. SVR-PRO-2026-0128 · Mensuel</div>
+          </div>
+          <div></div>
+          <div class="sub-price-col">
+            <div class="sub-price-big">349 <span style="font-size:14px;color:var(--text-gray)">DT</span></div>
+            <div class="sub-price-cycle">/ mois · HT</div>
+          </div>
+        </div>
+        <div class="sub-card-body">
+          <div>
+            <!-- Timeline -->
+            <div class="timeline-section">
+              <div class="tl-label-row">
+                <span class="tl-label">Progression de la période</span>
+                <span class="tl-days-left days-green">🟢 36 jours restants</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill fill-green" style="width: 55%"></div>
+              </div>
+              <div class="tl-dates">
+                <div class="tl-date-item">
+                  <span class="tl-label">Début</span>
+                  <span class="tl-date-val">28 Jan 2026</span>
+                </div>
+                <div class="tl-date-item" style="text-align:center">
+                  <span class="tl-label">Aujourd'hui</span>
+                  <span class="tl-date-val" style="color:var(--primary)">20 Fév 2026</span>
+                </div>
+                <div class="tl-date-item" style="text-align:right">
+                  <span class="tl-label">Expiration</span>
+                  <span class="tl-date-val">28 Mar 2026</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Mini grid -->
+            <div class="sub-mini-grid">
+              <div class="mini-info">
+                <div class="mini-info-label">Enquêtes VR</div>
+                <div class="mini-info-val">3 / 5 actives</div>
+              </div>
+              <div class="mini-info">
+                <div class="mini-info-label">APK utilisés</div>
+                <div class="mini-info-val">3 / 5 fournis</div>
+              </div>
+              <div class="mini-info">
+                <div class="mini-info-label">Répondants</div>
+                <div class="mini-info-val">342 / 500</div>
+              </div>
+              <div class="mini-info">
+                <div class="mini-info-label">Stockage</div>
+                <div class="mini-info-val">3.1 / 5 Go</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="sub-actions-col">
+            <button class="action-btn btn-upgrade" onclick="openPayModal('Upgrade Business','699 DT')">⚡ Passer à Business</button>
+            <button class="action-btn btn-renew" onclick="openPayModal('Renouveler Pro','349 DT')">🔄 Renouveler maintenant</button>
+            <button class="action-btn btn-invoice">📄 Voir la facture</button>
+
+            <!-- Auto renew -->
+            <div class="auto-renew-row" id="autoRenew1">
+              <div class="renew-toggle" id="toggle1" onclick="toggleRenew(1)"><div class="renew-knob"></div></div>
+              <span class="renew-label">Renouvellement auto</span>
+              <span class="renew-status on" id="renewStatus1">Activé</span>
+            </div>
+
+            <button class="action-btn btn-cancel">✕ Annuler l'abonnement</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Card 2 : Starter EXPIRE BIENTÔT ── -->
+      <div class="sub-card status-expiring" data-status="expiring">
+        <div class="sub-card-header">
+          <div class="plan-badge-big pbb-starter">🌱</div>
+          <div class="sub-card-meta">
+            <div class="sub-plan-name">
+              Forfait Starter
+              <span class="status-chip chip-expiring"><span class="chip-dot"></span>Expire dans 6 jours</span>
+            </div>
+            <div class="sub-plan-id">Réf. SVR-STR-2026-0115 · Mensuel</div>
+          </div>
+          <div></div>
+          <div class="sub-price-col">
+            <div class="sub-price-big">149 <span style="font-size:14px;color:var(--text-gray)">DT</span></div>
+            <div class="sub-price-cycle">/ mois · HT</div>
+          </div>
+        </div>
+        <div class="sub-card-body">
+          <div>
+            <div class="timeline-section">
+              <div class="tl-label-row">
+                <span class="tl-label">Progression de la période</span>
+                <span class="tl-days-left days-gold">⚠ 6 jours restants</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill fill-gold" style="width: 83%"></div>
+              </div>
+              <div class="tl-dates">
+                <div class="tl-date-item">
+                  <span class="tl-label">Début</span>
+                  <span class="tl-date-val">15 Jan 2026</span>
+                </div>
+                <div class="tl-date-item" style="text-align:center">
+                  <span class="tl-label">Aujourd'hui</span>
+                  <span class="tl-date-val" style="color:var(--warning)">20 Fév 2026</span>
+                </div>
+                <div class="tl-date-item" style="text-align:right">
+                  <span class="tl-label">Expiration</span>
+                  <span class="tl-date-val" style="color:var(--warning)">26 Fév 2026</span>
+                </div>
+              </div>
+            </div>
+            <div class="sub-mini-grid">
+              <div class="mini-info">
+                <div class="mini-info-label">Enquêtes VR</div>
+                <div class="mini-info-val">1 / 1 active</div>
+              </div>
+              <div class="mini-info">
+                <div class="mini-info-label">APK utilisés</div>
+                <div class="mini-info-val">1 / 1 fourni</div>
+              </div>
+              <div class="mini-info">
+                <div class="mini-info-label">Répondants</div>
+                <div class="mini-info-val">78 / 100</div>
+              </div>
+              <div class="mini-info">
+                <div class="mini-info-label">Stockage</div>
+                <div class="mini-info-val">0.7 / 1 Go</div>
+              </div>
+            </div>
+          </div>
+          <div class="sub-actions-col">
+            <button class="action-btn btn-repay" onclick="openPayModal('Renouveler Starter','149 DT')">⚡ Renouveler d'urgence</button>
+            <button class="action-btn btn-upgrade" onclick="openPayModal('Passer à Pro','349 DT')">🚀 Passer à Pro</button>
+            <button class="action-btn btn-invoice">📄 Voir la facture</button>
+            <div class="auto-renew-row off" id="autoRenew2">
+              <div class="renew-toggle off" id="toggle2" onclick="toggleRenew(2)"><div class="renew-knob"></div></div>
+              <span class="renew-label">Renouvellement auto</span>
+              <span class="renew-status off" id="renewStatus2">Désactivé</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Card 3 : Business EXPIRÉ ── -->
+      <div class="sub-card status-expired" data-status="expired">
+        <div class="sub-card-header">
+          <div class="plan-badge-big pbb-business">🏢</div>
+          <div class="sub-card-meta">
+            <div class="sub-plan-name">
+              Forfait Business
+              <span class="status-chip chip-expired"><span class="chip-dot"></span>Expiré</span>
+            </div>
+            <div class="sub-plan-id">Réf. SVR-BUS-2025-1201 · Mensuel</div>
+          </div>
+          <div></div>
+          <div class="sub-price-col">
+            <div class="sub-price-big" style="color:var(--text-gray)">699 <span style="font-size:14px">DT</span></div>
+            <div class="sub-price-cycle">Expiré le 10 Jan 2026</div>
+          </div>
+        </div>
+        <div class="sub-card-body">
+          <div>
+            <div class="timeline-section">
+              <div class="tl-label-row">
+                <span class="tl-label">Période d'abonnement</span>
+                <span class="tl-days-left days-red">✕ Expiré depuis 41 jours</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill fill-red" style="width: 100%"></div>
+              </div>
+              <div class="tl-dates">
+                <div class="tl-date-item">
+                  <span class="tl-label">Début</span>
+                  <span class="tl-date-val">10 Déc 2025</span>
+                </div>
+                <div class="tl-date-item" style="text-align:center">
+                  <span class="tl-label">Durée</span>
+                  <span class="tl-date-val">31 jours</span>
+                </div>
+                <div class="tl-date-item" style="text-align:right">
+                  <span class="tl-label">Expiré le</span>
+                  <span class="tl-date-val" style="color:var(--danger)">10 Jan 2026</span>
+                </div>
+              </div>
+            </div>
+            <div class="sub-mini-grid">
+              <div class="mini-info" style="opacity:0.6">
+                <div class="mini-info-label">Enquêtes réalisées</div>
+                <div class="mini-info-val">12 enquêtes</div>
+              </div>
+              <div class="mini-info" style="opacity:0.6">
+                <div class="mini-info-label">Répondants total</div>
+                <div class="mini-info-val">1 247</div>
+              </div>
+              <div class="mini-info" style="opacity:0.6">
+                <div class="mini-info-label">APK générés</div>
+                <div class="mini-info-val">8 / 20</div>
+              </div>
+              <div class="mini-info" style="opacity:0.6">
+                <div class="mini-info-label">Montant payé</div>
+                <div class="mini-info-val">699 DT</div>
+              </div>
+            </div>
+          </div>
+          <div class="sub-actions-col">
+            <button class="action-btn btn-reactivate" onclick="openPayModal('Réactiver Business','699 DT')">🔄 Réactiver cet abonnement</button>
+            <button class="action-btn btn-upgrade" onclick="openPayModal('Upgrade Enterprise','Sur devis')">🚀 Passer à Enterprise</button>
+            <button class="action-btn btn-invoice">📄 Voir la facture</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end sub list -->
+
+    <!-- ══ HISTORIQUE PAIEMENTS ══ -->
+    <div class="history-section">
+      <div class="section-title-row" style="margin-bottom:16px">
+        <div class="section-title">Historique des paiements</div>
+        <button class="export-btn">📥 Exporter CSV</button>
+      </div>
+      <div class="history-card">
+        <div class="history-header">
+          <div class="history-title">Toutes les transactions</div>
+          <span style="font-size:12px;color:var(--text-gray)">6 transactions</span>
+        </div>
+        <table class="history-table">
+          <thead>
+            <tr>
+              <th>Forfait</th>
+              <th>Date</th>
+              <th>Méthode</th>
+              <th>Montant</th>
+              <th>Statut</th>
+              <th>Facture</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><div class="ht-plan-cell"><div class="ht-plan-dot" style="background:var(--primary)"></div>Pro — Mensuel</div></td>
+              <td>28 Jan 2026</td>
+              <td>💳 Carte bancaire</td>
+              <td><span class="ht-amount">349 DT</span></td>
+              <td><span class="ht-status-badge hts-paid">✓ Payé</span></td>
+              <td><button class="dl-btn">⬇</button></td>
+            </tr>
+            <tr>
+              <td><div class="ht-plan-cell"><div class="ht-plan-dot" style="background:#AAB8C2"></div>Starter — Mensuel</div></td>
+              <td>15 Jan 2026</td>
+              <td>📲 D17</td>
+              <td><span class="ht-amount">149 DT</span></td>
+              <td><span class="ht-status-badge hts-paid">✓ Payé</span></td>
+              <td><button class="dl-btn">⬇</button></td>
+            </tr>
+            <tr>
+              <td><div class="ht-plan-cell"><div class="ht-plan-dot" style="background:var(--warning)"></div>Business — Mensuel</div></td>
+              <td>10 Déc 2025</td>
+              <td>🏦 Virement</td>
+              <td><span class="ht-amount">699 DT</span></td>
+              <td><span class="ht-status-badge hts-paid">✓ Payé</span></td>
+              <td><button class="dl-btn">⬇</button></td>
+            </tr>
+            <tr>
+              <td><div class="ht-plan-cell"><div class="ht-plan-dot" style="background:var(--primary)"></div>Pro — Mensuel</div></td>
+              <td>28 Déc 2025</td>
+              <td>💳 Carte bancaire</td>
+              <td><span class="ht-amount">349 DT</span></td>
+              <td><span class="ht-status-badge hts-pending">⏳ En attente</span></td>
+              <td><button class="dl-btn">⬇</button></td>
+            </tr>
+            <tr>
+              <td><div class="ht-plan-cell"><div class="ht-plan-dot" style="background:var(--danger)"></div>Enterprise — Essai</div></td>
+              <td>05 Nov 2025</td>
+              <td>💳 Carte bancaire</td>
+              <td><span class="ht-amount">0 DT</span></td>
+              <td><span class="ht-status-badge hts-failed">✕ Échoué</span></td>
+              <td><button class="dl-btn">⬇</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- end content -->
+</main>
+
+<!-- ══════════════════════════════════
+     MODAL PAIEMENT RAPIDE
+══════════════════════════════════ -->
+<div class="pay-overlay" id="payOverlay" onclick="handleOverlay(event)">
+  <div class="pay-modal">
+    <div class="pay-modal-head">
+      <button class="pay-modal-close" onclick="closePayModal()">✕</button>
+      <div class="pay-modal-title" id="pmTitle">Renouveler Pro</div>
+      <div class="pay-modal-sub">Paiement sécurisé — SurveyVR</div>
+      <div class="pay-modal-amount" id="pmAmount">349 <span>DT</span></div>
+    </div>
+    <div class="pay-modal-body" id="pmBody">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--text-dark);margin-bottom:14px;">Choisissez votre méthode</div>
+      <div class="quick-methods">
+        <div class="qm-btn selected" onclick="selectQM(this)">
+          <span class="qm-icon">💳</span>
+          <span class="qm-lbl">Carte</span>
+        </div>
+        <div class="qm-btn" onclick="selectQM(this)">
+          <span class="qm-icon">🏦</span>
+          <span class="qm-lbl">Virement</span>
+        </div>
+        <div class="qm-btn" onclick="selectQM(this)">
+          <span class="qm-icon">📲</span>
+          <span class="qm-lbl">D17</span>
+        </div>
+        <div class="qm-btn" onclick="selectQM(this)">
+          <span class="qm-icon">🟢</span>
+          <span class="qm-lbl">Flouci</span>
+        </div>
+      </div>
+      <button class="pay-confirm-btn" onclick="confirmPayment()">
+        🔒 Confirmer le paiement
+      </button>
+      <div class="pay-secure">🔐 Chiffrement SSL 256-bit · Données jamais stockées</div>
+    </div>
+    <div class="pay-success" id="pmSuccess">
+      <div class="pay-success-icon">🎉</div>
+      <div class="pay-success-title">Paiement réussi !</div>
+      <div class="pay-success-text" id="pmSuccessText">Votre abonnement a été renouvelé avec succès. Une facture vous a été envoyée par email.</div>
+      <button class="pay-success-close" onclick="closePayModal()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+
+</body>

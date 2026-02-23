@@ -715,8 +715,7 @@ body {
 .modal-body { padding: 28px 36px; overflow-y: auto; flex: 1; }
 
 /* Step 1 - Details */
-.step-content { display: none; }
-.step-content.active { display: block; }
+
 
 .detail-grid {
   display: grid;

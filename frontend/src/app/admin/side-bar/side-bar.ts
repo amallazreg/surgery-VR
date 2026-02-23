@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-side-bar',
@@ -13,8 +13,12 @@ import { RouterModule } from '@angular/router';
 export class SideBar implements OnInit {
   isSidebarOpen: boolean = true;
 
-  constructor() { }
+constructor(private router: Router) {}
 
+logout() {
+  localStorage.clear(); 
+  this.router.navigate(['/signin']);
+}
   ngOnInit(): void {
     this.checkScreenSize();
   }

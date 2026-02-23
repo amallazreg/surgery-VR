@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterLink, RouterModule } from '@angular/router';
+import { Router, RouterLink, RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-side-bar',
@@ -12,4 +12,10 @@ import { RouterLink, RouterModule } from '@angular/router';
 })
 export class SideBar {
 
+constructor(private router: Router) {}
+
+logout() {
+  localStorage.clear(); 
+  this.router.navigate(['/signin']);
+}
 }

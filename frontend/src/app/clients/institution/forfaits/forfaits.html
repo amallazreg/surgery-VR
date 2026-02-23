@@ -9,7 +9,7 @@
     <!-- Topbar -->
     <div class="topbar">
       <div class="topbar-left">
-        <h1>Forfaits & Abonnements</h1>
+        <h1>Tous Les Forfaits </h1>
         <p>Choisissez le plan adapté à vos besoins</p>
       </div>
       <div class="topbar-right">
@@ -37,13 +37,13 @@
         <span class="save-badge">Économisez 20%</span>
       </div>
 
-      <!-- Current plan banner -->
+      <!-- Current plan banner 
       <div class="current-plan-banner">
         <div class="dot"></div>
         Votre abonnement actuel : <strong>&nbsp;Forfait Pro</strong> — expire le 28 Mars 2026
         <div class="banner-spacer"></div>
         <span class="banner-link">Gérer la facturation →</span>
-      </div>
+      </div> -->
 
       <!-- ── Plans Grid ── -->
       <div class="forfaits-grid">
@@ -243,25 +243,25 @@
 
       <!-- STEP 2 : Payment -->
       <div class="step-content" *ngIf="!isSuccess && currentStep === 2">
-        <div class="pay-section-title">Choisissez votre moyen de paiement</div>
+        <div class="pay-section-title"> Choisir un moyen de paiement  </div>
 
         <div class="payment-methods">
           <div class="pay-method" [class.selected]="selectedPayMethod === 'card'" (click)="selectPayMethod('card')">
             <div class="pay-icon">💳</div>
             <div><div class="pay-name">Carte bancaire</div><div class="pay-desc">Visa, Mastercard</div></div>
           </div>
-          <div class="pay-method" [class.selected]="selectedPayMethod === 'virement'" (click)="selectPayMethod('virement')">
+       <!--   <div class="pay-method" [class.selected]="selectedPayMethod === 'virement'" (click)="selectPayMethod('virement')">
             <div class="pay-icon">🏦</div>
             <div><div class="pay-name">Virement bancaire</div><div class="pay-desc">Paiement via RIB</div></div>
           </div>
           <div class="pay-method" [class.selected]="selectedPayMethod === 'd17'" (click)="selectPayMethod('d17')">
             <div class="pay-icon">📲</div>
             <div><div class="pay-name">D17</div><div class="pay-desc">Paiement mobile D17</div></div>
-          </div>
+          </div> -->
           <div class="pay-method" [class.selected]="selectedPayMethod === 'flouci'" (click)="selectPayMethod('flouci')">
             <div class="pay-icon">🟢</div>
             <div><div class="pay-name">Flouci</div><div class="pay-desc">Wallet mobile Flouci</div></div>
-          </div>
+          </div> 
         </div>
 
         <!-- Carte bancaire -->

@@ -1,0 +1,299 @@
+<div class="app-shell">
+
+  <!-- ═══ SIDEBAR ═══ -->
+ <app-side-bar></app-side-bar>
+
+  <!-- ═══ MAIN ═══ -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Mes Expériences VR</h1>
+        <p>{{ totalExperiences }} expériences réparties sur {{ subscriptionGroups.length }} abonnements actifs</p>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-search" [class.focused]="searchQuery.length > 0">
+          <span>🔍</span>
+          <input type="text" [(ngModel)]="searchQuery" placeholder="Rechercher une expérience...">
+          <button *ngIf="searchQuery" class="search-clear" (click)="searchQuery = ''">✕</button>
+        </div>
+        <div class="topbar-btn notif-wrap">🔔<div class="notif-dot"></div></div>
+        <div class="topbar-btn">💬</div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- Stat strip -->
+      <div class="stat-strip">
+        <div class="stat-card">
+          <div class="stat-ico ico-blue">🥽</div>
+          <div>
+            <div class="stat-val">{{ totalExperiences }}</div>
+            <div class="stat-lbl">Expériences total</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico ico-green">🟢</div>
+          <div>
+            <div class="stat-val">{{ liveCount }}</div>
+            <div class="stat-lbl">En ligne (Live)</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico ico-cyan">👥</div>
+          <div>
+            <div class="stat-val">{{ totalRespondents | number }}</div>
+            <div class="stat-lbl">Répondants total</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-ico ico-accent">📱</div>
+          <div>
+            <div class="stat-val">{{ totalApk }}</div>
+            <div class="stat-lbl">APK générés</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls row -->
+      <div class="controls-row">
+        <div class="filter-pills">
+          <div
+            *ngFor="let f of filters"
+            class="filter-pill"
+            [class.active]="activeFilter === f.key"
+            (click)="setFilter(f.key)"
+          >
+            {{ f.label }}
+          </div>
+        </div>
+        <div class="view-toggle">
+          <button class="vt-btn active">⊞</button>
+          <button class="vt-btn">☰</button>
+        </div>
+      </div>
+
+      <!-- ════════════════════════════
+           SUBSCRIPTION GROUPS
+      ════════════════════════════ -->
+      <div
+        *ngFor="let group of subscriptionGroups; let gi = index"
+        class="sub-group"
+        [style.animation-delay]="(gi * 0.1 + 0.1) + 's'"
+        [hidden]="!isGroupVisible(group)"
+      >
+
+        <!-- Group header -->
+        <div class="sub-group-header" [ngClass]="group.headerClass">
+          <div class="sgh-glow"></div>
+          <div class="sub-plan-icon">{{ group.planIcon }}</div>
+
+          <div class="sub-group-info">
+            <div class="sub-group-name">{{ group.planName }}</div>
+            <div class="sub-group-meta">Réf. {{ group.ref }}</div>
+          </div>
+
+          <div class="sub-group-stat">
+            <div class="sgs-item">
+              <div class="sgs-val">{{ group.totalExperiences }}</div>
+              <div class="sgs-lbl">Expériences</div>
+            </div>
+            <div class="sgs-item">
+              <div class="sgs-val">{{ group.totalRespondents }}</div>
+              <div class="sgs-lbl">Répondants</div>
+            </div>
+            <div class="sgs-item">
+              <div class="sgs-val">{{ group.apkUsed }}</div>
+              <div class="sgs-lbl">APK</div>
+            </div>
+          </div>
+
+          <div class="sub-group-badge" [ngClass]="getSubBadge(group.status).cssClass">
+            <span class="sgb-dot"></span>
+            {{ getSubBadge(group.status).label }}
+          </div>
+        </div>
+
+        <!-- Experience cards grid -->
+        <div class="exp-grid">
+
+          <ng-container *ngFor="let exp of filteredExperiences(group)">
+
+            <!-- Empty slot card -->
+            <div *ngIf="exp.isEmpty" class="exp-card exp-card-empty">
+              <div class="exp-card-empty-icon">＋</div>
+              <div class="exp-card-empty-text">Nouvelle expérience</div>
+            </div>
+
+            <!-- Regular experience card -->
+            <div *ngIf="!exp.isEmpty" class="exp-card" [attr.data-status]="exp.status">
+
+              <!-- Thumbnail -->
+              <div class="exp-card-thumb">
+                <div class="vr-thumb" [ngClass]="exp.thumbClass">{{ exp.emoji }}</div>
+
+                <span class="exp-status-tag" [ngClass]="getStatusTag(exp.status).cssClass">
+                  {{ getStatusTag(exp.status).label }}
+                </span>
+
+                <span class="compat-tag">🥽 {{ exp.compatibility }}</span>
+
+                <!-- Hover overlay quick actions -->
+                <div class="exp-card-thumb-overlay">
+                  <button
+                    class="quick-action"
+                    title="Tester sur casque"
+                    [disabled]="!isActionable(exp)"
+                    (click)="openVRModal(exp); $event.stopPropagation()"
+                  >🥽</button>
+                  <button
+                    class="quick-action"
+                    title="Télécharger APK"
+                    (click)="openAPKModal(exp); $event.stopPropagation()"
+                  >📱</button>
+                </div>
+              </div>
+
+              <!-- Card body -->
+              <div class="exp-card-body">
+                <div class="exp-title">{{ exp.title }}</div>
+                <div class="exp-desc">{{ exp.description }}</div>
+
+                <div class="exp-stats-row">
+                  <div class="exp-stat-item">👥 <strong>{{ exp.respondents }}</strong> réponses</div>
+                  <div class="exp-stat-item">⏱ <strong>{{ exp.avgTime }}</strong> moy.</div>
+                  <div class="exp-stat-item" *ngIf="exp.rating">⭐ <strong>{{ exp.rating }}</strong></div>
+                  <div class="exp-stat-item warn" *ngIf="!exp.rating">⚠ Brouillon</div>
+                </div>
+              </div>
+
+              <!-- Action buttons -->
+              <div class="exp-actions-always">
+                <button
+                  class="exp-btn ebtn-vr"
+                  [class.disabled]="!isActionable(exp)"
+                  [disabled]="!isActionable(exp)"
+                  (click)="openVRModal(exp)"
+                >🥽 Tester VR</button>
+
+                <button class="exp-btn ebtn-apk" (click)="openAPKModal(exp)">
+                  📱 APK
+                </button>
+
+                <button
+                  class="exp-btn ebtn-stats"
+                  [class.disabled]="exp.respondents === 0"
+                  [disabled]="exp.respondents === 0"
+                >📊 Voir les résultats</button>
+              </div>
+
+            </div>
+          </ng-container>
+
+        </div>
+      </div>
+      <!-- end groups -->
+
+    </div>
+  </main>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL : TÉLÉCHARGER APK
+════════════════════════════════════ -->
+<div class="apk-overlay" [class.open]="isApkModalOpen" (click)="onApkOverlayClick($event)">
+  <div class="apk-modal">
+
+    <div class="apk-modal-head">
+      <button class="apk-close" (click)="closeAPKModal()">✕</button>
+      <div style="font-size:36px;margin-bottom:12px">📱</div>
+      <div class="apk-modal-head-title">{{ selectedExpForApk }}</div>
+      <div class="apk-modal-head-sub">Choisissez la version compatible avec votre casque</div>
+    </div>
+
+    <div class="apk-modal-body">
+
+      <div class="apk-version-list">
+        <div
+          *ngFor="let device of apkVersions; let i = index"
+          class="apk-version-item"
+          [class.recommended]="device.recommended"
+        >
+          <div *ngIf="device.recommended" class="apk-rec-tag">Recommandé</div>
+          <div class="apk-device-icon">{{ device.icon }}</div>
+          <div class="apk-version-info">
+            <div class="apk-version-name">{{ device.name }}</div>
+            <div class="apk-version-meta">{{ device.version }} · {{ device.android }} · Dernière version</div>
+          </div>
+          <span class="apk-version-size">{{ device.size }}</span>
+          <button
+            class="apk-dl-btn"
+            [class.done]="downloadStates[i] === 'done'"
+            [disabled]="downloadStates[i] === 'loading'"
+            (click)="downloadApk(i)"
+          >{{ getDownloadIcon(i) }}</button>
+        </div>
+      </div>
+
+      <div class="apk-qr-row">
+        <div class="apk-qr-box">QR Code</div>
+        <div class="apk-qr-text">
+          <strong>Installer via QR Code</strong><br>
+          Scannez avec votre casque VR ou smartphone Android pour lancer le téléchargement directement sur l'appareil.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     MODAL : TESTER SUR CASQUE
+════════════════════════════════════ -->
+<div class="vr-overlay" [class.open]="isVrModalOpen" (click)="onVrOverlayClick($event)">
+  <div class="vr-modal">
+
+    <div class="vr-modal-head">
+      <button class="vr-close" (click)="closeVRModal()">✕</button>
+      <div class="vr-headset-anim">🥽</div>
+      <div class="vr-modal-title">Lancer sur casque</div>
+      <div class="vr-modal-exp">{{ selectedExpForVr }}</div>
+    </div>
+
+    <div class="vr-modal-body">
+
+      <div class="vr-steps">
+        <div class="vr-step">
+          <div class="vr-step-num">1</div>
+          <div class="vr-step-text">Assurez-vous que votre <strong>casque Meta Quest</strong> est allumé et connecté au même réseau Wi-Fi.</div>
+        </div>
+        <div class="vr-step">
+          <div class="vr-step-num">2</div>
+          <div class="vr-step-text">Ouvrez l'application <strong>SurveyVR Player</strong> sur le casque (APK installé requis).</div>
+        </div>
+        <div class="vr-step">
+          <div class="vr-step-num">3</div>
+          <div class="vr-step-text">Cliquez sur <strong>"Lancer l'expérience"</strong> ci-dessous — l'expérience s'affichera automatiquement.</div>
+        </div>
+      </div>
+
+      <div class="vr-connect-status">
+        <div class="vr-status-dot"></div>
+        <div class="vr-status-text">Casque détecté : <strong>Quest 2 — AhmedKarim</strong> · Prêt à recevoir</div>
+      </div>
+
+      <button
+        class="vr-launch-btn"
+        [class.launched]="vrLaunchState === 'done'"
+        [disabled]="vrLaunchState === 'loading'"
+        (click)="launchOnHeadset()"
+      >
+        {{ vrLaunchLabel }}
+      </button>
+
+    </div>
+  </div>
+</div>

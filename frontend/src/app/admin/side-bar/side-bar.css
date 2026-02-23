@@ -174,3 +174,48 @@
     z-index: -1;
   }
 }
+
+/* Container logout */
+.sidebar-logout {
+  margin-top: auto;
+  padding: 20px;
+}
+
+/* Bouton logout */
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  background: linear-gradient(135deg, #ff4d4d, #cc0000);
+  color: white;
+
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+/* Hover effect */
+.logout-btn:hover {
+  background: linear-gradient(135deg, #ff1a1a, #990000);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255, 0, 0, 0.3);
+}
+
+/* Click effect */
+.logout-btn:active {
+  transform: scale(0.98);
+}
+
+/* Icon */
+.logout-icon {
+  font-size: 16px;
+}

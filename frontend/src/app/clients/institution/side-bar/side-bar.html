@@ -24,23 +24,25 @@
       <span class="nav-label">Dashboard</span>
     </div>
 
-    <div class="nav-item">
+    <div class="nav-item"
+    routerLink="/client/mesExperiences"
+             routerLinkActive="active">
       <div class="nav-icon">🥽</div>
-      <span class="nav-label">Mes Enquêtes VR</span>
-      <span class="nav-badge">3</span>
+      <span class="nav-label">Mes Expériences</span>
     </div>
 
     <div class="nav-item">
       <div class="nav-icon">📋</div>
       <span class="nav-label">Mes Demandes</span>
-      <span class="nav-badge">2</span>
     </div>
 
     <div class="nav-section-label">Application</div>
 
-    <div class="nav-item">
+    <div class="nav-item"
+         routerLink="/client/abonnements"
+         routerLinkActive="active">
       <div class="nav-icon">📱</div>
-      <span class="nav-label">Mes APK</span>
+      <span class="nav-label">Mes Abonnements</span>
     </div>
 
     <div class="nav-item">
@@ -64,21 +66,15 @@
       <span class="nav-label">Mon Compte</span>
     </div>
 
-    <div class="nav-item">
-      <div class="nav-icon">🎧</div>
-      <span class="nav-label">Support</span>
-    </div>
+    
   </nav>
 
-  <div class="sidebar-bottom">
-    <div class="storage-widget">
-      <div class="storage-header">
-        <span class="storage-label">Stockage utilisé</span>
-        <span class="storage-value">3.1 / 5 Go</span>
-      </div>
-      <div class="storage-bar">
-        <div class="storage-fill"></div>
-      </div>
-    </div>
-  </div>
+  <div class="sidebar-logout">
+  <button class="logout-btn" (click)="logout()">
+    <span class="logout-icon"></span>
+    <span>Déconnexion</span>
+  </button>
+</div>
+
+  
 </aside>
