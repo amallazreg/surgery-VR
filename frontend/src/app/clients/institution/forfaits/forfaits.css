@@ -304,7 +304,7 @@ body {
 /* Plan Card */
 .plan-card {
   background: #fff;
-  border-radius: 22px;
+  border-radius: 30px;
   border: 1.5px solid rgba(0,102,255,0.1);
   overflow: hidden;
   cursor: pointer;
@@ -312,6 +312,8 @@ body {
   position: relative;
   animation: fadeUp 0.5s ease-out both;
   display: flex; flex-direction: column;
+   width: 350px;      /* largeur */
+  min-height: 480px;
 }
 
 .plan-card:nth-child(1) { animation-delay: 0.1s; }

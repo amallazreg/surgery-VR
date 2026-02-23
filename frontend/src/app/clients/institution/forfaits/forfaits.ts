@@ -61,9 +61,7 @@ export class Forfaits  implements OnInit {
       cardClass: 'starter',
       features: [
         { text: '1 enquête VR active', yes: true },
-        { text: '100 répondants par mois', yes: true },
         { text: '1 APK fourni', yes: true },
-        { text: '1 Go de stockage cloud', yes: true },
         { text: 'Tableau de bord basique', yes: true },
         { text: 'Support par email', yes: true },
         { text: 'Export Excel / CSV', yes: false },
@@ -91,9 +89,7 @@ export class Forfaits  implements OnInit {
       isCurrent: true,
       features: [
         { text: '5 enquêtes VR actives', yes: true },
-        { text: '500 répondants par mois', yes: true },
         { text: '5 APK fournis', yes: true },
-        { text: '5 Go de stockage cloud', yes: true },
         { text: 'Dashboard analytique avancé', yes: true },
         { text: 'Support prioritaire', yes: true },
         { text: 'Export Excel / CSV', yes: true },
@@ -130,34 +126,7 @@ export class Forfaits  implements OnInit {
         { text: 'API (lecture)', yes: true },
       ]
     },
-    {
-      key: 'enterprise',
-      icon: '🚀',
-      name: 'Enterprise',
-      tagline: 'Sur mesure & illimité',
-      price: 'Sur devis',
-      priceYearly: 'Sur devis',
-      priceSub: '',
-      desc: 'Solution 100% sur mesure avec ressources illimitées, SLA garanti, Customer Success Manager dédié et intégration API complète.',
-      surveys: 'Illimité',
-      respondents: 'Illimité',
-      apk: 'Illimité',
-      storage: 'Illimité',
-      headerBg: 'linear-gradient(145deg, #1A0A2E, #2D1060)',
-      cardClass: 'enterprise',
-      features: [
-        { text: 'Enquêtes VR illimitées', yes: true },
-        { text: 'Répondants illimités', yes: true },
-        { text: 'APK illimités', yes: true },
-        { text: 'Stockage illimité', yes: true },
-        { text: 'White Label complet', yes: true },
-        { text: 'API complète', yes: true },
-        { text: 'SLA 99.9% garanti', yes: true },
-        { text: 'CSM dédié', yes: true },
-        { text: 'Formation sur site', yes: true },
-        { text: 'Rapports sur mesure', yes: true },
-      ]
-    }
+  
   ];
 
   // ── Compare table data ──────────────────────────────────

@@ -19,7 +19,7 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
   'http://localhost:4200',
-  'https://surgery-czdnp0r4u-amals-projects-e7d165d9.vercel.app'
+  'https://surgery-vr.vercel.app'
 ];
 
 app.use(cors({
@@ -33,7 +33,7 @@ app.use(cors({
 
     return callback(null, true);
   },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE' , 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
