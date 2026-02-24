@@ -47,53 +47,32 @@ app.use(cors({
   credentials: true
 }));
 
-app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
+app.post('/webhook',
+  express.raw({ type: 'application/json' }),
+  (req, res) => {
 
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
+    const sig = req.headers['stripe-signature'];
 
-    if (event.type === 'checkout.session.completed') {
+    try {
+      const event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
 
-      const session = event.data.object;
-      const userId = session.metadata.userId;
-      const forfaitId = session.metadata.forfaitId;
+      console.log("Webhook reçu :", event.type);
 
-      const forfait = await Forfait.findById(forfaitId);
+      if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        console.log("Session ID :", session.id);
+      }
 
-      // 1️⃣ Créer abonnement
-      const abonnement = await Abonnement.create({
-        user: userId,
-        forfait: forfaitId,
-        experiencesRestantes: forfait.experiences,
-        stripeSessionId: session.id,
-        status: 'active'
-      });
+      res.json({ received: true });
 
-      // 2️⃣ Créer Payment
-      await Paiement.create({
-        user: userId,
-        abonnement: abonnement._id,
-        amount: session.amount_total,
-        currency: session.currency,
-        stripeSessionId: session.id,
-        status: 'paid'
-      });
-
-      console.log("✅ Abonnement + Payment créés !");
+    } catch (err) {
+      console.error("Erreur webhook:", err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
     }
-
-    res.json({ received: true });
-
-  } catch (err) {
-    console.log(err);
-    res.status(400).send(`Webhook Error: ${err.message}`);
-  }
 });
 
 /* ========================
