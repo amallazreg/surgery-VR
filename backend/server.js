@@ -7,6 +7,7 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const User = require('./models/userModels');
 const Forfait = require('./models/forfait');
 const Abonnement = require ('./models/abonnement') ; 
+const Paiement = require('./models/paiement')
 
 const demandeDemoRoutes = require('./routes/demandeDemo');
 const demandeDevisRoutes = require('./routes/demandeDevis');
@@ -45,6 +46,55 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
   credentials: true
 }));
+
+app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const sig = req.headers['stripe-signature'];
+  let event;
+
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.body,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    );
+
+    if (event.type === 'checkout.session.completed') {
+
+      const session = event.data.object;
+      const userId = session.metadata.userId;
+      const forfaitId = session.metadata.forfaitId;
+
+      const forfait = await Forfait.findById(forfaitId);
+
+      // 1️⃣ Créer abonnement
+      const abonnement = await Abonnement.create({
+        user: userId,
+        forfait: forfaitId,
+        experiencesRestantes: forfait.experiences,
+        stripeSessionId: session.id,
+        status: 'active'
+      });
+
+      // 2️⃣ Créer Payment
+      await Paiement.create({
+        user: userId,
+        abonnement: abonnement._id,
+        amount: session.amount_total,
+        currency: session.currency,
+        stripeSessionId: session.id,
+        status: 'paid'
+      });
+
+      console.log("✅ Abonnement + Payment créés !");
+    }
+
+    res.json({ received: true });
+
+  } catch (err) {
+    console.log(err);
+    res.status(400).send(`Webhook Error: ${err.message}`);
+  }
+});
 
 /* ========================
    MIDDLEWARES
@@ -92,54 +142,7 @@ app.use('/client/forfaits', forfaitRoutes);
 app.use('/client/payment',paymentRoute) ; 
 
 
-app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
-  const sig = req.headers['stripe-signature'];
-  let event;
 
-  try {
-    event = stripe.webhooks.constructEvent(
-      req.body,
-      sig,
-      process.env.STRIPE_WEBHOOK_SECRET
-    );
-
-    if (event.type === 'checkout.session.completed') {
-
-      const session = event.data.object;
-      const userId = session.metadata.userId;
-      const forfaitId = session.metadata.forfaitId;
-
-      const forfait = await Forfait.findById(forfaitId);
-
-      // 1️⃣ Créer abonnement
-      const abonnement = await Abonnement.create({
-        user: userId,
-        forfait: forfaitId,
-        experiencesRestantes: forfait.experiences,
-        stripeSessionId: session.id,
-        status: 'active'
-      });
-
-      // 2️⃣ Créer Payment
-      await Payment.create({
-        user: userId,
-        abonnement: abonnement._id,
-        amount: session.amount_total,
-        currency: session.currency,
-        stripeSessionId: session.id,
-        status: 'paid'
-      });
-
-      console.log("✅ Abonnement + Payment créés !");
-    }
-
-    res.json({ received: true });
-
-  } catch (err) {
-    console.log(err);
-    res.status(400).send(`Webhook Error: ${err.message}`);
-  }
-});
 
 
 
