@@ -751,6 +751,15 @@ body {
   margin-bottom: 14px;
 }
 
+.plan-card {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  min-height: 200px;
+  background: white;
+  border: 2px solid red; /* pour les voir */
+}
+
 .features-cols {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SideBar } from "../side-bar/side-bar";
-
+import { ForfaitService } from '../../../services/forfait-service';
 
 export interface PlanFeature {
   text: string;
@@ -39,91 +39,11 @@ export type PaymentMethod = 'card' | 'virement' | 'd17' | 'flouci';
 })
 export class Forfaits  implements OnInit {
 
+  constructor(private forfaitService: ForfaitService) {}
+
   isYearly = false;
 
-  plans: Plan[] = [
-    {
-      key: 'Standard',
-      icon: '🌱',
-      name: 'Standard',
-      tagline: 'Parfait pour commencer',
-      price: '149',
-      priceYearly: '119',
-      priceSub: 'DT / mois',
-      desc: 'Parfait pour découvrir la puissance des expériences VR.',
-      experiences: '5 expériences',
-      apk: '5 APK',
-      headerBg: 'linear-gradient(145deg, #1A2B5F, #2D3E6F)',
-      cardClass: 'starter',
-      features: [
-        { text: 'simulations standards', yes: true },
-        { text: 'Accès aux expériences VR de base', yes: true },
-        { text: 'Tutoriels interactifs VR', yes: true },
-        { text: 'Possibilité de visualiser les résultats simples', yes: true },
-        { text: 'Accès aux expériences VR avancées', yes: false },
-        { text: 'interactions et scénarios complexes', yes: false },
-        { text: 'Rapports PDF de synthèse des expériences', yes: false },
-        { text: 'Simulation Esthétique Médicale par IA', yes: false },
-        { text: 'recommandations personnalisées et prédictions des résultats', yes: false },
-
-      ]
-    },
-    {
-      key: 'pro',
-      icon: '⚡',
-      name: 'Pro',
-      tagline: 'Pour les équipes actives',
-      price: '349',
-      priceYearly: '279',
-      priceSub: 'DT / mois',
-      desc: 'Idéal pour les équipes actives qui déploient des expériences VR en multi-points de vente.',
-      experiences: '12 expériences',
-      apk: '12 APK',
-      headerBg: 'linear-gradient(145deg, #0A1635, #1a2d5a)',
-      cardClass: 'pro',
-      isPopular: true,
-      isCurrent: true,
-        features: [
-        { text: 'simulations standards', yes: true },
-        { text: 'Accès aux expériences VR de base', yes: true },
-        { text: 'Tutoriels interactifs VR', yes: true },
-        { text: 'Possibilité de visualiser les résultats simples', yes: true },
-        { text: 'Accès aux expériences VR avancées', yes: true },
-        { text: 'interactions et scénarios complexes', yes: true },
-        { text: 'Rapports PDF de synthèse des expériences', yes: true },
-        { text: 'Simulation Esthétique Médicale par IA', yes: false },
-        { text: 'recommandations personnalisées et prédictions des résultats', yes: false },
-
-      ]
-    },
-    {
-      key: 'business',
-      icon: '🏢',
-      name: 'Business',
-      tagline: 'Multi-sites & grandes équipes',
-      price: '699',
-      priceYearly: '559',
-      priceSub: 'DT / mois',
-      desc: 'Pour les grandes enseignes et les équipes multi-sites. Toutes les fonctionnalités Pro plus un support dédié.',
-      experiences: '20 experiences',
-      apk: '20 APK',
-      headerBg: 'linear-gradient(135deg, #B45309, #D97706)',
-      cardClass: 'business',
-     features: [
-        { text: 'simulations standards', yes: true },
-        { text: 'Accès aux expériences VR de base', yes: true },
-        { text: 'Tutoriels interactifs VR', yes: true },
-        { text: 'Possibilité de visualiser les résultats simples', yes: true },
-        { text: 'Accès aux expériences VR avancées', yes: true },
-        { text: 'interactions et scénarios complexes', yes: true },
-        { text: 'Rapports PDF de synthèse des expériences', yes: true },
-        { text: 'Simulation Esthétique Médicale par IA', yes: true },
-        { text: 'recommandations personnalisées et prédictions des résultats', yes: true },
-
-      ]
-    },
-  
-  ];
+ plans: Plan[] = [];
 
   // ── Compare table data ──────────────────────────────────
   compareRows = [
@@ -207,8 +127,53 @@ export class Forfaits  implements OnInit {
     return this.isYearly ? plan.priceYearly : plan.price;
   }
 
-  ngOnInit(): void {}
+ngOnInit(): void {
+  
+  this.loadForfaits();
+}
 
+loadForfaits(): void {
+  this.forfaitService.getAllForfaits().subscribe({
+    next: (data) => {
+      this.plans = data.map((f: any) => ({
+        key: f.name.toLowerCase(),
+        icon: this.getIcon(f.name),
+        name: f.name,
+        tagline: f.tagline,
+        price: f.price?.toString(),
+        priceYearly: f.priceYearly?.toString(),
+        priceSub: 'DT / mois',
+        desc: f.tagline,
+        experiences: `${f.experiences} expériences`,
+        apk: `${f.apk} APK`,
+        headerBg: this.getHeaderBg(f.name),
+        cardClass: f.name.toLowerCase(),
+        features: f.features || []
+      }));
+    },
+    error: (err) => {
+      console.error('Erreur chargement forfaits', err);
+    }
+  });
+}
+
+getIcon(name: string): string {
+  switch (name.toLowerCase()) {
+    case 'standard': return '🌱';
+    case 'pro': return '⚡';
+    case 'business': return '🏢';
+    default: return '💎';
+  }
+}
+
+getHeaderBg(name: string): string {
+  switch (name.toLowerCase()) {
+    case 'standard': return 'linear-gradient(145deg, #1A2B5F, #2D3E6F)';
+    case 'pro': return 'linear-gradient(145deg, #0A1635, #1a2d5a)';
+    case 'business': return 'linear-gradient(135deg, #B45309, #D97706)';
+    default: return 'linear-gradient(135deg, #444, #222)';
+  }
+}
   // ── Billing toggle ──────────────────────────────────────
   toggleBilling(): void {
     this.isYearly = !this.isYearly;
