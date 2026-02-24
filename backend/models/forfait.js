@@ -13,6 +13,7 @@ const forfaitSchema = new mongoose.Schema({
   priceSub: { type: String },
   desc: { type: String },
   experiences: { type: String },
+  nbExperiences: { type : Number},
   apk: { type: String },
   features: [featureSchema],
 }, { timestamps: true });

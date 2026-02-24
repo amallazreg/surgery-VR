@@ -49,7 +49,7 @@ app.use(cors({
 
 app.post('/webhook',
   express.raw({ type: 'application/json' }),
-  (req, res) => {
+  async (req, res) => {
 
     const sig = req.headers['stripe-signature'];
 
@@ -64,7 +64,36 @@ app.post('/webhook',
 
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
-        console.log("Session ID :", session.id);
+
+        const userId = session.metadata.userId;
+        const forfaitId = session.metadata.forfaitId;
+
+        if (!userId || !forfaitId) {
+          console.log("Metadata manquante !");
+          return res.json({ received: true });
+        }
+
+        const forfait = await Forfait.findById(forfaitId);
+
+        // 1️⃣ Créer Abonnement
+        const abonnement = await Abonnement.create({
+          user: userId,
+          forfait: forfaitId,
+          experiencesRestantes: forfait.nbExperiences,
+          stripeSessionId: session.id
+        });
+
+        // 2️⃣ Créer Paiement
+        await Paiement.create({
+          user: userId,
+          abonnement: abonnement._id,
+          amount: session.amount_total / 100, // Stripe en cents
+          currency: session.currency,
+          stripeSessionId: session.id,
+          status: 'paid'
+        });
+
+        console.log("✅ Abonnement et Paiement créés !");
       }
 
       res.json({ received: true });
