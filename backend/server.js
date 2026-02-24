@@ -50,6 +50,7 @@ app.use(cors({
    MIDDLEWARES
 ======================== */
 
+app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 /* ========================
@@ -141,7 +142,6 @@ app.post('/webhook', express.raw({ type: 'application/json' }), async (req, res)
 });
 
 
-app.use(express.json());
 
 /* ========================
    GESTION DES ERREURS
