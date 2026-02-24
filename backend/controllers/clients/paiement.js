@@ -25,8 +25,8 @@ const createCheckoutSession = async (req, res) => {
           quantity: 1,
         },
       ],
-      success_url: 'http://localhost:4200/success',
-      cancel_url: 'http://localhost:4200/cancel',
+      success_url: 'https://surgery-vr.vercel.app/success',
+      cancel_url: 'https://surgery-vr.vercel.app/cancel',
       metadata: {
         userId,
         forfaitId
