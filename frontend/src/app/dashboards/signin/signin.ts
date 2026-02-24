@@ -70,6 +70,9 @@ togglePasswordVisibility() {
 
         // Sauvegarde token + role
         this.authService.saveToken(res.token);
+        const userId = res.user?.id || res.id;
+        localStorage.setItem('userId', userId);
+        console.log(userId);
         this.authService.saveRole(role);
 
         // REDIRECTION SELON ROLE

@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 })
 export class ForfaitService {
 
-  private apiUrl = 'https://surgery-vr.vercel.app/client/forfaits'; 
+  private apiUrl = 'https://surgery-vr.onrender.com/client/forfaits'; 
   // ⚠️ adapte selon ton backend
 
   constructor(private http: HttpClient) {}

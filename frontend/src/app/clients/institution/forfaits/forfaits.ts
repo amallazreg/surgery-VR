@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SideBar } from "../side-bar/side-bar";
 import { ForfaitService } from '../../../services/forfait-service';
+import { Payement } from '../../../services/payement';
 
 export interface PlanFeature {
   text: string;
@@ -10,6 +11,7 @@ export interface PlanFeature {
 }
 
 export interface Plan {
+  _id : string
   key: string;
   icon: string;
   name: string;
@@ -39,7 +41,7 @@ export type PaymentMethod = 'card' | 'virement' | 'd17' | 'flouci';
 })
 export class Forfaits  implements OnInit {
 
-  constructor(private forfaitService: ForfaitService) {}
+  constructor(private forfaitService: ForfaitService,private paymentService : Payement) {}
 
   isYearly = false;
 
@@ -47,12 +49,12 @@ export class Forfaits  implements OnInit {
 
   // ── Compare table data ──────────────────────────────────
   compareRows = [
-    { label: 'Expériences VR actives',  vals: ['1', '5', '20'] },
-    { label: 'APK inclus',           vals: ['1', '5', '20'] },
+    { label: 'Expériences VR actives',  vals: ['5', '12', '20'] },
+    { label: 'Accès aux expériences VR de base ', bools: [true, true, true]},
     { label: 'Accès aux expériences VR avancées',  bools: [false, true, true] },
     { label: 'interactions et scénarios complexes',   bools: [false, true, true] },
     { label: 'Rapports PDF de synthèse des expériences',bools: [false, true, true] },
-    { label: 'Simulation Esthétique Médicale par IA',   bools: [false, false, false] },
+    { label: 'Simulation Esthétique Médicale par IA',   bools: [false, false, true] },
   ];
 
   // ── FAQ ─────────────────────────────────────────────────
@@ -74,21 +76,18 @@ export class Forfaits  implements OnInit {
     }
   ];
 
-  // ── Modal state ─────────────────────────────────────────
   isModalOpen = false;
   selectedPlan: Plan | null = null;
   currentStep = 1;
   isProcessing = false;
   isSuccess = false;
 
-  // ── Payment form ────────────────────────────────────────
   selectedPayMethod: PaymentMethod = 'card';
   cardNumber = '';
   cardExpiry = '';
   cardCvv = '';
   cardName = '';
 
-  // ── Computed ─────────────────────────────────────────────
   get currentPrice(): string {
     if (!this.selectedPlan) return '';
     return this.isYearly ? this.selectedPlan.priceYearly : this.selectedPlan.price;
@@ -136,6 +135,7 @@ loadForfaits(): void {
   this.forfaitService.getAllForfaits().subscribe({
     next: (data) => {
       this.plans = data.map((f: any) => ({
+        _id: f._id,
         key: f.name.toLowerCase(),
         icon: this.getIcon(f.name),
         name: f.name,
@@ -228,13 +228,35 @@ getHeaderBg(name: string): string {
     this.selectedPayMethod = method;
   }
 
-  processPayment(): void {
-    this.isProcessing = true;
-    setTimeout(() => {
+processPayment(): void {
+
+  if (!this.selectedPlan) return;
+
+  this.isProcessing = true;
+
+  const userId = localStorage.getItem('userId'); 
+  const forfaitId = this.selectedPlan._id; 
+
+  console.log("Selected Plan:", this.selectedPlan);
+    console.log("Selected user :", userId);
+
+console.log("Forfait ID envoyé:", this.selectedPlan._id);
+
+  this.paymentService.createCheckoutSession(
+    userId!,
+    forfaitId
+  ).subscribe({
+    
+    next: (res) => {
+      
+      window.location.href = res.url;
+    },
+    error: (err) => {
+      console.error(err);
       this.isProcessing = false;
-      this.isSuccess = true;
-    }, 2000);
-  }
+    }
+  });
+}
 
   // ── Card formatting ──────────────────────────────────────
   formatCard(event: Event): void {
