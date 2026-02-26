@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SideBar } from "../side-bar/side-bar";
 import { ForfaitService } from '../../../services/forfait-service';
 import { Payement } from '../../../services/payement';
+import { ActivatedRoute } from '@angular/router';
 
 export interface PlanFeature {
   text: string;
@@ -41,7 +42,7 @@ export type PaymentMethod = 'card' | 'virement' | 'd17' | 'flouci';
 })
 export class Forfaits  implements OnInit {
 
-  constructor(private forfaitService: ForfaitService,private paymentService : Payement) {}
+  constructor(private forfaitService: ForfaitService,private paymentService : Payement,private route: ActivatedRoute ) {}
 
   isYearly = false;
 
@@ -126,9 +127,19 @@ export class Forfaits  implements OnInit {
     return this.isYearly ? plan.priceYearly : plan.price;
   }
 
-ngOnInit(): void {
+
+  showPaymentSuccessPopup = false;
+
   
+ngOnInit(): void {
   this.loadForfaits();
+
+  // Détecter retour depuis Stripe
+  this.route.queryParams.subscribe(params => {
+    if (params['payment'] === 'success') {
+      this.showPaymentSuccessPopup = true;
+    }
+  });
 }
 
 loadForfaits(): void {
@@ -277,21 +288,4 @@ console.log("Forfait ID envoyé:", this.selectedPlan._id);
     faq.open = !faq.open;
   }
 
-  // ── Nav ──────────────────────────────────────────────────
-  navItems = [
-    { icon: '🏠', label: 'Dashboard', badge: null, active: false, route: '/dashboard' },
-    { icon: '🥽', label: 'Mes Enquêtes VR', badge: 3, active: false, route: '/enquetes' },
-    { icon: '📋', label: 'Mes Demandes', badge: 2, active: false, route: '/demandes' },
-    { icon: '📱', label: 'Mes APK', badge: null, active: false, route: '/apk' },
-    { icon: '📊', label: 'Résultats & Stats', badge: null, active: false, route: '/stats' },
-    { icon: '💎', label: 'Forfaits', badge: null, active: true, route: '/forfaits' },
-    { icon: '⚙️', label: 'Mon Compte', badge: null, active: false, route: '/compte' },
-    { icon: '🎧', label: 'Support', badge: null, active: false, route: '/support' },
-  ];
-
-  navSections = [
-    { label: 'Général', items: [0, 1, 2] },
-    { label: 'Application', items: [3, 4] },
-    { label: 'Compte', items: [5, 6, 7] },
-  ];
 }

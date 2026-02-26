@@ -1,9 +1,12 @@
 import { Component, OnInit, Renderer2 } from '@angular/core';
 import { SideBar } from "../side-bar/side-bar";
+import { ActivatedRoute } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-abonnements',
-  imports: [SideBar],
+  standalone : true,
+  imports: [SideBar,CommonModule],
   templateUrl: './abonnements.html',
   styleUrl: './abonnements.css',
 })
@@ -18,7 +21,10 @@ export class Abonnements implements OnInit {
   paymentLoading: boolean = false;
   paymentSuccess: boolean = false;
 
-  constructor(private renderer: Renderer2) {}
+    showPaymentSuccessPopup = false;
+
+
+  constructor(private renderer: Renderer2,    private route: ActivatedRoute) {}
 
   ngOnInit(): void {
     // Animation progress bars
@@ -32,6 +38,12 @@ export class Abonnements implements OnInit {
         }, 200);
       });
     }, 100);
+
+     this.route.queryParams.subscribe(params => {
+      if (params['payment'] === 'success') {
+        this.showPaymentSuccessPopup = true;
+      }
+    });
   }
 
   // ───────────── FILTER SUBS ─────────────
@@ -73,5 +85,9 @@ export class Abonnements implements OnInit {
       this.paymentLoading = false;
       this.paymentSuccess = true;
     }, 1800);
+  }
+
+   closeSuccessPopup(): void {
+    this.showPaymentSuccessPopup = false;
   }
 }

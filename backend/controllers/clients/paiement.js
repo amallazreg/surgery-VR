@@ -6,8 +6,6 @@ const Forfait = require('../../models/forfait')
 const createCheckoutSession = async (req, res) => {
   try {
     const { userId, forfaitId } = req.body;
-
-    // Récupérer le forfait choisi
     const forfait = await Forfait.findById(forfaitId);
 
     const session = await stripe.checkout.sessions.create({
@@ -17,20 +15,15 @@ const createCheckoutSession = async (req, res) => {
         {
           price_data: {
             currency: 'usd',
-            product_data: {
-              name: forfait.name,
-            },
+            product_data: { name: forfait.name },
             unit_amount: forfait.price,
           },
           quantity: 1,
         },
       ],
-      success_url: 'https://surgery-vr.vercel.app/success',
-      cancel_url: 'https://surgery-vr.vercel.app/cancel',
-      metadata: {
-        userId,
-        forfaitId
-      }
+      success_url: 'https://surgery-vr.vercel.app/client/abonnements?payment=success',
+      cancel_url:  'https://surgery-vr.vercel.app/client/abonnements?payment=cancel',
+      metadata: { userId, forfaitId }
     });
 
     res.json({ url: session.url });
@@ -39,7 +32,6 @@ const createCheckoutSession = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 module.exports = {
     createCheckoutSession
 }

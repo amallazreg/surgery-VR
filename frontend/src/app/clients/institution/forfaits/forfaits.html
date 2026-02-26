@@ -143,7 +143,23 @@
       </div>
 
     </div>
+
+    <!-- ═══ POPUP PAIEMENT SUCCÈS ═══ -->
+<div class="success-overlay" *ngIf="showPaymentSuccessPopup">
+  <div class="success-popup">
+    <div class="success-anim">🎉</div>
+    <div class="success-title">Paiement confirmé !</div>
+    <div class="success-text">
+      Votre forfait est maintenant actif.<br>
+      Un email de confirmation vous a été envoyé.
+    </div>
+    <button class="btn-success-close" (click)="showPaymentSuccessPopup = false">
+      Accéder à mes abonnements
+    </button>
+  </div>
+</div>
   </main>
+
 </div>
 
 <!-- ═══════════════════════════════════════
@@ -230,7 +246,7 @@
 
       <!-- STEP 2 : Payment -->
       <div class="step-content" *ngIf="!isSuccess && currentStep === 2">
-        <div class="pay-section-title"> Choisir un moyen de paiement  </div>
+        <div class="pay-section-title"> Le moyen de paiement est :  </div>
 
         <div class="payment-methods">
           <div class="pay-method" [class.selected]="selectedPayMethod === 'card'" (click)="selectPayMethod('card')">
@@ -244,14 +260,14 @@
           <div class="pay-method" [class.selected]="selectedPayMethod === 'd17'" (click)="selectPayMethod('d17')">
             <div class="pay-icon">📲</div>
             <div><div class="pay-name">D17</div><div class="pay-desc">Paiement mobile D17</div></div>
-          </div> -->
+          </div> 
           <div class="pay-method" [class.selected]="selectedPayMethod === 'flouci'" (click)="selectPayMethod('flouci')">
             <div class="pay-icon">🟢</div>
             <div><div class="pay-name">Flouci</div><div class="pay-desc">Wallet mobile Flouci</div></div>
-          </div> 
+          </div> -->
         </div>
 
-        <!-- Carte bancaire -->
+        <!-- Carte bancaire 
         <div class="card-form" *ngIf="selectedPayMethod === 'card'">
           <div class="form-group">
             <label class="form-label">NUMÉRO DE CARTE</label>
@@ -275,7 +291,7 @@
             <label class="form-label">NOM SUR LA CARTE</label>
             <input class="form-input" [(ngModel)]="cardName" placeholder="Ahmed Karim">
           </div>
-        </div>
+        </div> -->
 
         <!-- Virement -->
         <div class="alt-pay-box" *ngIf="selectedPayMethod === 'virement'">

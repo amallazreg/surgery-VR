@@ -366,6 +366,21 @@
     </div>
 
   </div><!-- end content -->
+
+  <!-- ═══ POPUP PAIEMENT SUCCÈS ═══ -->
+<div class="success-overlay" *ngIf="showPaymentSuccessPopup">
+  <div class="success-popup">
+    <div class="success-anim">🎉</div>
+    <div class="success-title">Paiement confirmé !</div>
+    <div class="success-text">
+      Votre forfait est maintenant actif.<br>
+      Un email de confirmation vous a été envoyé.
+    </div>
+    <button class="btn-success-close" (click)="closeSuccessPopup()">
+      Accéder à mes abonnements
+    </button>
+  </div>
+</div>
 </main>
 
 <!-- ══════════════════════════════════
