@@ -989,72 +989,7 @@ body {
   margin-top: 10px; display: none;
 }
 
-.success-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  animation: fadeIn 0.3s ease;
-}
 
-.success-popup {
-  background: #fff;
-  border-radius: 20px;
-  padding: 48px 40px;
-  text-align: center;
-  max-width: 420px;
-  width: 90%;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-  animation: slideUp 0.4s ease;
-}
-
-.success-anim {
-  font-size: 64px;
-  margin-bottom: 16px;
-  animation: bounce 0.6s ease;
-}
-
-.success-title {
-  font-size: 24px;
-  font-weight: 700;
-  color: #1A2B5F;
-  margin-bottom: 12px;
-}
-
-.success-text {
-  color: #666;
-  font-size: 15px;
-  line-height: 1.6;
-  margin-bottom: 28px;
-}
-
-.btn-success-close {
-  background: linear-gradient(135deg, #1A2B5F, #2D3E6F);
-  color: #fff;
-  border: none;
-  padding: 14px 32px;
-  border-radius: 12px;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.btn-success-close:hover { opacity: 0.85; }
-
-@keyframes slideUp {
-  from { transform: translateY(30px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
-}
-
-@keyframes bounce {
-  0%, 100% { transform: scale(1); }
-  50%       { transform: scale(1.2); }
-}
 
 .faq-item.open .faq-a { display: block; }
 .faq-item.open .faq-chevron { transform: rotate(180deg); }

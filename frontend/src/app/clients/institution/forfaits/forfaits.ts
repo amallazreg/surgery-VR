@@ -127,19 +127,9 @@ export class Forfaits  implements OnInit {
     return this.isYearly ? plan.priceYearly : plan.price;
   }
 
-
-  showPaymentSuccessPopup = false;
-
-  
 ngOnInit(): void {
+  
   this.loadForfaits();
-
-  // Détecter retour depuis Stripe
-  this.route.queryParams.subscribe(params => {
-    if (params['payment'] === 'success') {
-      this.showPaymentSuccessPopup = true;
-    }
-  });
 }
 
 loadForfaits(): void {

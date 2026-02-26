@@ -1,93 +1,265 @@
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SideBar } from "../side-bar/side-bar";
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { AbonnementService } from '../../../services/abonnement-service';
 
 @Component({
   selector: 'app-abonnements',
-  standalone : true,
-  imports: [SideBar,CommonModule],
+  standalone: true,
+  imports: [SideBar, CommonModule],
   templateUrl: './abonnements.html',
   styleUrl: './abonnements.css',
 })
 export class Abonnements implements OnInit {
 
+  userId = localStorage.getItem('userId') || '';
+
+  // ── Data ──
+  abonnementActif: any = null;
+  historique: any[] = [];
+  factures: any[] = [];
+  forfaitsUpgrade: any[] = [];
+  forfaitActuel: any = null;
+
+  // ── Stats ──
+  totalDepense: number = 0;
+  expireBientotCount: number = 0;
+
+  // ── UI ──
   selectedFilter: string = 'all';
-  payModalOpen: boolean = false;
+  showPaymentSuccessPopup = false;
+  isLoading = true;
 
-  pmTitle: string = '';
-  pmAmount: string = '';
+  // ── Pay Modal ──
+  payModalOpen = false;
+  payModalType: 'renouveler' | 'upgrade' | '' = '';
+  selectedUpgradeForfait: any = null;
+  pmTitle = '';
+  pmAmount = '';
+  paymentLoading = false;
+  paymentSuccess = false;
 
-  paymentLoading: boolean = false;
-  paymentSuccess: boolean = false;
+today = new Date().toISOString();
+selectedMethod: string = 'card';
 
-    showPaymentSuccessPopup = false;
-
-
-  constructor(private renderer: Renderer2,    private route: ActivatedRoute) {}
+  constructor(
+    private route: ActivatedRoute,
+    private abonnementService: AbonnementService
+  ) {}
 
   ngOnInit(): void {
-    // Animation progress bars
-    setTimeout(() => {
-      const bars = document.querySelectorAll('.progress-fill');
-      bars.forEach((el: any) => {
-        const w = el.style.width;
-        el.style.width = '0';
-        setTimeout(() => {
-          el.style.width = w;
-        }, 200);
-      });
-    }, 100);
-
-     this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe(params => {
       if (params['payment'] === 'success') {
         this.showPaymentSuccessPopup = true;
       }
     });
+
+    this.loadData();
   }
 
-  // ───────────── FILTER SUBS ─────────────
-  filterSubs(status: string) {
+  // ── Load All Data ──────────────────────────────────────
+  loadData(): void {
+    this.isLoading = true;
+
+    // Abonnement actif
+    this.abonnementService.getMonAbonnement(this.userId).subscribe({
+      next: (data) => {
+        this.abonnementActif = data;
+        this.loadForfaitsUpgrade();
+      },
+      error: () => { this.abonnementActif = null; }
+    });
+
+    // Historique
+    this.abonnementService.getHistoriqueAbonnements(this.userId).subscribe({
+      next: (data) => {
+        this.historique = data;
+        this.expireBientotCount = data.filter(a => this.joursRestants(a.dateFin) <= 7 && a.status === 'active').length;
+        this.isLoading = false;
+      },
+      error: () => { this.historique = []; this.isLoading = false; }
+    });
+
+    // Factures
+    this.abonnementService.getMesFactures(this.userId).subscribe({
+      next: (data) => {
+        this.factures = data;
+        this.totalDepense = data.reduce((sum, f) => sum + (f.amount || 0), 0);
+      },
+      error: () => { this.factures = []; }
+    });
+  }
+
+  loadForfaitsUpgrade(): void {
+    this.abonnementService.getForfaitsUpgrade(this.userId).subscribe({
+      next: (data) => {
+        this.forfaitsUpgrade = data.forfaitsDisponibles;
+        this.forfaitActuel = data.forfaitActuel;
+      },
+      error: () => { this.forfaitsUpgrade = []; }
+    });
+  }
+
+  // ── Helpers ───────────────────────────────────────────
+  joursRestants(dateFin: string): number {
+    if (!dateFin) return 0;
+    const diff = new Date(dateFin).getTime() - new Date().getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }
+
+  progressPct(dateDebut: string, dateFin: string): number {
+    if (!dateDebut || !dateFin) return 0;
+    const total = new Date(dateFin).getTime() - new Date(dateDebut).getTime();
+    const elapsed = new Date().getTime() - new Date(dateDebut).getTime();
+    return Math.min(100, Math.round((elapsed / total) * 100));
+  }
+
+  progressClass(dateDebut: string, dateFin: string): string {
+    const jours = this.joursRestants(dateFin);
+    if (jours <= 7) return 'fill-red';
+    if (jours <= 14) return 'fill-gold';
+    return 'fill-green';
+  }
+
+  daysClass(dateDebut: string, dateFin: string): string {
+    const jours = this.joursRestants(dateFin);
+    if (jours <= 7) return 'days-red';
+    if (jours <= 14) return 'days-gold';
+    return 'days-green';
+  }
+
+  daysIcon(dateDebut: string, dateFin: string): string {
+    const jours = this.joursRestants(dateFin);
+    if (jours <= 7) return '✕';
+    if (jours <= 14) return '⚠';
+    return '🟢';
+  }
+
+  getStatusChipClass(status: string): string {
+    switch (status) {
+      case 'active': return 'chip-active';
+      case 'cancelled': return 'chip-expired';
+      default: return 'chip-expired';
+    }
+  }
+
+  getStatusLabel(status: string, dateFin: string): string {
+    if (status === 'active' && this.joursRestants(dateFin) <= 7) return `Expire dans ${this.joursRestants(dateFin)} jours`;
+    if (status === 'active') return 'Actif';
+    if (status === 'cancelled') return 'Annulé';
+    return 'Expiré';
+  }
+
+  getPlanIcon(name: string): string {
+    switch (name?.toLowerCase()) {
+      case 'standard': return '🌱';
+      case 'pro': return '⚡';
+      case 'business': return '🏢';
+      default: return '💎';
+    }
+  }
+
+  getPlanBadgeClass(name: string): string {
+    switch (name?.toLowerCase()) {
+      case 'standard': return 'pbb-starter';
+      case 'pro': return 'pbb-pro';
+      case 'business': return 'pbb-business';
+      default: return 'pbb-pro';
+    }
+  }
+
+  getCardClass(sub: any): string {
+    const jours = this.joursRestants(sub.dateFin);
+    if (sub.status !== 'active') return 'status-expired';
+    if (jours <= 7) return 'status-expiring';
+    return 'status-active';
+  }
+
+  getDataStatus(sub: any): string {
+    const jours = this.joursRestants(sub.dateFin);
+    if (sub.status !== 'active') return 'expired';
+    if (jours <= 7) return 'expiring';
+    return 'active';
+  }
+
+  get abonnementsFiltered(): any[] {
+    if (this.selectedFilter === 'all') return this.historique;
+    return this.historique.filter(a => this.getDataStatus(a) === this.selectedFilter);
+  }
+
+  get totalActifs(): number {
+    return this.historique.filter(a => a.status === 'active').length;
+  }
+
+  formatDate(date: string): string {
+    if (!date) return '—';
+    return new Date(date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  // ── Filter ────────────────────────────────────────────
+  filterSubs(status: string): void {
     this.selectedFilter = status;
   }
 
-  // ───────────── TOGGLE AUTO RENEW ─────────────
-  toggleRenew(sub: any) {
-    sub.autoRenew = !sub.autoRenew;
-  }
-
-  // ───────────── OPEN PAY MODAL ─────────────
-  openPayModal(title: string, amount: string) {
-    this.pmTitle = title;
-    this.pmAmount = amount.replace('DT', '');
+  // ── Pay Modal ─────────────────────────────────────────
+  openRenouvelerModal(): void {
+    if (!this.abonnementActif) return;
+    this.payModalType = 'renouveler';
+    this.pmTitle = `Renouveler ${this.abonnementActif.forfait.name}`;
+    this.pmAmount = this.abonnementActif.forfait.price;
     this.paymentSuccess = false;
     this.payModalOpen = true;
     document.body.style.overflow = 'hidden';
   }
 
-  closePayModal() {
+  openUpgradeModal(forfait: any): void {
+    this.payModalType = 'upgrade';
+    this.selectedUpgradeForfait = forfait;
+    this.pmTitle = `Passer à ${forfait.name}`;
+    this.pmAmount = forfait.price;
+    this.paymentSuccess = false;
+    this.payModalOpen = true;
+    document.body.style.overflow = 'hidden';
+  }
+
+  closePayModal(): void {
     this.payModalOpen = false;
     document.body.style.overflow = '';
   }
 
-  // ───────────── SELECT PAYMENT METHOD ─────────────
-  selectedMethod: string = '';
-
-  selectQM(method: string) {
-    this.selectedMethod = method;
-  }
-
-  // ───────────── CONFIRM PAYMENT ─────────────
-  confirmPayment() {
+  confirmPayment(): void {
     this.paymentLoading = true;
 
-    setTimeout(() => {
-      this.paymentLoading = false;
-      this.paymentSuccess = true;
-    }, 1800);
+    if (this.payModalType === 'renouveler') {
+      this.abonnementService.renouvelerAbonnement(this.userId, this.abonnementActif._id).subscribe({
+        next: (res) => { window.location.href = res.url; },
+        error: () => { this.paymentLoading = false; }
+      });
+    } else if (this.payModalType === 'upgrade') {
+      this.abonnementService.upgradeAbonnement(this.userId, this.selectedUpgradeForfait._id).subscribe({
+        next: (res) => { window.location.href = res.url; },
+        error: () => { this.paymentLoading = false; }
+      });
+    }
   }
 
-   closeSuccessPopup(): void {
+  closeSuccessPopup(): void {
     this.showPaymentSuccessPopup = false;
   }
+
+  onOverlayClick(event: MouseEvent): void {
+  if ((event.target as HTMLElement).classList.contains('pay-overlay')) {
+    this.closePayModal();
+  }
+}
+
+selectQM(method: string): void {
+  this.selectedMethod = method;
+}
+getRef(id: string): string {
+  if (!id) return '—';
+  return id.toString().slice(0, 12).toUpperCase();
+}
+
 }

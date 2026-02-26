@@ -1,0 +1,19 @@
+const express = require('express');
+const router = express.Router();
+const {
+  getMonAbonnement,
+  getHistoriqueAbonnements,
+  getMesFactures,
+  renouvelerAbonnement,
+  upgradeAbonnement,
+  getForfaitsUpgrade
+} = require('../../controllers/clients/abonnement');
+
+router.get('/mon-abonnement/:userId',     getMonAbonnement);
+router.get('/historique/:userId',          getHistoriqueAbonnements);
+router.get('/factures/:userId',            getMesFactures);
+router.get('/upgrade/disponibles/:userId', getForfaitsUpgrade);
+router.post('/renouveler',                 renouvelerAbonnement);
+router.post('/upgrade',                    upgradeAbonnement);
+
+module.exports = router;

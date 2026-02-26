@@ -17,6 +17,8 @@ const adminDemoRoute = require('./routes/admin/demandeDemo');
 const adminDevisRoute = require('./routes/admin/demandeDevis');
 const paymentRoute = require('./routes/clients/paiement')
 const forfaitRoutes = require('./routes/clients/forfait');
+const abonnementRoutes = require('./routes/clients/abonnement');
+
 
 
 const app = express();
@@ -65,8 +67,9 @@ app.post('/webhook',
       if (event.type === 'checkout.session.completed') {
         const session = event.data.object;
 
-        const userId = session.metadata.userId;
+        const userId    = session.metadata.userId;
         const forfaitId = session.metadata.forfaitId;
+        const type      = session.metadata.type || 'nouveau'; // nouveau | renouvellement | upgrade
 
         if (!userId || !forfaitId) {
           console.log("Metadata manquante !");
@@ -74,26 +77,95 @@ app.post('/webhook',
         }
 
         const forfait = await Forfait.findById(forfaitId);
+        if (!forfait) {
+          console.log("Forfait introuvable !");
+          return res.json({ received: true });
+        }
 
-        // 1️⃣ Créer Abonnement
-        const abonnement = await Abonnement.create({
-          user: userId,
-          forfait: forfaitId,
-          experiencesRestantes: forfait.nbExperiences,
-          stripeSessionId: session.id
-        });
+        // ─────────────────────────────────────────
+        // CAS 1 : Nouvel abonnement
+        // ─────────────────────────────────────────
+        if (type === 'nouveau') {
+          const abonnement = await Abonnement.create({
+            user: userId,
+            forfait: forfaitId,
+            experiencesRestantes: forfait.nbExperiences,
+            stripeSessionId: session.id,
+            status: 'active'
+          });
 
-        // 2️⃣ Créer Paiement
-        await Paiement.create({
-          user: userId,
-          abonnement: abonnement._id,
-          amount: session.amount_total / 100, // Stripe en cents
-          currency: session.currency,
-          stripeSessionId: session.id,
-          status: 'paid'
-        });
+          await Paiement.create({
+            user: userId,
+            abonnement: abonnement._id,
+            amount: session.amount_total / 100,
+            currency: session.currency,
+            stripeSessionId: session.id,
+            status: 'paid'
+          });
 
-        console.log("✅ Abonnement et Paiement créés !");
+          console.log("✅ Nouvel abonnement créé !");
+        }
+
+        // ─────────────────────────────────────────
+        // CAS 2 : Renouvellement (même forfait)
+        // ─────────────────────────────────────────
+        else if (type === 'renouvellement') {
+
+          // Remettre l'abonnement existant à active + reset experiences
+          const abonnement = await Abonnement.findOneAndUpdate(
+            { user: userId, forfait: forfaitId },
+            {
+              status: 'active',
+              experiencesRestantes: forfait.nbExperiences,
+              dateDebut: new Date(),
+              stripeSessionId: session.id
+            },
+            { new: true }
+          );
+
+          await Paiement.create({
+            user: userId,
+            abonnement: abonnement._id,
+            amount: session.amount_total / 100,
+            currency: session.currency,
+            stripeSessionId: session.id,
+            status: 'paid'
+          });
+
+          console.log("✅ Abonnement renouvelé !");
+        }
+
+        // ─────────────────────────────────────────
+        // CAS 3 : Upgrade vers forfait supérieur
+        // ─────────────────────────────────────────
+        else if (type === 'upgrade') {
+
+          // Annuler l'ancien abonnement actif
+          await Abonnement.findOneAndUpdate(
+            { user: userId, status: 'active' },
+            { status: 'cancelled' }
+          );
+
+          // Créer le nouvel abonnement avec le nouveau forfait
+          const nouvelAbonnement = await Abonnement.create({
+            user: userId,
+            forfait: forfaitId,
+            experiencesRestantes: forfait.nbExperiences,
+            stripeSessionId: session.id,
+            status: 'active'
+          });
+
+          await Paiement.create({
+            user: userId,
+            abonnement: nouvelAbonnement._id,
+            amount: session.amount_total / 100,
+            currency: session.currency,
+            stripeSessionId: session.id,
+            status: 'paid'
+          });
+
+          console.log("✅ Abonnement upgradé !");
+        }
       }
 
       res.json({ received: true });
@@ -148,6 +220,8 @@ app.use('/adminDevisRoute', adminDevisRoute);
 
 app.use('/client/forfaits', forfaitRoutes);
 app.use('/client/payment',paymentRoute) ; 
+app.use('/client/abonnements', abonnementRoutes);
+
 
 
 
