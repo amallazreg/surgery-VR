@@ -91,6 +91,8 @@ loadData(): void {
       this.factures = Array.isArray(data) ? data : [];
       this.totalDepense = this.factures.reduce(
       (sum, f) => sum + (parseFloat(f.amount) || 0), 0 );
+                       this.cdr.detectChanges();
+
     },
     error: () => { this.factures = []; }
   });
@@ -100,6 +102,8 @@ loadData(): void {
     next: (data) => {
       this.abonnementActif = data;
       this.loadForfaitsUpgrade();
+             this.cdr.detectChanges();
+
     },
     error: () => { this.abonnementActif = null; }
   });
@@ -109,6 +113,8 @@ loadData(): void {
       next: (data) => {
         this.forfaitsUpgrade = data.forfaitsDisponibles;
         this.forfaitActuel = data.forfaitActuel;
+               this.cdr.detectChanges();
+
       },
       error: () => { this.forfaitsUpgrade = []; }
     });
@@ -133,6 +139,7 @@ loadData(): void {
     if (jours <= 7) return 'fill-red';
     if (jours <= 14) return 'fill-gold';
     return 'fill-green';
+    
   }
 
   daysClass(dateDebut: string, dateFin: string): string {
@@ -282,5 +289,8 @@ voirFacture(sub: any): void {
   if (facture) {
     this.abonnementService.telechargerFacture(facture._id);
   }
+}
+telechargerFacturePdf(paiementId: string): void {
+  this.abonnementService.telechargerFacture(paiementId);
 }
 }

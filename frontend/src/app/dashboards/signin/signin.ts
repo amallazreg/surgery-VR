@@ -72,6 +72,9 @@ togglePasswordVisibility() {
         this.authService.saveToken(res.token);
         const userId = res.user?.id || res.id;
         localStorage.setItem('userId', userId);
+        localStorage.setItem('nom', res.user.nom);        
+        localStorage.setItem('prenom', res.user.prenom);  
+        localStorage.setItem('email', res.user.email);
         console.log(userId);
         this.authService.saveRole(role);
 
