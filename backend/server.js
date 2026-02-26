@@ -49,6 +49,13 @@ app.use(cors({
   credentials: true
 }));
 
+const getDateFin = () => {
+  const date = new Date();
+  date.setMonth(date.getMonth() + 1); // +1 mois
+  return date;
+};
+
+
 app.post('/webhook',
   express.raw({ type: 'application/json' }),
   async (req, res) => {
@@ -91,7 +98,9 @@ app.post('/webhook',
             forfait: forfaitId,
             experiencesRestantes: forfait.nbExperiences,
             stripeSessionId: session.id,
-            status: 'active'
+            status: 'active',
+            dateDebut: new Date(),        
+            dateFin: getDateFin()
           });
 
           await Paiement.create({
@@ -117,7 +126,8 @@ app.post('/webhook',
             {
               status: 'active',
               experiencesRestantes: forfait.nbExperiences,
-              dateDebut: new Date(),
+              dateDebut: new Date(),        
+              dateFin: getDateFin(),
               stripeSessionId: session.id
             },
             { new: true }
@@ -152,6 +162,8 @@ app.post('/webhook',
             forfait: forfaitId,
             experiencesRestantes: forfait.nbExperiences,
             stripeSessionId: session.id,
+            dateDebut: new Date(),        
+            dateFin: getDateFin(),
             status: 'active'
           });
 

@@ -1,4 +1,4 @@
-import { Component, Injectable, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Injectable, OnDestroy, OnInit } from '@angular/core';
 import { SideBar } from "../side-bar/side-bar";
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
@@ -122,7 +122,9 @@ export class CompteClients implements OnInit, OnDestroy {
   
   constructor(
     private adminService: AdminService,
-      @Inject(PLATFORM_ID) private platformId: Object
+      @Inject(PLATFORM_ID) private platformId: Object,
+          private cdr: ChangeDetectorRef  
+
 
   ) {}
 
@@ -225,6 +227,8 @@ export class CompteClients implements OnInit, OnDestroy {
           this.applyFilters();
           this.updateStats();
           this.isLoading = false;
+                 this.cdr.detectChanges();
+
        
         },
         error: (error) => {

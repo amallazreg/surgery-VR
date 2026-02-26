@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit ,ChangeDetectorRef } from '@angular/core';
 import { SideBar } from "../side-bar/side-bar";
 import { ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
@@ -45,52 +45,64 @@ selectedMethod: string = 'card';
 
   constructor(
     private route: ActivatedRoute,
-    private abonnementService: AbonnementService
+    private abonnementService: AbonnementService,
+    private cdr: ChangeDetectorRef  
   ) {}
 
-  ngOnInit(): void {
-    this.route.queryParams.subscribe(params => {
-      if (params['payment'] === 'success') {
-        this.showPaymentSuccessPopup = true;
-      }
-    });
+ngOnInit(): void {
+  this.route.queryParams.subscribe(params => {
+    if (params['payment'] === 'success') {
+      this.showPaymentSuccessPopup = true;
+    }
+  });
 
-    this.loadData();
-  }
+  this.loadData();
+}
 
-  // ── Load All Data ──────────────────────────────────────
-  loadData(): void {
-    this.isLoading = true;
+loadData(): void {
+  this.isLoading = true;
 
-    // Abonnement actif
-    this.abonnementService.getMonAbonnement(this.userId).subscribe({
-      next: (data) => {
-        this.abonnementActif = data;
-        this.loadForfaitsUpgrade();
-      },
-      error: () => { this.abonnementActif = null; }
-    });
+    console.log('loadData appelé, userId:', this.userId); // ← vérifier dans Console
 
-    // Historique
-    this.abonnementService.getHistoriqueAbonnements(this.userId).subscribe({
-      next: (data) => {
-        this.historique = data;
-        this.expireBientotCount = data.filter(a => this.joursRestants(a.dateFin) <= 7 && a.status === 'active').length;
-        this.isLoading = false;
-      },
-      error: () => { this.historique = []; this.isLoading = false; }
-    });
 
-    // Factures
-    this.abonnementService.getMesFactures(this.userId).subscribe({
-      next: (data) => {
-        this.factures = data;
-        this.totalDepense = data.reduce((sum, f) => sum + (f.amount || 0), 0);
-      },
-      error: () => { this.factures = []; }
-    });
-  }
+  // Historique
+  this.abonnementService.getHistoriqueAbonnements(this.userId).subscribe({
+    next: (data) => {
+      this.historique = Array.isArray(data) ? data : [];
+      this.expireBientotCount = this.historique.filter(
+        a => this.joursRestants(a.dateFin) <= 7 && a.status === 'active'
+      ).length;
 
+            console.log('isLoading -> false'); // ← vérifier
+
+      this.isLoading = false; // ✅ ici
+       this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Historique erreur:', err);
+      this.historique = [];
+      this.isLoading = false; // ✅ et ici
+    }
+  });
+
+  // Factures
+  this.abonnementService.getMesFactures(this.userId).subscribe({
+    next: (data) => {
+      this.factures = Array.isArray(data) ? data : [];
+      this.totalDepense = this.factures.reduce((sum, f) => sum + (f.amount || 0), 0);
+    },
+    error: () => { this.factures = []; }
+  });
+
+  // Abonnement actif
+  this.abonnementService.getMonAbonnement(this.userId).subscribe({
+    next: (data) => {
+      this.abonnementActif = data;
+      this.loadForfaitsUpgrade();
+    },
+    error: () => { this.abonnementActif = null; }
+  });
+}
   loadForfaitsUpgrade(): void {
     this.abonnementService.getForfaitsUpgrade(this.userId).subscribe({
       next: (data) => {

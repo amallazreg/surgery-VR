@@ -1,4 +1,4 @@
-import { Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
+import { ChangeDetectorRef, Component, Inject, OnDestroy, OnInit, PLATFORM_ID } from '@angular/core';
 import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
 import { AdminService } from '../../services/admin-service';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -152,7 +152,9 @@ export class DemandeDevis  implements OnInit, OnDestroy {
   
   constructor(
     private adminService: AdminService,
-    @Inject(PLATFORM_ID) private platformId: Object
+    @Inject(PLATFORM_ID) private platformId: Object,
+        private cdr: ChangeDetectorRef  
+
   ) {}
 
   // ========================================
@@ -225,6 +227,8 @@ export class DemandeDevis  implements OnInit, OnDestroy {
           this.applyFilters();
           this.updateStats();
           this.isLoading = false;
+                 this.cdr.detectChanges();
+
         },
         error: (error) => {
           console.error('Erreur chargement demandes:', error);

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit,ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SideBar } from "../side-bar/side-bar";
 import { ForfaitService } from '../../../services/forfait-service';
@@ -42,7 +42,10 @@ export type PaymentMethod = 'card' | 'virement' | 'd17' | 'flouci';
 })
 export class Forfaits  implements OnInit {
 
-  constructor(private forfaitService: ForfaitService,private paymentService : Payement,private route: ActivatedRoute ) {}
+  constructor(private forfaitService: ForfaitService,private paymentService : Payement,private route: ActivatedRoute,
+        private cdr: ChangeDetectorRef  
+
+   ) {}
 
   isYearly = false;
 
@@ -151,6 +154,8 @@ loadForfaits(): void {
         cardClass: f.name.toLowerCase(),
         features: f.features || []
       }));
+             this.cdr.detectChanges();
+
     },
     error: (err) => {
       console.error('Erreur chargement forfaits', err);
