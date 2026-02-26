@@ -50,8 +50,10 @@
         <div class="stat-pill">
           <div class="stat-pill-icon spi-red">💸</div>
           <div class="stat-pill-info">
-            <div class="stat-pill-val">{{ totalDepense }} USD</div>
-            <div class="stat-pill-lbl">Dépensé total</div>
+            <div class="stat-pill-val">
+              {{ totalDepense * 100 }} USD
+            </div>   
+             <div class="stat-pill-lbl">Dépensé total</div>
           </div>
         </div>
       </div>
@@ -218,8 +220,12 @@
                   </div>
                 </td>
                 <td>{{ formatDate(f.createdAt) }}</td>
-                <td><span class="ht-amount">{{ f.amount }} {{ f.currency?.toUpperCase() }}</span></td>
-                <td>
+                  <td>
+                    <span class="ht-amount">
+                     {{ f.amount.toString().replace('.', '') }} TND
+                    </span>
+                  </td>            
+                      <td>
                   <span class="ht-status-badge" [ngClass]="f.status === 'paid' ? 'hts-paid' : 'hts-pending'">
                     {{ f.status === 'paid' ? '✓ Payé' : '⏳ En attente' }}
                   </span>
