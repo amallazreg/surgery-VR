@@ -328,6 +328,8 @@ body {
 .fill-gold   { background: linear-gradient(90deg, #F59E0B, #FCD34D); }
 .fill-red    { background: linear-gradient(90deg, #FF3B5C, #FF6B8A); }
 
+
+
 .tl-dates {
   display: flex; justify-content: space-between;
   font-size: 11px; color: #5A6B8C;

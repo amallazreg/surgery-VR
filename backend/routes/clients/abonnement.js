@@ -6,7 +6,8 @@ const {
   getMesFactures,
   renouvelerAbonnement,
   upgradeAbonnement,
-  getForfaitsUpgrade
+  getForfaitsUpgrade,
+  telechargerFacture
 } = require('../../controllers/clients/abonnement');
 
 router.get('/mon-abonnement/:userId',     getMonAbonnement);
@@ -15,5 +16,6 @@ router.get('/factures/:userId',            getMesFactures);
 router.get('/upgrade/disponibles/:userId', getForfaitsUpgrade);
 router.post('/renouveler',                 renouvelerAbonnement);
 router.post('/upgrade',                    upgradeAbonnement);
+router.get('/facture/:paiementId', telechargerFacture);
 
 module.exports = router;

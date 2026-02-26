@@ -118,7 +118,7 @@
                 </div>
                 <div class="progress-track">
                   <div
-                    class="progress-fill"
+                    class="progress-fill fill-green"
                     [ngClass]="progressClass(sub.dateDebut, sub.dateFin)"
                     [style.width.%]="progressPct(sub.dateDebut, sub.dateFin)"
                   ></div>
@@ -149,14 +149,14 @@
                   <div class="mini-info-label">Forfait</div>
                   <div class="mini-info-val">{{ sub.forfait?.name }}</div>
                 </div>
-                <div class="mini-info">
+            <!--    <div class="mini-info">
                   <div class="mini-info-label">Statut</div>
                   <div class="mini-info-val">{{ sub.status }}</div>
                 </div>
                 <div class="mini-info">
                   <div class="mini-info-label">Session Stripe</div>
                   <div class="mini-info-val" style="font-size:11px">{{ sub.stripeSessionId | slice:0:14 }}...</div>
-                </div>
+                </div> -->
               </div>
             </div>
 
@@ -183,7 +183,7 @@
                 </button>
               </ng-container>
 
-              <button class="action-btn btn-invoice">📄 Voir la facture</button>
+              <button class="action-btn btn-invoice" (click)="voirFacture(sub)">📄 Voir la facture</button>
             </div>
           </div>
         </div>

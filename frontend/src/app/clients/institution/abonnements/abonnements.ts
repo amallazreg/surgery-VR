@@ -89,7 +89,8 @@ loadData(): void {
   this.abonnementService.getMesFactures(this.userId).subscribe({
     next: (data) => {
       this.factures = Array.isArray(data) ? data : [];
-      this.totalDepense = this.factures.reduce((sum, f) => sum + (f.amount || 0), 0);
+      this.totalDepense = this.factures.reduce(
+      (sum, f) => sum + (parseFloat(f.amount) || 0), 0 );
     },
     error: () => { this.factures = []; }
   });
@@ -274,4 +275,12 @@ getRef(id: string): string {
   return id.toString().slice(0, 12).toUpperCase();
 }
 
+
+voirFacture(sub: any): void {
+  // Trouver la facture correspondante à cet abonnement
+  const facture = this.factures.find(f => f.abonnement?._id === sub._id);
+  if (facture) {
+    this.abonnementService.telechargerFacture(facture._id);
+  }
+}
 }

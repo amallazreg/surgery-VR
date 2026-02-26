@@ -34,4 +34,9 @@ export class AbonnementService {
   upgradeAbonnement(userId: string, nouveauForfaitId: string) {
     return this.http.post<{ url: string }>(`${this.apiUrl}/upgrade`, { userId, nouveauForfaitId });
   }
+
+  telechargerFacture(paiementId: string): void {
+  const url = `${this.apiUrl}/facture/${paiementId}`;
+  window.open(url, '_blank'); // ← ouvre/télécharge le PDF
+}
 }
