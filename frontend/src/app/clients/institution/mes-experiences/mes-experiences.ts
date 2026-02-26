@@ -12,13 +12,13 @@ export interface Experience {
   title: string;
   description: string;
   emoji: string;
-  thumbClass: string;       // vrt-1 .. vrt-8
+  thumbClass: string;
   status: ExpStatus;
-  compatibility: string;    // ex: 'Quest 2 & 3'
+  compatibility: string;
   respondents: number;
-  avgTime: string;
+  avgTime: string;          // "4:32" or "—"
   rating: number | null;
-  isEmpty?: boolean;        // slot vide
+  isEmpty?: boolean;
 }
 
 export interface SubscriptionGroup {
@@ -27,7 +27,7 @@ export interface SubscriptionGroup {
   planIcon: string;
   ref: string;
   expireLabel: string;
-  headerClass: string;       // sgh-pro | sgh-starter | sgh-business
+  headerClass: string;
   status: SubStatus;
   totalExperiences: number;
   totalRespondents: number;
@@ -38,9 +38,9 @@ export interface SubscriptionGroup {
 
 @Component({
   selector: 'app-mes-experiences',
-standalone: true,
+  standalone: true,
   imports: [CommonModule, FormsModule, SideBar],
-    templateUrl: './mes-experiences.html',
+  templateUrl: './mes-experiences.html',
   styleUrl: './mes-experiences.css',
 })
 export class MesExperiences implements OnInit {
@@ -58,21 +58,7 @@ export class MesExperiences implements OnInit {
     { key: 'paused', label: '⏸ Pausées' },
   ];
 
-  // ── Global stats ─────────────────────────────────────────
-  get totalExperiences(): number { return this.subscriptionGroups.reduce((a, g) => a + g.experiences.filter(e => !e.isEmpty).length, 0); }
-  get liveCount(): number        { return this.subscriptionGroups.reduce((a, g) => a + g.experiences.filter(e => e.status === 'live' || e.status === 'new').length, 0); }
-  get totalRespondents(): number { return this.subscriptionGroups.reduce((a, g) => a + g.totalRespondents, 0); }
-  get totalApk(): number         { return this.subscriptionGroups.length + 2; }
-
-  // ── APK versions ─────────────────────────────────────────
-  apkVersions: ApkDevice[] = [
-    { icon: '🥽', name: 'Meta Quest 2 & 3', version: 'v2.4.1', android: 'Android 11+', size: '124 Mo', recommended: true },
-    { icon: '🥽', name: 'Meta Quest Pro',    version: 'v2.4.1', android: 'Android 12+', size: '138 Mo' },
-    { icon: '📱', name: 'Pico 4 / Neo 3',   version: 'v2.3.0', android: 'Android 10+', size: '119 Mo' },
-  ];
-  downloadStates: Record<number, 'idle' | 'loading' | 'done'> = { 0: 'idle', 1: 'idle', 2: 'idle' };
-
-  // ── Subscription groups data ──────────────────────────────
+  // ── Single active subscription ────────────────────────────
   subscriptionGroups: SubscriptionGroup[] = [
     {
       key: 'pro',
@@ -85,7 +71,7 @@ export class MesExperiences implements OnInit {
       totalExperiences: 5,
       totalRespondents: 987,
       apkUsed: '3/5',
-      maxSlots: 5,
+      maxSlots: 6,
       experiences: [
         {
           id: 1,
@@ -125,50 +111,55 @@ export class MesExperiences implements OnInit {
         { id: 6, title: '', description: '', emoji: '', thumbClass: '', status: 'draft', compatibility: '', respondents: 0, avgTime: '', rating: null, isEmpty: true },
       ],
     },
-    {
-      key: 'starter',
-      planName: 'Forfait Starter',
-      planIcon: '🌱',
-      ref: 'SVR-STR-2026-0115 · Expire le 26 Fév 2026 · ⚠ 6 jours restants',
-      expireLabel: '26 Fév 2026',
-      headerClass: 'sgh-starter',
-      status: 'expiring',
-      totalExperiences: 3,
-      totalRespondents: 260,
-      apkUsed: '1/1',
-      maxSlots: 1,
-      experiences: [
-        {
-          id: 7,
-          title: 'Showroom Automobile VR — Préférences',
-          description: 'Configuration et évaluation de véhicules dans un showroom VR photoréaliste avec choix de couleurs.',
-          emoji: '🚗', thumbClass: 'vrt-6', status: 'live',
-          compatibility: 'Quest 2', respondents: 178, avgTime: '7:20', rating: 4.8,
-        },
-        {
-          id: 8,
-          title: 'Satisfaction Hôtelière — Chambre VR',
-          description: 'Évaluation des chambres rénovées en visite 360° immersive avant ouverture au public.',
-          emoji: '🏨', thumbClass: 'vrt-7', status: 'live',
-          compatibility: 'Quest 2 & 3', respondents: 82, avgTime: '5:50', rating: 4.6,
-        },
-        {
-          id: 9,
-          title: 'Aménagement Espaces Verts — Opinion',
-          description: 'Consultation citoyenne via immersion VR sur les futurs aménagements d\'espaces urbains verts.',
-          emoji: '🌿', thumbClass: 'vrt-8', status: 'draft',
-          compatibility: 'Quest 3', respondents: 0, avgTime: '—', rating: null,
-        },
-      ],
-    },
   ];
 
-  // ── Computed helpers ─────────────────────────────────────
+  /** The single active subscription */
+  get activeSubscription(): SubscriptionGroup {
+    return this.subscriptionGroups[0];
+  }
+
+  // ── Global stats ─────────────────────────────────────────
+  get totalExperiences(): number {
+    return this.activeSubscription.experiences.filter(e => !e.isEmpty).length;
+  }
+
+  /** Average completion rate: respondents / (respondents + 0 rated) — mocked as 87% here */
+  get avgCompletionRate(): number {
+    const exps = this.activeSubscription.experiences.filter(e => !e.isEmpty && e.respondents > 0);
+    if (!exps.length) return 0;
+    // Mocked formula: completion = 75 + (rating / 5) * 25
+    const avg = exps.reduce((s, e) => s + (e.rating ? 75 + (e.rating / 5) * 25 : 75), 0) / exps.length;
+    return Math.round(avg);
+  }
+
+  /** Global average session time across all experiences */
+  get globalAvgTime(): string {
+    const exps = this.activeSubscription.experiences.filter(e => !e.isEmpty && e.avgTime !== '—' && e.respondents > 0);
+    if (!exps.length) return '—';
+    const totalSecs = exps.reduce((s, e) => {
+      const [m, sec] = e.avgTime.split(':').map(Number);
+      return s + m * 60 + sec;
+    }, 0);
+    const avg = Math.round(totalSecs / exps.length);
+    return `${Math.floor(avg / 60)}:${String(avg % 60).padStart(2, '0')}`;
+  }
+
+  get totalApk(): number { return 3; }
+
+  // ── APK versions ─────────────────────────────────────────
+  apkVersions: ApkDevice[] = [
+    { icon: '🥽', name: 'Meta Quest 2 & 3', version: 'v2.4.1', android: 'Android 11+', size: '124 Mo', recommended: true },
+    { icon: '🥽', name: 'Meta Quest Pro',    version: 'v2.4.1', android: 'Android 12+', size: '138 Mo' },
+    { icon: '📱', name: 'Pico 4 / Neo 3',   version: 'v2.3.0', android: 'Android 10+', size: '119 Mo' },
+  ];
+  downloadStates: Record<number, 'idle' | 'loading' | 'done'> = { 0: 'idle', 1: 'idle', 2: 'idle' };
+
+  // ── Helpers ──────────────────────────────────────────────
   getStatusTag(status: ExpStatus): { label: string; cssClass: string } {
     const map: Record<ExpStatus, { label: string; cssClass: string }> = {
-      live:   { label: '● LIVE',      cssClass: 'est-live' },
-      new:    { label: '✦ NOUVEAU',   cssClass: 'est-new' },
-      paused: { label: '⏸ PAUSÉE',   cssClass: 'est-paused' },
+      live:   { label: '● LIVE',       cssClass: 'est-live' },
+      new:    { label: '✦ NOUVEAU',    cssClass: 'est-new' },
+      paused: { label: '⏸ PAUSÉE',    cssClass: 'est-paused' },
       draft:  { label: '✏️ BROUILLON', cssClass: 'est-draft' },
     };
     return map[status];
@@ -180,15 +171,15 @@ export class MesExperiences implements OnInit {
 
   getSubBadge(status: SubStatus): { label: string; cssClass: string } {
     const map: Record<SubStatus, { label: string; cssClass: string }> = {
-      active:   { label: 'Actif',           cssClass: 'sgb-active' },
-      expiring: { label: 'Expire bientôt',  cssClass: 'sgb-expiring' },
-      expired:  { label: 'Expiré',          cssClass: 'sgb-expired' },
+      active:   { label: 'Actif',          cssClass: 'sgb-active' },
+      expiring: { label: 'Expire bientôt', cssClass: 'sgb-expiring' },
+      expired:  { label: 'Expiré',         cssClass: 'sgb-expired' },
     };
     return map[status];
   }
 
-  filteredExperiences(group: SubscriptionGroup): Experience[] {
-    return group.experiences.filter(exp => {
+  filteredExperiencesFlat(): Experience[] {
+    return this.activeSubscription.experiences.filter(exp => {
       if (exp.isEmpty) return this.activeFilter === 'all';
       const matchFilter = this.activeFilter === 'all' || exp.status === this.activeFilter;
       const matchSearch = !this.searchQuery || exp.title.toLowerCase().includes(this.searchQuery.toLowerCase());
@@ -196,17 +187,11 @@ export class MesExperiences implements OnInit {
     });
   }
 
-  isGroupVisible(group: SubscriptionGroup): boolean {
-    return this.filteredExperiences(group).some(e => !e.isEmpty || this.activeFilter === 'all');
-  }
-
-  setFilter(key: string): void {
-    this.activeFilter = key;
-  }
+  setFilter(key: string): void { this.activeFilter = key; }
 
   // ── Modal : APK ──────────────────────────────────────────
   isApkModalOpen = false;
-  selectedExpForApk: string = '';
+  selectedExpForApk = '';
 
   openAPKModal(exp: Experience): void {
     this.selectedExpForApk = exp.title;
@@ -214,16 +199,10 @@ export class MesExperiences implements OnInit {
     this.isApkModalOpen = true;
     document.body.style.overflow = 'hidden';
   }
-
-  closeAPKModal(): void {
-    this.isApkModalOpen = false;
-    document.body.style.overflow = '';
-  }
-
+  closeAPKModal(): void { this.isApkModalOpen = false; document.body.style.overflow = ''; }
   onApkOverlayClick(e: MouseEvent): void {
     if ((e.target as HTMLElement).classList.contains('apk-overlay')) this.closeAPKModal();
   }
-
   downloadApk(index: number): void {
     this.downloadStates[index] = 'loading';
     setTimeout(() => {
@@ -231,7 +210,6 @@ export class MesExperiences implements OnInit {
       setTimeout(() => { this.downloadStates[index] = 'idle'; }, 2500);
     }, 1500);
   }
-
   getDownloadIcon(index: number): string {
     const s = this.downloadStates[index];
     return s === 'loading' ? '⏳' : s === 'done' ? '✓' : '⬇';
@@ -239,7 +217,7 @@ export class MesExperiences implements OnInit {
 
   // ── Modal : VR Test ──────────────────────────────────────
   isVrModalOpen = false;
-  selectedExpForVr: string = '';
+  selectedExpForVr = '';
   vrLaunchState: 'idle' | 'loading' | 'done' = 'idle';
 
   openVRModal(exp: Experience): void {
@@ -248,17 +226,10 @@ export class MesExperiences implements OnInit {
     this.isVrModalOpen = true;
     document.body.style.overflow = 'hidden';
   }
-
-  closeVRModal(): void {
-    this.isVrModalOpen = false;
-    this.vrLaunchState = 'idle';
-    document.body.style.overflow = '';
-  }
-
+  closeVRModal(): void { this.isVrModalOpen = false; this.vrLaunchState = 'idle'; document.body.style.overflow = ''; }
   onVrOverlayClick(e: MouseEvent): void {
     if ((e.target as HTMLElement).classList.contains('vr-overlay')) this.closeVRModal();
   }
-
   launchOnHeadset(): void {
     this.vrLaunchState = 'loading';
     setTimeout(() => {
@@ -266,7 +237,6 @@ export class MesExperiences implements OnInit {
       setTimeout(() => { this.vrLaunchState = 'idle'; }, 3500);
     }, 1800);
   }
-
   get vrLaunchLabel(): string {
     if (this.vrLaunchState === 'loading') return '⏳ Envoi vers le casque...';
     if (this.vrLaunchState === 'done')    return '✅ Expérience lancée sur le casque !';
@@ -275,9 +245,3 @@ export class MesExperiences implements OnInit {
 
   ngOnInit(): void {}
 }
-
-
-
-
-
-
