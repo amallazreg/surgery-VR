@@ -1,14 +1,15 @@
-const Abonnement = require('../../models/abonnement');
-const Paiement = require('../../models/paiement');
-const Forfait = require('../../models/forfait');
-const Stripe = require('stripe');
-const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
+const crypto      = require('crypto');
+const Abonnement  = require('../../models/abonnement');
+const Paiement    = require('../../models/paiement');
+const Forfait     = require('../../models/forfait');
+const Stripe      = require('stripe');
+const stripe      = Stripe(process.env.STRIPE_SECRET_KEY);
 const PDFDocument = require('pdfkit');
 
 
-// ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
 // 1. GET — Abonnement actif de l'utilisateur (avec détails forfait)
-// ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
 const getMonAbonnement = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -27,9 +28,10 @@ const getMonAbonnement = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
 // 2. GET — Historique de tous les abonnements
-// ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
 const getHistoriqueAbonnements = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -44,9 +46,10 @@ const getHistoriqueAbonnements = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
 // 3. GET — Factures de l'utilisateur
-// ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
 const getMesFactures = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -65,6 +68,10 @@ const getMesFactures = async (req, res) => {
   }
 };
 
+
+// ═══════════════════════════════════════════════════════════
+// 4. GET — Télécharger une facture PDF
+// ═══════════════════════════════════════════════════════════
 const telechargerFacture = async (req, res) => {
   try {
     const { paiementId } = req.params;
@@ -89,7 +96,6 @@ const telechargerFacture = async (req, res) => {
     // ── Header ──
     doc.fontSize(24).fillColor('#1A2B5F').text('SurveyVR', 50, 50);
     doc.fontSize(10).fillColor('#888').text('Plateforme d\'enquêtes VR', 50, 78);
-
     doc.moveTo(50, 100).lineTo(550, 100).strokeColor('#e0e0e0').stroke();
 
     // ── Titre Facture ──
@@ -136,10 +142,8 @@ const telechargerFacture = async (req, res) => {
       .text(`${paiement.amount} ${paiement.currency?.toUpperCase()}`, 460, 366);
 
     // ── Statut ──
-    doc.fontSize(11).fillColor('#22c55e')
-      .text(`✓ Paiement confirmé`, 50, 415);
-    doc.fontSize(10).fillColor('#888')
-      .text(`Session Stripe: ${paiement.stripeSessionId}`, 50, 432);
+    doc.fontSize(11).fillColor('#22c55e').text(`✓ Paiement confirmé`, 50, 415);
+    doc.fontSize(10).fillColor('#888').text(`Session Stripe: ${paiement.stripeSessionId}`, 50, 432);
 
     // ── Footer ──
     doc.moveTo(50, 700).lineTo(550, 700).strokeColor('#e0e0e0').stroke();
@@ -154,9 +158,10 @@ const telechargerFacture = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// 4. POST — Renouveler l'abonnement (même forfait)
-// ─────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+// 5. POST — Renouveler l'abonnement (même forfait)
+// ═══════════════════════════════════════════════════════════
 const renouvelerAbonnement = async (req, res) => {
   try {
     const { userId, abonnementId } = req.body;
@@ -196,9 +201,10 @@ const renouvelerAbonnement = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// 5. POST — Upgrade vers un forfait supérieur
-// ─────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+// 6. POST — Upgrade vers un forfait supérieur
+// ═══════════════════════════════════════════════════════════
 const upgradeAbonnement = async (req, res) => {
   try {
     const { userId, nouveauForfaitId } = req.body;
@@ -207,8 +213,6 @@ const upgradeAbonnement = async (req, res) => {
     if (!nouveauForfait) {
       return res.status(404).json({ message: 'Forfait introuvable' });
     }
-
-  
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
@@ -238,17 +242,17 @@ const upgradeAbonnement = async (req, res) => {
   }
 };
 
-// ─────────────────────────────────────────
-// 6. GET — Forfaits disponibles pour upgrade
-// ─────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════════
+// 7. GET — Forfaits disponibles pour upgrade
+// ═══════════════════════════════════════════════════════════
 const getForfaitsUpgrade = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Récupérer le forfait actuel
-    const abonnementActuel = await Abonnement.findOne({ 
-      user: userId, 
-      status: 'active' 
+    const abonnementActuel = await Abonnement.findOne({
+      user: userId,
+      status: 'active'
     }).populate('forfait');
 
     if (!abonnementActuel) {
@@ -257,7 +261,6 @@ const getForfaitsUpgrade = async (req, res) => {
 
     const prixActuel = parseInt(abonnementActuel.forfait.price);
 
-    // Retourner uniquement les forfaits plus chers
     const forfaitsSupérieurs = await Forfait.find({
       price: { $gt: prixActuel }
     }).sort({ price: 1 });
@@ -271,12 +274,155 @@ const getForfaitsUpgrade = async (req, res) => {
   }
 };
 
+
+// ═══════════════════════════════════════════════════════════
+// 8. GET — Droits complets de l'abonnement actif
+// ═══════════════════════════════════════════════════════════
+const getMesDroits = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const abonnement = await Abonnement.findOne({ user: userId, status: 'active' })
+      .populate('forfait');
+
+    if (!abonnement) {
+      return res.status(404).json({ message: 'Aucun abonnement actif' });
+    }
+
+    const forfait = abonnement.forfait;
+
+    res.json({
+      forfait: forfait.name,
+
+      // APK
+      apkTotal:    forfait.nbApk,
+      apkRestants: abonnement.apkRestants,
+
+      // Formation
+      formation: forfait.formation?.incluse
+        ? {
+            dureeHeures:  forfait.formation.dureeHeures,
+            maxEtudiants: forfait.formation.maxEtudiants,
+            detaillee:    forfait.formation.detaillee,
+            activee:      abonnement.formationUtilisee,
+            codesAcces:   abonnement.formationUtilisee ? abonnement.codesAcces : [],
+          }
+        : null,
+
+      // Simulation esthétique (Business uniquement)
+      simulationEsthetique: forfait.simulationEsthetique,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════════
+// 9. POST — Télécharger un APK (décrémente le compteur)
+// ═══════════════════════════════════════════════════════════
+const telechargerApk = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const abonnement = await Abonnement.findOne({ user: userId, status: 'active' })
+      .populate('forfait');
+
+    if (!abonnement) {
+      return res.status(404).json({ message: 'Aucun abonnement actif' });
+    }
+
+    if (abonnement.apkRestants <= 0) {
+      return res.status(403).json({
+        message: `Quota APK épuisé (${abonnement.forfait.nbApk} APK/mois). Renouvelez votre abonnement.`
+      });
+    }
+
+    // Décrémente le compteur
+    abonnement.apkRestants -= 1;
+    await abonnement.save();
+
+    // Retourne l'URL de téléchargement (adapte selon ton stockage S3, GCS, etc.)
+    res.json({
+      message: 'APK disponible au téléchargement',
+      apkRestants: abonnement.apkRestants,
+      apkTotal:    abonnement.forfait.nbApk,
+      downloadUrl: process.env.APK_DOWNLOAD_URL || 'https://ton-bucket.s3.amazonaws.com/app.apk'
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+// ═══════════════════════════════════════════════════════════
+// 10. POST — Activer la formation + générer les codes d'accès
+// ═══════════════════════════════════════════════════════════
+const activerFormation = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const abonnement = await Abonnement.findOne({ user: userId, status: 'active' })
+      .populate('forfait');
+
+    if (!abonnement) {
+      return res.status(404).json({ message: 'Aucun abonnement actif' });
+    }
+
+    const forfait = abonnement.forfait;
+
+    // Vérifier que la formation est incluse dans ce forfait
+    if (!forfait.formation?.incluse) {
+      return res.status(403).json({
+        message: `Le forfait "${forfait.name}" ne comprend pas de formation. Passez au forfait Pro ou Business.`
+      });
+    }
+
+    // Si déjà activée, on retourne simplement les codes existants
+    if (abonnement.formationUtilisee) {
+      return res.status(200).json({
+        message: 'Formation déjà activée.',
+        dureeHeures:  forfait.formation.dureeHeures,
+        detaillee:    forfait.formation.detaillee,
+        maxEtudiants: forfait.formation.maxEtudiants,
+        codesAcces:   abonnement.codesAcces
+      });
+    }
+
+    // Générer un code unique par étudiant
+    const nbCodes = forfait.formation.maxEtudiants;
+    const codes = Array.from({ length: nbCodes }, () =>
+      crypto.randomBytes(4).toString('hex').toUpperCase() // ex: "A3F2C1B0"
+    );
+
+    abonnement.formationUtilisee = true;
+    abonnement.codesAcces        = codes;
+    await abonnement.save();
+
+    res.json({
+      message:      `Formation activée avec succès !`,
+      dureeHeures:  forfait.formation.dureeHeures,
+      detaillee:    forfait.formation.detaillee,
+      maxEtudiants: nbCodes,
+      codesAcces:   codes
+    });
+
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
 module.exports = {
   getMonAbonnement,
   getHistoriqueAbonnements,
   getMesFactures,
+  telechargerFacture,
   renouvelerAbonnement,
   upgradeAbonnement,
   getForfaitsUpgrade,
-  telechargerFacture
+  getMesDroits,
+  telechargerApk,
+  activerFormation,
 };

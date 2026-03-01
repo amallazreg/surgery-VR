@@ -16,7 +16,7 @@ export interface Experience {
   status: ExpStatus;
   compatibility: string;
   respondents: number;
-  avgTime: string;          // "4:32" or "—"
+  avgTime: string;         
   rating: number | null;
   isEmpty?: boolean;
 }
