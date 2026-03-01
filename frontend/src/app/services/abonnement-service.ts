@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -39,4 +40,20 @@ export class AbonnementService {
   const url = `${this.apiUrl}/facture/${paiementId}`;
   window.open(url, '_blank'); // ← ouvre/télécharge le PDF
 }
+
+// ─── Droits complets de l'abonnement actif ──────────────
+  // Retourne : apkTotal, apkRestants, formation, simulationEsthetique
+  getMesDroits(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/droits/${userId}`);
+  }
+
+  // ─── Télécharger un APK (décrémente le compteur) ────────
+  telechargerApk(userId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/telechargerApk/${userId}`, {});
+  }
+
+  // ─── Activer la formation + générer les codes d'accès ───
+  activerFormation(userId: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/formation/${userId}`, {});
+  }
 }

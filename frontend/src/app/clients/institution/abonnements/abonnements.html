@@ -50,22 +50,141 @@
         <div class="stat-pill">
           <div class="stat-pill-icon spi-red">💸</div>
           <div class="stat-pill-info">
-            <div class="stat-pill-val">
-              {{ totalDepense * 100 }} USD
-            </div>   
-             <div class="stat-pill-lbl">Dépensé total</div>
+            <div class="stat-pill-val">{{ totalDepense * 100 }} DT</div>
+            <div class="stat-pill-lbl">Dépensé total</div>
           </div>
         </div>
       </div>
 
-      <!-- Section header -->
-      <div class="section-title-row">
+      <!-- ══════════════════════════════════════════════════
+           SECTION DROITS & FONCTIONNALITÉS
+      ══════════════════════════════════════════════════ -->
+      <ng-container *ngIf="droits">
+        <div class="section-title-row" style="margin-top:28px">
+          <div class="section-title">🎯 Mes fonctionnalités</div>
+          <span style="font-size:12px;color:#888">Forfait {{ droits.forfait }}</span>
+        </div>
+
+        <div class="droits-grid">
+
+          <!-- ── APK ── -->
+          <div class="droits-card">
+            <div class="droits-card-header">
+              <span class="droits-icon">📱</span>
+              <div>
+                <div class="droits-title">APK disponibles</div>
+                <div class="droits-sub">{{ droits.apkRestants }} / {{ droits.apkTotal }} restants ce mois</div>
+              </div>
+            </div>
+
+            <!-- Barre de progression APK -->
+            <div class="progress-track" style="margin:12px 0">
+              <div
+                class="progress-fill"
+                [ngClass]="apkBarClass()"
+                [style.width.%]="apkBarWidth()"
+              ></div>
+            </div>
+            <div style="font-size:11px;color:#aaa;margin-bottom:14px">
+              {{ droits.apkTotal - droits.apkRestants }} APK téléchargés · {{ droits.apkRestants }} restants
+            </div>
+
+            <!-- Message retour APK -->
+            <div *ngIf="apkSuccess" class="apk-success-msg">✅ {{ apkMessage }}</div>
+            <div *ngIf="apkError"   class="apk-error-msg">❌ {{ apkError }}</div>
+
+            <button
+              class="action-btn btn-upgrade"
+              [disabled]="apkLoading || droits.apkRestants <= 0"
+              (click)="telechargerApk()"
+            >
+              {{ apkLoading ? '⏳ En cours...' : droits.apkRestants > 0 ? '📥 Télécharger APK' : '🚫 Quota épuisé' }}
+            </button>
+          </div>
+
+          <!-- ── Formation ── -->
+          <div class="droits-card" [ngClass]="!droits.formation ? 'droits-card-locked' : ''">
+            <div class="droits-card-header">
+              <span class="droits-icon">🎓</span>
+              <div>
+                <div class="droits-title">Formation incluse</div>
+                <div class="droits-sub" *ngIf="droits.formation">
+                  {{ droits.formation.dureeHeures }}h · {{ droits.formation.maxEtudiants }} étudiants
+                  <span *ngIf="droits.formation.detaillee" class="badge-detaillee">Détaillée</span>
+                </div>
+                <div class="droits-sub" *ngIf="!droits.formation">Non incluse dans ce forfait</div>
+              </div>
+            </div>
+
+            <ng-container *ngIf="droits.formation">
+              <!-- Déjà activée -->
+              <div *ngIf="droits.formation.activee" class="formation-activated">
+                <div class="fa-badge">✅ Formation activée</div>
+                <div style="font-size:12px;color:#888;margin:8px 0">
+                  {{ droits.formation.codesAcces.length }} codes d'accès générés
+                </div>
+                <button class="action-btn btn-invoice" (click)="openFormationModal()">
+                  👁 Voir les codes d'accès
+                </button>
+              </div>
+
+              <!-- Pas encore activée -->
+              <div *ngIf="!droits.formation.activee">
+                <div style="font-size:12px;color:#aaa;margin-bottom:14px">
+                  Cliquez pour générer {{ droits.formation.maxEtudiants }} codes d'accès étudiants.
+                </div>
+                <button class="action-btn btn-upgrade" (click)="openFormationModal()">
+                  🚀 Activer la formation
+                </button>
+              </div>
+            </ng-container>
+
+            <!-- Non incluse -->
+            <ng-container *ngIf="!droits.formation">
+              <div style="font-size:12px;color:#aaa;margin-bottom:14px">
+                Disponible à partir du forfait Pro.
+              </div>
+              <button class="action-btn" disabled style="opacity:0.4;cursor:not-allowed">
+                🔒 Non disponible
+              </button>
+            </ng-container>
+          </div>
+
+          <!-- ── Simulation Esthétique ── -->
+          <div class="droits-card" [ngClass]="!droits.simulationEsthetique ? 'droits-card-locked' : ''">
+            <div class="droits-card-header">
+              <span class="droits-icon">🧬</span>
+              <div>
+                <div class="droits-title">Simulation esthétique IA</div>
+                <div class="droits-sub">
+                  {{ droits.simulationEsthetique ? 'Incluse dans votre forfait Business' : 'Réservée au forfait Business' }}
+                </div>
+              </div>
+            </div>
+
+            <div *ngIf="droits.simulationEsthetique" class="simulation-active">
+              <div class="fa-badge" style="background:#f0fdf4;color:#166534">✅ Fonctionnalité active</div>
+            </div>
+
+            <div *ngIf="!droits.simulationEsthetique" style="margin-top:12px">
+              <button class="action-btn" disabled style="opacity:0.4;cursor:not-allowed">
+                🔒 Non disponible
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </ng-container>
+      <!-- fin section droits -->
+
+      <!-- Section header abonnements -->
+      <div class="section-title-row" style="margin-top:28px">
         <div class="section-title">Tous les abonnements</div>
         <div class="filter-pills">
-          <div class="filter-pill" [class.active]="selectedFilter === 'all'" (click)="filterSubs('all')">Tous</div>
-          <div class="filter-pill" [class.active]="selectedFilter === 'active'" (click)="filterSubs('active')">Actifs</div>
+          <div class="filter-pill" [class.active]="selectedFilter === 'all'"      (click)="filterSubs('all')">Tous</div>
+          <div class="filter-pill" [class.active]="selectedFilter === 'active'"   (click)="filterSubs('active')">Actifs</div>
           <div class="filter-pill" [class.active]="selectedFilter === 'expiring'" (click)="filterSubs('expiring')">Expirent bientôt</div>
-          <div class="filter-pill" [class.active]="selectedFilter === 'expired'" (click)="filterSubs('expired')">Expirés</div>
+          <div class="filter-pill" [class.active]="selectedFilter === 'expired'"  (click)="filterSubs('expired')">Expirés</div>
         </div>
       </div>
 
@@ -120,7 +239,7 @@
                 </div>
                 <div class="progress-track">
                   <div
-                    class="progress-fill fill-green"
+                    class="progress-fill"
                     [ngClass]="progressClass(sub.dateDebut, sub.dateFin)"
                     [style.width.%]="progressPct(sub.dateDebut, sub.dateFin)"
                   ></div>
@@ -148,23 +267,18 @@
                   <div class="mini-info-val">{{ sub.experiencesRestantes }}</div>
                 </div>
                 <div class="mini-info">
+                  <div class="mini-info-label">APK restants</div>
+                  <div class="mini-info-val">{{ sub.apkRestants }}</div>
+                </div>
+                <div class="mini-info">
                   <div class="mini-info-label">Forfait</div>
                   <div class="mini-info-val">{{ sub.forfait?.name }}</div>
                 </div>
-            <!--    <div class="mini-info">
-                  <div class="mini-info-label">Statut</div>
-                  <div class="mini-info-val">{{ sub.status }}</div>
-                </div>
-                <div class="mini-info">
-                  <div class="mini-info-label">Session Stripe</div>
-                  <div class="mini-info-val" style="font-size:11px">{{ sub.stripeSessionId | slice:0:14 }}...</div>
-                </div> -->
               </div>
             </div>
 
             <!-- Actions -->
             <div class="sub-actions-col">
-              <!-- Upgrade buttons -->
               <ng-container *ngIf="sub.status === 'active'">
                 <button
                   *ngFor="let f of forfaitsUpgrade"
@@ -178,7 +292,6 @@
                 </button>
               </ng-container>
 
-              <!-- Expiré : réactiver -->
               <ng-container *ngIf="sub.status !== 'active'">
                 <button class="action-btn btn-reactivate" (click)="openRenouvelerModal()">
                   🔄 Réactiver cet abonnement
@@ -193,14 +306,13 @@
 
       <!-- Historique Paiements -->
       <div class="history-section">
-      <div class="section-title-row" style="margin-bottom:16px"  >
+        <div class="section-title-row" style="margin-bottom:16px">
           <div class="section-title">Historique des paiements</div>
-           <!-- <button class="export-btn" (click)="telechargerFacturePdf(f.id)" >📥 Exporter CSV</button> -->
-        </div> 
+          <span style="font-size:12px;color:var(--text-gray)">{{ factures.length }} transactions</span>
+        </div>
         <div class="history-card">
           <div class="history-header">
             <div class="history-title">Toutes les transactions</div>
-            <span style="font-size:12px;color:var(--text-gray)">{{ factures.length }} transactions</span>
           </div>
           <table class="history-table">
             <thead>
@@ -220,12 +332,10 @@
                   </div>
                 </td>
                 <td>{{ formatDate(f.createdAt) }}</td>
-                  <td>
-                    <span class="ht-amount">
-                     {{ f.amount.toString().replace('.', '') }} TND
-                    </span>
-                  </td>            
-                      <td>
+                <td>
+                  <span class="ht-amount">{{ f.amount.toString().replace('.', '') }} TND</span>
+                </td>
+                <td>
                   <span class="ht-status-badge" [ngClass]="f.status === 'paid' ? 'hts-paid' : 'hts-pending'">
                     {{ f.status === 'paid' ? '✓ Payé' : '⏳ En attente' }}
                   </span>
@@ -242,7 +352,7 @@
     </ng-container>
   </div>
 
-  <!-- Popup Succès -->
+  <!-- Popup Succès Paiement -->
   <div class="success-overlay" *ngIf="showPaymentSuccessPopup">
     <div class="success-popup">
       <div class="success-anim">🎉</div>
@@ -254,7 +364,10 @@
 
 </main>
 
-<!-- Modal Paiement -->
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL PAIEMENT (renouveler / upgrade)
+═══════════════════════════════════════════════════ -->
 <div class="pay-overlay" [class.open]="payModalOpen" (click)="onOverlayClick($event)">
   <div class="pay-modal">
     <div class="pay-modal-head">
@@ -285,6 +398,83 @@
       <div class="pay-success-text">Votre abonnement a été renouvelé avec succès.</div>
       <button class="pay-success-close" (click)="closePayModal()">Fermer</button>
     </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════
+     MODAL FORMATION — Activation & Codes d'accès
+═══════════════════════════════════════════════════ -->
+<div class="formation-overlay" [class.open]="formationModalOpen" (click)="onOverlayClick($event)">
+  <div class="formation-modal">
+
+    <!-- Header -->
+    <div class="formation-modal-head">
+      <button class="pay-modal-close" (click)="closeFormationModal()">✕</button>
+      <div class="formation-modal-icon">🎓</div>
+      <div class="formation-modal-title">
+        Formation VR — {{ droits?.formation?.dureeHeures }}h
+        <span *ngIf="droits?.formation?.detaillee" class="badge-detaillee">Détaillée</span>
+      </div>
+      <div class="formation-modal-sub">
+        Accès pour {{ droits?.formation?.maxEtudiants }} étudiants
+      </div>
+    </div>
+
+    <!-- Body -->
+    <div class="formation-modal-body">
+
+      <!-- Avant activation -->
+      <ng-container *ngIf="!formationResult && !droits?.formation?.activee">
+        <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:20px">
+          En activant la formation, vous allez générer <strong>{{ droits?.formation?.maxEtudiants }} codes d'accès</strong>
+          uniques à distribuer à vos étudiants. Cette action ne peut être effectuée qu'une seule fois par cycle.
+        </p>
+        <div *ngIf="formationError" class="apk-error-msg">❌ {{ formationError }}</div>
+        <button
+          class="pay-confirm-btn"
+          [disabled]="formationLoading"
+          (click)="activerFormation()"
+        >
+          {{ formationLoading ? '⏳ Génération en cours...' : '🚀 Générer les codes d\'accès' }}
+        </button>
+      </ng-container>
+
+      <!-- Codes générés (après activation OU déjà activée) -->
+      <ng-container *ngIf="formationResult || droits?.formation?.activee">
+        <div class="codes-success-header">
+          <div style="font-size:32px">🎉</div>
+          <div class="codes-success-title">Formation activée !</div>
+          <div class="codes-success-sub">
+            Distribuez ces codes à vos étudiants pour accéder à la formation de
+            <strong>{{ droits?.formation?.dureeHeures }}h</strong>.
+          </div>
+        </div>
+
+        <!-- Grille des codes -->
+        <div class="codes-grid">
+          <div
+            class="code-chip"
+            *ngFor="let code of (formationResult?.codesAcces || droits?.formation?.codesAcces)"
+            (click)="copierCode(code)"
+            title="Cliquer pour copier"
+          >
+            {{ code }}
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:#aaa;text-align:center;margin-top:10px">
+          Cliquez sur un code pour le copier
+        </div>
+      </ng-container>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="formation-modal-footer">
+      <button class="action-btn btn-invoice" (click)="closeFormationModal()">Fermer</button>
+    </div>
+
   </div>
 </div>
 </body>

@@ -513,3 +513,106 @@ body {
 ::-webkit-scrollbar { width: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,102,255,0.15); border-radius: 99px; }
+
+
+
+/* ══════════════════════════════════════════════
+   AJOUTS CSS — mes-experiences
+   À coller à la fin de mes-experiences.css
+══════════════════════════════════════════════ */
+
+/* ── APK mini barre dans le banner ── */
+.sbs-apk-item { min-width: 100px; }
+.apk-mini-bar {
+  width: 80px; height: 3px;
+  background: rgba(255,255,255,0.12);
+  border-radius: 99px; overflow: hidden;
+  margin-top: 5px;
+}
+.apk-mini-fill {
+  height: 100%; border-radius: 99px;
+  transition: width 0.5s ease, background 0.3s;
+}
+
+/* ── Badge APK installé sur la card ── */
+.apk-installed-badge {
+  position: absolute; bottom: 10px; left: 10px;
+  background: rgba(0, 196, 140, 0.9);
+  color: #fff; font-size: 10px; font-weight: 700;
+  padding: 4px 10px; border-radius: 7px;
+  backdrop-filter: blur(8px);
+  animation: fadeUp 0.3s ease-out both;
+}
+
+/* ── Bouton VR verrouillé ── */
+.ebtn-vr-locked {
+  background: rgba(90,107,140,0.12); color: #5A6B8C;
+  border: 1.5px solid rgba(90,107,140,0.2) !important;
+  cursor: not-allowed;
+}
+.ebtn-vr-locked:hover { background: rgba(90,107,140,0.18); }
+
+/* ── Bouton APK installé ── */
+.ebtn-apk-done {
+  background: rgba(0,196,140,0.1); color: #00C48C;
+  border: 1.5px solid rgba(0,196,140,0.3) !important;
+}
+.ebtn-apk-done:hover { background: rgba(0,196,140,0.18); }
+
+/* ── Quick action verrouillée ── */
+.quick-action.qa-locked {
+  background: rgba(255,255,255,0.7);
+  opacity: 0.75;
+}
+
+/* ── Stat card warning APK ── */
+.stat-card.apk-warning {
+  border-color: rgba(255, 59, 92, 0.3);
+  background: rgba(255, 59, 92, 0.04);
+}
+.stat-card.apk-warning .stat-val { color: #FF3B5C; }
+
+/* ── Quota bar dans la modal APK ── */
+.apk-quota-bar {
+  margin-top: 16px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+.apk-quota-label {
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; color: rgba(255,255,255,0.55);
+  margin-bottom: 8px;
+}
+.apk-quota-label strong { font-size: 12px; font-weight: 700; }
+.apk-quota-track {
+  height: 5px; background: rgba(255,255,255,0.1);
+  border-radius: 99px; overflow: hidden;
+}
+.apk-quota-fill {
+  height: 100%; border-radius: 99px;
+  transition: width 0.5s ease, background 0.3s;
+}
+
+/* ── Message quota dans la modal ── */
+.apk-quota-msg {
+  font-size: 13px; font-weight: 600;
+  padding: 10px 14px; border-radius: 10px;
+  margin-bottom: 14px;
+}
+.apk-quota-msg-success {
+  background: #f0fdf4; color: #166534;
+  border: 1px solid rgba(0,196,140,0.3);
+}
+.apk-quota-msg-error {
+  background: #fef2f2; color: #991b1b;
+  border: 1px solid rgba(255,59,92,0.3);
+}
+
+/* ── Déjà installé box ── */
+.apk-already-installed {
+  text-align: center;
+  background: #f0fdf4; border: 1px solid rgba(0,196,140,0.3);
+  border-radius: 12px; padding: 16px;
+  margin-bottom: 14px;
+}
