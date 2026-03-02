@@ -22,7 +22,14 @@ const abonnementSchema = new mongoose.Schema({
   apkRestants: { type: Number, default: 0 }, 
 
   formationUtilisee: { type: Boolean, default: false }, 
-  codesAcces:        [{ type: String }],                
+  codesAcces:        [{ type: String }],   
+  
+    // ─── NOUVEAU : expériences dont l'APK a été téléchargé ───
+  // Persisté en BDD → survit au rechargement de page
+  experiencesDebloquees: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Experience'
+  }],
 
 
   dateDebut: { type: Date, default: Date.now },

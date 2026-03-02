@@ -94,7 +94,7 @@ const telechargerFacture = async (req, res) => {
     doc.pipe(res);
 
     // ── Header ──
-    doc.fontSize(24).fillColor('#1A2B5F').text('SurveyVR', 50, 50);
+    doc.fontSize(24).fillColor('#1A2B5F').text('SurgeryVR', 50, 50);
     doc.fontSize(10).fillColor('#888').text('Plateforme d\'enquêtes VR', 50, 78);
     doc.moveTo(50, 100).lineTo(550, 100).strokeColor('#e0e0e0').stroke();
 
@@ -148,7 +148,7 @@ const telechargerFacture = async (req, res) => {
     // ── Footer ──
     doc.moveTo(50, 700).lineTo(550, 700).strokeColor('#e0e0e0').stroke();
     doc.fontSize(9).fillColor('#aaa')
-      .text('SurveyVR — Plateforme d\'enquêtes VR', 50, 710, { align: 'center', width: 500 })
+      .text('SurgeryVR — Plateforme d\'enquêtes VR', 50, 710, { align: 'center', width: 500 })
       .text('Ce document est une facture officielle.', 50, 723, { align: 'center', width: 500 });
 
     doc.end();
