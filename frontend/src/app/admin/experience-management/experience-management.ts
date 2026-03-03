@@ -19,12 +19,14 @@ export interface Experience {
   apkSize?: string;
   apkVersion: string;
   apkAndroid: string;
-  forfaits: any[];
+  forfaits?: any[];
   respondents: number;
   avgTime: string;
   rating: number | null;
   createdAt?: string;
 }
+
+// ─── Constantes ───────────────────────────────────────────────────────────────
 
 const DEFAULT_FORM = {
   title: '',
@@ -37,8 +39,9 @@ const DEFAULT_FORM = {
   forfaits: [] as string[],
 };
 
-const EMOJIS = ['🥽', '🫀', '🧠', '🦷', '🦴', '💉', '🩺', '🔬', '🩻', '⚕️', '🧬', '🏥'];
+const EMOJIS        = ['🥽', '🫀', '🧠', '🦷', '🦴', '💉', '🩺', '🔬', '🩻', '⚕️', '🧬', '🏥'];
 const THUMB_CLASSES = ['vrt-1', 'vrt-2', 'vrt-3', 'vrt-4', 'vrt-5', 'vrt-6'];
+
 
 @Component({
   selector: 'app-experience-management',
@@ -49,33 +52,43 @@ const THUMB_CLASSES = ['vrt-1', 'vrt-2', 'vrt-3', 'vrt-4', 'vrt-5', 'vrt-6'];
 })
 export class ExperienceManagement implements OnInit {
 
-  experiences: Experience[] = [];
+  // ─── Data ─────────────────────────────────────────────────────────────────
+  experiences: Experience[]         = [];
   filteredExperiences: Experience[] = [];
-  forfaits: any[] = [];
+  forfaits: any[]                   = [];
 
-  searchQuery = '';
+  // ─── Filters ──────────────────────────────────────────────────────────────
+  searchQuery           = '';
   selectedForfaitFilter = '';
 
-  isLoading = false;
-  isSaving = false;
+  // ─── State ────────────────────────────────────────────────────────────────
+  isLoading  = false;
+  isSaving   = false;
   isDeleting = false;
   errorMessage = '';
 
-  showModal = false;
+  // ─── Modals ───────────────────────────────────────────────────────────────
+  showModal       = false;
   showDeleteModal = false;
-  showViewModal = false;
+  showViewModal   = false;
 
-  selectedExperience: Experience | null = null;
-  experienceToDelete: Experience | null = null;
+  selectedExperience:  Experience | null = null;
+  experienceToDelete:  Experience | null = null;
 
+  // ─── Formulaire ───────────────────────────────────────────────────────────
   formData = { ...DEFAULT_FORM, forfaits: [] as string[] };
-  selectedFile: File | null = null;
-  filePreview = '';
-  dragOver = false;
 
-  readonly emojis = EMOJIS;
+  // Champs APK Meta App Lab (remplace selectedFile)
+  apkUrl          = '';
+  apkPublicId     = '';
+  apkOriginalName = '';
+  apkSize         = '';
+
+  // ─── Constantes template ──────────────────────────────────────────────────
+  readonly emojis       = EMOJIS;
   readonly thumbClasses = THUMB_CLASSES;
 
+  // ─── Toast ────────────────────────────────────────────────────────────────
   toastVisible = false;
   toastMessage = '';
   toastType: 'success' | 'error' = 'success';
@@ -84,9 +97,10 @@ export class ExperienceManagement implements OnInit {
   constructor(
     private experienceService: Experiences,
     private forfaitService: ForfaitService,
-    private cdr: ChangeDetectorRef  
-
+    private cdr: ChangeDetectorRef,
   ) {}
+
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.loadExperiences();
@@ -96,7 +110,7 @@ export class ExperienceManagement implements OnInit {
   // ─── API ──────────────────────────────────────────────────────────────────
 
   loadExperiences(): void {
-    this.isLoading = true;
+    this.isLoading   = true;
     this.errorMessage = '';
 
     this.experienceService.getAllExperiences().subscribe({
@@ -105,11 +119,10 @@ export class ExperienceManagement implements OnInit {
         this.applyFilters();
         this.isLoading = false;
         this.cdr.detectChanges();
-
       },
       error: (err) => {
         this.errorMessage = 'Impossible de charger les expériences.';
-        this.isLoading = false;
+        this.isLoading    = false;
         console.error(err);
       },
     });
@@ -117,44 +130,56 @@ export class ExperienceManagement implements OnInit {
 
   loadForfaits(): void {
     this.forfaitService.getAllForfaits().subscribe({
-      next: (data) => { this.forfaits = data;
-                this.cdr.detectChanges();
-
-       },
+      next: (data) => {
+        this.forfaits = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Erreur chargement forfaits:', err),
     });
   }
 
   saveExperience(): void {
-    if (!this.formData.title.trim() || !this.selectedFile) return;
+    // ── Validations manuelles ──
+    if (!this.formData.title.trim()) {
+      this.showToast('❌ Le titre est obligatoire.', 'error');
+      return;
+    }
+    if (!this.apkUrl.trim()) {
+      this.showToast('❌ Veuillez renseigner le lien APK Meta App Lab.', 'error');
+      return;
+    }
 
     this.isSaving = true;
-    const fd = new FormData();
 
-    fd.append('apk', this.selectedFile);
-    fd.append('title', this.formData.title);
-    fd.append('description', this.formData.description || '');
-    fd.append('emoji', this.formData.emoji);
-    fd.append('thumbClass', this.formData.thumbClass);
-    fd.append('compatibility', this.formData.compatibility);
-    fd.append('apkVersion', this.formData.apkVersion);
-    fd.append('apkAndroid', this.formData.apkAndroid);
-    this.formData.forfaits.forEach(id => fd.append('forfaits', id));
+    // ── Payload JSON avec l'URL Meta App Lab ──
+    const payload = {
+      title:           this.formData.title,
+      description:     this.formData.description,
+      emoji:           this.formData.emoji,
+      thumbClass:      this.formData.thumbClass,
+      compatibility:   this.formData.compatibility,
+      apkVersion:      this.formData.apkVersion,
+      apkAndroid:      this.formData.apkAndroid,
+      forfaits:        this.formData.forfaits,
+      apkUrl:          this.apkUrl,
+      apkPublicId:     this.apkPublicId,
+      apkOriginalName: this.apkOriginalName,
+      apkSize:         this.apkSize,
+    };
 
-    this.experienceService.createExperience(fd).subscribe({
+    this.experienceService.createExperience(payload).subscribe({
       next: (created) => {
         this.experiences.unshift(created);
         this.applyFilters();
         this.closeModal();
         this.isSaving = false;
-                this.cdr.detectChanges();
-
+        this.cdr.detectChanges();
         this.showToast('✅ Expérience créée avec succès !', 'success');
       },
       error: (err) => {
         this.isSaving = false;
-        this.showToast('❌ Erreur lors de la création.', 'error');
-        console.error(err);
+        this.showToast('❌ Erreur lors de la création. Vérifiez les données.', 'error');
+        console.error('Erreur création expérience:', err);
       },
     });
   }
@@ -169,8 +194,7 @@ export class ExperienceManagement implements OnInit {
         this.applyFilters();
         this.closeDeleteModal();
         this.isDeleting = false;
-                this.cdr.detectChanges();
-
+        this.cdr.detectChanges();
         this.showToast('🗑️ Expérience supprimée.', 'success');
       },
       error: (err) => {
@@ -181,7 +205,7 @@ export class ExperienceManagement implements OnInit {
     });
   }
 
-  // ─── Filters ──────────────────────────────────────────────────────────────
+  // ─── Filtres ──────────────────────────────────────────────────────────────
 
   applyFilters(): void {
     let result = [...this.experiences];
@@ -197,9 +221,7 @@ export class ExperienceManagement implements OnInit {
 
     if (this.selectedForfaitFilter) {
       result = result.filter(e =>
-        e.forfaits?.some((f: any) =>
-          (f._id || f) === this.selectedForfaitFilter
-        )
+        e.forfaits?.some((f: any) => (f._id || f) === this.selectedForfaitFilter)
       );
     }
 
@@ -207,17 +229,15 @@ export class ExperienceManagement implements OnInit {
   }
 
   clearFilters(): void {
-    this.searchQuery = '';
+    this.searchQuery           = '';
     this.selectedForfaitFilter = '';
     this.applyFilters();
   }
 
-  // ─── Stats Helpers ────────────────────────────────────────────────────────
+  // ─── Stats ────────────────────────────────────────────────────────────────
 
-  getTotalExperiences(): number { return this.experiences.length; }
-
-  getExperiencesWithRating(): number {
-    return this.experiences.filter(e => e.rating !== null).length;
+  getTotalExperiences(): number {
+    return this.experiences.length;
   }
 
   getAvgRating(): string {
@@ -231,48 +251,12 @@ export class ExperienceManagement implements OnInit {
     return this.experiences.reduce((s, e) => s + (e.respondents || 0), 0);
   }
 
-  getStars(rating: number | null): string {
-    if (!rating) return '—';
-    return '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating));
-  }
-
   getForfaitName(id: string): string {
     const f = this.forfaits.find(f => f._id === id);
     return f?.name || id;
   }
 
-  // ─── File Upload ──────────────────────────────────────────────────────────
-
-  onFileSelect(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files?.[0]) this.handleFile(input.files[0]);
-  }
-
-  onDrop(event: DragEvent): void {
-    event.preventDefault();
-    this.dragOver = false;
-    const file = event.dataTransfer?.files[0];
-    if (file) this.handleFile(file);
-  }
-
-  onDragOver(event: DragEvent): void {
-    event.preventDefault();
-    this.dragOver = true;
-  }
-
-  onDragLeave(): void { this.dragOver = false; }
-
-  private handleFile(file: File): void {
-    this.selectedFile = file;
-    this.filePreview = file.name;
-  }
-
-  formatFileSize(bytes: number): string {
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  }
-
-  // ─── Forfait Multi-Select ─────────────────────────────────────────────────
+  // ─── Forfait multi-select ─────────────────────────────────────────────────
 
   toggleForfait(id: string): void {
     const idx = this.formData.forfaits.indexOf(id);
@@ -287,31 +271,35 @@ export class ExperienceManagement implements OnInit {
   // ─── Modals ───────────────────────────────────────────────────────────────
 
   openModal(): void {
-    this.formData = { ...DEFAULT_FORM, forfaits: [] };
-    this.selectedFile = null;
-    this.filePreview = '';
-    this.showModal = true;
+    this.formData        = { ...DEFAULT_FORM, forfaits: [] };
+    this.apkUrl          = '';
+    this.apkPublicId     = '';
+    this.apkOriginalName = '';
+    this.apkSize         = '';
+    this.showModal       = true;
   }
 
-  closeModal(): void { this.showModal = false; }
+  closeModal(): void {
+    this.showModal = false;
+  }
 
   viewExperience(exp: Experience): void {
     this.selectedExperience = exp;
-    this.showViewModal = true;
+    this.showViewModal      = true;
   }
 
   closeViewModal(): void {
-    this.showViewModal = false;
+    this.showViewModal      = false;
     this.selectedExperience = null;
   }
 
   confirmDelete(exp: Experience): void {
     this.experienceToDelete = exp;
-    this.showDeleteModal = true;
+    this.showDeleteModal    = true;
   }
 
   closeDeleteModal(): void {
-    this.showDeleteModal = false;
+    this.showDeleteModal    = false;
     this.experienceToDelete = null;
   }
 
@@ -320,8 +308,8 @@ export class ExperienceManagement implements OnInit {
   showToast(message: string, type: 'success' | 'error'): void {
     clearTimeout(this.toastTimer);
     this.toastMessage = message;
-    this.toastType = type;
+    this.toastType    = type;
     this.toastVisible = true;
-    this.toastTimer = setTimeout(() => { this.toastVisible = false; }, 3500);
+    this.toastTimer   = setTimeout(() => { this.toastVisible = false; }, 3500);
   }
 }

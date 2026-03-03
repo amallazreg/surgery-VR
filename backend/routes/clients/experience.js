@@ -31,7 +31,7 @@ const storage = new CloudinaryStorage({
 
 
 // ── Routes ADMIN ────────────────────────────────────────────
-router.post('/',      upload.single('apk'), createExperience);
+router.post('/',   createExperience);
 router.get('/',       getAllExperiences);
 router.delete('/:id', deleteExperience);
 

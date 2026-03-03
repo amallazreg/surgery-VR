@@ -60,9 +60,9 @@ export class Experiences {
     return this.http.get<any[]>(`${this.apiUrl}`);
   }
 
-  createExperience(formData: FormData): Observable<any> {
-    return this.http.post(`${this.apiUrl}`, formData);
-  }
+createExperience(data: any): Observable<any> {
+  return this.http.post(`${this.apiUrl}`, data);
+}
 
   deleteExperience(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);

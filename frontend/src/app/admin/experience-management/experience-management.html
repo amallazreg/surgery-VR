@@ -1,5 +1,5 @@
 <div class="admin-layout">
-    <app-side-bar></app-side-bar>
+  <app-side-bar></app-side-bar>
   <main class="main-content">
 
     <!-- Header -->
@@ -135,12 +135,12 @@
               <span class="meta-chip">📱 {{ exp.apkAndroid }}</span>
             </div>
 
-            <div class="exp-forfaits" *ngIf="selectedExperience && selectedExperience.forfaits.length">
+            <div class="exp-forfaits" *ngIf="exp.forfaits && exp.forfaits.length">
               <span class="forfait-tag" *ngFor="let f of exp.forfaits">
                 💎 {{ f.name || getForfaitName(f) }}
               </span>
             </div>
-            <div class="exp-no-forfait" *ngIf="!exp.forfaits.length">
+            <div class="exp-no-forfait" *ngIf="!exp.forfaits || !exp.forfaits.length">
               <span class="forfait-tag inactive">⚠️ Aucun forfait assigné</span>
             </div>
 
@@ -159,9 +159,9 @@
               </div>
             </div>
 
-            <div class="exp-apk-info" *ngIf="exp.apkOriginalName">
-              <span class="apk-icon">📦</span>
-              <span class="apk-name">{{ exp.apkOriginalName }}</span>
+            <div class="exp-apk-info" *ngIf="exp.apkOriginalName || exp.apkUrl">
+              <span class="apk-icon">🔗</span>
+              <span class="apk-name">{{ exp.apkOriginalName || 'Meta App Lab' }}</span>
               <span class="apk-size" *ngIf="exp.apkSize">{{ exp.apkSize }}</span>
             </div>
           </div>
@@ -193,132 +193,170 @@
       <button class="modal-close" (click)="closeModal()">✕</button>
     </div>
     <div class="modal-body">
-      <form (ngSubmit)="saveExperience()" #expForm="ngForm">
 
-        <div class="modal-two-col">
-          <!-- Colonne gauche -->
-          <div class="modal-col">
+      <div class="modal-two-col">
 
-            <!-- Infos générales -->
-            <div class="form-section">
-              <div class="form-section-title">📋 Informations</div>
+        <!-- ── Colonne gauche ── -->
+        <div class="modal-col">
+
+          <!-- Infos générales -->
+          <div class="form-section">
+            <div class="form-section-title">📋 Informations</div>
+            <div class="form-group">
+              <label>Titre *</label>
+              <input
+                type="text"
+                [(ngModel)]="formData.title"
+                name="title"
+                placeholder="Ex: Chirurgie cardiaque pédiatrique"
+              />
+            </div>
+            <div class="form-group">
+              <label>Description</label>
+              <textarea
+                [(ngModel)]="formData.description"
+                name="description"
+                rows="3"
+                placeholder="Décrivez le scénario de formation..."
+              ></textarea>
+            </div>
+            <div class="form-grid-2">
               <div class="form-group">
-                <label>Titre *</label>
-                <input type="text" [(ngModel)]="formData.title" name="title" required placeholder="Ex: Chirurgie cardiaque pédiatrique" />
+                <label>Compatibilité</label>
+                <input type="text" [(ngModel)]="formData.compatibility" name="compatibility" placeholder="Quest 2 & 3" />
               </div>
               <div class="form-group">
-                <label>Description</label>
-                <textarea [(ngModel)]="formData.description" name="description" rows="3" placeholder="Décrivez le scénario de formation..."></textarea>
-              </div>
-              <div class="form-grid-2">
-                <div class="form-group">
-                  <label>Compatibilité</label>
-                  <input type="text" [(ngModel)]="formData.compatibility" name="compatibility" placeholder="Quest 2 & 3" />
-                </div>
-                <div class="form-group">
-                  <label>Android minimum</label>
-                  <input type="text" [(ngModel)]="formData.apkAndroid" name="apkAndroid" placeholder="Android 10+" />
-                </div>
-              </div>
-              <div class="form-grid-2">
-                <div class="form-group">
-                  <label>Version APK</label>
-                  <input type="text" [(ngModel)]="formData.apkVersion" name="apkVersion" placeholder="v1.0.0" />
-                </div>
-                <div class="form-group">
-                  <label>Classe visuelle</label>
-                  <select [(ngModel)]="formData.thumbClass" name="thumbClass">
-                    <option *ngFor="let t of thumbClasses" [value]="t">{{ t }}</option>
-                  </select>
-                </div>
+                <label>Android minimum</label>
+                <input type="text" [(ngModel)]="formData.apkAndroid" name="apkAndroid" placeholder="Android 10+" />
               </div>
             </div>
-
-            <!-- Emoji picker -->
-            <div class="form-section">
-              <div class="form-section-title">🎨 Icône de l'expérience</div>
-              <div class="emoji-grid">
-                <div
-                  class="emoji-option"
-                  *ngFor="let e of emojis"
-                  [class.selected]="formData.emoji === e"
-                  (click)="formData.emoji = e"
-                >{{ e }}</div>
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label>Version APK</label>
+                <input type="text" [(ngModel)]="formData.apkVersion" name="apkVersion" placeholder="v1.0.0" />
+              </div>
+              <div class="form-group">
+                <label>Classe visuelle</label>
+                <select [(ngModel)]="formData.thumbClass" name="thumbClass">
+                  <option *ngFor="let t of thumbClasses" [value]="t">{{ t }}</option>
+                </select>
               </div>
             </div>
-
           </div>
 
-          <!-- Colonne droite -->
-          <div class="modal-col">
-
-            <!-- Upload APK -->
-            <div class="form-section">
-              <div class="form-section-title">📦 Fichier APK *</div>
+          <!-- Emoji picker -->
+          <div class="form-section">
+            <div class="form-section-title">🎨 Icône de l'expérience</div>
+            <div class="emoji-grid">
               <div
-                class="upload-zone"
-                [class.drag-over]="dragOver"
-                [class.has-file]="selectedFile"
-                (dragover)="onDragOver($event)"
-                (dragleave)="onDragLeave()"
-                (drop)="onDrop($event)"
-                (click)="fileInput.click()"
-              >
-                <input #fileInput type="file" accept=".apk" style="display:none" (change)="onFileSelect($event)" />
-                <div *ngIf="!selectedFile" class="upload-placeholder">
-                  <div class="upload-icon">📤</div>
-                  <div class="upload-text">Glissez votre APK ici</div>
-                  <div class="upload-hint">ou cliquez pour sélectionner</div>
-                  <div class="upload-formats">Format .apk uniquement</div>
-                </div>
-                <div *ngIf="selectedFile" class="upload-success">
-                  <div class="upload-icon">✅</div>
-                  <div class="upload-filename">{{ selectedFile.name }}</div>
-                  <div class="upload-filesize">{{ formatFileSize(selectedFile.size) }}</div>
-                  <div class="upload-change">Cliquer pour changer</div>
-                </div>
-              </div>
+                class="emoji-option"
+                *ngFor="let e of emojis"
+                [class.selected]="formData.emoji === e"
+                (click)="formData.emoji = e"
+              >{{ e }}</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ── Colonne droite ── -->
+        <div class="modal-col">
+
+          <!-- Lien APK Meta App Lab -->
+          <div class="form-section">
+            <div class="form-section-title">
+              <span>📦 Lien APK — Meta App Lab *</span>
+              <a href="https://developer.oculus.com/manage/" target="_blank" class="meta-link-help">
+                Ouvrir Meta Dashboard ↗
+              </a>
             </div>
 
-            <!-- Forfaits -->
-            <div class="form-section">
-              <div class="form-section-title">💎 Forfaits associés</div>
-              <p class="form-hint">Sélectionnez les forfaits qui auront accès à cette expérience.</p>
-              <div class="forfaits-picker">
-                <div
-                  class="forfait-option"
-                  *ngFor="let f of forfaits"
-                  [class.selected]="isForfaitSelected(f._id)"
-                  (click)="toggleForfait(f._id)"
-                >
-                  <div class="forfait-option-check">{{ isForfaitSelected(f._id) ? '✓' : '' }}</div>
-                  <div class="forfait-option-info">
-                    <div class="forfait-option-name">{{ f.name }}</div>
-                    <div class="forfait-option-sub">{{ f.tagline || (f.price ? (f.price + ' €/mois') : 'Sur devis') }}</div>
+            <div class="form-group">
+              <label>URL Meta App Lab *</label>
+              <input
+                type="url"
+                [(ngModel)]="apkUrl"
+                name="apkUrl"
+                placeholder="https://www.meta.com/s/xxxxxx"
+              />
+            </div>
+
+            <!-- Aperçu du lien -->
+            <div class="apk-url-preview" *ngIf="apkUrl">
+              <span class="apk-preview-icon">🔗</span>
+              <span class="apk-preview-url">{{ apkUrl }}</span>
+              <a [href]="apkUrl" target="_blank" class="btn-test-link">Tester ↗</a>
+            </div>
+
+            <!-- Hint si vide -->
+            <div class="apk-url-empty" *ngIf="!apkUrl">
+              <span>💡 Copiez le lien depuis votre espace Meta App Lab</span>
+            </div>
+
+            <div class="form-grid-2" style="margin-top: 0.8rem;">
+              <div class="form-group">
+                <label>Nom du fichier</label>
+                <input
+                  type="text"
+                  [(ngModel)]="apkOriginalName"
+                  name="apkOriginalName"
+                  placeholder="Ex: RehabX.apk"
+                />
+              </div>
+              <div class="form-group">
+                <label>Taille</label>
+                <input
+                  type="text"
+                  [(ngModel)]="apkSize"
+                  name="apkSize"
+                  placeholder="Ex: 126 MB"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Forfaits -->
+          <div class="form-section">
+            <div class="form-section-title">💎 Forfaits associés</div>
+            <p class="form-hint">Sélectionnez les forfaits qui auront accès à cette expérience.</p>
+            <div class="forfaits-picker">
+              <div
+                class="forfait-option"
+                *ngFor="let f of forfaits"
+                [class.selected]="isForfaitSelected(f._id)"
+                (click)="toggleForfait(f._id)"
+              >
+                <div class="forfait-option-check">{{ isForfaitSelected(f._id) ? '✓' : '' }}</div>
+                <div class="forfait-option-info">
+                  <div class="forfait-option-name">{{ f.name }}</div>
+                  <div class="forfait-option-sub">
+                    {{ f.tagline || (f.price ? (f.price + ' €/mois') : 'Sur devis') }}
                   </div>
                 </div>
-                <div class="forfaits-empty" *ngIf="forfaits.length === 0">
-                  Aucun forfait disponible. Créez d'abord un forfait.
-                </div>
+              </div>
+              <div class="forfaits-empty" *ngIf="forfaits.length === 0">
+                Aucun forfait disponible. Créez d'abord un forfait.
               </div>
             </div>
-
           </div>
-        </div>
 
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
-          <button
-            type="submit"
-            class="btn btn-primary"
-            [disabled]="isSaving || !expForm.valid || !selectedFile"
-          >
-            <span *ngIf="isSaving">⏳ Upload en cours...</span>
-            <span *ngIf="!isSaving">🚀 Créer l'expérience</span>
-          </button>
         </div>
+      </div>
 
-      </form>
+      <!-- Footer boutons -->
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          [disabled]="isSaving"
+          (click)="saveExperience()"
+        >
+          <span *ngIf="isSaving">⏳ Enregistrement...</span>
+          <span *ngIf="!isSaving">🚀 Créer l'expérience</span>
+        </button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -358,7 +396,9 @@
         </div>
         <div class="view-detail-item">
           <div class="view-detail-label">⭐ Note</div>
-          <div class="view-detail-value">{{ selectedExperience.rating ? (selectedExperience.rating + '/5') : '—' }}</div>
+          <div class="view-detail-value">
+            {{ selectedExperience.rating ? (selectedExperience.rating + '/5') : '—' }}
+          </div>
         </div>
         <div class="view-detail-item">
           <div class="view-detail-label">📦 Taille APK</div>
@@ -366,8 +406,8 @@
         </div>
       </div>
 
-        <div class="view-section" *ngIf="selectedExperience && selectedExperience.forfaits.length > 0">
-            <div class="view-section-title">💎 Forfaits avec accès</div>
+      <div class="view-section" *ngIf="selectedExperience.forfaits && selectedExperience.forfaits.length > 0">
+        <div class="view-section-title">💎 Forfaits avec accès</div>
         <div class="forfait-tags-row">
           <span class="forfait-tag" *ngFor="let f of selectedExperience.forfaits">
             {{ f.name || getForfaitName(f) }}
@@ -376,19 +416,28 @@
       </div>
 
       <div class="view-apk-block" *ngIf="selectedExperience.apkUrl">
-        <div class="apk-block-icon">📦</div>
+        <div class="apk-block-icon">🔗</div>
         <div class="apk-block-info">
-          <div class="apk-block-name">{{ selectedExperience.apkOriginalName || 'Fichier APK' }}</div>
-          <div class="apk-block-meta">{{ selectedExperience.apkVersion }} · {{ selectedExperience.apkSize || 'Taille inconnue' }}</div>
+          <div class="apk-block-name">{{ selectedExperience.apkOriginalName || 'Meta App Lab' }}</div>
+          <div class="apk-block-meta">
+            {{ selectedExperience.apkVersion }} · {{ selectedExperience.apkSize || 'Taille inconnue' }}
+          </div>
         </div>
-        <a [href]="selectedExperience.apkUrl" target="_blank" class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">
-          ⬇️ Télécharger
+        <a
+          [href]="selectedExperience.apkUrl"
+          target="_blank"
+          class="btn btn-primary"
+          style="padding: 0.6rem 1.2rem; font-size: 0.9rem;"
+        >
+          🔗 Ouvrir
         </a>
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
-        <button class="btn btn-danger" (click)="closeViewModal(); confirmDelete(selectedExperience!)">🗑️ Supprimer</button>
+        <button class="btn btn-danger" (click)="closeViewModal(); confirmDelete(selectedExperience!)">
+          🗑️ Supprimer
+        </button>
       </div>
     </div>
   </div>
@@ -407,7 +456,7 @@
         Supprimer l'expérience <strong>{{ experienceToDelete?.title }}</strong> ?
       </p>
       <p style="color:var(--text-gray); font-size:0.9rem;">
-        Le fichier APK sera également supprimé de Cloudinary. Cette action est irréversible.
+        Cette action est irréversible.
       </p>
     </div>
     <div class="modal-footer">
@@ -420,6 +469,11 @@
 </div>
 
 <!-- Toast -->
-<div class="toast" [class.show]="toastVisible" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+<div
+  class="toast"
+  [class.show]="toastVisible"
+  [class.toast-success]="toastType === 'success'"
+  [class.toast-error]="toastType === 'error'"
+>
   {{ toastMessage }}
 </div>
