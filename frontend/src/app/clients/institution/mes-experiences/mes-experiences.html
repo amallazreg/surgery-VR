@@ -27,194 +27,203 @@
     <!-- Content -->
     <div class="content">
 
-      <!-- ══ SUBSCRIPTION BANNER ══ -->
-      <div class="sub-banner" [ngClass]="activeSubscription.headerClass">
-        <div class="sub-banner-glow"></div>
+      <!-- ══ LOADING STATE ══ -->
+      <div *ngIf="isLoading" class="loading-state">
+        <div class="loading-spinner">⏳</div>
+        <p>Chargement de vos expériences...</p>
+      </div>
 
-        <div class="sub-banner-left">
-          <span class="sub-banner-icon">{{ activeSubscription.planIcon }}</span>
-          <div>
-            <div class="sub-banner-name">{{ activeSubscription.planName }}</div>
-            <div class="sub-banner-ref">{{ activeSubscription.ref }}</div>
-          </div>
-        </div>
+      <!-- ══ ERROR STATE ══ -->
+      <div *ngIf="!isLoading && errorMessage" class="error-state">
+        <div style="font-size:40px;margin-bottom:12px">⚠️</div>
+        <p>{{ errorMessage }}</p>
+        <button class="exp-btn ebtn-apk" (click)="loadMesExperiences()">🔄 Réessayer</button>
+      </div>
 
-        <div class="sub-banner-stats">
-          <div class="sbs-item">
-            <div class="sbs-val">{{ activeSubscription.totalExperiences }}/{{ activeSubscription.maxSlots }}</div>
-            <div class="sbs-lbl">Expériences</div>
-          </div>
-          <div class="sbs-sep"></div>
+      <!-- ══ MAIN CONTENT ══ -->
+      <ng-container *ngIf="!isLoading && !errorMessage">
 
-          <!-- APK avec barre de progression intégrée -->
-          <div class="sbs-item sbs-apk-item">
-            <div class="sbs-val">
-              {{ activeSubscription.apkRestants }}<span style="font-size:11px;opacity:.5">/{{ activeSubscription.apkTotal }}</span>
-            </div>
-            <div class="sbs-lbl">APK restants</div>
-            <!-- Mini barre -->
-            <div class="apk-mini-bar">
-              <div
-                class="apk-mini-fill"
-                [style.width.%]="apkBarWidth()"
-                [style.background]="apkBarColor()"
-              ></div>
+        <!-- ══ SUBSCRIPTION BANNER ══ -->
+        <div class="sub-banner" [ngClass]="activeSubscription.headerClass">
+          <div class="sub-banner-glow"></div>
+
+          <div class="sub-banner-left">
+            <span class="sub-banner-icon">{{ activeSubscription.planIcon }}</span>
+            <div>
+              <div class="sub-banner-name">{{ activeSubscription.planName }}</div>
+              <div class="sub-banner-ref">{{ activeSubscription.expireLabel ? 'Expire le ' + activeSubscription.expireLabel : '' }}</div>
             </div>
           </div>
 
-          <div class="sbs-sep"></div>
-          <div class="sbs-item">
-            <div class="sbs-val">{{ activeSubscription.totalRespondents }}</div>
-            <div class="sbs-lbl">Répondants</div>
-          </div>
-        </div>
+          <div class="sub-banner-stats">
+            <div class="sbs-item">
+              <div class="sbs-val">{{ activeSubscription.totalExperiences }}/{{ activeSubscription.maxSlots }}</div>
+              <div class="sbs-lbl">Expériences</div>
+            </div>
+            <div class="sbs-sep"></div>
 
-        <div class="sub-banner-badge" [ngClass]="getSubBadge(activeSubscription.status).cssClass">
-          <span class="sgb-dot"></span>
-          {{ getSubBadge(activeSubscription.status).label }}
-        </div>
-      </div>
-
-      <!-- Stat strip -->
-      <div class="stat-strip">
-        <div class="stat-card">
-          <div class="stat-ico ico-blue">🥽</div>
-          <div>
-            <div class="stat-val">{{ totalExperiences }}</div>
-            <div class="stat-lbl">Expériences total</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico ico-green">✅</div>
-          <div>
-            <div class="stat-val">{{ avgCompletionRate }}%</div>
-            <div class="stat-lbl">Taux de complétion</div>
-          </div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-ico ico-cyan">⏱</div>
-          <div>
-            <div class="stat-val">{{ globalAvgTime }}</div>
-            <div class="stat-lbl">Durée moy. session</div>
-          </div>
-        </div>
-        <div class="stat-card" [class.apk-warning]="activeSubscription.apkRestants <= 2">
-          <div class="stat-ico ico-accent">📱</div>
-          <div>
-            <div class="stat-val">{{ totalApk }}</div>
-            <div class="stat-lbl">APK téléchargés</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Controls row -->
-      <div class="controls-row">
-        <div class="filter-pills">
-          <div
-            *ngFor="let f of filters"
-            class="filter-pill"
-            [class.active]="activeFilter === f.key"
-            (click)="setFilter(f.key)"
-          >{{ f.label }}</div>
-        </div>
-        <div class="view-toggle">
-          <button class="vt-btn active">⊞</button>
-          <button class="vt-btn">☰</button>
-        </div>
-      </div>
-
-      <!-- ══ EXPERIENCE CARDS GRID ══ -->
-      <div class="exp-grid">
-
-        <ng-container *ngFor="let exp of filteredExperiencesFlat()">
-
-          <!-- Empty slot -->
-          <div *ngIf="exp.isEmpty" class="exp-card exp-card-empty">
-            <div class="exp-card-empty-icon">＋</div>
-            <div class="exp-card-empty-text">Nouvelle expérience</div>
-          </div>
-
-          <!-- Experience card -->
-          <div *ngIf="!exp.isEmpty" class="exp-card" [attr.data-status]="exp.status">
-
-            <!-- ── Thumbnail ── -->
-            <div class="exp-card-thumb">
-              <div class="vr-thumb" [ngClass]="exp.thumbClass">{{ exp.emoji }}</div>
-
-              <!-- Badge APK installé -->
-              <div *ngIf="exp.apkInstalled" class="apk-installed-badge">
-                ✅ APK installé
+            <!-- APK avec barre de progression intégrée -->
+            <div class="sbs-item sbs-apk-item">
+              <div class="sbs-val">
+                {{ activeSubscription.apkRestants }}<span style="font-size:11px;opacity:.5">/{{ activeSubscription.apkTotal }}</span>
               </div>
-
-              <span class="exp-status-tag" [ngClass]="getStatusTag(exp.status).cssClass">
-                {{ getStatusTag(exp.status).label }}
-              </span>
-              <span class="compat-tag">🥽 {{ exp.compatibility }}</span>
-
-              <!-- Hover overlay -->
-              <div class="exp-card-thumb-overlay">
-                <!-- Bouton VR : actif uniquement si APK installé -->
-                <button
-                  class="quick-action"
-                  [class.qa-locked]="!exp.apkInstalled"
-                  [title]="exp.apkInstalled ? 'Tester sur casque' : 'Installez l\'APK d\'abord'"
-                  (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp); $event.stopPropagation()"
-                >{{ exp.apkInstalled ? '🥽' : '🔒' }}</button>
-
-                <button
-                  class="quick-action"
-                  title="Télécharger APK"
-                  (click)="openAPKModal(exp); $event.stopPropagation()"
-                >📱</button>
+              <div class="sbs-lbl">APK restants</div>
+              <div class="apk-mini-bar">
+                <div
+                  class="apk-mini-fill"
+                  [style.width.%]="apkBarWidth()"
+                  [style.background]="apkBarColor()"
+                ></div>
               </div>
             </div>
 
-            <!-- ── Card body ── -->
-            <div class="exp-card-body">
-              <div class="exp-title">{{ exp.title }}</div>
-              <div class="exp-desc">{{ exp.description }}</div>
-
-              <div class="exp-stats-row">
-                <div class="exp-stat-item">👥 <strong>{{ exp.respondents }}</strong> réponses</div>
-                <div class="exp-stat-item">⏱ <strong>{{ exp.avgTime }}</strong> moy.</div>
-                <div class="exp-stat-item" *ngIf="exp.rating">⭐ <strong>{{ exp.rating }}</strong></div>
-                <div class="exp-stat-item warn" *ngIf="!exp.rating">⚠ Brouillon</div>
-              </div>
-            </div>
-
-            <!-- ── Action buttons ── -->
-            <div class="exp-actions-always">
-
-              <!-- Bouton VR : débloqué si APK installé -->
-              <button
-                class="exp-btn"
-                [ngClass]="exp.apkInstalled ? 'ebtn-vr' : 'ebtn-vr-locked'"
-                (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp)"
-              >
-                {{ exp.apkInstalled ? '🥽 Tester VR' : '🔒 APK requis' }}
-              </button>
-
-              <!-- Bouton APK : change selon état -->
-              <button
-                class="exp-btn"
-                [ngClass]="exp.apkInstalled ? 'ebtn-apk-done' : 'ebtn-apk'"
-                (click)="openAPKModal(exp)"
-              >
-                {{ exp.apkInstalled ? '✅ APK installé' : '📱 APK' }}
-              </button>
-
-              <button
-                class="exp-btn ebtn-stats"
-                [class.disabled]="exp.respondents === 0"
-                [disabled]="exp.respondents === 0"
-              >📊 Voir les résultats</button>
-
+            <div class="sbs-sep"></div>
+            <div class="sbs-item">
+              <div class="sbs-val">{{ activeSubscription.totalRespondents }}</div>
+              <div class="sbs-lbl">Répondants</div>
             </div>
           </div>
 
-        </ng-container>
-      </div>
+          <div class="sub-banner-badge" [ngClass]="getSubBadge(activeSubscription.status).cssClass">
+            <span class="sgb-dot"></span>
+            {{ getSubBadge(activeSubscription.status).label }}
+          </div>
+        </div>
 
+        <!-- Stat strip -->
+        <div class="stat-strip">
+          <div class="stat-card">
+            <div class="stat-ico ico-blue">🥽</div>
+            <div>
+              <div class="stat-val">{{ totalExperiences }}</div>
+              <div class="stat-lbl">Expériences total</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-ico ico-green">✅</div>
+            <div>
+              <div class="stat-val">{{ avgCompletionRate }}%</div>
+              <div class="stat-lbl">Taux de complétion</div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-ico ico-cyan">⏱</div>
+            <div>
+              <div class="stat-val">{{ globalAvgTime }}</div>
+              <div class="stat-lbl">Durée moy. session</div>
+            </div>
+          </div>
+          <div class="stat-card" [class.apk-warning]="activeSubscription.apkRestants <= 2">
+            <div class="stat-ico ico-accent">📱</div>
+            <div>
+              <div class="stat-val">{{ totalApk }}</div>
+              <div class="stat-lbl">APK téléchargés</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="controls-row">
+          <div class="filter-pills">
+            <div
+              *ngFor="let f of filters"
+              class="filter-pill"
+              [class.active]="activeFilter === f.key"
+              (click)="setFilter(f.key)"
+            >{{ f.label }}</div>
+          </div>
+          <div class="view-toggle">
+            <button class="vt-btn active">⊞</button>
+            <button class="vt-btn">☰</button>
+          </div>
+        </div>
+
+        <!-- ══ EXPERIENCE CARDS GRID ══ -->
+        <div class="exp-grid">
+
+          <ng-container *ngFor="let exp of filteredExperiencesFlat()">
+
+            <!-- Empty slot -->
+            <div *ngIf="exp.isEmpty" class="exp-card exp-card-empty">
+              <div class="exp-card-empty-icon">＋</div>
+              <div class="exp-card-empty-text">Nouvelle expérience</div>
+            </div>
+
+            <!-- Experience card -->
+            <div *ngIf="!exp.isEmpty" class="exp-card" [attr.data-status]="exp.status">
+
+              <!-- ── Thumbnail ── -->
+              <div class="exp-card-thumb">
+                <div class="vr-thumb" [ngClass]="exp.thumbClass">{{ exp.emoji }}</div>
+
+                <div *ngIf="exp.apkInstalled" class="apk-installed-badge">
+                  ✅ APK installé
+                </div>
+
+                <span class="exp-status-tag" [ngClass]="getStatusTag(exp.status).cssClass">
+                  {{ getStatusTag(exp.status).label }}
+                </span>
+                <span class="compat-tag">🥽 {{ exp.compatibility }}</span>
+
+                <!-- Hover overlay -->
+                <div class="exp-card-thumb-overlay">
+                  <button
+                    class="quick-action"
+                    [class.qa-locked]="!exp.apkInstalled"
+                    [title]="exp.apkInstalled ? 'Tester sur casque' : 'Installez l\'APK d\'abord'"
+                    (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp); $event.stopPropagation()"
+                  >{{ exp.apkInstalled ? '🥽' : '🔒' }}</button>
+
+                  <button
+                    class="quick-action"
+                    title="Télécharger APK"
+                    (click)="openAPKModal(exp); $event.stopPropagation()"
+                  >📱</button>
+                </div>
+              </div>
+
+              <!-- ── Card body ── -->
+              <div class="exp-card-body">
+                <div class="exp-title">{{ exp.title }}</div>
+                <div class="exp-desc">{{ exp.description }}</div>
+
+                <div class="exp-stats-row">
+                  <div class="exp-stat-item">👥 <strong>{{ exp.respondents }}</strong> réponses</div>
+                  <div class="exp-stat-item">⏱ <strong>{{ exp.avgTime }}</strong> moy.</div>
+                  <div class="exp-stat-item" *ngIf="exp.rating">⭐ <strong>{{ exp.rating }}</strong></div>
+                  <div class="exp-stat-item warn" *ngIf="!exp.rating">⚠ Brouillon</div>
+                </div>
+              </div>
+
+              <!-- ── Action buttons ── -->
+              <!-- ── Action buttons ── -->
+<div class="exp-actions-always">
+
+  <!-- Quiz guidé -->
+  <button
+    class="exp-btn"
+    [ngClass]="exp.apkInstalled ? 'ebtn-vr' : 'ebtn-vr-locked'"
+    (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp)"
+  >
+    {{ exp.apkInstalled ? '🥽 Tester sur le casque' : '🔒 APK requis' }}
+  </button>
+
+  <!-- Examen -->
+  <button
+    class="exp-btn"
+    [ngClass]="exp.apkInstalled ? 'ebtn-apk-done' : 'ebtn-apk'"
+    (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp)"
+  >
+    {{ exp.apkInstalled ? '✅ Examen' : '🔒 APK requis' }}
+  </button>
+
+</div>
+            </div>
+
+          </ng-container>
+        </div>
+
+      </ng-container>
     </div>
   </main>
 </div>
@@ -270,7 +279,7 @@
         </div>
       </div>
 
-      <!-- Liste des versions -->
+      <!-- Liste des versions — enrichies avec les métadonnées de l'expérience sélectionnée -->
       <div class="apk-version-list">
         <div
           *ngFor="let device of apkVersions; let i = index"
@@ -281,9 +290,13 @@
           <div class="apk-device-icon">{{ device.icon }}</div>
           <div class="apk-version-info">
             <div class="apk-version-name">{{ device.name }}</div>
-            <div class="apk-version-meta">{{ device.version }} · {{ device.android }} · Dernière version</div>
+            <div class="apk-version-meta">
+              {{ selectedExp?.apkVersion || device.version }} ·
+              {{ selectedExp?.apkAndroid || device.android }} ·
+              Dernière version
+            </div>
           </div>
-          <span class="apk-version-size">{{ device.size }}</span>
+          <span class="apk-version-size">{{ selectedExp?.apkSize || device.size }}</span>
           <button
             class="apk-dl-btn"
             [class.done]="downloadStates[i] === 'done'"

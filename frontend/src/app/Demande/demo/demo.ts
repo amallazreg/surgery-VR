@@ -45,13 +45,14 @@ export class Demo implements OnInit {
       isValid: false,
       isCompleted: false
     },
-    {
+        {
       id: 3,
-      title: 'Objectif Principal',
-      subtitle: 'Quel est votre objectif prioritaire ?',
+      title: 'Parlez-nous de vos Besoins',
+      subtitle: 'Décrivez brièvement vos attentes et besoins spécifiques',
       isValid: false,
       isCompleted: false
     },
+
     {
       id: 4,
       title: 'Informations de Contact',
@@ -59,13 +60,7 @@ export class Demo implements OnInit {
       isValid: false,
       isCompleted: false
     },
-    {
-      id: 5,
-      title: 'Parlez-nous de vos Besoins',
-      subtitle: 'Décrivez brièvement vos attentes et besoins spécifiques',
-      isValid: false,
-      isCompleted: false
-    }
+
   ];
 
   // Données du formulaire
@@ -78,17 +73,16 @@ export class Demo implements OnInit {
     // Step 2
     interest: '',
     
-    // Step 3
-    objectives: [] as string[],
+ // Step 3
+    message: '',
+    consent: false,
     
     // Step 4
     institutionName: '',
     email: '',
     phone: '',
     
-    // Step 5
-    message: '',
-    consent: false
+   
   };
 
     isSubmitting: boolean = false;
@@ -192,11 +186,11 @@ export class Demo implements OnInit {
         }
         break;
 
-      case 3:
-        // Validation Step 3: Objectifs
-        if (this.formData.objectives.length === 0) {
+     case 3:
+        // Validation Step 3: Message et consentement
+        if (!this.formData.consent) {
           isValid = false;
-          errorMessage = '⚠️ Veuillez sélectionner au moins un objectif';
+          errorMessage = '⚠️ Veuillez accepter d\'être contacté pour continuer';
         }
         break;
 
@@ -217,13 +211,7 @@ export class Demo implements OnInit {
         }
         break;
 
-      case 5:
-        // Validation Step 5: Message et consentement
-        if (!this.formData.consent) {
-          isValid = false;
-          errorMessage = '⚠️ Veuillez accepter d\'être contacté pour continuer';
-        }
-        break;
+ 
     }
 
     // Afficher l'erreur si la validation échoue
@@ -255,29 +243,8 @@ export class Demo implements OnInit {
     console.log('❌ Error:', message);
   }
 
-  // Gérer le changement des checkboxes d'objectifs
-  onObjectiveChange(objectiveValue: string, event: Event): void {
-    const checkbox = event.target as HTMLInputElement;
-    
-    if (checkbox.checked) {
-      // Ajouter l'objectif s'il n'existe pas déjà
-      if (!this.formData.objectives.includes(objectiveValue)) {
-        this.formData.objectives.push(objectiveValue);
-      }
-    } else {
-      // Retirer l'objectif
-      this.formData.objectives = this.formData.objectives.filter(
-        obj => obj !== objectiveValue
-      );
-    }
-    
-    console.log('📝 Objectives updated:', this.formData.objectives);
-  }
 
-  // Vérifier si un objectif est sélectionné
-  isObjectiveSelected(objectiveValue: string): boolean {
-    return this.formData.objectives.includes(objectiveValue);
-  }
+
 
   // Mettre à jour le compteur de caractères du message
   onMessageInput(event: Event): void {
@@ -308,7 +275,6 @@ onSubmitForm() {
 
     domaineInteret: this.formData.interest,
 
-    objectifs: this.formData.objectives,
 
     nomInstitution: this.formData.institutionName,
     emailProfessionnel: this.formData.email,

@@ -17,9 +17,7 @@ const demandeDemoSchema = new mongoose.Schema({
     type: String, 
     required: true 
   },
-  objectifs: [{ 
-    type: String 
-  }],
+
   nomInstitution: { 
     type: String, 
     required: true 

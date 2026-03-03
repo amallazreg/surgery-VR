@@ -49,8 +49,7 @@
             <div class="step-label">
               {{ step.id === 1 ? 'Profil' : 
                  step.id === 2 ? 'Intérêt' : 
-                 step.id === 3 ? 'Objectif' : 
-                 step.id === 4 ? 'Contact' : 'Message' }}
+                 step.id === 3 ? 'Message' : 'Contact' }}
             </div>
           </div>
         </div>
@@ -165,76 +164,39 @@
           </div>
         </div>
 
-        <!-- Step 3: Objectifs -->
+          <!-- Step 3: Message -->
         <div class="wizard-step" [class.active]="currentStepNumber === 3" *ngIf="currentStepNumber === 3">
           <div class="step-header">
             <h2>{{ currentStep.title }}</h2>
             <p>{{ currentStep.subtitle }}</p>
           </div>
 
-          <div class="checkbox-group">
-            <label class="checkbox-card">
-              <input 
-                type="checkbox" 
-                value="reduire-erreurs"
-                [checked]="isObjectiveSelected('reduire-erreurs')"
-                (change)="onObjectiveChange('reduire-erreurs', $event)">
-              <div class="checkbox-content">
-                <div class="checkbox-icon">⚠️</div>
-                <div class="checkbox-text">
-                  <h3>Réduire les Erreurs Médicales</h3>
-                  <p>Améliorer la sécurité des patients par la pratique</p>
-                </div>
-              </div>
-            </label>
+          <div class="form-group">
+            <label for="message">Votre message détaillé</label>
+            <textarea 
+              id="message"
+              [(ngModel)]="formData.message"
+              name="message"
+              rows="6"
+              [maxlength]="maxMessageLength"
+              (input)="onMessageInput($event)"
+              placeholder="Décrivez vos besoins spécifiques, le nombre d'utilisateurs prévus, vos contraintes particulières..."></textarea>
+            <div class="char-count">
+              <span>{{ messageCharCount }}</span> / {{ maxMessageLength }} caractères
+            </div>
+          </div>
 
-            <label class="checkbox-card">
+          <div class="consent-group">
+            <label class="consent-checkbox">
               <input 
-                type="checkbox" 
-                value="formation-pratique"
-                [checked]="isObjectiveSelected('formation-pratique')"
-                (change)="onObjectiveChange('formation-pratique', $event)">
-              <div class="checkbox-content">
-                <div class="checkbox-icon">💪</div>
-                <div class="checkbox-text">
-                  <h3>Améliorer la Formation Pratique</h3>
-                  <p>Offrir plus d'opportunités de pratique réaliste</p>
-                </div>
-              </div>
-            </label>
-
-            <label class="checkbox-card">
-              <input 
-                type="checkbox" 
-                value="gestion-stress"
-                [checked]="isObjectiveSelected('gestion-stress')"
-                (change)="onObjectiveChange('gestion-stress', $event)">
-              <div class="checkbox-content">
-                <div class="checkbox-icon">🎯</div>
-                <div class="checkbox-text">
-                  <h3>Gérer le Stress et Situations Critiques</h3>
-                  <p>Préparer aux situations d'urgence haute pression</p>
-                </div>
-              </div>
-            </label>
-
-            <label class="checkbox-card">
-              <input 
-                type="checkbox" 
-                value="standardiser-formation"
-                [checked]="isObjectiveSelected('standardiser-formation')"
-                (change)="onObjectiveChange('standardiser-formation', $event)">
-              <div class="checkbox-content">
-                <div class="checkbox-icon">📊</div>
-                <div class="checkbox-text">
-                  <h3>Standardiser la Formation</h3>
-                  <p>Assurer une formation homogène et mesurable</p>
-                </div>
-              </div>
+                type="checkbox"
+                [(ngModel)]="formData.consent"
+                name="consent">
+              <span>J'accepte d'être contacté par SurgeryVR Solutions concernant cette demande de démo *</span>
             </label>
           </div>
         </div>
-
+      
         <!-- Step 4: Contact -->
         <div class="wizard-step" [class.active]="currentStepNumber === 4" *ngIf="currentStepNumber === 4">
           <div class="step-header">
@@ -273,38 +235,7 @@
           </div>
         </div>
 
-        <!-- Step 5: Message -->
-        <div class="wizard-step" [class.active]="currentStepNumber === 5" *ngIf="currentStepNumber === 5">
-          <div class="step-header">
-            <h2>{{ currentStep.title }}</h2>
-            <p>{{ currentStep.subtitle }}</p>
-          </div>
-
-          <div class="form-group">
-            <label for="message">Votre message (optionnel)</label>
-            <textarea 
-              id="message"
-              [(ngModel)]="formData.message"
-              name="message"
-              rows="6"
-              [maxlength]="maxMessageLength"
-              (input)="onMessageInput($event)"
-              placeholder="Décrivez vos besoins spécifiques, le nombre d'utilisateurs prévus, vos contraintes particulières..."></textarea>
-            <div class="char-count">
-              <span>{{ messageCharCount }}</span> / {{ maxMessageLength }} caractères
-            </div>
-          </div>
-
-          <div class="consent-group">
-            <label class="consent-checkbox">
-              <input 
-                type="checkbox"
-                [(ngModel)]="formData.consent"
-                name="consent">
-              <span>J'accepte d'être contacté par SurgeryVR Solutions concernant cette demande de démo *</span>
-            </label>
-          </div>
-        </div>
+      
 
         <!-- Navigation Buttons -->
         <div class="wizard-navigation">

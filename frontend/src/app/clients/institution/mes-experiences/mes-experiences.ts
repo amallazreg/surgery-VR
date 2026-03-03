@@ -1,18 +1,20 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule }       from '@angular/common';
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { SideBar } from "../side-bar/side-bar";
-import { AbonnementService } from '../../../services/abonnement-service';
+import { FormsModule }         from '@angular/forms';
+import { SideBar }             from '../side-bar/side-bar';
+import { ExperienceBackend, Experiences } from '../../../services/experiences';
 
-export type ExpStatus = 'live' | 'draft' | 'paused' | 'new';
-export type SubStatus = 'active' | 'expiring' | 'expired';
+export type ExpStatus  = 'live' | 'draft' | 'paused' | 'new';
+export type SubStatus  = 'active' | 'expiring' | 'expired';
+
 export type ApkDevice = {
   icon: string; name: string; version: string;
   android: string; size: string; recommended?: boolean;
 };
 
+// ── Interface UI (ce que le template consomme) ────────────
 export interface Experience {
-  id: number;
+  id: string;          // _id MongoDB (string)
   title: string;
   description: string;
   emoji: string;
@@ -23,7 +25,13 @@ export interface Experience {
   avgTime: string;
   rating: number | null;
   isEmpty?: boolean;
-  apkInstalled?: boolean; // ← NOUVEAU : APK téléchargé pour cette expérience
+  apkInstalled: boolean;
+  // données brutes Cloudinary utiles pour le DL
+  apkUrl?: string;
+  apkOriginalName?: string;
+  apkAndroid?: string;
+  apkVersion?: string;
+  apkSize?: string;
 }
 
 export interface SubscriptionGroup {
@@ -36,27 +44,29 @@ export interface SubscriptionGroup {
   status: SubStatus;
   totalExperiences: number;
   totalRespondents: number;
-  apkUsed: number;       // ← nombre d'APK téléchargés
-  apkRestants: number;   // ← quota restant (depuis backend)
-  apkTotal: number;      // ← quota total du forfait
+  apkUsed: number;
+  apkRestants: number;
+  apkTotal: number;
   maxSlots: number;
   experiences: Experience[];
 }
 
 @Component({
-  selector: 'app-mes-experiences',
-  standalone: true,
-  imports: [CommonModule, FormsModule, SideBar],
+  selector:    'app-mes-experiences',
+  standalone:  true,
+  imports:     [CommonModule, FormsModule, SideBar],
   templateUrl: './mes-experiences.html',
-  styleUrl: './mes-experiences.css',
+  styleUrl:    './mes-experiences.css',
 })
 export class MesExperiences implements OnInit {
 
+
   userId = localStorage.getItem('userId') || '';
 
-  searchQuery  = '';
-  activeFilter = 'all';
-  isLoadingDroits = true;
+  searchQuery   = '';
+  activeFilter  = 'all';
+  isLoading     = true;
+  errorMessage  = '';
 
   filters = [
     { key: 'all',    label: 'Toutes' },
@@ -65,68 +75,23 @@ export class MesExperiences implements OnInit {
     { key: 'paused', label: '⏸ Pausées' },
   ];
 
-  // ── Abonnement actif ─────────────────────────────────────
+  // ── Groupe abonnement (1 seul actif) ─────────────────────
   subscriptionGroups: SubscriptionGroup[] = [
     {
-      key: 'pro',
-      planName: 'Chargement...',
-      planIcon: '⏳',
-      ref: '',
-      expireLabel: '',
-      headerClass: 'sgh-pro',
-      status: 'active',
+      key:              'active',
+      planName:         'Chargement...',
+      planIcon:         '⏳',
+      ref:              '',
+      expireLabel:      '',
+      headerClass:      'sgh-pro',
+      status:           'active',
       totalExperiences: 0,
-      totalRespondents: 987,
-      apkUsed: 0,
-      apkRestants: 0,
-      apkTotal: 0,
-      maxSlots: 6,
-      experiences: [
-        {
-          id: 1,
-          title: 'Satisfaction Magasin — Tunis Centre',
-          description: 'Parcours client immersif dans un environnement de magasin 3D pour mesurer la satisfaction en rayon.',
-          emoji: '🛍️', thumbClass: 'vrt-1', status: 'live',
-          compatibility: 'Quest 2 & 3', respondents: 342, avgTime: '4:32', rating: 4.7,
-          apkInstalled: false,
-        },
-        {
-          id: 2,
-          title: 'Parcours Magasin — Sfax Point de Vente',
-          description: 'Navigation guidée dans la boutique VR pour évaluer la signalétique et le placement des produits.',
-          emoji: '🗺️', thumbClass: 'vrt-2', status: 'live',
-          compatibility: 'Quest 3', respondents: 218, avgTime: '6:15', rating: 4.5,
-          apkInstalled: false,
-        },
-        {
-          id: 3,
-          title: 'Test Produit — Campagne Ramadan 2026',
-          description: 'Évaluation des préférences produits dans un décor thématique Ramadan avec choix interactifs en VR.',
-          emoji: '🌙', thumbClass: 'vrt-3', status: 'new',
-          compatibility: 'Quest 2 & 3', respondents: 47, avgTime: '3:48', rating: 4.9,
-          apkInstalled: false,
-        },
-        {
-          id: 4,
-          title: 'Nouveau Concept Store — Avis Clients',
-          description: 'Visite virtuelle d\'un concept store avant inauguration pour recueillir les avis sur l\'agencement.',
-          emoji: '🏪', thumbClass: 'vrt-4', status: 'paused',
-          compatibility: 'Quest 2', respondents: 95, avgTime: '5:02', rating: 4.2,
-          apkInstalled: false,
-        },
-        {
-          id: 5,
-          title: 'Test Packaging — Nouvelle Gamme Bio',
-          description: 'Comparaison de designs packaging en environnement rayon 3D avant lancement commercial.',
-          emoji: '📦', thumbClass: 'vrt-5', status: 'draft',
-          compatibility: 'Quest 3', respondents: 0, avgTime: '—', rating: null,
-          apkInstalled: false,
-        },
-        {
-          id: 6, title: '', description: '', emoji: '', thumbClass: '', status: 'draft',
-          compatibility: '', respondents: 0, avgTime: '', rating: null, isEmpty: true,
-        },
-      ],
+      totalRespondents: 0,
+      apkUsed:          0,
+      apkRestants:      0,
+      apkTotal:         0,
+      maxSlots:         6,
+      experiences:      [],
     },
   ];
 
@@ -140,9 +105,13 @@ export class MesExperiences implements OnInit {
   }
 
   get avgCompletionRate(): number {
-    const exps = this.activeSubscription.experiences.filter(e => !e.isEmpty && e.respondents > 0);
+    const exps = this.activeSubscription.experiences.filter(
+      e => !e.isEmpty && e.respondents > 0
+    );
     if (!exps.length) return 0;
-    const avg = exps.reduce((s, e) => s + (e.rating ? 75 + (e.rating / 5) * 25 : 75), 0) / exps.length;
+    const avg = exps.reduce(
+      (s, e) => s + (e.rating ? 75 + (e.rating / 5) * 25 : 75), 0
+    ) / exps.length;
     return Math.round(avg);
   }
 
@@ -152,8 +121,8 @@ export class MesExperiences implements OnInit {
     );
     if (!exps.length) return '—';
     const totalSecs = exps.reduce((s, e) => {
-      const [m, sec] = e.avgTime.split(':').map(Number);
-      return s + m * 60 + sec;
+      const parts = e.avgTime.split(':').map(Number);
+      return s + parts[0] * 60 + (parts[1] || 0);
     }, 0);
     const avg = Math.round(totalSecs / exps.length);
     return `${Math.floor(avg / 60)}:${String(avg % 60).padStart(2, '0')}`;
@@ -163,60 +132,108 @@ export class MesExperiences implements OnInit {
     return this.activeSubscription.apkUsed;
   }
 
-  // ── APK versions ─────────────────────────────────────────
+  // ── APK devices (statique — liste des casques supportés) ─
   apkVersions: ApkDevice[] = [
     { icon: '🥽', name: 'Meta Quest 2 & 3', version: 'v2.4.1', android: 'Android 11+', size: '124 Mo', recommended: true },
-    { icon: '🥽', name: 'Meta Quest Pro',    version: 'v2.4.1', android: 'Android 12+', size: '138 Mo' },
-    { icon: '📱', name: 'Pico 4 / Neo 3',   version: 'v2.3.0', android: 'Android 10+', size: '119 Mo' },
+    { icon: '🥽', name: 'Meta Quest Pro',   version: 'v2.4.1', android: 'Android 12+', size: '138 Mo' },
+    { icon: '📱', name: 'Pico 4 / Neo 3',  version: 'v2.3.0', android: 'Android 10+', size: '119 Mo' },
   ];
 
-  downloadStates: Record<number, 'idle' | 'loading' | 'done'> = { 0: 'idle', 1: 'idle', 2: 'idle' };
+  downloadStates: Record<number, 'idle' | 'loading' | 'done'> = {
+    0: 'idle', 1: 'idle', 2: 'idle',
+  };
 
-  // APK en cours de téléchargement pour quelle expérience
-  currentApkExpId: number | null = null;
-
-  // Message de quota APK
   apkQuotaMessage = '';
   apkQuotaError   = false;
 
   constructor(
-    private abonnementService: AbonnementService,
-    private cdr: ChangeDetectorRef
+    private experienceService: Experiences,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
-    this.loadDroits();
+    this.loadMesExperiences();
   }
 
   // ════════════════════════════════════════════════════════
-  // CHARGER LES DROITS DEPUIS LE BACKEND
+  // CHARGER LES EXPÉRIENCES + ABONNEMENT DEPUIS LE BACKEND
   // ════════════════════════════════════════════════════════
-  loadDroits(): void {
-    this.isLoadingDroits = true;
-    this.abonnementService.getMesDroits(this.userId).subscribe({
-      next: (droits) => {
+  loadMesExperiences(): void {
+    this.isLoading    = true;
+    this.errorMessage = '';
+
+    this.experienceService.getMesExperiences(this.userId).subscribe({
+      next: (data) => {
         const sub = this.subscriptionGroups[0];
 
-        // Mise à jour des infos forfait
-        sub.planName    = `Forfait ${droits.forfait}`;
-        sub.planIcon    = this.getPlanIcon(droits.forfait);
-        sub.headerClass = this.getPlanHeaderClass(droits.forfait);
-        sub.apkRestants = droits.apkRestants;
-        sub.apkTotal    = droits.apkTotal;
-        sub.apkUsed     = droits.apkTotal - droits.apkRestants;
+        // ── Abonnement ──
+        sub.planName    = `Forfait ${data.abonnement.forfaitName}`;
+        sub.planIcon    = this.getPlanIcon(data.abonnement.forfaitName);
+        sub.headerClass = this.getPlanHeaderClass(data.abonnement.forfaitName);
+        sub.apkRestants = data.abonnement.apkRestants;
+        sub.apkTotal    = data.abonnement.apkTotal;
+        sub.apkUsed     = data.abonnement.apkTotal - data.abonnement.apkRestants;
+        sub.expireLabel = data.abonnement.dateFin
+          ? new Date(data.abonnement.dateFin).toLocaleDateString('fr-FR')
+          : '';
 
-        // Limiter les slots au forfait
-        sub.maxSlots = droits.apkTotal;
+        // ── Expériences — mapping backend → UI ──
+        const mapped: Experience[] = data.experiences.map(
+          (e: ExperienceBackend) => this.mapBackendExp(e)
+        );
 
-        this.isLoadingDroits = false;
+        // Slot vide si moins de maxSlots
+        if (mapped.length < sub.maxSlots) {
+          mapped.push(this.emptySlot());
+        }
+
+        sub.experiences      = mapped;
+        sub.totalExperiences = data.experiences.length;
+
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
-      error: () => {
-        this.isLoadingDroits = false;
-      }
+      error: (err) => {
+        this.errorMessage = err.error?.message || 'Impossible de charger vos expériences.';
+        this.isLoading    = false;
+        this.cdr.detectChanges();
+      },
     });
   }
 
+  // ── Mapper un ExperienceBackend vers l'interface UI ──────
+  private mapBackendExp(e: ExperienceBackend): Experience {
+    return {
+      id:             e._id,
+      title:          e.title,
+      description:    e.description || '',
+      emoji:          e.emoji       || '🥽',
+      thumbClass:     e.thumbClass  || 'vrt-1',
+      status:         e.status      || 'new',
+      compatibility:  e.compatibility || 'Quest 2 & 3',
+      respondents:    e.respondents ?? 0,
+      avgTime:        e.avgTime     || '—',
+      rating:         e.rating      ?? null,
+      apkInstalled:   e.apkInstalled,
+      apkUrl:         e.apkUrl,
+      apkOriginalName: e.apkOriginalName,
+      apkAndroid:     e.apkAndroid,
+      apkVersion:     e.apkVersion,
+      apkSize:        e.apkSize,
+    };
+  }
+
+  private emptySlot(): Experience {
+    return {
+      id: '', title: '', description: '', emoji: '', thumbClass: '',
+      status: 'draft', compatibility: '', respondents: 0,
+      avgTime: '', rating: null, isEmpty: true, apkInstalled: false,
+    };
+  }
+
+  // ════════════════════════════════════════════════════════
+  // HELPERS UI
+  // ════════════════════════════════════════════════════════
   getPlanIcon(name: string): string {
     switch (name?.toLowerCase()) {
       case 'standard': return '🌱';
@@ -235,40 +252,25 @@ export class MesExperiences implements OnInit {
     }
   }
 
-  // ════════════════════════════════════════════════════════
-  // HELPERS
-  // ════════════════════════════════════════════════════════
   getStatusTag(status: ExpStatus): { label: string; cssClass: string } {
     const map: Record<ExpStatus, { label: string; cssClass: string }> = {
-      live:   { label: '● LIVE',       cssClass: 'est-live' },
-      new:    { label: '✦ NOUVEAU',    cssClass: 'est-new' },
-      paused: { label: '⏸ PAUSÉE',    cssClass: 'est-paused' },
-      draft:  { label: '✏️ BROUILLON', cssClass: 'est-draft' },
+      live:   { label: '● LIVE',        cssClass: 'est-live'   },
+      new:    { label: '✦ NOUVEAU',     cssClass: 'est-new'    },
+      paused: { label: '⏸ PAUSÉE',     cssClass: 'est-paused' },
+      draft:  { label: '✏️ BROUILLON',  cssClass: 'est-draft'  },
     };
     return map[status];
-  }
-
-  isActionable(exp: Experience): boolean {
-    // On peut lancer sur le casque uniquement si l'APK est installé
-    return exp.apkInstalled === true;
   }
 
   getSubBadge(status: SubStatus): { label: string; cssClass: string } {
     const map: Record<SubStatus, { label: string; cssClass: string }> = {
-      active:   { label: 'Actif',          cssClass: 'sgb-active' },
+      active:   { label: 'Actif',          cssClass: 'sgb-active'   },
       expiring: { label: 'Expire bientôt', cssClass: 'sgb-expiring' },
-      expired:  { label: 'Expiré',         cssClass: 'sgb-expired' },
+      expired:  { label: 'Expiré',         cssClass: 'sgb-expired'  },
     };
     return map[status];
   }
 
-  // Texte APK button selon état
-  getApkBtnLabel(exp: Experience): string {
-    if (exp.apkInstalled) return '✅ APK Installé';
-    return '📱 APK';
-  }
-
-  // Barre de progression APK
   apkBarWidth(): number {
     const sub = this.activeSubscription;
     if (!sub.apkTotal) return 0;
@@ -295,7 +297,7 @@ export class MesExperiences implements OnInit {
   setFilter(key: string): void { this.activeFilter = key; }
 
   // ════════════════════════════════════════════════════════
-  // MODAL APK — avec appel backend
+  // MODAL APK — appel downloadExperienceApk
   // ════════════════════════════════════════════════════════
   isApkModalOpen    = false;
   selectedExpForApk = '';
@@ -317,22 +319,18 @@ export class MesExperiences implements OnInit {
   }
 
   onApkOverlayClick(e: MouseEvent): void {
-    if ((e.target as HTMLElement).classList.contains('apk-overlay')) this.closeAPKModal();
+    if ((e.target as HTMLElement).classList.contains('apk-overlay')) {
+      this.closeAPKModal();
+    }
   }
 
-  // ─── Télécharger APK : appel backend + mise à jour UI ───
+  // ─── Téléchargement APK via backend ──────────────────────
   downloadApk(index: number): void {
-    // Si déjà installé, pas besoin de redécrementer le quota
-    if (this.selectedExp?.apkInstalled) {
-      this.downloadStates[index] = 'loading';
-      setTimeout(() => {
-        this.downloadStates[index] = 'done';
-      }, 1000);
-      return;
-    }
+    if (!this.selectedExp) return;
 
-    // Vérifier quota local avant d'appeler le serveur
-    if (this.activeSubscription.apkRestants <= 0) {
+    // Si déjà installé → re-télécharger sans décrémentation (backend gère ça)
+    // On appelle quand même le backend pour obtenir l'URL signée / Cloudinary URL
+    if (this.activeSubscription.apkRestants <= 0 && !this.selectedExp.apkInstalled) {
       this.apkQuotaMessage = `Quota APK épuisé (${this.activeSubscription.apkTotal} APK/mois). Renouvelez votre abonnement.`;
       this.apkQuotaError   = true;
       return;
@@ -342,47 +340,60 @@ export class MesExperiences implements OnInit {
     this.apkQuotaMessage       = '';
     this.apkQuotaError         = false;
 
-    // Appel backend — décrémente apkRestants
-    this.abonnementService.telechargerApk(this.userId).subscribe({
-      next: (res) => {
-        this.downloadStates[index] = 'done';
+    this.experienceService
+      .downloadExperienceApk(this.userId, this.selectedExp.id)
+      .subscribe({
+        next: (res) => {
+          this.downloadStates[index] = 'done';
 
-        // ─── Mise à jour du compteur ───
-        this.activeSubscription.apkRestants = res.apkRestants;
-        this.activeSubscription.apkUsed     = res.apkTotal - res.apkRestants;
+          // ── Mettre à jour le compteur global ──
+          this.activeSubscription.apkRestants = res.apkRestants;
+          this.activeSubscription.apkUsed =
+            this.activeSubscription.apkTotal - res.apkRestants;
 
-        // ─── Marquer l'expérience comme "APK installé" ───
-        if (this.selectedExp) {
+          // ── Marquer l'expérience comme installée dans la liste ──
           const exp = this.activeSubscription.experiences.find(
             e => e.id === this.selectedExp!.id
           );
           if (exp) {
             exp.apkInstalled = true;
-            // Si l'expérience était en draft, elle passe en "new" (prête à tester)
-            if (exp.status === 'draft') {
-              exp.status = 'new';
-            }
+            if (exp.status === 'draft') exp.status = 'new';
           }
-        }
 
-        this.apkQuotaMessage = `✅ APK installé ! ${res.apkRestants} téléchargements restants ce mois.`;
-        this.apkQuotaError   = false;
+          // ── Déclencher le téléchargement réel via <a> ──
+          this.triggerDownload(res.downloadUrl, res.fileName);
 
-        this.cdr.detectChanges();
+          this.apkQuotaMessage = res.dejaInstalle
+            ? `✅ Re-téléchargement OK — quota non décompté.`
+            : `✅ APK téléchargé ! ${res.apkRestants} restants ce mois.`;
+          this.apkQuotaError = false;
 
-        // Ferme la modal après 2 secondes
-        setTimeout(() => {
-          this.closeAPKModal();
+          this.cdr.detectChanges();
+
+          setTimeout(() => {
+            this.closeAPKModal();
+            this.downloadStates[index] = 'idle';
+          }, 2200);
+        },
+        error: (err) => {
           this.downloadStates[index] = 'idle';
-        }, 2000);
-      },
-      error: (err) => {
-        this.downloadStates[index] = 'idle';
-        this.apkQuotaMessage       = err.error?.message || 'Quota APK épuisé.';
-        this.apkQuotaError         = true;
-        this.cdr.detectChanges();
-      }
-    });
+          this.apkQuotaMessage       = err.error?.message || 'Erreur lors du téléchargement.';
+          this.apkQuotaError         = true;
+          this.cdr.detectChanges();
+        },
+      });
+  }
+
+  // ── Déclencher le téléchargement via un lien invisible ───
+  private triggerDownload(url: string, fileName: string): void {
+    const a       = document.createElement('a');
+    a.href        = url;
+    a.download    = fileName;
+    a.target      = '_blank';
+    a.rel         = 'noopener noreferrer';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
   }
 
   getDownloadIcon(index: number): string {
@@ -400,7 +411,7 @@ export class MesExperiences implements OnInit {
   vrLaunchState: 'idle' | 'loading' | 'done' = 'idle';
 
   openVRModal(exp: Experience): void {
-    if (!exp.apkInstalled) return; // bloquer si APK pas installé
+    if (!exp.apkInstalled) return;
     this.selectedExpForVr = exp.title;
     this.vrLaunchState    = 'idle';
     this.isVrModalOpen    = true;
@@ -414,16 +425,27 @@ export class MesExperiences implements OnInit {
   }
 
   onVrOverlayClick(e: MouseEvent): void {
-    if ((e.target as HTMLElement).classList.contains('vr-overlay')) this.closeVRModal();
+    if ((e.target as HTMLElement).classList.contains('vr-overlay')) {
+      this.closeVRModal();
+    }
   }
 
-  launchOnHeadset(): void {
-    this.vrLaunchState = 'loading';
-    setTimeout(() => {
-      this.vrLaunchState = 'done';
-      setTimeout(() => { this.vrLaunchState = 'idle'; }, 3500);
-    }, 1800);
-  }
+launchOnHeadset(): void {
+  this.vrLaunchState = 'loading';
+  
+  // Ajouter le player vidéo dynamiquement
+  const video = document.createElement('video');
+  video.src = "https://drive.usercontent.google.com/download?id=16-bfkSGrf72_qOmySsV2HqS0uB63zwd7&export=download&authuser=0&confirm=t&uuid=b5254f66-90ff-4014-b20a-c104db6a2d02&at=APcXIO3eQWnGb8s3eHjpUvasZuFg:1772456231162";
+  video.controls = true;
+  video.autoplay = true;
+  video.style.width = '100%';
+  document.body.appendChild(video);
+
+  this.vrLaunchState = 'done';
+  setTimeout(() => { 
+    this.vrLaunchState = 'idle'; 
+  }, 3500);
+}
 
   get vrLaunchLabel(): string {
     if (this.vrLaunchState === 'loading') return '⏳ Envoi vers le casque...';
