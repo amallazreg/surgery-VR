@@ -1,0 +1,425 @@
+<div class="admin-layout">
+    <app-side-bar></app-side-bar>
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="header-back">
+          <span class="back-icon">🥽</span>
+          <div>
+            <h2>Bibliothèque d'Expériences</h2>
+            <p>Gérez les modules VR et leurs fichiers APK</p>
+          </div>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="openModal()">
+          ➕ Nouvelle expérience
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card" style="animation-delay:0.1s">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-1">🥽</div>
+          <div class="stat-change positive">↗ Total</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ getTotalExperiences() }}</div>
+          <div class="stat-label">Expériences VR</div>
+        </div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.2s">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-2">⭐</div>
+          <div class="stat-change positive">Moy.</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ getAvgRating() }}</div>
+          <div class="stat-label">Note moyenne</div>
+        </div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.3s">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-3">👥</div>
+          <div class="stat-change positive">↗ Actifs</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ getTotalRespondents() }}</div>
+          <div class="stat-label">Sessions réalisées</div>
+        </div>
+      </div>
+      <div class="stat-card" style="animation-delay:0.4s">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-4">💎</div>
+          <div class="stat-change positive">Forfaits</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ forfaits.length }}</div>
+          <div class="stat-label">Forfaits liés</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters & List -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">Expériences VR</h3>
+        <div class="filters-bar">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Rechercher..."
+              [(ngModel)]="searchQuery"
+              (input)="applyFilters()"
+            />
+          </div>
+          <select class="filter-select" [(ngModel)]="selectedForfaitFilter" (change)="applyFilters()">
+            <option value="">Tous les forfaits</option>
+            <option *ngFor="let f of forfaits" [value]="f._id">{{ f.name }}</option>
+          </select>
+          <button class="btn-clear" *ngIf="searchQuery || selectedForfaitFilter" (click)="clearFilters()">
+            ✕ Effacer
+          </button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des expériences...</p>
+      </div>
+
+      <!-- Error -->
+      <div class="error-state" *ngIf="errorMessage && !isLoading">
+        <div style="font-size:2rem">⚠️</div>
+        <p>{{ errorMessage }}</p>
+        <button class="btn btn-primary" (click)="loadExperiences()">Réessayer</button>
+      </div>
+
+      <!-- Empty -->
+      <div class="empty-state" *ngIf="!isLoading && !errorMessage && filteredExperiences.length === 0">
+        <div style="font-size:3rem">🥽</div>
+        <p>Aucune expérience trouvée</p>
+        <button class="btn btn-primary" (click)="openModal()">Créer une expérience</button>
+      </div>
+
+      <!-- Grid -->
+      <div class="experiences-grid" *ngIf="!isLoading && !errorMessage && filteredExperiences.length > 0">
+        <div
+          class="exp-card"
+          *ngFor="let exp of filteredExperiences; let i = index"
+          [style.animation-delay]="(i * 0.07) + 's'"
+        >
+          <!-- Card Top -->
+          <div class="exp-card-top" [class]="'thumb-' + exp.thumbClass">
+            <div class="exp-emoji">{{ exp.emoji }}</div>
+            <div class="exp-version-badge">{{ exp.apkVersion }}</div>
+            <div class="exp-actions-overlay">
+              <button class="action-btn btn-view" data-tooltip="Détails" (click)="viewExperience(exp)">👁️</button>
+              <button class="action-btn btn-delete" data-tooltip="Supprimer" (click)="confirmDelete(exp)">🗑️</button>
+            </div>
+          </div>
+
+          <!-- Card Body -->
+          <div class="exp-card-body">
+            <div class="exp-title">{{ exp.title }}</div>
+            <div class="exp-desc">{{ exp.description || 'Aucune description' }}</div>
+
+            <div class="exp-meta">
+              <span class="meta-chip">🥽 {{ exp.compatibility }}</span>
+              <span class="meta-chip">📱 {{ exp.apkAndroid }}</span>
+            </div>
+
+            <div class="exp-forfaits" *ngIf="selectedExperience && selectedExperience.forfaits.length">
+              <span class="forfait-tag" *ngFor="let f of exp.forfaits">
+                💎 {{ f.name || getForfaitName(f) }}
+              </span>
+            </div>
+            <div class="exp-no-forfait" *ngIf="!exp.forfaits.length">
+              <span class="forfait-tag inactive">⚠️ Aucun forfait assigné</span>
+            </div>
+
+            <div class="exp-stats-row">
+              <div class="exp-stat">
+                <span class="exp-stat-icon">👥</span>
+                <span>{{ exp.respondents }} sessions</span>
+              </div>
+              <div class="exp-stat">
+                <span class="exp-stat-icon">⏱️</span>
+                <span>{{ exp.avgTime }}</span>
+              </div>
+              <div class="exp-stat" *ngIf="exp.rating">
+                <span class="exp-stat-icon">⭐</span>
+                <span>{{ exp.rating }}/5</span>
+              </div>
+            </div>
+
+            <div class="exp-apk-info" *ngIf="exp.apkOriginalName">
+              <span class="apk-icon">📦</span>
+              <span class="apk-name">{{ exp.apkOriginalName }}</span>
+              <span class="apk-size" *ngIf="exp.apkSize">{{ exp.apkSize }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results count -->
+      <div class="results-count" *ngIf="!isLoading && filteredExperiences.length > 0">
+        {{ filteredExperiences.length }} expérience{{ filteredExperiences.length > 1 ? 's' : '' }} affichée{{ filteredExperiences.length > 1 ? 's' : '' }}
+        <span *ngIf="selectedForfaitFilter"> · filtrée{{ filteredExperiences.length > 1 ? 's' : '' }} par forfait</span>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Background -->
+  <div class="bg-animated">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL CRÉATION ═══════════════ -->
+<div class="modal-overlay" *ngIf="showModal" (click)="$event.target === $event.currentTarget && closeModal()">
+  <div class="modal modal-large">
+    <div class="modal-header">
+      <h3>🥽 Nouvelle expérience VR</h3>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <form (ngSubmit)="saveExperience()" #expForm="ngForm">
+
+        <div class="modal-two-col">
+          <!-- Colonne gauche -->
+          <div class="modal-col">
+
+            <!-- Infos générales -->
+            <div class="form-section">
+              <div class="form-section-title">📋 Informations</div>
+              <div class="form-group">
+                <label>Titre *</label>
+                <input type="text" [(ngModel)]="formData.title" name="title" required placeholder="Ex: Chirurgie cardiaque pédiatrique" />
+              </div>
+              <div class="form-group">
+                <label>Description</label>
+                <textarea [(ngModel)]="formData.description" name="description" rows="3" placeholder="Décrivez le scénario de formation..."></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label>Compatibilité</label>
+                  <input type="text" [(ngModel)]="formData.compatibility" name="compatibility" placeholder="Quest 2 & 3" />
+                </div>
+                <div class="form-group">
+                  <label>Android minimum</label>
+                  <input type="text" [(ngModel)]="formData.apkAndroid" name="apkAndroid" placeholder="Android 10+" />
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label>Version APK</label>
+                  <input type="text" [(ngModel)]="formData.apkVersion" name="apkVersion" placeholder="v1.0.0" />
+                </div>
+                <div class="form-group">
+                  <label>Classe visuelle</label>
+                  <select [(ngModel)]="formData.thumbClass" name="thumbClass">
+                    <option *ngFor="let t of thumbClasses" [value]="t">{{ t }}</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Emoji picker -->
+            <div class="form-section">
+              <div class="form-section-title">🎨 Icône de l'expérience</div>
+              <div class="emoji-grid">
+                <div
+                  class="emoji-option"
+                  *ngFor="let e of emojis"
+                  [class.selected]="formData.emoji === e"
+                  (click)="formData.emoji = e"
+                >{{ e }}</div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Colonne droite -->
+          <div class="modal-col">
+
+            <!-- Upload APK -->
+            <div class="form-section">
+              <div class="form-section-title">📦 Fichier APK *</div>
+              <div
+                class="upload-zone"
+                [class.drag-over]="dragOver"
+                [class.has-file]="selectedFile"
+                (dragover)="onDragOver($event)"
+                (dragleave)="onDragLeave()"
+                (drop)="onDrop($event)"
+                (click)="fileInput.click()"
+              >
+                <input #fileInput type="file" accept=".apk" style="display:none" (change)="onFileSelect($event)" />
+                <div *ngIf="!selectedFile" class="upload-placeholder">
+                  <div class="upload-icon">📤</div>
+                  <div class="upload-text">Glissez votre APK ici</div>
+                  <div class="upload-hint">ou cliquez pour sélectionner</div>
+                  <div class="upload-formats">Format .apk uniquement</div>
+                </div>
+                <div *ngIf="selectedFile" class="upload-success">
+                  <div class="upload-icon">✅</div>
+                  <div class="upload-filename">{{ selectedFile.name }}</div>
+                  <div class="upload-filesize">{{ formatFileSize(selectedFile.size) }}</div>
+                  <div class="upload-change">Cliquer pour changer</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Forfaits -->
+            <div class="form-section">
+              <div class="form-section-title">💎 Forfaits associés</div>
+              <p class="form-hint">Sélectionnez les forfaits qui auront accès à cette expérience.</p>
+              <div class="forfaits-picker">
+                <div
+                  class="forfait-option"
+                  *ngFor="let f of forfaits"
+                  [class.selected]="isForfaitSelected(f._id)"
+                  (click)="toggleForfait(f._id)"
+                >
+                  <div class="forfait-option-check">{{ isForfaitSelected(f._id) ? '✓' : '' }}</div>
+                  <div class="forfait-option-info">
+                    <div class="forfait-option-name">{{ f.name }}</div>
+                    <div class="forfait-option-sub">{{ f.tagline || (f.price ? (f.price + ' €/mois') : 'Sur devis') }}</div>
+                  </div>
+                </div>
+                <div class="forfaits-empty" *ngIf="forfaits.length === 0">
+                  Aucun forfait disponible. Créez d'abord un forfait.
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="isSaving || !expForm.valid || !selectedFile"
+          >
+            <span *ngIf="isSaving">⏳ Upload en cours...</span>
+            <span *ngIf="!isSaving">🚀 Créer l'expérience</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL DÉTAIL ═══════════════ -->
+<div class="modal-overlay" *ngIf="showViewModal" (click)="$event.target === $event.currentTarget && closeViewModal()">
+  <div class="modal modal-view" *ngIf="selectedExperience">
+    <div class="modal-header">
+      <h3>{{ selectedExperience.emoji }} {{ selectedExperience.title }}</h3>
+      <button class="modal-close" (click)="closeViewModal()">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="view-hero" [class]="'thumb-' + selectedExperience.thumbClass">
+        <div class="view-hero-emoji">{{ selectedExperience.emoji }}</div>
+        <div class="view-hero-version">{{ selectedExperience.apkVersion }}</div>
+      </div>
+
+      <p class="view-desc">{{ selectedExperience.description || 'Aucune description.' }}</p>
+
+      <div class="view-details-grid">
+        <div class="view-detail-item">
+          <div class="view-detail-label">🥽 Compatibilité</div>
+          <div class="view-detail-value">{{ selectedExperience.compatibility }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">📱 Android min.</div>
+          <div class="view-detail-value">{{ selectedExperience.apkAndroid }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">👥 Sessions</div>
+          <div class="view-detail-value">{{ selectedExperience.respondents }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">⏱️ Temps moyen</div>
+          <div class="view-detail-value">{{ selectedExperience.avgTime }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">⭐ Note</div>
+          <div class="view-detail-value">{{ selectedExperience.rating ? (selectedExperience.rating + '/5') : '—' }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">📦 Taille APK</div>
+          <div class="view-detail-value">{{ selectedExperience.apkSize || '—' }}</div>
+        </div>
+      </div>
+
+        <div class="view-section" *ngIf="selectedExperience && selectedExperience.forfaits.length > 0">
+            <div class="view-section-title">💎 Forfaits avec accès</div>
+        <div class="forfait-tags-row">
+          <span class="forfait-tag" *ngFor="let f of selectedExperience.forfaits">
+            {{ f.name || getForfaitName(f) }}
+          </span>
+        </div>
+      </div>
+
+      <div class="view-apk-block" *ngIf="selectedExperience.apkUrl">
+        <div class="apk-block-icon">📦</div>
+        <div class="apk-block-info">
+          <div class="apk-block-name">{{ selectedExperience.apkOriginalName || 'Fichier APK' }}</div>
+          <div class="apk-block-meta">{{ selectedExperience.apkVersion }} · {{ selectedExperience.apkSize || 'Taille inconnue' }}</div>
+        </div>
+        <a [href]="selectedExperience.apkUrl" target="_blank" class="btn btn-primary" style="padding: 0.6rem 1.2rem; font-size: 0.9rem;">
+          ⬇️ Télécharger
+        </a>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
+        <button class="btn btn-danger" (click)="closeViewModal(); confirmDelete(selectedExperience!)">🗑️ Supprimer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════ MODAL SUPPRESSION ═══════════════ -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="$event.target === $event.currentTarget && closeDeleteModal()">
+  <div class="modal modal-confirm">
+    <div class="modal-header danger">
+      <h3>🗑️ Confirmer la suppression</h3>
+      <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align:center; padding: 2rem;">
+      <div style="font-size:3rem; margin-bottom: 1rem;">⚠️</div>
+      <p style="font-size:1.1rem; color:var(--text-dark); margin-bottom:0.5rem;">
+        Supprimer l'expérience <strong>{{ experienceToDelete?.title }}</strong> ?
+      </p>
+      <p style="color:var(--text-gray); font-size:0.9rem;">
+        Le fichier APK sera également supprimé de Cloudinary. Cette action est irréversible.
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteModal()">Annuler</button>
+      <button class="btn btn-danger" (click)="deleteExperience()" [disabled]="isDeleting">
+        {{ isDeleting ? '⏳ Suppression...' : '🗑️ Supprimer définitivement' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" [class.show]="toastVisible" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+  {{ toastMessage }}
+</div>

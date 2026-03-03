@@ -14,6 +14,8 @@ import { Forfaits } from './clients/institution/forfaits/forfaits';
 import { Abonnements } from './clients/institution/abonnements/abonnements';
 import { MesExperiences } from './clients/institution/mes-experiences/mes-experiences';
 import { Chatbot } from './clients/institution/chatbot/chatbot';
+import { ForfaitManagment } from './admin/forfait-managment/forfait-managment';
+import { ExperienceManagement } from './admin/experience-management/experience-management';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -28,6 +30,9 @@ export const routes: Routes = [
       { path: 'admin/clients', component : CompteClients },
       {path : 'admin/demande-demo' , component : DemandeDemo} ,
       {path : 'admin/demande-devis' , component : DemandeDevis},
+      {path : 'admin/forfaitManagement' , component : ForfaitManagment},
+      {path : 'admin/experienceManagement' , component : ExperienceManagement},
+
 
 
       {path : 'client/dashborad' , component : Dashboard},

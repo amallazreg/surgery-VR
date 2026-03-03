@@ -52,5 +52,20 @@ export class Experiences {
       {}
     );
   }
+
+  private apiUrl = 'https://surgery-vr.onrender.com/admin/experiences';
+
+
+  getAllExperiences(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}`);
+  }
+
+  createExperience(formData: FormData): Observable<any> {
+    return this.http.post(`${this.apiUrl}`, formData);
+  }
+
+  deleteExperience(id: string): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`);
+  }
   
 }

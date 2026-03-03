@@ -1,0 +1,455 @@
+<div class="admin-layout">
+    <app-side-bar></app-side-bar>
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h2>Gestion des Forfaits 💎</h2>
+        <p>Gérez les offres et abonnements de votre plateforme SurgeryVR</p>
+      </div>
+      <div class="header-right">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            placeholder="Rechercher un forfait..."
+            [(ngModel)]="searchQuery"
+            (input)="onSearch()"
+          />
+        </div>
+        <button class="btn btn-primary" (click)="openModal()">
+          ➕ Nouveau forfait
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card" style="animation-delay: 0.1s;">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-1">💎</div>
+          <div class="stat-change positive">↗ Total</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ forfaits.length }}</div>
+          <div class="stat-label">Forfaits disponibles</div>
+        </div>
+      </div>
+      <div class="stat-card" style="animation-delay: 0.2s;">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-2">🎯</div>
+          <div class="stat-change positive">↗ Actifs</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ getForfaitsAvecFormation() }}</div>
+          <div class="stat-label">Avec formation incluse</div>
+        </div>
+      </div>
+      <div class="stat-card" style="animation-delay: 0.3s;">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-3">📱</div>
+          <div class="stat-change positive">↗ APK</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ getTotalApk() }}</div>
+          <div class="stat-label">APK total distribués</div>
+        </div>
+      </div>
+      <div class="stat-card" style="animation-delay: 0.4s;">
+        <div class="stat-header">
+          <div class="stat-icon stat-icon-4">🎭</div>
+          <div class="stat-change positive">↗ Sim</div>
+        </div>
+        <div class="stat-body">
+          <div class="stat-value">{{ getForfaitsEsthetique() }}</div>
+          <div class="stat-label">Simulation esthétique</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Forfaits Cards Grid -->
+    <div class="section-card">
+      <div class="section-header">
+        <h3 class="section-title">Liste des Forfaits</h3>
+        <div class="section-header-right">
+          <button class="btn btn-experiences" (click)="goToExperiences()">
+            🎮 Toutes les expériences
+          </button>
+          <div class="view-toggle">
+            <button class="toggle-btn" [class.active]="viewMode === 'cards'" (click)="viewMode = 'cards'">⊞ Cartes</button>
+            <button class="toggle-btn" [class.active]="viewMode === 'table'" (click)="viewMode = 'table'">☰ Tableau</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des forfaits...</p>
+      </div>
+
+      <!-- Error State -->
+      <div class="error-state" *ngIf="errorMessage && !isLoading">
+        <div style="font-size: 2rem;">⚠️</div>
+        <p>{{ errorMessage }}</p>
+        <button class="btn btn-primary" (click)="loadForfaits()">Réessayer</button>
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!isLoading && !errorMessage && filteredForfaits.length === 0">
+        <div style="font-size: 3rem;">📦</div>
+        <p>Aucun forfait trouvé</p>
+        <button class="btn btn-primary" (click)="openModal()">Créer le premier forfait</button>
+      </div>
+
+      <!-- Cards View -->
+      <div class="forfaits-grid" *ngIf="!isLoading && !errorMessage && filteredForfaits.length > 0 && viewMode === 'cards'">
+        <div class="forfait-card" *ngFor="let forfait of filteredForfaits; let i = index"
+             [style.animation-delay]="(i * 0.1) + 's'">
+          <div class="forfait-card-header">
+            <div class="forfait-badge">{{ forfait.tagline || 'Offre' }}</div>
+            <div class="forfait-actions">
+              <button class="action-btn btn-view" data-tooltip="Voir" (click)="viewForfait(forfait)">👁️</button>
+              <button class="action-btn btn-edit" data-tooltip="Modifier" (click)="openModal(forfait)">✏️</button>
+              <button class="action-btn btn-delete" data-tooltip="Supprimer" (click)="confirmDelete(forfait)">🗑️</button>
+            </div>
+          </div>
+          <div class="forfait-name">{{ forfait.name }}</div>
+          <div class="forfait-desc">{{ forfait.desc || 'Aucune description' }}</div>
+          <div class="forfait-price">
+            <span class="price-main">{{ forfait.price ? (forfait.price + ' €') : 'Sur devis' }}</span>
+            <span class="price-sub" *ngIf="forfait.priceSub">{{ forfait.priceSub }}</span>
+          </div>
+          <div class="forfait-meta">
+            <div class="meta-item">
+              <span class="meta-icon">🎮</span>
+              <span>{{ forfait.nbExperiences || 0 }} expériences</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-icon">📱</span>
+              <span>{{ forfait.nbApk || 0 }} APK</span>
+            </div>
+            <div class="meta-item" *ngIf="forfait.formation.incluse">
+              <span class="meta-icon">🎓</span>
+              <span>Formation {{ forfait.formation.dureeHeures }}h</span>
+            </div>
+            <div class="meta-item" *ngIf="forfait.simulationEsthetique">
+              <span class="meta-icon">✨</span>
+              <span>Sim. esthétique</span>
+            </div>
+          </div>
+
+        
+          <div class="forfait-features" *ngIf="forfait.features && forfait.features.length > 0">
+            <div class="feature-item" *ngFor="let f of forfait.features.slice(0, 4)">
+              <span [class]="f.yes ? 'feature-yes' : 'feature-no'">{{ f.yes ? '✓' : '✗' }}</span>
+              <span>{{ f.text }}</span>
+            </div>
+            <div class="feature-more" *ngIf="forfait.features.length > 4">
+              +{{ forfait.features.length - 4 }} autres fonctionnalités
+            </div>
+          </div>
+
+            <!-- Bouton expériences du forfait -->
+          <button class="btn-experiences-link" (click)="goToExperiences(forfait._id)">
+            <span class="btn-exp-icon">🎮</span>
+            <span>Voir les expériences de ce forfait</span>
+            <span class="btn-exp-count" *ngIf="forfait.nbExperiences">{{ forfait.nbExperiences }}</span>
+            <span class="btn-exp-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Table View -->
+      <div class="table-container" *ngIf="!isLoading && !errorMessage && filteredForfaits.length > 0 && viewMode === 'table'">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom</th>
+              <th>Prix</th>
+              <th>Expériences</th>
+              <th>APK</th>
+              <th>Formation</th>
+              <th>Sim. Esthétique</th>
+              <th>Features</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let forfait of filteredForfaits">
+              <td>
+                <div style="font-weight: 600;">{{ forfait.name }}</div>
+                <div style="font-size: 0.85rem; color: var(--text-gray);">{{ forfait.tagline }}</div>
+              </td>
+              <td>
+                <div style="font-weight: 700; color: var(--primary);">{{ forfait.price ? (forfait.price + ' €') : 'Sur devis' }}</div>
+                <div style="font-size: 0.8rem; color: var(--text-gray);">{{ forfait.priceSub }}</div>
+              </td>
+              <td>{{ forfait.nbExperiences || 0 }}</td>
+              <td>{{ forfait.nbApk || 0 }}</td>
+              <td>
+                <span class="status-badge" [class]="forfait.formation.incluse ? 'status-approved' : 'status-inactive'">
+                  {{ forfait.formation.incluse ? (forfait.formation.dureeHeures + 'h') : 'Non' }}
+                </span>
+              </td>
+              <td>
+                <span class="status-badge" [class]="forfait.simulationEsthetique ? 'status-approved' : 'status-inactive'">
+                  {{ forfait.simulationEsthetique ? 'Oui' : 'Non' }}
+                </span>
+              </td>
+              <td>{{ forfait.features.length || 0 }} features</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn btn-view" data-tooltip="Voir" (click)="viewForfait(forfait)">👁️</button>
+                  <button class="action-btn btn-edit" data-tooltip="Modifier" (click)="openModal(forfait)">✏️</button>
+                  <button class="action-btn btn-delete" data-tooltip="Supprimer" (click)="confirmDelete(forfait)">🗑️</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <!-- Animated Background -->
+  <div class="bg-animated">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+</div>
+
+<!-- ==================== MODAL CREATION/EDITION ==================== -->
+<div class="modal-overlay" *ngIf="showModal" (click)="closeModalOnOverlay($event)">
+  <div class="modal" #modalRef>
+    <div class="modal-header">
+      <h3>{{ isEditing ? '✏️ Modifier le forfait' : '➕ Nouveau forfait' }}</h3>
+      <button class="modal-close" (click)="closeModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <form (ngSubmit)="saveForfait()" #forfaitForm="ngForm">
+
+        <!-- Section: Infos générales -->
+        <div class="form-section">
+          <div class="form-section-title">📋 Informations générales</div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label>Nom du forfait *</label>
+              <input type="text" [(ngModel)]="formData.name" name="name" required placeholder="ex: Starter, Pro, Enterprise..." />
+            </div>
+            <div class="form-group">
+              <label>Tagline</label>
+              <input type="text" [(ngModel)]="formData.tagline" name="tagline" placeholder="ex: Idéal pour débuter" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Description</label>
+            <textarea [(ngModel)]="formData.desc" name="desc" rows="3" placeholder="Description du forfait..."></textarea>
+          </div>
+        </div>
+
+        <!-- Section: Prix -->
+        <div class="form-section">
+          <div class="form-section-title">💰 Tarification</div>
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label>Prix mensuel (€)</label>
+              <input type="number" [(ngModel)]="formData.price" name="price" placeholder="0" min="0" />
+            </div>
+            <div class="form-group">
+              <label>Prix annuel</label>
+              <input type="text" [(ngModel)]="formData.priceYearly" name="priceYearly" placeholder="ex: 9 600 €/an" />
+            </div>
+            <div class="form-group">
+              <label>Sous-texte prix</label>
+              <input type="text" [(ngModel)]="formData.priceSub" name="priceSub" placeholder="ex: /mois HT" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Expériences & APK -->
+        <div class="form-section">
+          <div class="form-section-title">🎮 Expériences & Accès</div>
+          <div class="form-grid-3">
+            <div class="form-group">
+              <label>Description expériences</label>
+              <input type="text" [(ngModel)]="formData.experiences" name="experiences" placeholder="ex: 5 modules inclus" />
+            </div>
+            <div class="form-group">
+              <label>Nombre d'expériences</label>
+              <input type="number" [(ngModel)]="formData.nbExperiences" name="nbExperiences" placeholder="0" min="0" />
+            </div>
+            <div class="form-group">
+              <label>Nombre APK</label>
+              <input type="number" [(ngModel)]="formData.nbApk" name="nbApk" placeholder="0" min="0" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Lien APK</label>
+            <input type="text" [(ngModel)]="formData.apk" name="apk" placeholder="https://..." />
+          </div>
+        </div>
+
+        <!-- Section: Formation -->
+        <div class="form-section">
+          <div class="form-section-title">🎓 Formation</div>
+          <div class="form-toggle-row">
+            <label class="toggle-label">Formation incluse</label>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="formData.formation.incluse" name="formationIncluse" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <div class="form-grid-3" *ngIf="formData.formation.incluse">
+            <div class="form-group">
+              <label>Durée (heures)</label>
+              <input type="number" [(ngModel)]="formData.formation.dureeHeures" name="dureeHeures" placeholder="0" min="0" />
+            </div>
+            <div class="form-group">
+              <label>Max étudiants</label>
+              <input type="number" [(ngModel)]="formData.formation.maxEtudiants" name="maxEtudiants" placeholder="0" min="0" />
+            </div>
+            <div class="form-group" style="display:flex; flex-direction:column; justify-content:center;">
+              <div class="form-toggle-row" style="margin-top: 1.5rem;">
+                <label class="toggle-label">Formation détaillée</label>
+                <label class="switch">
+                  <input type="checkbox" [(ngModel)]="formData.formation.detaillee" name="formationDetaillee" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section: Options -->
+        <div class="form-section">
+          <div class="form-section-title">✨ Options</div>
+          <div class="form-toggle-row">
+            <label class="toggle-label">Simulation esthétique incluse</label>
+            <label class="switch">
+              <input type="checkbox" [(ngModel)]="formData.simulationEsthetique" name="simulationEsthetique" />
+              <span class="slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Section: Features -->
+        <div class="form-section">
+          <div class="form-section-title">
+            ⚡ Fonctionnalités
+            <button type="button" class="btn-add-feature" (click)="addFeature()">+ Ajouter</button>
+          </div>
+          <div class="features-list">
+            <div class="feature-row" *ngFor="let feature of formData.features; let i = index">
+              <input type="text" [(ngModel)]="feature.text" [name]="'feature_text_' + i" placeholder="Description de la fonctionnalité..." class="feature-input" />
+              <label class="switch small">
+                <input type="checkbox" [(ngModel)]="feature.yes" [name]="'feature_yes_' + i" />
+                <span class="slider"></span>
+              </label>
+              <span class="feature-status-label">{{ feature.yes ? '✓ Inclus' : '✗ Exclu' }}</span>
+              <button type="button" class="btn-remove-feature" (click)="removeFeature(i)">🗑️</button>
+            </div>
+          </div>
+          <p class="features-hint" *ngIf="formData.features.length === 0">Aucune fonctionnalité ajoutée. Cliquez sur "+ Ajouter" pour commencer.</p>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSaving || !forfaitForm.valid">
+            <span *ngIf="isSaving">⏳ Enregistrement...</span>
+            <span *ngIf="!isSaving">{{ isEditing ? '💾 Mettre à jour' : '✅ Créer le forfait' }}</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL DETAIL VIEW ==================== -->
+<div class="modal-overlay" *ngIf="showViewModal" (click)="closeViewModal()">
+  <div class="modal modal-view" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>👁️ Détail du forfait</h3>
+      <button class="modal-close" (click)="closeViewModal()">✕</button>
+    </div>
+    <div class="modal-body" *ngIf="selectedForfait">
+      <div class="view-forfait-header">
+        <div class="view-forfait-name">{{ selectedForfait.name }}</div>
+        <div class="view-forfait-tagline">{{ selectedForfait.tagline }}</div>
+        <div class="view-forfait-price">
+          {{ selectedForfait.price ? (selectedForfait.price + ' €') : 'Sur devis' }}
+          <span class="price-sub" *ngIf="selectedForfait.priceSub">{{ selectedForfait.priceSub }}</span>
+        </div>
+      </div>
+      <p class="view-forfait-desc">{{ selectedForfait.desc }}</p>
+      <div class="view-details-grid">
+        <div class="view-detail-item">
+          <div class="view-detail-label">🎮 Expériences</div>
+          <div class="view-detail-value">{{ selectedForfait.nbExperiences || 0 }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">📱 APK</div>
+          <div class="view-detail-value">{{ selectedForfait.nbApk || 0 }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">🎓 Formation</div>
+          <div class="view-detail-value">{{ selectedForfait.formation.incluse ? (selectedForfait.formation.dureeHeures + 'h') : 'Non incluse' }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">👥 Max étudiants</div>
+          <div class="view-detail-value">{{ selectedForfait.formation.maxEtudiants || '-' }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">✨ Sim. esthétique</div>
+          <div class="view-detail-value">{{ selectedForfait.simulationEsthetique ? 'Oui' : 'Non' }}</div>
+        </div>
+        <div class="view-detail-item">
+          <div class="view-detail-label">💰 Prix annuel</div>
+          <div class="view-detail-value">{{ selectedForfait.priceYearly || '-' }}</div>
+        </div>
+      </div>
+      <div class="view-features" *ngIf="selectedForfait.features && selectedForfait.features.length > 0">
+        <div class="form-section-title">⚡ Fonctionnalités</div>
+        <div class="feature-item" *ngFor="let f of selectedForfait.features">
+          <span [class]="f.yes ? 'feature-yes' : 'feature-no'">{{ f.yes ? '✓' : '✗' }}</span>
+          <span>{{ f.text }}</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
+        <button class="btn btn-primary" (click)="closeViewModal(); openModal(selectedForfait)">✏️ Modifier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==================== MODAL CONFIRMATION SUPPRESSION ==================== -->
+<div class="modal-overlay" *ngIf="showDeleteModal" (click)="closeDeleteModal()">
+  <div class="modal modal-confirm" (click)="$event.stopPropagation()">
+    <div class="modal-header danger">
+      <h3>🗑️ Confirmer la suppression</h3>
+      <button class="modal-close" (click)="closeDeleteModal()">✕</button>
+    </div>
+    <div class="modal-body" style="text-align: center; padding: 2rem;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">⚠️</div>
+      <p style="font-size: 1.1rem; color: var(--text-dark); margin-bottom: 0.5rem;">
+        Voulez-vous vraiment supprimer le forfait <strong>{{ forfaitToDelete?.name }}</strong> ?
+      </p>
+      <p style="color: var(--text-gray); font-size: 0.9rem;">Cette action est irréversible.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeDeleteModal()">Annuler</button>
+      <button class="btn btn-danger" (click)="deleteForfait()" [disabled]="isDeleting">
+        {{ isDeleting ? '⏳ Suppression...' : '🗑️ Supprimer' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" [class.show]="toastVisible" [class.toast-success]="toastType === 'success'" [class.toast-error]="toastType === 'error'">
+  {{ toastMessage }}
+</div>
