@@ -3,8 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SurveyVR — Forfaits</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<title>SurgeryVR — Assistant IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
 <style>
 :root {
   --primary: #0066FF;
@@ -12,44 +14,44 @@
   --accent: #FF006E;
   --dark: #1A2B5F;
   --dark-blue: #2D3E6F;
-  --light: #FFFFFF;
   --bg-light: #F8FAFF;
-  --bg-gradient: linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
   --success: #00C48C;
+  --warning: #F59E0B;
+  --danger: #FF3B5C;
   --gradient-1: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
   --gradient-2: linear-gradient(135deg, #FF006E 0%, #FF6B00 100%);
   --gradient-gold: linear-gradient(135deg, #F59E0B 0%, #F97316 100%);
-  --gradient-glow: radial-gradient(circle at 50% 50%, rgba(0, 102, 255, 0.08), transparent 70%);
   --text-dark: #1A2B5F;
   --text-gray: #5A6B8C;
-  --sidebar-width: 280px;
   --sidebar-bg: #0A1635;
+  --sidebar-width: 280px;
 }
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-html { overflow: hidden; height: 100%; }
+html { height: 100%; overflow: hidden; }
 
 body {
   font-family: 'DM Sans', sans-serif;
-  background: var(--bg-light);
-  color: var(--text-dark);
+  background: #F8FAFF;
+  color: #1A2B5F;
   display: flex;
-  width: 100vw;
-  height: 100vh;
+  width: 100vw; height: 100vh;
   overflow: hidden;
 }
 
-/* ─── SIDEBAR (same as dashboard) ─── */
+/* ─── SIDEBAR ─── */
 .sidebar {
   width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
   background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   position: fixed;
   top: 0; left: 0; bottom: 0;
+  height: 100vh;
   z-index: 100;
   border-right: 1px solid rgba(0,217,255,0.08);
+  overflow: hidden;
 }
 
 .sidebar::before {
@@ -57,7 +59,16 @@ body {
   position: absolute;
   top: -80px; left: -80px;
   width: 260px; height: 260px;
-  background: radial-gradient(circle, rgba(0,102,255,0.18), transparent 70%);
+  background: radial-gradient(circle, rgba(0,102,255,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.sidebar::after {
+  content: '';
+  position: absolute;
+  bottom: 60px; right: -60px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(0,217,255,0.10) 0%, transparent 70%);
   pointer-events: none;
 }
 
@@ -76,6 +87,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 18px;
   box-shadow: 0 4px 16px rgba(0,102,255,0.4);
+  flex-shrink: 0;
 }
 
 .logo-text {
@@ -83,6 +95,7 @@ body {
   font-weight: 800;
   font-size: 18px;
   color: #fff;
+  letter-spacing: -0.3px;
 }
 
 .logo-text span {
@@ -98,9 +111,14 @@ body {
   background: rgba(255,255,255,0.05);
   border: 1px solid rgba(255,255,255,0.08);
   border-radius: 14px;
-  display: flex; align-items: center; gap: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   cursor: pointer;
+  transition: all 0.2s;
 }
+
+.sidebar-user:hover { background: rgba(255,255,255,0.08); }
 
 .user-avatar {
   width: 38px; height: 38px;
@@ -111,1392 +129,932 @@ body {
   font-weight: 700;
   color: #fff;
   font-size: 14px;
+  flex-shrink: 0;
 }
 
-.user-name-mini { font-family: 'Syne', sans-serif; font-weight: 600; font-size: 13px; color: #fff; }
-.user-plan-mini { font-size: 11px; color: var(--secondary); font-weight: 500; }
-.user-info-mini { flex: 1; }
+.user-info-mini { flex: 1; min-width: 0; }
 
-.sidebar-nav { flex: 1; padding: 8px 12px; overflow-y: auto; }
+.user-name-mini {
+  font-family: 'Syne', sans-serif;
+  font-weight: 600;
+  font-size: 13px;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-plan-mini {
+  font-size: 11px;
+  color: var(--secondary);
+  font-weight: 500;
+}
+
+.user-chevron { color: rgba(255,255,255,0.3); font-size: 12px; }
+
+.sidebar-nav {
+  flex: 1;
+  padding: 8px 12px;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sidebar-nav::-webkit-scrollbar { display: none; }
 
 .nav-section-label {
-  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
-  text-transform: uppercase; color: rgba(255,255,255,0.25);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.25);
   padding: 16px 12px 8px;
 }
 
 .nav-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 11px 14px; border-radius: 12px;
-  cursor: pointer; transition: all 0.2s; margin-bottom: 2px;
-  position: relative; overflow: hidden;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 2px;
+  text-decoration: none;
+  position: relative;
+  overflow: hidden;
 }
 
 .nav-item::before {
-  content: ''; position: absolute; inset: 0;
-  background: var(--gradient-1); opacity: 0;
-  transition: opacity 0.2s; border-radius: 12px;
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--gradient-1);
+  opacity: 0;
+  transition: opacity 0.2s;
+  border-radius: 12px;
 }
 
 .nav-item:hover::before { opacity: 0.12; }
 .nav-item.active::before { opacity: 1; }
 
 .nav-icon {
-  width: 36px; height: 36px; border-radius: 9px;
+  width: 36px; height: 36px;
+  border-radius: 9px;
   display: flex; align-items: center; justify-content: center;
-  font-size: 17px; background: rgba(255,255,255,0.05);
-  transition: all 0.2s; flex-shrink: 0; position: relative; z-index: 1;
+  font-size: 17px;
+  background: rgba(255,255,255,0.05);
+  transition: all 0.2s;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
 }
 
 .nav-item.active .nav-icon { background: rgba(255,255,255,0.2); }
 
 .nav-label {
-  font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.5);
-  transition: color 0.2s; position: relative; z-index: 1; flex: 1;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.5);
+  transition: color 0.2s;
+  position: relative;
+  z-index: 1;
+  flex: 1;
 }
 
 .nav-item:hover .nav-label { color: rgba(255,255,255,0.85); }
 .nav-item.active .nav-label { color: #fff; font-weight: 600; }
 
-.nav-badge {
-  background: var(--accent); color: #fff;
-  font-size: 10px; font-weight: 700;
-  padding: 2px 7px; border-radius: 20px;
-  position: relative; z-index: 1;
+.sidebar-logout {
+  padding: 20px;
 }
 
-.sidebar-bottom { padding: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
-
-.storage-widget {
-  background: rgba(255,255,255,0.04);
-  border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 12px; padding: 14px;
+.logout-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  background: linear-gradient(135deg, #ff4d4d, #cc0000);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: 'DM Sans', sans-serif;
 }
 
-.storage-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-.storage-label { font-size: 11px; color: rgba(255,255,255,0.4); font-weight: 500; }
-.storage-value { font-size: 11px; color: rgba(255,255,255,0.7); font-weight: 600; }
-.storage-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
-.storage-fill { height: 100%; width: 62%; background: var(--gradient-1); border-radius: 99px; }
+.logout-btn:hover {
+  background: linear-gradient(135deg, #ff1a1a, #990000);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(255,0,0,0.3);
+}
 
-/* ─── MAIN ─── */
+/* ─── MAIN CONTENT ─── */
 .main {
   margin-left: var(--sidebar-width);
-  width: calc(100vw - var(--sidebar-width));
-  flex: 1; display: flex; flex-direction: column;
-  height: 100vh; overflow-y: auto;
-  background: var(--bg-gradient);
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: #F0F4FF;
+  position: relative;
 }
 
-/* Topbar */
+/* Background atmosphere */
+.main::before {
+  content: '';
+  position: absolute;
+  top: -100px; right: -100px;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(0,102,255,0.06) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.main::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(0,217,255,0.05) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ─── TOPBAR ─── */
 .topbar {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 36px;
-  background: rgba(255,255,255,0.85);
-  backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 32px;
+  background: rgba(255,255,255,0.8);
+  backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(0,102,255,0.08);
-  position: sticky; top: 0; z-index: 50;
+  z-index: 10;
+  position: relative;
+  flex-shrink: 0;
 }
 
-.topbar-left h1 {
+.topbar-left { display: flex; align-items: center; gap: 14px; }
+
+.ai-avatar {
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  background: var(--gradient-1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  box-shadow: 0 4px 20px rgba(0,102,255,0.3);
+  position: relative;
+}
+
+.ai-avatar::after {
+  content: '';
+  position: absolute;
+  bottom: -2px; right: -2px;
+  width: 12px; height: 12px;
+  background: var(--success);
+  border-radius: 50%;
+  border: 2px solid #fff;
+}
+
+.topbar-title {
   font-family: 'Syne', sans-serif;
-  font-size: 22px; font-weight: 700; color: var(--text-dark); letter-spacing: -0.4px;
+  font-weight: 700;
+  font-size: 17px;
+  color: var(--text-dark);
 }
 
-.topbar-left p { font-size: 13px; color: var(--text-gray); margin-top: 1px; }
+.topbar-subtitle {
+  font-size: 12px;
+  color: var(--text-gray);
+  font-weight: 400;
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 1px;
+}
 
-.topbar-right { display: flex; align-items: center; gap: 12px; }
+.status-dot {
+  width: 6px; height: 6px;
+  background: var(--success);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.3); }
+}
+
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
 
 .topbar-btn {
-  width: 40px; height: 40px; border-radius: 10px;
-  border: 1px solid rgba(0,102,255,0.12); background: #fff;
-  display: flex; align-items: center; justify-content: center;
-  cursor: pointer; font-size: 16px; color: var(--text-gray); transition: all 0.2s;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.2s;
 }
 
-/* ─── CONTENT ─── */
-.content { padding: 32px 36px; flex: 1; }
-
-/* Toggle billing */
-.billing-toggle-wrap {
-  display: flex; align-items: center; justify-content: center;
-  gap: 16px; margin-bottom: 40px;
-  animation: fadeUp 0.4s ease-out;
+.topbar-btn.ghost {
+  background: rgba(0,102,255,0.06);
+  color: var(--primary);
+  border: 1px solid rgba(0,102,255,0.12);
 }
 
-.billing-label {
-  font-family: 'Syne', sans-serif;
-  font-size: 14px; font-weight: 600; color: var(--text-gray);
-  transition: color 0.2s;
+.topbar-btn.ghost:hover {
+  background: rgba(0,102,255,0.1);
 }
 
-.billing-label.active { color: var(--primary); }
-
-.toggle-switch {
-  width: 52px; height: 28px;
-  background: var(--gradient-1);
-  border-radius: 99px; cursor: pointer;
-  position: relative; transition: all 0.3s;
-  box-shadow: 0 2px 8px rgba(0,102,255,0.3);
+.topbar-btn.danger {
+  background: rgba(255,59,92,0.08);
+  color: var(--danger);
+  border: 1px solid rgba(255,59,92,0.15);
 }
 
-.toggle-knob {
+.topbar-btn.danger:hover {
+  background: rgba(255,59,92,0.14);
+}
+
+/* ─── CHAT AREA ─── */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 28px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0,102,255,0.15) transparent;
+}
+
+.chat-area::-webkit-scrollbar { width: 4px; }
+.chat-area::-webkit-scrollbar-thumb { background: rgba(0,102,255,0.15); border-radius: 99px; }
+
+/* Welcome banner */
+.welcome-banner {
+  background: linear-gradient(135deg, #0A1635 0%, #1A2B5F 100%);
+  border-radius: 20px;
+  padding: 28px 32px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 8px;
+  position: relative;
+  overflow: hidden;
+  animation: fadeSlideIn 0.5s ease-out;
+}
+
+.welcome-banner::before {
+  content: '';
   position: absolute;
-  top: 4px; left: 4px;
-  width: 20px; height: 20px;
-  background: #fff;
-  border-radius: 50%;
-  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  top: -40px; right: -40px;
+  width: 220px; height: 220px;
+  background: radial-gradient(circle, rgba(0,217,255,0.12) 0%, transparent 65%);
 }
 
-.toggle-switch.yearly .toggle-knob { transform: translateX(24px); }
-
-.save-badge {
-  background: rgba(0,196,140,0.12);
-  border: 1px solid rgba(0,196,140,0.25);
-  color: var(--success);
-  font-size: 11px; font-weight: 700;
-  padding: 3px 10px; border-radius: 99px;
+.welcome-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -30px; left: 50%;
+  width: 160px; height: 160px;
+  background: radial-gradient(circle, rgba(0,102,255,0.15) 0%, transparent 65%);
 }
 
-/* Hero Section */
-.page-hero {
-  text-align: center; margin-bottom: 48px;
-  animation: fadeUp 0.4s ease-out;
+.welcome-icon {
+  font-size: 52px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 12px rgba(0,217,255,0.3));
 }
 
-.page-hero h2 {
+.welcome-text { position: relative; z-index: 1; }
+
+.welcome-text h2 {
   font-family: 'Syne', sans-serif;
-  font-size: 36px; font-weight: 800; color: var(--text-dark);
-  letter-spacing: -1px; margin-bottom: 12px;
+  font-size: 22px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 6px;
 }
 
-.page-hero h2 span {
+.welcome-text h2 span {
   background: var(--gradient-1);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.page-hero p {
-  font-size: 15px; color: var(--text-gray); max-width: 480px; margin: 0 auto;
-  line-height: 1.7;
+.welcome-text p {
+  font-size: 14px;
+  color: rgba(255,255,255,0.55);
+  line-height: 1.6;
+  max-width: 380px;
 }
 
-/* Current plan banner */
-.current-plan-banner {
-  background: rgba(0,102,255,0.06);
-  border: 1px solid rgba(0,102,255,0.15);
-  border-radius: 14px;
-  padding: 14px 24px;
-  display: flex; align-items: center; gap: 12px;
-  margin-bottom: 36px;
-  font-size: 13px; color: var(--text-dark);
-  animation: fadeUp 0.4s ease-out 0.05s both;
-}
-
-.current-plan-banner strong { font-weight: 700; color: var(--primary); }
-.current-plan-banner .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); flex-shrink: 0; }
-.banner-spacer { flex: 1; }
-.banner-link { font-size: 12px; font-weight: 600; color: var(--primary); cursor: pointer; }
-
-/* Forfaits Grid */
-.forfaits-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-  margin-bottom: 48px;
-}
-
-/* Plan Card */
-.plan-card {
-  background: #fff;
-  border-radius: 22px;
-  border: 1.5px solid rgba(0,102,255,0.1);
-  overflow: hidden;
-  cursor: pointer;
-  transition: all 0.35s cubic-bezier(.34,1.2,.64,1);
-  position: relative;
-  animation: fadeUp 0.5s ease-out both;
-  display: flex; flex-direction: column;
-}
-
-.plan-card:nth-child(1) { animation-delay: 0.1s; }
-.plan-card:nth-child(2) { animation-delay: 0.18s; }
-.plan-card:nth-child(3) { animation-delay: 0.26s; }
-.plan-card:nth-child(4) { animation-delay: 0.34s; }
-
-.plan-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 60px rgba(0,102,255,0.14);
-  border-color: rgba(0,102,255,0.25);
-}
-
-.plan-card.popular {
-  border-color: var(--primary);
-  box-shadow: 0 8px 40px rgba(0,102,255,0.15);
-}
-
-.plan-card.current {
-  border-color: var(--success);
-}
-
-/* Popular ribbon */
-.popular-badge {
-  position: absolute;
-  top: 18px; right: -28px;
-  background: var(--gradient-1);
-  color: #fff;
-  font-family: 'Syne', sans-serif;
-  font-size: 10px; font-weight: 700;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  padding: 5px 36px;
-  transform: rotate(45deg);
-  transform-origin: center;
-  box-shadow: 0 2px 12px rgba(0,102,255,0.35);
-}
-
-.current-badge {
-  position: absolute;
-  top: 14px; left: 14px;
-  background: rgba(0,196,140,0.1);
-  border: 1px solid rgba(0,196,140,0.3);
-  color: var(--success);
-  font-size: 10px; font-weight: 700;
-  padding: 3px 10px; border-radius: 99px;
-  letter-spacing: 0.5px;
-}
-
-/* Plan header */
-.plan-header {
-  padding: 28px 24px 22px;
-  border-bottom: 1px solid rgba(0,102,255,0.07);
-  position: relative;
-  overflow: hidden;
-}
-
-.plan-card.starter .plan-header { background: linear-gradient(145deg, #F8FAFF, #EEF4FF); }
-.plan-card.pro .plan-header { background: linear-gradient(145deg, #0A1635, #1a2d5a); }
-.plan-card.business .plan-header { background: var(--gradient-gold); }
-.plan-card.enterprise .plan-header { background: linear-gradient(145deg, #1A0A2E, #2D1060); }
-
-.plan-header::after {
-  content: '';
-  position: absolute;
-  bottom: -40px; right: -40px;
-  width: 120px; height: 120px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.06);
-}
-
-.plan-icon {
-  font-size: 28px; margin-bottom: 14px; display: block;
-}
-
-.plan-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 18px; font-weight: 800; letter-spacing: -0.3px;
+/* Suggestion chips */
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
   margin-bottom: 4px;
+  animation: fadeSlideIn 0.6s ease-out 0.1s both;
 }
 
-.plan-card.starter .plan-name { color: var(--text-dark); }
-.plan-card.pro .plan-name,
-.plan-card.enterprise .plan-name { color: #fff; }
-.plan-card.business .plan-name { color: #fff; }
-
-.plan-tagline {
-  font-size: 12px; font-weight: 400; opacity: 0.65;
-}
-
-.plan-card.starter .plan-tagline { color: var(--text-gray); }
-.plan-card.pro .plan-tagline,
-.plan-card.business .plan-tagline,
-.plan-card.enterprise .plan-tagline { color: rgba(255,255,255,0.75); }
-
-.plan-price-wrap { margin-top: 20px; display: flex; align-items: flex-end; gap: 4px; }
-
-.plan-price {
-  font-family: 'Syne', sans-serif;
-  font-size: 38px; font-weight: 800; letter-spacing: -2px; line-height: 1;
-}
-
-.plan-card.starter .plan-price { color: var(--text-dark); }
-.plan-card.pro .plan-price,
-.plan-card.business .plan-price,
-.plan-card.enterprise .plan-price { color: #fff; }
-
-.plan-currency {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px; font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.plan-card.starter .plan-currency { color: var(--text-gray); }
-.plan-card.pro .plan-currency,
-.plan-card.business .plan-currency,
-.plan-card.enterprise .plan-currency { color: rgba(255,255,255,0.7); }
-
-.plan-period {
-  font-size: 12px; margin-bottom: 6px;
-}
-
-.plan-card.starter .plan-period { color: var(--text-gray); }
-.plan-card.pro .plan-period,
-.plan-card.business .plan-period,
-.plan-card.enterprise .plan-period { color: rgba(255,255,255,0.5); }
-
-/* Plan body */
-.plan-body { padding: 20px 24px; flex: 1; display: flex; flex-direction: column; }
-
-.plan-features { list-style: none; flex: 1; }
-
-.plan-features li {
-  display: flex; align-items: flex-start; gap: 10px;
-  padding: 7px 0;
-  font-size: 13px; color: var(--text-dark);
-  border-bottom: 1px solid rgba(0,102,255,0.05);
-}
-
-.plan-features li:last-child { border-bottom: none; }
-
-.feat-check {
-  width: 18px; height: 18px; border-radius: 5px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 10px; flex-shrink: 0; margin-top: 1px;
-}
-
-.check-yes { background: rgba(0,196,140,0.12); color: var(--success); }
-.check-no { background: rgba(0,0,0,0.05); color: #ccc; }
-
-.feat-text { line-height: 1.4; }
-.feat-val { font-weight: 700; color: var(--primary); }
-
-/* Plan CTA */
-.plan-cta {
-  width: 100%; padding: 13px;
-  border-radius: 12px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 13px; font-weight: 700;
-  cursor: pointer; border: none;
-  transition: all 0.25s; margin-top: 20px;
-  letter-spacing: 0.3px;
-}
-
-.plan-card.starter .plan-cta {
-  background: rgba(0,102,255,0.08);
-  color: var(--primary);
-  border: 1.5px solid rgba(0,102,255,0.2);
-}
-
-.plan-card.starter .plan-cta:hover {
-  background: var(--gradient-1); color: #fff;
-  box-shadow: 0 4px 16px rgba(0,102,255,0.3);
-}
-
-.plan-card.pro .plan-cta {
-  background: var(--gradient-1); color: #fff;
-  box-shadow: 0 4px 16px rgba(0,102,255,0.3);
-}
-
-.plan-card.pro .plan-cta:hover {
-  box-shadow: 0 8px 24px rgba(0,102,255,0.45);
-  transform: translateY(-1px);
-}
-
-.plan-card.business .plan-cta {
-  background: rgba(255,255,255,0.25); color: #fff;
-  border: 1.5px solid rgba(255,255,255,0.4);
-}
-
-.plan-card.business .plan-cta:hover {
-  background: rgba(255,255,255,0.35);
-}
-
-.plan-card.enterprise .plan-cta {
-  background: var(--gradient-2); color: #fff;
-  box-shadow: 0 4px 16px rgba(255,0,110,0.3);
-}
-
-.plan-card.enterprise .plan-cta:hover {
-  box-shadow: 0 8px 24px rgba(255,0,110,0.45);
-  transform: translateY(-1px);
-}
-
-.plan-card.current-plan .plan-cta {
-  background: rgba(0,196,140,0.1);
-  color: var(--success);
-  border: 1.5px solid rgba(0,196,140,0.3);
-  cursor: default;
-}
-
-/* Compare section */
-.compare-section {
-  background: #fff;
-  border-radius: 18px;
-  border: 1px solid rgba(0,102,255,0.08);
-  padding: 28px;
-  margin-bottom: 32px;
-  animation: fadeUp 0.5s ease-out 0.4s both;
-}
-
-.compare-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 16px; font-weight: 700; color: var(--text-dark);
-  margin-bottom: 20px;
-}
-
-.compare-table { width: 100%; border-collapse: collapse; }
-
-.compare-table th {
-  font-family: 'Syne', sans-serif;
-  font-size: 12px; font-weight: 700;
-  color: var(--text-gray); text-align: center;
-  padding: 8px 12px; letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.compare-table th:first-child { text-align: left; }
-
-.compare-table td {
-  text-align: center; padding: 11px 12px;
-  border-top: 1px solid rgba(0,102,255,0.06);
-  font-size: 13px; color: var(--text-dark);
-}
-
-.compare-table td:first-child { text-align: left; font-weight: 500; }
-.compare-table tr:hover td { background: rgba(0,102,255,0.02); }
-
-.tick { color: var(--success); font-size: 15px; }
-.cross { color: #D0D5E8; font-size: 15px; }
-.val-cell { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--primary); font-size: 13px; }
-.highlight-col { background: rgba(0,102,255,0.04); }
-
-/* ═══════════════════════════════════════
-   MODAL / POPUP
-═══════════════════════════════════════ */
-.modal-overlay {
-  position: fixed; inset: 0;
-  background: rgba(10, 22, 53, 0.7);
-  backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: flex; align-items: center; justify-content: center;
-  padding: 20px;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.3s;
-}
-
-.modal-overlay.open {
-  opacity: 1; pointer-events: all;
-}
-
-.modal {
-  background: #fff;
+.suggestion-chip {
+  padding: 9px 16px;
+  background: rgba(255,255,255,0.9);
+  border: 1px solid rgba(0,102,255,0.12);
   border-radius: 24px;
-  width: 100%; max-width: 820px;
-  max-height: 90vh;
-  overflow: hidden;
-  display: flex; flex-direction: column;
-  box-shadow: 0 40px 100px rgba(0,0,0,0.25);
-  transform: translateY(30px) scale(0.96);
-  transition: transform 0.35s cubic-bezier(.34,1.2,.64,1);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--primary);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 7px;
+  box-shadow: 0 2px 8px rgba(0,102,255,0.06);
 }
 
-.modal-overlay.open .modal {
-  transform: translateY(0) scale(1);
+.suggestion-chip:hover {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(0,102,255,0.2);
 }
 
-/* Modal Header */
-.modal-header {
-  padding: 0;
-  position: relative;
-  overflow: hidden;
-  flex-shrink: 0;
+/* Messages */
+.message-group {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  animation: fadeSlideIn 0.35s ease-out;
 }
 
-.modal-hero {
-  padding: 32px 36px 28px;
-  position: relative;
-  overflow: hidden;
+@keyframes fadeSlideIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.modal-hero::before {
-  content: '';
-  position: absolute;
-  top: -60px; right: -60px;
-  width: 250px; height: 250px;
-  border-radius: 50%;
-  background: rgba(255,255,255,0.07);
-}
+.message-group.user { flex-direction: row-reverse; }
 
-.modal-close {
-  position: absolute; top: 18px; right: 18px;
+.msg-avatar {
   width: 36px; height: 36px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.25);
-  color: #fff; font-size: 18px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; z-index: 2;
-}
-
-.modal-close:hover { background: rgba(255,255,255,0.25); }
-
-.modal-plan-icon { font-size: 36px; margin-bottom: 12px; display: block; }
-
-.modal-plan-name {
-  font-family: 'Syne', sans-serif;
-  font-size: 28px; font-weight: 800; color: #fff; letter-spacing: -0.8px;
-  margin-bottom: 6px;
-}
-
-.modal-plan-desc { font-size: 14px; color: rgba(255,255,255,0.65); max-width: 400px; line-height: 1.6; }
-
-.modal-price-row {
-  display: flex; align-items: flex-end; gap: 6px; margin-top: 20px;
-}
-
-.modal-price {
-  font-family: 'Syne', sans-serif;
-  font-size: 48px; font-weight: 800; color: #fff; letter-spacing: -2px; line-height: 1;
-}
-
-.modal-price-sub { font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
-
-/* Progress steps */
-.modal-steps {
-  display: flex; align-items: center;
-  padding: 20px 36px;
-  border-bottom: 1px solid rgba(0,102,255,0.08);
-  gap: 0;
   flex-shrink: 0;
-}
-
-.step {
-  display: flex; align-items: center; gap: 10px; flex: 1;
-  position: relative;
-}
-
-.step:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: calc(50% + 18px);
-  right: calc(-50% + 18px);
-  top: 50%; transform: translateY(-50%);
-  height: 2px;
-  background: rgba(0,102,255,0.1);
-  transition: background 0.3s;
-}
-
-.step.done:not(:last-child)::after { background: var(--primary); }
-
-.step-num {
-  width: 34px; height: 34px; border-radius: 10px;
   display: flex; align-items: center; justify-content: center;
-  font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700;
-  border: 2px solid rgba(0,102,255,0.15);
-  color: var(--text-gray); background: #fff;
-  transition: all 0.3s; flex-shrink: 0;
+  font-size: 16px;
 }
 
-.step.active .step-num {
-  background: var(--gradient-1); color: #fff; border-color: transparent;
-  box-shadow: 0 4px 12px rgba(0,102,255,0.3);
+.msg-avatar.ai {
+  background: var(--gradient-1);
+  box-shadow: 0 4px 12px rgba(0,102,255,0.25);
 }
 
-.step.done .step-num {
-  background: var(--success); color: #fff; border-color: transparent;
-}
-
-.step-label {
-  font-size: 12px; font-weight: 600; color: var(--text-gray);
-  transition: color 0.3s;
-}
-
-.step.active .step-label { color: var(--primary); }
-.step.done .step-label { color: var(--success); }
-
-/* Modal Body */
-.modal-body { padding: 28px 36px; overflow-y: auto; flex: 1; }
-
-/* Step 1 - Details */
-.step-content { display: none; }
-.step-content.active { display: block; }
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.detail-card {
-  background: var(--bg-light);
-  border: 1px solid rgba(0,102,255,0.08);
-  border-radius: 14px;
-  padding: 16px;
-  display: flex; align-items: flex-start; gap: 12px;
-}
-
-.detail-icon {
-  width: 38px; height: 38px; border-radius: 10px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 17px; flex-shrink: 0;
-  background: rgba(0,102,255,0.08);
-}
-
-.detail-info { flex: 1; }
-.detail-label { font-size: 11px; color: var(--text-gray); font-weight: 500; margin-bottom: 3px; }
-.detail-value { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: var(--text-dark); }
-
-.features-full { margin-bottom: 24px; }
-
-.features-full-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 14px; font-weight: 700; color: var(--text-dark);
-  margin-bottom: 14px;
-}
-
-.features-cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.feature-row {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px;
-  background: var(--bg-light);
-  border-radius: 10px;
-  font-size: 13px; color: var(--text-dark);
-}
-
-.feature-row .check { font-size: 14px; }
-.feature-row .check.yes { color: var(--success); }
-.feature-row .check.no { color: #D0D5E8; }
-
-/* Step 2 - Payment method */
-.payment-methods {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
-  margin-bottom: 24px;
-}
-
-.pay-method {
-  border: 2px solid rgba(0,102,255,0.1);
-  border-radius: 16px; padding: 18px 20px;
-  cursor: pointer; transition: all 0.25s;
-  display: flex; align-items: center; gap: 14px;
-  background: #fff;
-  position: relative;
-}
-
-.pay-method:hover { border-color: rgba(0,102,255,0.25); background: rgba(0,102,255,0.02); }
-.pay-method.selected { border-color: var(--primary); background: rgba(0,102,255,0.04); }
-
-.pay-method.selected::after {
-  content: '✓';
-  position: absolute; top: 10px; right: 12px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: var(--primary); color: #fff;
-  font-size: 11px; font-weight: 700;
-  display: flex; align-items: center; justify-content: center;
-}
-
-.pay-icon {
-  width: 46px; height: 46px; border-radius: 12px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 22px; flex-shrink: 0;
-  background: var(--bg-light);
-}
-
-.pay-name { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--text-dark); }
-.pay-desc { font-size: 12px; color: var(--text-gray); margin-top: 2px; }
-
-/* Card form */
-.card-form { margin-top: 20px; }
-
-.form-group { margin-bottom: 16px; }
-
-.form-label {
-  display: block; font-size: 12px; font-weight: 600;
-  color: var(--text-gray); margin-bottom: 6px; letter-spacing: 0.3px;
-}
-
-.form-input {
-  width: 100%; padding: 12px 16px;
-  border: 1.5px solid rgba(0,102,255,0.15);
-  border-radius: 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--text-dark);
-  background: #fff; outline: none;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,255,0.08); }
-.form-input::placeholder { color: #C0CADF; }
-
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-
-.card-icons { display: flex; gap: 8px; margin-top: 8px; }
-
-.card-icon-badge {
-  background: var(--bg-light); border: 1px solid rgba(0,102,255,0.1);
-  border-radius: 8px; padding: 4px 10px;
-  font-size: 12px; color: var(--text-gray); font-weight: 600;
-}
-
-/* Step 3 - Confirm */
-.confirm-summary {
-  background: var(--bg-light);
-  border: 1px solid rgba(0,102,255,0.1);
-  border-radius: 16px; padding: 24px;
-  margin-bottom: 20px;
-}
-
-.confirm-row {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 0; border-bottom: 1px solid rgba(0,102,255,0.07);
-  font-size: 14px;
-}
-
-.confirm-row:last-child { border-bottom: none; }
-.confirm-row .label { color: var(--text-gray); }
-.confirm-row .value { font-weight: 600; color: var(--text-dark); }
-.confirm-row.total { padding-top: 16px; }
-.confirm-row.total .label { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; color: var(--text-dark); }
-.confirm-row.total .value { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--primary); }
-
-.security-note {
-  display: flex; align-items: center; gap: 10px;
-  background: rgba(0,196,140,0.07);
-  border: 1px solid rgba(0,196,140,0.2);
-  border-radius: 12px; padding: 12px 16px;
-  font-size: 12px; color: var(--text-dark);
-  margin-bottom: 20px;
-}
-
-/* Success */
-.success-screen {
-  display: none; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 40px; text-align: center;
-  min-height: 300px;
-}
-
-.success-screen.show { display: flex; }
-
-.success-anim {
-  width: 80px; height: 80px; border-radius: 50%;
-  background: rgba(0,196,140,0.1);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 36px; margin-bottom: 20px;
-  animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1);
-}
-
-@keyframes popIn {
-  from { transform: scale(0); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-.success-title {
-  font-family: 'Syne', sans-serif;
-  font-size: 24px; font-weight: 800; color: var(--text-dark);
-  margin-bottom: 10px;
-}
-
-.success-text { font-size: 14px; color: var(--text-gray); line-height: 1.7; max-width: 360px; }
-
-/* Modal Footer */
-.modal-footer {
-  padding: 20px 36px;
-  border-top: 1px solid rgba(0,102,255,0.08);
-  display: flex; justify-content: space-between; align-items: center;
-  flex-shrink: 0;
-  background: #fff;
-}
-
-.btn-back {
-  padding: 11px 22px;
-  background: transparent; color: var(--text-gray);
-  border: 1.5px solid rgba(0,102,255,0.15);
-  border-radius: 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s;
-}
-
-.btn-back:hover { border-color: var(--primary); color: var(--primary); }
-
-.btn-next {
-  padding: 12px 28px;
-  background: var(--gradient-1); color: #fff; border: none;
-  border-radius: 12px;
-  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 700;
-  cursor: pointer; transition: all 0.2s;
-  box-shadow: 0 4px 16px rgba(0,102,255,0.3);
-  display: flex; align-items: center; gap: 8px;
-}
-
-.btn-next:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,102,255,0.4); }
-
-.btn-pay {
+.msg-avatar.user {
   background: var(--gradient-2);
-  box-shadow: 0 4px 16px rgba(255,0,110,0.3);
-}
-
-.btn-pay:hover { box-shadow: 0 8px 24px rgba(255,0,110,0.4); }
-
-/* Animations */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(0,102,255,0.15); border-radius: 99px; }
-
-/* FAQ */
-.faq-section {
-  margin-bottom: 40px;
-  animation: fadeUp 0.5s ease-out 0.5s both;
-}
-
-.faq-title {
   font-family: 'Syne', sans-serif;
-  font-size: 18px; font-weight: 700; color: var(--text-dark);
-  margin-bottom: 16px;
+  font-weight: 700;
+  color: #fff;
+  font-size: 13px;
 }
 
-.faq-item {
+.msg-content { max-width: 68%; display: flex; flex-direction: column; gap: 4px; }
+
+.message-group.user .msg-content { align-items: flex-end; }
+
+.msg-bubble {
+  padding: 14px 18px;
+  border-radius: 18px;
+  font-size: 14px;
+  line-height: 1.65;
+  position: relative;
+}
+
+.msg-bubble.ai {
+  background: rgba(255,255,255,0.95);
+  color: var(--text-dark);
+  border-radius: 4px 18px 18px 18px;
+  box-shadow: 0 4px 20px rgba(0,102,255,0.07);
+  border: 1px solid rgba(0,102,255,0.07);
+}
+
+.msg-bubble.user {
+  background: var(--gradient-1);
+  color: #fff;
+  border-radius: 18px 4px 18px 18px;
+  box-shadow: 0 4px 20px rgba(0,102,255,0.25);
+}
+
+.msg-time {
+  font-size: 11px;
+  color: var(--text-gray);
+  padding: 0 4px;
+}
+
+/* Typing indicator */
+.typing-indicator {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  animation: fadeSlideIn 0.3s ease-out;
+}
+
+.typing-bubble {
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(0,102,255,0.07);
+  border-radius: 4px 18px 18px 18px;
+  padding: 16px 20px;
+  display: flex; gap: 5px; align-items: center;
+  box-shadow: 0 4px 20px rgba(0,102,255,0.07);
+}
+
+.typing-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--primary);
+  opacity: 0.4;
+  animation: typingBounce 1.2s infinite;
+}
+
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-6px); opacity: 1; }
+}
+
+/* Info card inside message */
+.info-card {
+  margin-top: 10px;
+  background: rgba(0,102,255,0.04);
+  border: 1px solid rgba(0,102,255,0.1);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.info-card-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.info-card-icon.blue { background: rgba(0,102,255,0.1); }
+.info-card-icon.green { background: rgba(0,196,140,0.1); }
+
+.info-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 2px;
+}
+
+.info-card-desc {
+  font-size: 12px;
+  color: var(--text-gray);
+  line-height: 1.5;
+}
+
+/* Tag pills inside message */
+.msg-tags {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.msg-tag {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.msg-tag.blue { background: rgba(0,102,255,0.1); color: var(--primary); }
+.msg-tag.green { background: rgba(0,196,140,0.1); color: var(--success); }
+.msg-tag.pink { background: rgba(255,0,110,0.1); color: var(--accent); }
+
+/* ─── INPUT AREA ─── */
+.input-area {
+  padding: 20px 32px 24px;
+  background: rgba(255,255,255,0.85);
+  backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(0,102,255,0.07);
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.input-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
   background: #fff;
-  border: 1px solid rgba(0,102,255,0.08);
-  border-radius: 14px; padding: 18px 20px;
-  margin-bottom: 10px; cursor: pointer;
+  border: 1.5px solid rgba(0,102,255,0.14);
+  border-radius: 18px;
+  padding: 12px 14px 12px 18px;
+  box-shadow: 0 4px 24px rgba(0,102,255,0.08);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-wrapper:focus-within {
+  border-color: var(--primary);
+  box-shadow: 0 4px 28px rgba(0,102,255,0.15);
+}
+
+.chat-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--text-dark);
+  background: transparent;
+  resize: none;
+  line-height: 1.5;
+  max-height: 120px;
+  min-height: 22px;
+}
+
+.chat-input::placeholder { color: #9BAAC5; }
+
+.input-actions { display: flex; gap: 6px; align-items: center; flex-shrink: 0; }
+
+.input-btn {
+  width: 36px; height: 36px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
   transition: all 0.2s;
 }
 
-.faq-item:hover { border-color: rgba(0,102,255,0.2); }
-
-.faq-q {
-  font-size: 14px; font-weight: 600; color: var(--text-dark);
-  display: flex; justify-content: space-between; align-items: center;
+.input-btn.attach {
+  background: rgba(0,102,255,0.07);
+  color: var(--primary);
 }
 
-.faq-a {
-  font-size: 13px; color: var(--text-gray); line-height: 1.7;
-  margin-top: 10px; display: none;
+.input-btn.attach:hover { background: rgba(0,102,255,0.14); }
+
+.input-btn.send {
+  background: var(--gradient-1);
+  box-shadow: 0 4px 14px rgba(0,102,255,0.3);
 }
 
-.faq-item.open .faq-a { display: block; }
-.faq-item.open .faq-chevron { transform: rotate(180deg); }
-.faq-chevron { transition: transform 0.2s; color: var(--primary); }
+.input-btn.send:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgba(0,102,255,0.4);
+}
+
+.input-hint {
+  text-align: center;
+  font-size: 11px;
+  color: #9BAAC5;
+  margin-top: 10px;
+}
+
+.input-hint strong { color: var(--text-gray); }
+
+/* Divider label */
+.chat-date {
+  text-align: center;
+  font-size: 11px;
+  color: #9BAAC5;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  position: relative;
+}
+
+.chat-date::before, .chat-date::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: calc(50% - 60px);
+  height: 1px;
+  background: rgba(0,102,255,0.08);
+}
+
+.chat-date::before { left: 0; }
+.chat-date::after { right: 0; }
 </style>
 </head>
 <body>
 
-<!-- ═══ SIDEBAR ═══ -->
+<!-- ─── SIDEBAR ─── -->
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-icon">🥽</div>
-    <div class="logo-text">Survey<span>VR</span></div>
+    <div class="logo-text">Surgery<span>VR</span></div>
   </div>
+
   <div class="sidebar-user">
-    <div class="user-avatar">AK</div>
+    <div class="user-avatar">DC</div>
     <div class="user-info-mini">
-      <div class="user-name-mini">Ahmed Karim</div>
-      <div class="user-plan-mini">✦ Forfait Pro</div>
+      <div class="user-name-mini">Dr. Clara Martin</div>
+      <div class="user-plan-mini">clara@surgeryvr.io</div>
     </div>
+    <div class="user-chevron">›</div>
   </div>
+
   <nav class="sidebar-nav">
     <div class="nav-section-label">Général</div>
-    <div class="nav-item"><div class="nav-icon">🏠</div><span class="nav-label">Dashboard</span></div>
-    <div class="nav-item"><div class="nav-icon">🥽</div><span class="nav-label">Mes Enquêtes VR</span><span class="nav-badge">3</span></div>
-    <div class="nav-item"><div class="nav-icon">📋</div><span class="nav-label">Mes Demandes</span><span class="nav-badge">2</span></div>
-    <div class="nav-section-label">Application</div>
-    <div class="nav-item"><div class="nav-icon">📱</div><span class="nav-label">Mes APK</span></div>
-    <div class="nav-item"><div class="nav-icon">📊</div><span class="nav-label">Résultats & Stats</span></div>
-    <div class="nav-section-label">Compte</div>
-    <div class="nav-item active"><div class="nav-icon">💎</div><span class="nav-label">Forfaits</span></div>
-    <div class="nav-item"><div class="nav-icon">⚙️</div><span class="nav-label">Mon Compte</span></div>
-    <div class="nav-item"><div class="nav-icon">🎧</div><span class="nav-label">Support</span></div>
-  </nav>
-  <div class="sidebar-bottom">
-    <div class="storage-widget">
-      <div class="storage-header">
-        <span class="storage-label">Stockage utilisé</span>
-        <span class="storage-value">3.1 / 5 Go</span>
-      </div>
-      <div class="storage-bar"><div class="storage-fill"></div></div>
+
+    <div class="nav-item">
+      <div class="nav-icon">🏠</div>
+      <span class="nav-label">Dashboard</span>
     </div>
+
+    <div class="nav-item">
+      <div class="nav-icon">🥽</div>
+      <span class="nav-label">Mes Expériences</span>
+    </div>
+
+    <div class="nav-item">
+      <div class="nav-icon">📋</div>
+      <span class="nav-label">Mes Demandes</span>
+    </div>
+
+    <div class="nav-section-label">Application</div>
+
+    <div class="nav-item">
+      <div class="nav-icon">📱</div>
+      <span class="nav-label">Mes Abonnements</span>
+    </div>
+
+    <div class="nav-item">
+      <div class="nav-icon">📊</div>
+      <span class="nav-label">Résultats & Stats</span>
+    </div>
+
+    <div class="nav-section-label">Compte</div>
+
+    <div class="nav-item">
+      <div class="nav-icon">💎</div>
+      <span class="nav-label">Forfaits</span>
+    </div>
+
+    <div class="nav-item">
+      <div class="nav-icon">⚙️</div>
+      <span class="nav-label">Mon Compte</span>
+    </div>
+
+    <div class="nav-section-label">Support</div>
+
+    <div class="nav-item active">
+      <div class="nav-icon">🤖</div>
+      <span class="nav-label">Assistant IA</span>
+    </div>
+  </nav>
+
+  <div class="sidebar-logout">
+    <button class="logout-btn">
+      <span>🚪</span>
+      <span>Déconnexion</span>
+    </button>
   </div>
 </aside>
 
-<!-- ═══ MAIN ═══ -->
+<!-- ─── MAIN CHAT ─── -->
 <main class="main">
+
+  <!-- Topbar -->
   <div class="topbar">
     <div class="topbar-left">
-      <h1>Forfaits & Abonnements</h1>
-      <p>Choisissez le plan adapté à vos besoins</p>
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="topbar-title">Assistant SurgeryVR</div>
+        <div class="topbar-subtitle">
+          <span class="status-dot"></span>
+          En ligne · IA médicale spécialisée
+        </div>
+      </div>
     </div>
-    <div class="topbar-right">
-      <div class="topbar-btn">🔔</div>
-      <div class="topbar-btn">💬</div>
+    <div class="topbar-actions">
+      <button class="topbar-btn ghost">📎 Historique</button>
+      <button class="topbar-btn ghost">⚙️ Paramètres</button>
+      <button class="topbar-btn danger">🗑 Effacer</button>
     </div>
   </div>
 
-  <div class="content">
+  <!-- Chat messages -->
+  <div class="chat-area" id="chatArea">
 
-    <!-- Hero -->
-    <div class="page-hero">
-      <h2>Des forfaits <span>pensés pour vous</span></h2>
-      <p>Des solutions flexibles pour déployer vos enquêtes VR en magasin, du démarrage à l'échelle enterprise.</p>
-    </div>
-
-    <!-- Billing toggle -->
-    <div class="billing-toggle-wrap">
-      <span class="billing-label active" id="lbl-monthly">Mensuel</span>
-      <div class="toggle-switch" id="billingToggle" onclick="toggleBilling()">
-        <div class="toggle-knob"></div>
+    <!-- Welcome -->
+    <div class="welcome-banner">
+      <div class="welcome-icon">🧠</div>
+      <div class="welcome-text">
+        <h2>Bonjour, Dr. Clara <span>Martin</span> 👋</h2>
+        <p>Je suis votre assistant IA dédié à SurgeryVR. Posez-moi vos questions sur vos simulations, protocoles chirurgicaux ou l'utilisation de la plateforme.</p>
       </div>
-      <span class="billing-label" id="lbl-yearly">Annuel</span>
-      <span class="save-badge">Économisez 20%</span>
     </div>
 
-    <!-- Current plan banner -->
-    <div class="current-plan-banner">
-      <div class="dot"></div>
-      Votre abonnement actuel : <strong>&nbsp;Forfait Pro</strong> — expire le 28 Mars 2026
-      <div class="banner-spacer"></div>
-      <span class="banner-link">Gérer la facturation →</span>
+    <!-- Suggestions -->
+    <div class="suggestions">
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">🥽 Comment démarrer une simulation ?</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">📊 Voir mes statistiques de performance</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">💎 Comparer les forfaits</div>
+      <div class="suggestion-chip" onclick="sendSuggestion(this)">🔧 Problème technique</div>
     </div>
 
-    <!-- Forfaits grid -->
-    <div class="forfaits-grid">
+    <div class="chat-date">Aujourd'hui</div>
 
-      <!-- Starter -->
-      <div class="plan-card starter" onclick="openModal('starter')">
-        <div class="plan-header">
-          <span class="plan-icon">🌱</span>
-          <div class="plan-name">Starter</div>
-          <div class="plan-tagline">Parfait pour commencer</div>
-          <div class="plan-price-wrap">
-            <span class="plan-currency">DT</span>
-            <span class="plan-price" data-monthly="149" data-yearly="119">149</span>
-            <span class="plan-period">/mois</span>
+    <!-- AI message 1 -->
+    <div class="message-group ai">
+      <div class="msg-avatar ai">🤖</div>
+      <div class="msg-content">
+        <div class="msg-bubble ai">
+          Bonjour ! Je suis prêt à vous assister. Voici ce que je peux faire pour vous aujourd'hui :
+          <div class="msg-tags">
+            <span class="msg-tag blue">🏥 Simulations</span>
+            <span class="msg-tag green">📈 Statistiques</span>
+            <span class="msg-tag pink">💡 Conseils</span>
+          </div>
+          <div class="info-card">
+            <div class="info-card-icon blue">🥽</div>
+            <div>
+              <div class="info-card-title">Simulation active détectée</div>
+              <div class="info-card-desc">Appendicectomie laparoscopique — Module 3 en cours. Score actuel : 87/100</div>
+            </div>
           </div>
         </div>
-        <div class="plan-body">
-          <ul class="plan-features">
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">1</span> enquête VR active</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">100</span> répondants/mois</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">1</span> APK fourni</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">1 Go</span> stockage</div></li>
-            <li><div class="feat-check check-no">✗</div><div class="feat-text" style="color:#aaa">Support prioritaire</div></li>
-            <li><div class="feat-check check-no">✗</div><div class="feat-text" style="color:#aaa">Export Excel / CSV</div></li>
-          </ul>
-          <button class="plan-cta">Choisir Starter</button>
-        </div>
-      </div>
-
-      <!-- Pro (current) -->
-      <div class="plan-card pro current" onclick="openModal('pro')">
-        <div class="popular-badge">Populaire</div>
-        <div class="current-badge">✓ Actuel</div>
-        <div class="plan-header">
-          <span class="plan-icon">⚡</span>
-          <div class="plan-name">Pro</div>
-          <div class="plan-tagline">Pour les équipes actives</div>
-          <div class="plan-price-wrap">
-            <span class="plan-currency">DT</span>
-            <span class="plan-price" data-monthly="349" data-yearly="279">349</span>
-            <span class="plan-period">/mois</span>
-          </div>
-        </div>
-        <div class="plan-body">
-          <ul class="plan-features">
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">5</span> enquêtes VR actives</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">500</span> répondants/mois</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">5</span> APK fournis</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">5 Go</span> stockage</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text">Support prioritaire</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text">Export Excel / CSV</div></li>
-          </ul>
-          <button class="plan-cta" style="background:rgba(255,255,255,0.15);color:#fff;border:1.5px solid rgba(255,255,255,0.3)">✓ Plan actuel</button>
-        </div>
-      </div>
-
-      <!-- Business -->
-      <div class="plan-card business" onclick="openModal('business')">
-        <div class="plan-header">
-          <span class="plan-icon">🏢</span>
-          <div class="plan-name">Business</div>
-          <div class="plan-tagline">Multi-sites & grandes équipes</div>
-          <div class="plan-price-wrap">
-            <span class="plan-currency">DT</span>
-            <span class="plan-price" data-monthly="699" data-yearly="559">699</span>
-            <span class="plan-period">/mois</span>
-          </div>
-        </div>
-        <div class="plan-body">
-          <ul class="plan-features">
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">20</span> enquêtes VR actives</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">2 000</span> répondants/mois</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">20</span> APK fournis</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">20 Go</span> stockage</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text">Support dédié</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text">Dashboard multi-sites</div></li>
-          </ul>
-          <button class="plan-cta">Passer à Business</button>
-        </div>
-      </div>
-
-      <!-- Enterprise -->
-      <div class="plan-card enterprise" onclick="openModal('enterprise')">
-        <div class="plan-header">
-          <span class="plan-icon">🚀</span>
-          <div class="plan-name">Enterprise</div>
-          <div class="plan-tagline">Sur mesure & illimité</div>
-          <div class="plan-price-wrap">
-            <span class="plan-price" style="font-size:28px;letter-spacing:-0.5px">Sur devis</span>
-          </div>
-        </div>
-        <div class="plan-body">
-          <ul class="plan-features">
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">Illimité</span> enquêtes VR</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">Illimité</span> répondants</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">Illimité</span> APK</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text"><span class="feat-val">Illimité</span> stockage</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text">SLA garanti + CSM dédié</div></li>
-            <li><div class="feat-check check-yes">✓</div><div class="feat-text">Intégration API + White Label</div></li>
-          </ul>
-          <button class="plan-cta">Contacter l'équipe</button>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Compare table -->
-    <div class="compare-section">
-      <div class="compare-title">📊 Comparaison détaillée</div>
-      <table class="compare-table">
-        <thead>
-          <tr>
-            <th>Fonctionnalité</th>
-            <th>Starter</th>
-            <th class="highlight-col">Pro</th>
-            <th>Business</th>
-            <th>Enterprise</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td>Enquêtes VR actives</td>
-            <td><span class="val-cell">1</span></td>
-            <td class="highlight-col"><span class="val-cell">5</span></td>
-            <td><span class="val-cell">20</span></td>
-            <td><span class="val-cell">∞</span></td>
-          </tr>
-          <tr>
-            <td>Répondants / mois</td>
-            <td><span class="val-cell">100</span></td>
-            <td class="highlight-col"><span class="val-cell">500</span></td>
-            <td><span class="val-cell">2 000</span></td>
-            <td><span class="val-cell">∞</span></td>
-          </tr>
-          <tr>
-            <td>APK inclus</td>
-            <td><span class="val-cell">1</span></td>
-            <td class="highlight-col"><span class="val-cell">5</span></td>
-            <td><span class="val-cell">20</span></td>
-            <td><span class="val-cell">∞</span></td>
-          </tr>
-          <tr>
-            <td>Stockage cloud</td>
-            <td>1 Go</td>
-            <td class="highlight-col">5 Go</td>
-            <td>20 Go</td>
-            <td>∞</td>
-          </tr>
-          <tr>
-            <td>Support prioritaire</td>
-            <td><span class="cross">✕</span></td>
-            <td class="highlight-col"><span class="tick">✓</span></td>
-            <td><span class="tick">✓</span></td>
-            <td><span class="tick">✓</span></td>
-          </tr>
-          <tr>
-            <td>Export Excel / CSV</td>
-            <td><span class="cross">✕</span></td>
-            <td class="highlight-col"><span class="tick">✓</span></td>
-            <td><span class="tick">✓</span></td>
-            <td><span class="tick">✓</span></td>
-          </tr>
-          <tr>
-            <td>Dashboard multi-sites</td>
-            <td><span class="cross">✕</span></td>
-            <td class="highlight-col"><span class="cross">✕</span></td>
-            <td><span class="tick">✓</span></td>
-            <td><span class="tick">✓</span></td>
-          </tr>
-          <tr>
-            <td>API & Intégrations</td>
-            <td><span class="cross">✕</span></td>
-            <td class="highlight-col"><span class="cross">✕</span></td>
-            <td><span class="cross">✕</span></td>
-            <td><span class="tick">✓</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- FAQ -->
-    <div class="faq-section">
-      <div class="faq-title">Questions fréquentes</div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">Puis-je changer de forfait à tout moment ? <span class="faq-chevron">▾</span></div>
-        <div class="faq-a">Oui, vous pouvez passer à un forfait supérieur immédiatement. Le passage à un forfait inférieur prend effet à la fin de la période de facturation en cours.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">Quels moyens de paiement sont acceptés ? <span class="faq-chevron">▾</span></div>
-        <div class="faq-a">Nous acceptons les cartes bancaires Visa / Mastercard, le virement bancaire (RIB), et le paiement mobile via D17 et Flouci.</div>
-      </div>
-      <div class="faq-item" onclick="toggleFaq(this)">
-        <div class="faq-q">Y a-t-il une période d'essai gratuite ? <span class="faq-chevron">▾</span></div>
-        <div class="faq-a">Oui, tous les nouveaux comptes bénéficient de 14 jours d'essai gratuit sur le forfait Pro, sans carte bancaire requise.</div>
+        <div class="msg-time">14:32</div>
       </div>
     </div>
 
+    <!-- User message -->
+    <div class="message-group user">
+      <div class="msg-avatar user">DC</div>
+      <div class="msg-content">
+        <div class="msg-bubble user">
+          Comment puis-je améliorer mon score sur le module d'appendicectomie ?
+        </div>
+        <div class="msg-time">14:33</div>
+      </div>
+    </div>
+
+    <!-- AI message 2 with rich content -->
+    <div class="message-group ai">
+      <div class="msg-avatar ai">🤖</div>
+      <div class="msg-content">
+        <div class="msg-bubble ai">
+          D'après votre historique de simulations, voici les 3 axes d'amélioration prioritaires :
+
+          <div class="info-card" style="margin-top:12px;">
+            <div class="info-card-icon blue">⚡</div>
+            <div>
+              <div class="info-card-title">Précision des incisions</div>
+              <div class="info-card-desc">Votre angle d'approche est légèrement décalé (-4°). Exercez-vous sur le module "Précision Laparoscopique" pour corriger.</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon green">⏱</div>
+            <div>
+              <div class="info-card-title">Gestion du temps opératoire</div>
+              <div class="info-card-desc">Vos temps de procédure sont 12% au-dessus de la médiane. Focus sur les transitions entre instruments.</div>
+            </div>
+          </div>
+
+          <div class="info-card">
+            <div class="info-card-icon blue">🎯</div>
+            <div>
+              <div class="info-card-title">Hémostase</div>
+              <div class="info-card-desc">Score hémostase : 92/100. Excellent ! Maintenez cette rigueur.</div>
+            </div>
+          </div>
+        </div>
+        <div class="msg-time">14:33</div>
+      </div>
+    </div>
+
+    <!-- Typing indicator -->
+    <div class="typing-indicator" id="typingIndicator" style="display:none;">
+      <div class="msg-avatar ai">🤖</div>
+      <div class="typing-bubble">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Input -->
+  <div class="input-area">
+    <div class="input-wrapper">
+      <textarea
+        id="chatInput"
+        class="chat-input"
+        placeholder="Posez votre question à l'assistant SurgeryVR…"
+        rows="1"
+        onkeydown="handleKey(event)"
+        oninput="autoResize(this)"
+      ></textarea>
+      <div class="input-actions">
+        <button class="input-btn attach" title="Joindre un fichier">📎</button>
+        <button class="input-btn send" onclick="sendMessage()" title="Envoyer">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="input-hint">Appuyez sur <strong>Entrée</strong> pour envoyer · <strong>Maj+Entrée</strong> pour un saut de ligne</div>
   </div>
 </main>
 
-<!-- ═══════════════════════════════════════
-     MODAL
-═══════════════════════════════════════ -->
-<div class="modal-overlay" id="modalOverlay" onclick="handleOverlayClick(event)">
-  <div class="modal" id="modal">
+<script>
+const chatArea = document.getElementById('chatArea');
+const chatInput = document.getElementById('chatInput');
+const typingIndicator = document.getElementById('typingIndicator');
 
-    <!-- Modal Header (dynamic) -->
-    <div class="modal-header">
-      <div class="modal-hero" id="modalHero">
-        <button class="modal-close" onclick="closeModal()">✕</button>
-        <span class="modal-plan-icon" id="modalIcon">⚡</span>
-        <div class="modal-plan-name" id="modalName">Forfait Pro</div>
-        <div class="modal-plan-desc" id="modalDesc">Idéal pour les équipes actives qui déploient des enquêtes VR en multi-points de vente.</div>
-        <div class="modal-price-row">
-          <span class="modal-price" id="modalPrice">349</span>
-          <span class="modal-price-sub" id="modalPriceSub">DT / mois</span>
-        </div>
-      </div>
+const aiResponses = [
+  "Je comprends votre question. D'après les données de votre dernière session, votre progression est remarquable. Continuez à pratiquer le module recommandé quotidiennement.",
+  "Excellente question ! La simulation que vous mentionnez nécessite une configuration spécifique. Je vous recommande de vérifier vos paramètres VR dans les réglages avancés.",
+  "Votre score de performance est dans le top 15% des utilisateurs de votre spécialité. Pour progresser davantage, je vous suggère de revoir les modules de niveau intermédiaire.",
+  "Je vais analyser vos statistiques récentes… Votre temps de réaction s'est amélioré de 8% cette semaine. C'est un excellent indicateur de progression !",
+];
 
-      <!-- Steps -->
-      <div class="modal-steps">
-        <div class="step active" id="step-indicator-1">
-          <div class="step-num">1</div>
-          <div class="step-label">Détails</div>
-        </div>
-        <div class="step" id="step-indicator-2">
-          <div class="step-num">2</div>
-          <div class="step-label">Paiement</div>
-        </div>
-        <div class="step" id="step-indicator-3">
-          <div class="step-num">3</div>
-          <div class="step-label">Confirmation</div>
-        </div>
-      </div>
+let responseIndex = 0;
+
+function autoResize(textarea) {
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendMessage() {
+  const text = chatInput.value.trim();
+  if (!text) return;
+  appendMessage(text, 'user');
+  chatInput.value = '';
+  chatInput.style.height = 'auto';
+  showTyping();
+  setTimeout(() => {
+    hideTyping();
+    appendMessage(aiResponses[responseIndex % aiResponses.length], 'ai');
+    responseIndex++;
+  }, 1400 + Math.random() * 600);
+}
+
+function sendSuggestion(el) {
+  const text = el.textContent.trim().replace(/^[^\s]+\s/, '');
+  chatInput.value = text;
+  sendMessage();
+  el.closest('.suggestions').style.opacity = '0.4';
+  el.closest('.suggestions').style.pointerEvents = 'none';
+}
+
+function appendMessage(text, role) {
+  const group = document.createElement('div');
+  group.className = `message-group ${role}`;
+  const now = new Date();
+  const time = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
+  const avatarContent = role === 'ai' ? '🤖' : 'DC';
+  group.innerHTML = `
+    <div class="msg-avatar ${role}">${avatarContent}</div>
+    <div class="msg-content">
+      <div class="msg-bubble ${role}">${text}</div>
+      <div class="msg-time">${time}</div>
     </div>
+  `;
+  chatArea.insertBefore(group, typingIndicator);
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
 
-    <!-- Modal Body -->
-    <div class="modal-body">
+function showTyping() {
+  typingIndicator.style.display = 'flex';
+  chatArea.scrollTop = chatArea.scrollHeight;
+}
 
-      <!-- STEP 1 : Details -->
-      <div class="step-content active" id="step1">
-        <div class="detail-grid">
-          <div class="detail-card">
-            <div class="detail-icon">🥽</div>
-            <div class="detail-info">
-              <div class="detail-label">Enquêtes VR actives</div>
-              <div class="detail-value" id="d-surveys">5 enquêtes</div>
-            </div>
-          </div>
-          <div class="detail-card">
-            <div class="detail-icon">👥</div>
-            <div class="detail-info">
-              <div class="detail-label">Répondants / mois</div>
-              <div class="detail-value" id="d-respondents">500</div>
-            </div>
-          </div>
-          <div class="detail-card">
-            <div class="detail-icon">📱</div>
-            <div class="detail-info">
-              <div class="detail-label">APK inclus</div>
-              <div class="detail-value" id="d-apk">5 APK</div>
-            </div>
-          </div>
-          <div class="detail-card">
-            <div class="detail-icon">☁️</div>
-            <div class="detail-info">
-              <div class="detail-label">Stockage cloud</div>
-              <div class="detail-value" id="d-storage">5 Go</div>
-            </div>
-          </div>
-        </div>
+function hideTyping() {
+  typingIndicator.style.display = 'none';
+}
 
-        <div class="features-full">
-          <div class="features-full-title">✦ Ce qui est inclus</div>
-          <div class="features-cols" id="featuresList"></div>
-        </div>
-      </div>
-
-      <!-- STEP 2 : Payment -->
-      <div class="step-content" id="step2">
-        <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700;color:var(--text-dark);margin-bottom:16px;">Choisissez votre moyen de paiement</div>
-
-        <div class="payment-methods">
-          <div class="pay-method selected" onclick="selectPayment(this, 'card')">
-            <div class="pay-icon">💳</div>
-            <div>
-              <div class="pay-name">Carte bancaire</div>
-              <div class="pay-desc">Visa, Mastercard</div>
-            </div>
-          </div>
-          <div class="pay-method" onclick="selectPayment(this, 'virement')">
-            <div class="pay-icon">🏦</div>
-            <div>
-              <div class="pay-name">Virement bancaire</div>
-              <div class="pay-desc">Paiement via RIB</div>
-            </div>
-          </div>
-          <div class="pay-method" onclick="selectPayment(this, 'd17')">
-            <div class="pay-icon">📲</div>
-            <div>
-              <div class="pay-name">D17</div>
-              <div class="pay-desc">Paiement mobile D17</div>
-            </div>
-          </div>
-          <div class="pay-method" onclick="selectPayment(this, 'flouci')">
-            <div class="pay-icon">🟢</div>
-            <div>
-              <div class="pay-name">Flouci</div>
-              <div class="pay-desc">Wallet mobile Flouci</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Card form (default) -->
-        <div class="card-form" id="cardForm">
-          <div class="form-group">
-            <label class="form-label">NUMÉRO DE CARTE</label>
-            <input class="form-input" placeholder="1234 5678 9012 3456" maxlength="19" oninput="formatCard(this)">
-            <div class="card-icons">
-              <span class="card-icon-badge">VISA</span>
-              <span class="card-icon-badge">MC</span>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label">DATE D'EXPIRATION</label>
-              <input class="form-input" placeholder="MM / AA" maxlength="7" oninput="formatExpiry(this)">
-            </div>
-            <div class="form-group">
-              <label class="form-label">CVV</label>
-              <input class="form-input" placeholder="•••" maxlength="3" type="password">
-            </div>
-          </div>
-          <div class="form-group">
-            <label class="form-label">NOM SUR LA CARTE</label>
-            <input class="form-input" placeholder="Ahmed Karim">
-          </div>
-        </div>
-
-        <!-- Virement form -->
-        <div class="card-form" id="virementForm" style="display:none;">
-          <div style="background:var(--bg-light);border:1px solid rgba(0,102,255,0.1);border-radius:14px;padding:20px;">
-            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--text-dark);margin-bottom:14px;">Coordonnées bancaires</div>
-            <div style="font-size:13px;color:var(--text-gray);line-height:2.2;">
-              <strong>Banque :</strong> Banque Nationale Agricole (BNA)<br>
-              <strong>Bénéficiaire :</strong> SurveyVR SARL<br>
-              <strong>RIB :</strong> 08 006 0123456789 12<br>
-              <strong>Référence :</strong> <span style="color:var(--primary);font-weight:700;">SVR-AK-2026</span>
-            </div>
-            <div style="margin-top:14px;font-size:12px;color:var(--accent);">⚠ Votre abonnement sera activé sous 24–48h après réception du virement.</div>
-          </div>
-        </div>
-
-        <!-- D17 form -->
-        <div class="card-form" id="d17Form" style="display:none;">
-          <div style="background:var(--bg-light);border:1px solid rgba(0,102,255,0.1);border-radius:14px;padding:20px;text-align:center;">
-            <div style="font-size:48px;margin-bottom:12px;">📲</div>
-            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text-dark);margin-bottom:8px;">Payer via D17</div>
-            <div style="font-size:13px;color:var(--text-gray);margin-bottom:16px;">Envoyez le montant au numéro suivant :</div>
-            <div style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--primary);letter-spacing:2px;">+216 71 234 567</div>
-            <div style="margin-top:12px;font-size:12px;color:var(--text-gray);">Référence : <strong>SVR-AK-2026</strong></div>
-          </div>
-        </div>
-
-        <!-- Flouci form -->
-        <div class="card-form" id="flouciForm" style="display:none;">
-          <div style="background:var(--bg-light);border:1px solid rgba(0,102,255,0.1);border-radius:14px;padding:20px;text-align:center;">
-            <div style="font-size:48px;margin-bottom:12px;">🟢</div>
-            <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:15px;color:var(--text-dark);margin-bottom:8px;">Payer via Flouci</div>
-            <div style="font-size:13px;color:var(--text-gray);margin-bottom:16px;">Scannez le QR code ou entrez le lien de paiement :</div>
-            <div style="width:120px;height:120px;background:#fff;border:2px solid #eee;border-radius:12px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#aaa;">QR Code</div>
-            <div style="font-size:12px;color:var(--text-gray);">Référence : <strong>SVR-AK-2026</strong></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- STEP 3 : Confirm -->
-      <div class="step-content" id="step3">
-        <div class="confirm-summary">
-          <div class="confirm-row">
-            <span class="label">Forfait</span>
-            <span class="value" id="confirm-plan">Pro</span>
-          </div>
-          <div class="confirm-row">
-            <span class="label">Facturation</span>
-            <span class="value" id="confirm-billing">Mensuelle</span>
-          </div>
-          <div class="confirm-row">
-            <span class="label">Moyen de paiement</span>
-            <span class="value" id="confirm-method">Carte bancaire</span>
-          </div>
-          <div class="confirm-row">
-            <span class="label">Date de début</span>
-            <span class="value">20 Février 2026</span>
-          </div>
-          <div class="confirm-row">
-            <span class="label">Prochaine facturation</span>
-            <span class="value">20 Mars 2026</span>
-          </div>
-          <div class="confirm-row total">
-            <span class="label">Total à payer</span>
-            <span class="value" id="confirm-total">349 DT</span>
-          </div>
-        </div>
-
-        <div class="security-note">
-          🔒 Paiement 100% sécurisé — Vos données sont chiffrées SSL 256-bit. SurveyVR ne stocke jamais vos informations bancaires.
-        </div>
-      </div>
-
-      <!-- SUCCESS -->
-      <div class="success-screen" id="successScreen">
-        <div class="success-anim">🎉</div>
-        <div class="success-title">Paiement confirmé !</div>
-        <div class="success-text">Votre forfait <strong id="success-plan">Pro</strong> est maintenant actif. Un email de confirmation vous a été envoyé. Profitez de toutes vos fonctionnalités dès maintenant.</div>
-        <button onclick="closeModal()" style="margin-top:28px;padding:13px 32px;background:var(--gradient-1);color:#fff;border:none;border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 16px rgba(0,102,255,0.3);">Accéder au Dashboard</button>
-      </div>
-    </div>
-
-    <!-- Modal Footer -->
-    <div class="modal-footer" id="modalFooter">
-      <button class="btn-back" id="btnBack" onclick="prevStep()">← Retour</button>
-      <div style="font-size:12px;color:var(--text-gray);" id="stepHint">Cliquez sur "Suivant" pour continuer</div>
-      <button class="btn-next" id="btnNext" onclick="nextStep()">Suivant →</button>
-    </div>
-  </div>
-</div>
-
-
+// Initial scroll
+chatArea.scrollTop = chatArea.scrollHeight;
+</script>
 </body>
 </html>

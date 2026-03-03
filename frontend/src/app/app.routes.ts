@@ -13,6 +13,7 @@ import { Dashboard } from './clients/institution/dashboard/dashboard';
 import { Forfaits } from './clients/institution/forfaits/forfaits';
 import { Abonnements } from './clients/institution/abonnements/abonnements';
 import { MesExperiences } from './clients/institution/mes-experiences/mes-experiences';
+import { Chatbot } from './clients/institution/chatbot/chatbot';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -33,6 +34,7 @@ export const routes: Routes = [
       { path: 'client/forfaits', component: Forfaits },
       {path : 'client/abonnements', component : Abonnements},
       {path : 'client/mesExperiences', component : MesExperiences}, 
+      {path : 'client/chatbot', component: Chatbot} , 
 
        { path: '**', redirectTo: '' }
 
