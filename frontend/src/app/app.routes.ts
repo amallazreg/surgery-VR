@@ -16,6 +16,7 @@ import { MesExperiences } from './clients/institution/mes-experiences/mes-experi
 import { Chatbot } from './clients/institution/chatbot/chatbot';
 import { ForfaitManagment } from './admin/forfait-managment/forfait-managment';
 import { ExperienceManagement } from './admin/experience-management/experience-management';
+import { DashboardEtudiant } from './clients/Etudiants/dashboard-etudiant/dashboard-etudiant';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -40,6 +41,10 @@ export const routes: Routes = [
       {path : 'client/abonnements', component : Abonnements},
       {path : 'client/mesExperiences', component : MesExperiences}, 
       {path : 'client/chatbot', component: Chatbot} , 
+
+
+      {path : 'etudiant/dashborad' , component : DashboardEtudiant},
+
 
        { path: '**', redirectTo: '' }
 

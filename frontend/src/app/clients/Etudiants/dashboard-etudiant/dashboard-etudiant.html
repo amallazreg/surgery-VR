@@ -1,0 +1,336 @@
+<div class="student-layout">
+<app-side-bar-etudiant></app-side-bar-etudiant>
+    <!-- Main Content -->
+  <main class="main-content">
+
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h2>Bonjour   {{userName}}</h2>
+        <p>Voici votre progression sur SurgeryVR — continuez comme ça !</p>
+      </div>
+      <div class="header-right">
+      
+        <button class="notification-btn">
+          🔔
+          <div class="notif-dot"></div>
+        </button>
+      </div>
+    </header>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+
+      <div class="stat-card" style="animation-delay: 0.1s;">
+        <div class="stat-header">
+          <div class="stat-icon si-1">🥽</div>
+          <div class="stat-change positive">↗ +3 ce mois</div>
+        </div>
+        <div class="stat-value">12</div>
+        <div class="stat-label">Simulations complétées</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width: 60%; background: var(--gradient-1);"></div>
+        </div>
+      </div>
+
+      <div class="stat-card" style="animation-delay: 0.2s;">
+        <div class="stat-header">
+          <div class="stat-icon si-2">⭐</div>
+          <div class="stat-change positive">↗ +0.4</div>
+        </div>
+        <div class="stat-value">87<span class="stat-value-sub">/100</span></div>
+        <div class="stat-label">Score moyen global</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width: 87%; background: var(--gradient-2);"></div>
+        </div>
+      </div>
+
+      <div class="stat-card" style="animation-delay: 0.3s;">
+        <div class="stat-header">
+          <div class="stat-icon si-3">⏱️</div>
+          <div class="stat-change neutral">Ce mois</div>
+        </div>
+        <div class="stat-value">34<span class="stat-value-sub">h</span></div>
+        <div class="stat-label">Heures de pratique</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width: 76%; background: var(--gradient-3);"></div>
+        </div>
+      </div>
+
+      <div class="stat-card" style="animation-delay: 0.4s;">
+        <div class="stat-header">
+          <div class="stat-icon si-4">🏅</div>
+          <div class="stat-change positive">↗ Top 10%</div>
+        </div>
+        <div class="stat-value">#8</div>
+        <div class="stat-label">Classement promo</div>
+        <div class="stat-progress">
+          <div class="stat-progress-fill" style="width: 90%; background: var(--gradient-4);"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Content Grid -->
+    <div class="content-grid">
+
+      <!-- Modules VR -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Mes Modules VR</h3>
+          <button class="btn btn-secondary">Voir tout</button>
+        </div>
+        <div class="module-list">
+
+          <div class="module-item">
+            <div class="module-thumb m-green">🫀</div>
+            <div class="module-info">
+              <div class="module-name">Chirurgie Cardiaque — Module 1</div>
+              <div class="module-meta">12 exercices · Niveau Avancé</div>
+              <div class="module-bar">
+                <div class="module-fill" style="width: 100%;"></div>
+              </div>
+            </div>
+            <div class="module-pct">100%</div>
+            <span class="status-chip chip-done">Terminé</span>
+          </div>
+
+          <div class="module-item">
+            <div class="module-thumb m-blue">🧠</div>
+            <div class="module-info">
+              <div class="module-name">Neurochirurgie — Bases</div>
+              <div class="module-meta">8 exercices · Niveau Intermédiaire</div>
+              <div class="module-bar">
+                <div class="module-fill" style="width: 72%;"></div>
+              </div>
+            </div>
+            <div class="module-pct">72%</div>
+            <span class="status-chip chip-ongoing">En cours</span>
+          </div>
+
+          <div class="module-item">
+            <div class="module-thumb m-pink">🦴</div>
+            <div class="module-info">
+              <div class="module-name">Orthopédie — Prothèse hanche</div>
+              <div class="module-meta">10 exercices · Niveau Intermédiaire</div>
+              <div class="module-bar">
+                <div class="module-fill" style="width: 45%;"></div>
+              </div>
+            </div>
+            <div class="module-pct">45%</div>
+            <span class="status-chip chip-ongoing">En cours</span>
+          </div>
+
+          <div class="module-item">
+            <div class="module-thumb m-purple">👁️</div>
+            <div class="module-info">
+              <div class="module-name">Ophtalmologie — Cataracte</div>
+              <div class="module-meta">6 exercices · Niveau Débutant</div>
+              <div class="module-bar">
+                <div class="module-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="module-pct locked-pct">0%</div>
+            <span class="status-chip chip-locked">🔒 Verrouillé</span>
+          </div>
+
+          <div class="module-item">
+            <div class="module-thumb m-orange">🩺</div>
+            <div class="module-info">
+              <div class="module-name">Urgences — Trauma sévère</div>
+              <div class="module-meta">15 exercices · Niveau Expert</div>
+              <div class="module-bar">
+                <div class="module-fill" style="width: 0%;"></div>
+              </div>
+            </div>
+            <div class="module-pct locked-pct">0%</div>
+            <span class="status-chip chip-locked">🔒 Verrouillé</span>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Right Column -->
+      <div class="right-column">
+
+        <!-- Upcoming Sessions -->
+        <div class="section-card">
+          <div class="section-header">
+            <h3 class="section-title">Séances à venir</h3>
+          </div>
+          <div class="session-list">
+
+            <div class="session-item urgent">
+              <div class="session-date date-blue">
+                <span class="day">05</span>
+                <span class="month">MAR</span>
+              </div>
+              <div class="session-body">
+                <div class="session-title">Simulation Cardiaque — Éval.</div>
+                <div class="session-sub">14h00 · Prof. Lenoir</div>
+              </div>
+            </div>
+
+            <div class="session-item soon">
+              <div class="session-date date-orange">
+                <span class="day">09</span>
+                <span class="month">MAR</span>
+              </div>
+              <div class="session-body">
+                <div class="session-title">Atelier Neurochirurgie</div>
+                <div class="session-sub">10h00 · Prof. Marchand</div>
+              </div>
+            </div>
+
+            <div class="session-item later">
+              <div class="session-date date-green">
+                <span class="day">15</span>
+                <span class="month">MAR</span>
+              </div>
+              <div class="session-body">
+                <div class="session-title">Certification Orthopédie</div>
+                <div class="session-sub">09h30 · En ligne</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Achievements + Leaderboard -->
+    <div class="content-grid">
+
+      <!-- Achievements -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Badges & Récompenses</h3>
+          <span class="badge-count">5 / 12 obtenus</span>
+        </div>
+        <div class="achievements-grid">
+
+          <div class="achievement-card">
+            <span class="achievement-icon">🥇</span>
+            <div class="achievement-name">Premier Scalpel</div>
+            <div class="achievement-desc">1ère simulation</div>
+          </div>
+
+          <div class="achievement-card">
+            <span class="achievement-icon">🎯</span>
+            <div class="achievement-name">Précision Max</div>
+            <div class="achievement-desc">Score parfait 100</div>
+          </div>
+
+          <div class="achievement-card">
+            <span class="achievement-icon">⚡</span>
+            <div class="achievement-name">Speed Run</div>
+            <div class="achievement-desc">Module en &lt; 10 min</div>
+          </div>
+
+          <div class="achievement-card">
+            <span class="achievement-icon">🔥</span>
+            <div class="achievement-name">Streak 7 jours</div>
+            <div class="achievement-desc">7 jours consécutifs</div>
+          </div>
+
+          <div class="achievement-card">
+            <span class="achievement-icon">🫀</span>
+            <div class="achievement-name">Cardio Expert</div>
+            <div class="achievement-desc">Module cardiaque fini</div>
+          </div>
+
+          <div class="achievement-card locked">
+            <span class="achievement-icon">🧠</span>
+            <div class="achievement-name">Neuro Master</div>
+            <div class="achievement-desc">Finir Neurochirurgie</div>
+          </div>
+
+          <div class="achievement-card locked">
+            <span class="achievement-icon">🏆</span>
+            <div class="achievement-name">Top 3 Promo</div>
+            <div class="achievement-desc">Atteindre rang #3</div>
+          </div>
+
+          <div class="achievement-card locked">
+            <span class="achievement-icon">💎</span>
+            <div class="achievement-name">Chirurgien Élite</div>
+            <div class="achievement-desc">Tous modules complétés</div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="section-card">
+        <div class="section-header">
+          <h3 class="section-title">Classement Promo</h3>
+          <button class="btn btn-secondary">Voir tout</button>
+        </div>
+        <div class="leaderboard">
+
+          <div class="lb-item">
+            <span class="lb-rank gold">1</span>
+            <div class="lb-avatar av-blue">CL</div>
+            <div class="lb-info">
+              <div class="lb-name">Clara Laurent</div>
+              <div class="lb-score">12 modules · 98% moy.</div>
+            </div>
+            <div class="lb-pts">4 820 XP</div>
+          </div>
+
+          <div class="lb-item">
+            <span class="lb-rank silver">2</span>
+            <div class="lb-avatar av-green">TM</div>
+            <div class="lb-info">
+              <div class="lb-name">Thomas Moreau</div>
+              <div class="lb-score">11 modules · 95% moy.</div>
+            </div>
+            <div class="lb-pts">4 310 XP</div>
+          </div>
+
+          <div class="lb-item">
+            <span class="lb-rank bronze">3</span>
+            <div class="lb-avatar av-pink">SC</div>
+            <div class="lb-info">
+              <div class="lb-name">Sophie Carlier</div>
+              <div class="lb-score">11 modules · 93% moy.</div>
+            </div>
+            <div class="lb-pts">4 150 XP</div>
+          </div>
+
+          <div class="lb-item">
+            <span class="lb-rank other">4</span>
+            <div class="lb-avatar av-purple">JB</div>
+            <div class="lb-info">
+              <div class="lb-name">Jean Bouchard</div>
+              <div class="lb-score">10 modules · 91% moy.</div>
+            </div>
+            <div class="lb-pts">3 890 XP</div>
+          </div>
+
+          <div class="lb-item me">
+            <span class="lb-rank me-rank">8</span>
+            <div class="lb-avatar av-blue">AM</div>
+            <div class="lb-info">
+              <div class="lb-name">Adam Morel <span class="me-tag">(vous)</span></div>
+              <div class="lb-score">12 modules · 87% moy.</div>
+            </div>
+            <div class="lb-pts">2 450 XP</div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- Animated Background -->
+  <div class="bg-animated">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+</div>

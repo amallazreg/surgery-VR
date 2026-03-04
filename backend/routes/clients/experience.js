@@ -12,6 +12,7 @@ const {
   deleteExperience,
   getMesExperiences,
   downloadExperienceApk,
+  getExperiencesByForfait,
 } = require('../../controllers/clients/experience');
 
 
@@ -38,5 +39,7 @@ router.delete('/:id', deleteExperience);
 // ── Routes CLIENT ───────────────────────────────────────────
 router.get('/mes-experiences/:userId',         getMesExperiences);
 router.post('/download/:userId/:experienceId', downloadExperienceApk);
+router.get('/:forfaitId', getExperiencesByForfait);
+
 
 module.exports = router;

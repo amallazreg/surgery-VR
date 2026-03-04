@@ -75,6 +75,9 @@ togglePasswordVisibility() {
         localStorage.setItem('nom', res.user.nom);        
         localStorage.setItem('prenom', res.user.prenom);  
         localStorage.setItem('email', res.user.email);
+        localStorage.setItem('specialite', res.user.specialite);
+        localStorage.setItem('niveauEtude', res.user.niveauEtude);
+
         console.log(userId);
         this.authService.saveRole(role);
 
@@ -82,7 +85,9 @@ togglePasswordVisibility() {
         if (role === 'admin') {
           this.router.navigate(['/admin/dashboard']);
         } else if (role === 'professionnel') {
-          this.router.navigate(['client/dashborad']);
+          this.router.navigate(['/client/dashborad']);
+        } else if(role === 'etudiant'){
+          this.router.navigate(['/etudiant/dashborad'])
         }
 
         this.loading = false;

@@ -1,0 +1,71 @@
+<aside class="sidebar">
+  <div class="logo">
+    <h1>
+      <div class="logo-icon">🥽</div>
+      SurgeryVR
+    </h1>
+  </div>
+
+  <div class="student-badge">
+    <div class="student-avatar">{{ userInitials }}</div>
+    <div class="student-info">
+      <div class="name">{{userName}}</div>
+      <div class="role">Etudiant</div>
+    </div>
+  </div>
+
+  <nav>
+    <ul class="nav-menu">
+      <li class="nav-item">
+        <a routerLink="/etudiant/dashborad" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+          <span class="nav-icon">📊</span>
+          <span>Tableau de bord</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/student/modules" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">🥽</span>
+          <span>Mes Modules VR</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/student/sessions" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">📅</span>
+          <span>Séances Planifiées</span>
+          <span class="nav-badge">2</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/student/performances" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">📈</span>
+          <span>Mes Performances</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/student/leaderboard" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">🏆</span>
+          <span>Classement</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/student/certifications" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">🎓</span>
+          <span>Certifications</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/student/settings" class="nav-link" routerLinkActive="active">
+          <span class="nav-icon">⚙️</span>
+          <span>Paramètres</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-logout">
+    <button class="logout-btn" (click)="logout()">
+      <span class="logout-icon">🚪</span>
+      <span>Déconnexion</span>
+    </button>
+  </div>
+</aside>

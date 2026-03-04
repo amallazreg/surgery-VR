@@ -76,14 +76,16 @@ export class ForfaitManagment implements OnInit {
     
   ) {}
 
-  // ─── Navigation ───────────────────────────────────────────────────────────
+  // ─── Navigation 
   goToExperiences(forfaitId?: string): void {
     this.router.navigate(['/admin/experienceManagement'], {
       queryParams: forfaitId ? { forfait: forfaitId } : {}
     });
   }
 
-  // ─── State ───────────────────────────────────────────────────────────────
+
+
+  // ─── State 
   forfaits: Forfait[] = [];
   filteredForfaits: Forfait[] = [];
   searchQuery = '';
@@ -94,7 +96,7 @@ export class ForfaitManagment implements OnInit {
   isDeleting = false;
   errorMessage = '';
 
-  // ─── Modals ──────────────────────────────────────────────────────────────
+  // ─── Modals 
   showModal = false;
   showViewModal = false;
   showDeleteModal = false;
@@ -105,20 +107,18 @@ export class ForfaitManagment implements OnInit {
 
   formData: Forfait = this.cloneDefault();
 
-  // ─── Toast ───────────────────────────────────────────────────────────────
+  // ─── Toast 
   toastVisible = false;
   toastMessage = '';
   toastType: 'success' | 'error' = 'success';
   private toastTimer: any;
 
 
-  // ─── Lifecycle ───────────────────────────────────────────────────────────
 
   ngOnInit(): void {
     this.loadForfaits();
   }
 
-  // ─── API Calls ───────────────────────────────────────────────────────────
 
   loadForfaits(): void {
     this.isLoading = true;
@@ -138,6 +138,8 @@ export class ForfaitManagment implements OnInit {
       },
     });
   }
+
+
 
   saveForfait(): void {
     if (!this.formData.name.trim()) return;
@@ -194,7 +196,6 @@ export class ForfaitManagment implements OnInit {
     });
   }
 
-  // ─── Search ──────────────────────────────────────────────────────────────
 
   onSearch(): void {
     this.applySearch();
@@ -214,7 +215,6 @@ export class ForfaitManagment implements OnInit {
     );
   }
 
-  // ─── Stats Helpers ────────────────────────────────────────────────────────
 
   getForfaitsAvecFormation(): number {
     return this.forfaits.filter(f => f.formation?.incluse).length;
@@ -228,7 +228,6 @@ export class ForfaitManagment implements OnInit {
     return this.forfaits.filter(f => f.simulationEsthetique).length;
   }
 
-  // ─── Modal: Create / Edit ─────────────────────────────────────────────────
 
   openModal(forfait?: Forfait): void {
     if (forfait) {
@@ -253,7 +252,6 @@ export class ForfaitManagment implements OnInit {
     }
   }
 
-  // ─── Modal: View ──────────────────────────────────────────────────────────
 
   viewForfait(forfait: Forfait): void {
     this.selectedForfait = forfait;
@@ -265,7 +263,6 @@ export class ForfaitManagment implements OnInit {
     this.selectedForfait = null;
   }
 
-  // ─── Modal: Delete ────────────────────────────────────────────────────────
 
   confirmDelete(forfait: Forfait): void {
     this.forfaitToDelete = forfait;
@@ -277,7 +274,6 @@ export class ForfaitManagment implements OnInit {
     this.forfaitToDelete = null;
   }
 
-  // ─── Features ─────────────────────────────────────────────────────────────
 
   addFeature(): void {
     this.formData.features.push({ text: '', yes: true });
@@ -287,7 +283,6 @@ export class ForfaitManagment implements OnInit {
     this.formData.features.splice(index, 1);
   }
 
-  // ─── Toast ───────────────────────────────────────────────────────────────
 
   showToast(message: string, type: 'success' | 'error'): void {
     clearTimeout(this.toastTimer);
@@ -299,8 +294,6 @@ export class ForfaitManagment implements OnInit {
       this.toastVisible = false;
     }, 3500);
   }
-
-  // ─── Utils ───────────────────────────────────────────────────────────────
 
   private cloneDefault(): Forfait {
     return this.deepClone(DEFAULT_FORM_DATA);

@@ -163,10 +163,29 @@ const downloadExperienceApk = async (req, res) => {
   }
 };
 
+const getExperiencesByForfait = async (req, res) => {
+  try {
+    const { forfaitId } = req.params;
+
+    const experiences = await Experience.find({ forfaits: forfaitId })
+      .populate('forfaits', 'name price tagline')
+      .sort({ createdAt: -1 });
+
+    res.json({
+      forfaitId,
+      total: experiences.length,
+      experiences,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createExperience,
   getAllExperiences,
   deleteExperience,
   getMesExperiences,
   downloadExperienceApk,
+  getExperiencesByForfait,
 };
