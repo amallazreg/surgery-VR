@@ -19,6 +19,7 @@ export interface ExperienceBackend {
   rating: number | null;
   apkInstalled: boolean;   // enrichi par le backend
   status: 'live' | 'new' | 'paused' | 'draft';
+  appLabUrl?: string;  
 }
 
 export interface DownloadApkResponse {

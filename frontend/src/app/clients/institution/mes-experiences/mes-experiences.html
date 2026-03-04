@@ -1,10 +1,5 @@
-<!-- ═══════════════════════════════════════════════════
-     mes-experiences.html
-═══════════════════════════════════════════════════ -->
 <div class="app-shell">
-
   <app-side-bar></app-side-bar>
-
   <main class="main">
 
     <!-- Topbar -->
@@ -24,29 +19,27 @@
       </div>
     </div>
 
-    <!-- Content -->
     <div class="content">
 
-      <!-- ══ LOADING STATE ══ -->
+      <!-- LOADING -->
       <div *ngIf="isLoading" class="loading-state">
         <div class="loading-spinner">⏳</div>
         <p>Chargement de vos expériences...</p>
       </div>
 
-      <!-- ══ ERROR STATE ══ -->
+      <!-- ERROR -->
       <div *ngIf="!isLoading && errorMessage" class="error-state">
         <div style="font-size:40px;margin-bottom:12px">⚠️</div>
         <p>{{ errorMessage }}</p>
         <button class="exp-btn ebtn-apk" (click)="loadMesExperiences()">🔄 Réessayer</button>
       </div>
 
-      <!-- ══ MAIN CONTENT ══ -->
+      <!-- MAIN CONTENT -->
       <ng-container *ngIf="!isLoading && !errorMessage">
 
-        <!-- ══ SUBSCRIPTION BANNER ══ -->
+        <!-- SUBSCRIPTION BANNER -->
         <div class="sub-banner" [ngClass]="activeSubscription.headerClass">
           <div class="sub-banner-glow"></div>
-
           <div class="sub-banner-left">
             <span class="sub-banner-icon">{{ activeSubscription.planIcon }}</span>
             <div>
@@ -54,43 +47,34 @@
               <div class="sub-banner-ref">{{ activeSubscription.expireLabel ? 'Expire le ' + activeSubscription.expireLabel : '' }}</div>
             </div>
           </div>
-
           <div class="sub-banner-stats">
             <div class="sbs-item">
               <div class="sbs-val">{{ activeSubscription.totalExperiences }}/{{ activeSubscription.maxSlots }}</div>
               <div class="sbs-lbl">Expériences</div>
             </div>
             <div class="sbs-sep"></div>
-
-            <!-- APK avec barre de progression intégrée -->
             <div class="sbs-item sbs-apk-item">
               <div class="sbs-val">
                 {{ activeSubscription.apkRestants }}<span style="font-size:11px;opacity:.5">/{{ activeSubscription.apkTotal }}</span>
               </div>
               <div class="sbs-lbl">APK restants</div>
               <div class="apk-mini-bar">
-                <div
-                  class="apk-mini-fill"
-                  [style.width.%]="apkBarWidth()"
-                  [style.background]="apkBarColor()"
-                ></div>
+                <div class="apk-mini-fill" [style.width.%]="apkBarWidth()" [style.background]="apkBarColor()"></div>
               </div>
             </div>
-
             <div class="sbs-sep"></div>
             <div class="sbs-item">
               <div class="sbs-val">{{ activeSubscription.totalRespondents }}</div>
               <div class="sbs-lbl">Répondants</div>
             </div>
           </div>
-
           <div class="sub-banner-badge" [ngClass]="getSubBadge(activeSubscription.status).cssClass">
             <span class="sgb-dot"></span>
             {{ getSubBadge(activeSubscription.status).label }}
           </div>
         </div>
 
-        <!-- Stat strip -->
+        <!-- STAT STRIP -->
         <div class="stat-strip">
           <div class="stat-card">
             <div class="stat-ico ico-blue">🥽</div>
@@ -122,15 +106,13 @@
           </div>
         </div>
 
-        <!-- Controls row -->
+        <!-- CONTROLS -->
         <div class="controls-row">
           <div class="filter-pills">
-            <div
-              *ngFor="let f of filters"
-              class="filter-pill"
-              [class.active]="activeFilter === f.key"
-              (click)="setFilter(f.key)"
-            >{{ f.label }}</div>
+            <div *ngFor="let f of filters" class="filter-pill"
+              [class.active]="activeFilter === f.key" (click)="setFilter(f.key)">
+              {{ f.label }}
+            </div>
           </div>
           <div class="view-toggle">
             <button class="vt-btn active">⊞</button>
@@ -138,9 +120,8 @@
           </div>
         </div>
 
-        <!-- ══ EXPERIENCE CARDS GRID ══ -->
+        <!-- EXPERIENCE CARDS -->
         <div class="exp-grid">
-
           <ng-container *ngFor="let exp of filteredExperiencesFlat()">
 
             <!-- Empty slot -->
@@ -151,42 +132,27 @@
 
             <!-- Experience card -->
             <div *ngIf="!exp.isEmpty" class="exp-card" [attr.data-status]="exp.status">
-
-              <!-- ── Thumbnail ── -->
               <div class="exp-card-thumb">
                 <div class="vr-thumb" [ngClass]="exp.thumbClass">{{ exp.emoji }}</div>
-
-                <div *ngIf="exp.apkInstalled" class="apk-installed-badge">
-                  ✅ APK installé
-                </div>
-
+                <div *ngIf="exp.apkInstalled" class="apk-installed-badge">✅ APK installé</div>
                 <span class="exp-status-tag" [ngClass]="getStatusTag(exp.status).cssClass">
                   {{ getStatusTag(exp.status).label }}
                 </span>
                 <span class="compat-tag">🥽 {{ exp.compatibility }}</span>
-
-                <!-- Hover overlay -->
                 <div class="exp-card-thumb-overlay">
-                  <button
-                    class="quick-action"
+                  <button class="quick-action"
                     [class.qa-locked]="!exp.apkInstalled"
                     [title]="exp.apkInstalled ? 'Tester sur casque' : 'Installez l\'APK d\'abord'"
-                    (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp); $event.stopPropagation()"
-                  >{{ exp.apkInstalled ? '🥽' : '🔒' }}</button>
-
-                  <button
-                    class="quick-action"
-                    title="Télécharger APK"
-                    (click)="openAPKModal(exp); $event.stopPropagation()"
-                  >📱</button>
+                    (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp); $event.stopPropagation()">
+                    {{ exp.apkInstalled ? '🥽' : '🔒' }}
+                  </button>
+                  <button class="quick-action" title="Télécharger APK"
+                    (click)="openAPKModal(exp); $event.stopPropagation()">📱</button>
                 </div>
               </div>
-
-              <!-- ── Card body ── -->
               <div class="exp-card-body">
                 <div class="exp-title">{{ exp.title }}</div>
                 <div class="exp-desc">{{ exp.description }}</div>
-
                 <div class="exp-stats-row">
                   <div class="exp-stat-item">👥 <strong>{{ exp.respondents }}</strong> réponses</div>
                   <div class="exp-stat-item">⏱ <strong>{{ exp.avgTime }}</strong> moy.</div>
@@ -194,30 +160,18 @@
                   <div class="exp-stat-item warn" *ngIf="!exp.rating">⚠ Brouillon</div>
                 </div>
               </div>
-
-              <!-- ── Action buttons ── -->
-              <!-- ── Action buttons ── -->
-<div class="exp-actions-always">
-
-  <!-- Quiz guidé -->
-  <button
-    class="exp-btn"
-    [ngClass]="exp.apkInstalled ? 'ebtn-vr' : 'ebtn-vr-locked'"
-    (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp)"
-  >
-    {{ exp.apkInstalled ? '🥽 Tester sur le casque' : '🔒 APK requis' }}
-  </button>
-
-  <!-- Examen -->
-  <button
-    class="exp-btn"
-    [ngClass]="exp.apkInstalled ? 'ebtn-apk-done' : 'ebtn-apk'"
-    (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp)"
-  >
-    {{ exp.apkInstalled ? '✅ Examen' : '🔒 APK requis' }}
-  </button>
-
-</div>
+              <div class="exp-actions-always">
+                <button class="exp-btn"
+                  [ngClass]="exp.apkInstalled ? 'ebtn-vr' : 'ebtn-vr-locked'"
+                  (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp)">
+                  {{ exp.apkInstalled ? '🥽 Tester sur le casque' : '🔒 APK requis' }}
+                </button>
+                <button class="exp-btn"
+                  [ngClass]="exp.apkInstalled ? 'ebtn-apk-done' : 'ebtn-apk'"
+                  (click)="exp.apkInstalled ? openVRModal(exp) : openAPKModal(exp)">
+                  {{ exp.apkInstalled ? '✅ Examen' : '🔒 APK requis' }}
+                </button>
+              </div>
             </div>
 
           </ng-container>
@@ -230,18 +184,15 @@
 
 
 <!-- ════════════════════════════════════
-     MODAL APK — avec quota backend
+     MODAL APK
 ════════════════════════════════════ -->
 <div class="apk-overlay" [class.open]="isApkModalOpen" (click)="onApkOverlayClick($event)">
   <div class="apk-modal">
-
     <div class="apk-modal-head">
       <button class="apk-close" (click)="closeAPKModal()">✕</button>
       <div style="font-size:36px;margin-bottom:12px">📱</div>
       <div class="apk-modal-head-title">{{ selectedExpForApk }}</div>
       <div class="apk-modal-head-sub">Choisissez la version compatible avec votre casque</div>
-
-      <!-- Compteur quota APK -->
       <div class="apk-quota-bar">
         <div class="apk-quota-label">
           <span>Quota APK ce mois</span>
@@ -250,62 +201,42 @@
           </strong>
         </div>
         <div class="apk-quota-track">
-          <div
-            class="apk-quota-fill"
-            [style.width.%]="apkBarWidth()"
-            [style.background]="apkBarColor()"
-          ></div>
+          <div class="apk-quota-fill" [style.width.%]="apkBarWidth()" [style.background]="apkBarColor()"></div>
         </div>
       </div>
     </div>
-
     <div class="apk-modal-body">
-
-      <!-- Message quota -->
-      <div *ngIf="apkQuotaMessage"
-        class="apk-quota-msg"
+      <div *ngIf="apkQuotaMessage" class="apk-quota-msg"
         [class.apk-quota-msg-error]="apkQuotaError"
-        [class.apk-quota-msg-success]="!apkQuotaError"
-      >
+        [class.apk-quota-msg-success]="!apkQuotaError">
         {{ apkQuotaMessage }}
       </div>
-
-      <!-- Si APK déjà installé pour cette expérience -->
       <div *ngIf="selectedExp?.apkInstalled" class="apk-already-installed">
         <div style="font-size:28px;margin-bottom:8px">✅</div>
         <div style="font-weight:700;color:#166534;margin-bottom:4px">APK déjà installé</div>
-        <div style="font-size:12px;color:#888">
-          Re-télécharger ne consommera pas votre quota.
-        </div>
+        <div style="font-size:12px;color:#888">Re-télécharger ne consommera pas votre quota.</div>
       </div>
-
-      <!-- Liste des versions — enrichies avec les métadonnées de l'expérience sélectionnée -->
       <div class="apk-version-list">
-        <div
-          *ngFor="let device of apkVersions; let i = index"
-          class="apk-version-item"
-          [class.recommended]="device.recommended"
-        >
+        <div *ngFor="let device of apkVersions; let i = index"
+          class="apk-version-item" [class.recommended]="device.recommended">
           <div *ngIf="device.recommended" class="apk-rec-tag">Recommandé</div>
           <div class="apk-device-icon">{{ device.icon }}</div>
           <div class="apk-version-info">
             <div class="apk-version-name">{{ device.name }}</div>
             <div class="apk-version-meta">
               {{ selectedExp?.apkVersion || device.version }} ·
-              {{ selectedExp?.apkAndroid || device.android }} ·
-              Dernière version
+              {{ selectedExp?.apkAndroid || device.android }} · Dernière version
             </div>
           </div>
           <span class="apk-version-size">{{ selectedExp?.apkSize || device.size }}</span>
-          <button
-            class="apk-dl-btn"
+          <button class="apk-dl-btn"
             [class.done]="downloadStates[i] === 'done'"
             [disabled]="downloadStates[i] === 'loading' || (activeSubscription.apkRestants <= 0 && !selectedExp?.apkInstalled)"
-            (click)="downloadApk(i)"
-          >{{ getDownloadIcon(i) }}</button>
+            (click)="downloadApk(i)">
+            {{ getDownloadIcon(i) }}
+          </button>
         </div>
       </div>
-
       <div class="apk-qr-row">
         <div class="apk-qr-box">QR Code</div>
         <div class="apk-qr-text">
@@ -319,7 +250,7 @@
 
 
 <!-- ════════════════════════════════════
-     MODAL VR — uniquement si APK installé
+     MODAL VR — une seule fois !
 ════════════════════════════════════ -->
 <div class="vr-overlay" [class.open]="isVrModalOpen" (click)="onVrOverlayClick($event)">
   <div class="vr-modal">
@@ -330,30 +261,56 @@
       <div class="vr-modal-exp">{{ selectedExpForVr }}</div>
     </div>
     <div class="vr-modal-body">
+
       <div class="vr-steps">
         <div class="vr-step">
           <div class="vr-step-num">1</div>
-          <div class="vr-step-text">Assurez-vous que votre <strong>casque Meta Quest</strong> est allumé et connecté au même réseau Wi-Fi.</div>
+          <div class="vr-step-text">
+            Allumez votre <strong>casque Meta Quest</strong> et
+            connectez-vous avec votre <strong>compte Meta</strong>.
+          </div>
         </div>
         <div class="vr-step">
           <div class="vr-step-num">2</div>
-          <div class="vr-step-text">Ouvrez l'application <strong>SurveyVR Player</strong> sur le casque (APK installé requis).</div>
+          <div class="vr-step-text">
+            Cliquez sur <strong>"Lancer l'expérience"</strong> ci-dessous —
+            le lien <strong>Meta App Lab</strong> s'ouvrira dans un nouvel onglet.
+          </div>
         </div>
         <div class="vr-step">
           <div class="vr-step-num">3</div>
-          <div class="vr-step-text">Cliquez sur <strong>"Lancer l'expérience"</strong> ci-dessous — l'expérience s'affichera automatiquement.</div>
+          <div class="vr-step-text">
+            Ouvrez ce <strong>même lien depuis le navigateur de votre casque</strong>
+            pour installer et lancer l'expérience VR.
+          </div>
         </div>
       </div>
-      <div class="vr-connect-status">
-        <div class="vr-status-dot"></div>
-        <div class="vr-status-text">Casque détecté : <strong>Quest 2 — AhmedKarim</strong> · Prêt à recevoir</div>
+
+      <!-- Lien à copier -->
+      <div class="vr-link-box" *ngIf="selectedExpVr?.appLabUrl">
+        <div class="vr-link-label">🔗 Lien à ouvrir depuis le casque :</div>
+        <div class="vr-link-row">
+          <span class="vr-link-url">{{ selectedExpVr?.appLabUrl }}</span>
+          <button class="vr-copy-btn" (click)="copyAppLabLink()">
+            {{ linkCopied ? '✅ Copié !' : '📋 Copier' }}
+          </button>
+        </div>
       </div>
+
+      <!-- Message si pas de lien -->
+      <div class="vr-no-link" *ngIf="!selectedExpVr?.appLabUrl">
+        ⚠️ Lien Meta App Lab non configuré pour cette expérience.
+      </div>
+
+      <!-- Bouton lancer -->
       <button
         class="vr-launch-btn"
         [class.launched]="vrLaunchState === 'done'"
-        [disabled]="vrLaunchState === 'loading'"
-        (click)="launchOnHeadset()"
-      >{{ vrLaunchLabel }}</button>
+        [disabled]="vrLaunchState === 'loading' || !selectedExpVr?.appLabUrl"
+        (click)="launchOnHeadset()">
+        {{ vrLaunchLabel }}
+      </button>
+
     </div>
   </div>
 </div>

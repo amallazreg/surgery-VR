@@ -16,6 +16,8 @@ const experienceSchema = new mongoose.Schema({
   apkVersion:      { type: String, default: 'v1.0.0' },
   apkAndroid:      { type: String, default: 'Android 10+' },
 
+  appLabUrl: { type: String, default: null },
+
   // ─── Forfaits qui ont accès ───
   forfaits: [{
     type: mongoose.Schema.Types.ObjectId,
