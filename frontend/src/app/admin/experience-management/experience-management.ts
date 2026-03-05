@@ -13,12 +13,8 @@ export interface Experience {
   emoji: string;
   thumbClass: string;
   compatibility: string;
-  apkUrl: string;
-  apkPublicId?: string;
-  apkOriginalName?: string;
-  apkSize?: string;
-  apkVersion: string;
-  apkAndroid: string;
+  apkUrl?: string;       // optionnel
+  appLabUrl: string;     // obligatoire
   forfaits?: any[];
   respondents: number;
   avgTime: string;
@@ -34,8 +30,6 @@ const DEFAULT_FORM = {
   emoji: '🥽',
   thumbClass: 'vrt-1',
   compatibility: 'Quest 2 & 3',
-  apkVersion: 'v1.0.0',
-  apkAndroid: 'Android 10+',
   forfaits: [] as string[],
 };
 
@@ -62,9 +56,9 @@ export class ExperienceManagement implements OnInit {
   selectedForfaitFilter = '';
 
   // ─── State ────────────────────────────────────────────────────────────────
-  isLoading  = false;
-  isSaving   = false;
-  isDeleting = false;
+  isLoading    = false;
+  isSaving     = false;
+  isDeleting   = false;
   errorMessage = '';
 
   // ─── Modals ───────────────────────────────────────────────────────────────
@@ -72,17 +66,13 @@ export class ExperienceManagement implements OnInit {
   showDeleteModal = false;
   showViewModal   = false;
 
-  selectedExperience:  Experience | null = null;
-  experienceToDelete:  Experience | null = null;
+  selectedExperience: Experience | null = null;
+  experienceToDelete: Experience | null = null;
 
   // ─── Formulaire ───────────────────────────────────────────────────────────
-  formData = { ...DEFAULT_FORM, forfaits: [] as string[] };
-
-  // Champs APK Meta App Lab (remplace selectedFile)
-  apkUrl          = '';
-  apkPublicId     = '';
-  apkOriginalName = '';
-  apkSize         = '';
+  formData   = { ...DEFAULT_FORM, forfaits: [] as string[] };
+  appLabUrl  = '';   // obligatoire
+  apkUrl     = '';   // optionnel
 
   // ─── Constantes template ──────────────────────────────────────────────────
   readonly emojis       = EMOJIS;
@@ -93,6 +83,8 @@ export class ExperienceManagement implements OnInit {
   toastMessage = '';
   toastType: 'success' | 'error' = 'success';
   private toastTimer: any;
+
+  linkCopied = false;
 
   constructor(
     private experienceService: Experiences,
@@ -110,7 +102,7 @@ export class ExperienceManagement implements OnInit {
   // ─── API ──────────────────────────────────────────────────────────────────
 
   loadExperiences(): void {
-    this.isLoading   = true;
+    this.isLoading    = true;
     this.errorMessage = '';
 
     this.experienceService.getAllExperiences().subscribe({
@@ -139,33 +131,26 @@ export class ExperienceManagement implements OnInit {
   }
 
   saveExperience(): void {
-    // ── Validations manuelles ──
     if (!this.formData.title.trim()) {
       this.showToast('❌ Le titre est obligatoire.', 'error');
       return;
     }
-    if (!this.apkUrl.trim()) {
-      this.showToast('❌ Veuillez renseigner le lien APK Meta App Lab.', 'error');
+    if (!this.appLabUrl.trim()) {
+      this.showToast('❌ Le lien Meta App Lab est obligatoire.', 'error');
       return;
     }
 
     this.isSaving = true;
 
-    // ── Payload JSON avec l'URL Meta App Lab ──
     const payload = {
-      title:           this.formData.title,
-      description:     this.formData.description,
-      emoji:           this.formData.emoji,
-      thumbClass:      this.formData.thumbClass,
-      compatibility:   this.formData.compatibility,
-      apkVersion:      this.formData.apkVersion,
-      apkAndroid:      this.formData.apkAndroid,
-      forfaits:        this.formData.forfaits,
-      apkUrl:          this.apkUrl,
-      apkPublicId:     this.apkPublicId,
-      apkOriginalName: this.apkOriginalName,
-      apkSize:         this.apkSize,
-    };
+      title:         this.formData.title,
+      description:   this.formData.description,
+      emoji:         this.formData.emoji,
+      thumbClass:    this.formData.thumbClass,
+      compatibility: this.formData.compatibility,
+      forfaits:      this.formData.forfaits,
+      appLabUrl:     this.appLabUrl,
+      apkUrl: this.apkUrl.trim() || this.appLabUrl,    };
 
     this.experienceService.createExperience(payload).subscribe({
       next: (created) => {
@@ -271,12 +256,10 @@ export class ExperienceManagement implements OnInit {
   // ─── Modals ───────────────────────────────────────────────────────────────
 
   openModal(): void {
-    this.formData        = { ...DEFAULT_FORM, forfaits: [] };
-    this.apkUrl          = '';
-    this.apkPublicId     = '';
-    this.apkOriginalName = '';
-    this.apkSize         = '';
-    this.showModal       = true;
+    this.formData  = { ...DEFAULT_FORM, forfaits: [] };
+    this.appLabUrl = '';
+    this.apkUrl    = '';
+    this.showModal = true;
   }
 
   closeModal(): void {
@@ -301,6 +284,14 @@ export class ExperienceManagement implements OnInit {
   closeDeleteModal(): void {
     this.showDeleteModal    = false;
     this.experienceToDelete = null;
+  }
+
+  copyAppLabLink(): void {
+    if (!this.selectedExperience?.appLabUrl) return;
+    navigator.clipboard.writeText(this.selectedExperience.appLabUrl).then(() => {
+      this.linkCopied = true;
+      setTimeout(() => { this.linkCopied = false; }, 2500);
+    });
   }
 
   // ─── Toast ────────────────────────────────────────────────────────────────

@@ -616,3 +616,66 @@ body {
   border-radius: 12px; padding: 16px;
   margin-bottom: 14px;
 }
+
+.vr-link-box {
+  background: linear-gradient(135deg, #f8fbff, #eef5ff);
+  border: 1px solid #dce6ff;
+  border-radius: 14px;
+  padding: 18px 20px;
+  margin-top: 20px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vr-link-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.12);
+}
+
+.vr-link-label {
+  font-weight: 600;
+  font-size: 15px;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.vr-link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.vr-link-url {
+  flex: 1;
+  background: white;
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  color: #34495e;
+  border: 1px solid #e0e6f5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.vr-copy-btn {
+  border: none;
+  background: linear-gradient(135deg, #4f8cff, #3a6df0);
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 9px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.vr-copy-btn:hover {
+  background: linear-gradient(135deg, #3a6df0, #274fce);
+  transform: scale(1.05);
+}
+
+.vr-copy-btn:active {
+  transform: scale(0.96);
+}

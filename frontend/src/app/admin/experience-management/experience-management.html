@@ -9,7 +9,7 @@
           <span class="back-icon">🥽</span>
           <div>
             <h2>Bibliothèque d'Expériences</h2>
-            <p>Gérez les modules VR et leurs fichiers APK</p>
+            <p>Gérez les modules VR et leurs liens Meta App Lab</p>
           </div>
         </div>
       </div>
@@ -118,7 +118,6 @@
           <!-- Card Top -->
           <div class="exp-card-top" [class]="'thumb-' + exp.thumbClass">
             <div class="exp-emoji">{{ exp.emoji }}</div>
-            <div class="exp-version-badge">{{ exp.apkVersion }}</div>
             <div class="exp-actions-overlay">
               <button class="action-btn btn-view" data-tooltip="Détails" (click)="viewExperience(exp)">👁️</button>
               <button class="action-btn btn-delete" data-tooltip="Supprimer" (click)="confirmDelete(exp)">🗑️</button>
@@ -132,7 +131,6 @@
 
             <div class="exp-meta">
               <span class="meta-chip">🥽 {{ exp.compatibility }}</span>
-              <span class="meta-chip">📱 {{ exp.apkAndroid }}</span>
             </div>
 
             <div class="exp-forfaits" *ngIf="exp.forfaits && exp.forfaits.length">
@@ -159,10 +157,9 @@
               </div>
             </div>
 
-            <div class="exp-apk-info" *ngIf="exp.apkOriginalName || exp.apkUrl">
+            <div class="exp-apk-info" *ngIf="exp.appLabUrl">
               <span class="apk-icon">🔗</span>
-              <span class="apk-name">{{ exp.apkOriginalName || 'Meta App Lab' }}</span>
-              <span class="apk-size" *ngIf="exp.apkSize">{{ exp.apkSize }}</span>
+              <span class="apk-name">Meta App Lab</span>
             </div>
           </div>
         </div>
@@ -220,27 +217,15 @@
                 placeholder="Décrivez le scénario de formation..."
               ></textarea>
             </div>
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Compatibilité</label>
-                <input type="text" [(ngModel)]="formData.compatibility" name="compatibility" placeholder="Quest 2 & 3" />
-              </div>
-              <div class="form-group">
-                <label>Android minimum</label>
-                <input type="text" [(ngModel)]="formData.apkAndroid" name="apkAndroid" placeholder="Android 10+" />
-              </div>
+            <div class="form-group">
+              <label>Compatibilité</label>
+              <input type="text" [(ngModel)]="formData.compatibility" name="compatibility" placeholder="Quest 2 & 3" />
             </div>
-            <div class="form-grid-2">
-              <div class="form-group">
-                <label>Version APK</label>
-                <input type="text" [(ngModel)]="formData.apkVersion" name="apkVersion" placeholder="v1.0.0" />
-              </div>
-              <div class="form-group">
-                <label>Classe visuelle</label>
-                <select [(ngModel)]="formData.thumbClass" name="thumbClass">
-                  <option *ngFor="let t of thumbClasses" [value]="t">{{ t }}</option>
-                </select>
-              </div>
+            <div class="form-group">
+              <label>Classe visuelle</label>
+              <select [(ngModel)]="formData.thumbClass" name="thumbClass">
+                <option *ngFor="let t of thumbClasses" [value]="t">{{ t }}</option>
+              </select>
             </div>
           </div>
 
@@ -262,10 +247,10 @@
         <!-- ── Colonne droite ── -->
         <div class="modal-col">
 
-          <!-- Lien APK Meta App Lab -->
+          <!-- Liens APK -->
           <div class="form-section">
             <div class="form-section-title">
-              <span>📦 Lien APK — Meta App Lab *</span>
+              <span>🔗 Lien Meta App Lab *</span>
               <a href="https://developer.oculus.com/manage/" target="_blank" class="meta-link-help">
                 Ouvrir Meta Dashboard ↗
               </a>
@@ -275,43 +260,32 @@
               <label>URL Meta App Lab *</label>
               <input
                 type="url"
-                [(ngModel)]="apkUrl"
-                name="apkUrl"
+                [(ngModel)]="appLabUrl"
+                name="appLabUrl"
                 placeholder="https://www.meta.com/s/xxxxxx"
               />
             </div>
 
             <!-- Aperçu du lien -->
-            <div class="apk-url-preview" *ngIf="apkUrl">
+            <div class="apk-url-preview" *ngIf="appLabUrl">
               <span class="apk-preview-icon">🔗</span>
-              <span class="apk-preview-url">{{ apkUrl }}</span>
-              <a [href]="apkUrl" target="_blank" class="btn-test-link">Tester ↗</a>
+              <span class="apk-preview-url">{{ appLabUrl }}</span>
+              <a [href]="appLabUrl" target="_blank" class="btn-test-link">Tester ↗</a>
             </div>
 
-            <!-- Hint si vide -->
-            <div class="apk-url-empty" *ngIf="!apkUrl">
+            <div class="apk-url-empty" *ngIf="!appLabUrl">
               <span>💡 Copiez le lien depuis votre espace Meta App Lab</span>
             </div>
 
-            <div class="form-grid-2" style="margin-top: 0.8rem;">
-              <div class="form-group">
-                <label>Nom du fichier</label>
-                <input
-                  type="text"
-                  [(ngModel)]="apkOriginalName"
-                  name="apkOriginalName"
-                  placeholder="Ex: RehabX.apk"
-                />
-              </div>
-              <div class="form-group">
-                <label>Taille</label>
-                <input
-                  type="text"
-                  [(ngModel)]="apkSize"
-                  name="apkSize"
-                  placeholder="Ex: 126 MB"
-                />
-              </div>
+            <!-- APK URL optionnel -->
+            <div class="form-group" style="margin-top: 1rem;">
+              <label>URL APK directe <span class="label-optional">(optionnel)</span></label>
+              <input
+                type="url"
+                [(ngModel)]="apkUrl"
+                name="apkUrl"
+                placeholder="https://cdn.example.com/app.apk"
+              />
             </div>
           </div>
 
@@ -372,7 +346,6 @@
 
       <div class="view-hero" [class]="'thumb-' + selectedExperience.thumbClass">
         <div class="view-hero-emoji">{{ selectedExperience.emoji }}</div>
-        <div class="view-hero-version">{{ selectedExperience.apkVersion }}</div>
       </div>
 
       <p class="view-desc">{{ selectedExperience.description || 'Aucune description.' }}</p>
@@ -381,10 +354,6 @@
         <div class="view-detail-item">
           <div class="view-detail-label">🥽 Compatibilité</div>
           <div class="view-detail-value">{{ selectedExperience.compatibility }}</div>
-        </div>
-        <div class="view-detail-item">
-          <div class="view-detail-label">📱 Android min.</div>
-          <div class="view-detail-value">{{ selectedExperience.apkAndroid }}</div>
         </div>
         <div class="view-detail-item">
           <div class="view-detail-label">👥 Sessions</div>
@@ -400,10 +369,6 @@
             {{ selectedExperience.rating ? (selectedExperience.rating + '/5') : '—' }}
           </div>
         </div>
-        <div class="view-detail-item">
-          <div class="view-detail-label">📦 Taille APK</div>
-          <div class="view-detail-value">{{ selectedExperience.apkSize || '—' }}</div>
-        </div>
       </div>
 
       <div class="view-section" *ngIf="selectedExperience.forfaits && selectedExperience.forfaits.length > 0">
@@ -415,22 +380,35 @@
         </div>
       </div>
 
-      <div class="view-apk-block" *ngIf="selectedExperience.apkUrl">
+      <!-- Bloc App Lab 
+      <div class="view-apk-block" *ngIf="selectedExperience.appLabUrl">
         <div class="apk-block-icon">🔗</div>
         <div class="apk-block-info">
-          <div class="apk-block-name">{{ selectedExperience.apkOriginalName || 'Meta App Lab' }}</div>
-          <div class="apk-block-meta">
-            {{ selectedExperience.apkVersion }} · {{ selectedExperience.apkSize || 'Taille inconnue' }}
+          <div class="apk-block-name">Meta App Lab</div>
+          <div class="apk-link-row">
+            <span class="apk-link-url">{{ selectedExperience.appLabUrl }}</span>
+            <button class="apk-copy-btn" (click)="copyAppLabLink()">
+              {{ linkCopied ? '✅ Copié' : '📋 Copier' }}
+            </button>
           </div>
         </div>
-        <a
-          [href]="selectedExperience.apkUrl"
-          target="_blank"
-          class="btn btn-primary"
-          style="padding: 0.6rem 1.2rem; font-size: 0.9rem;"
-        >
+        <a [href]="selectedExperience.appLabUrl" target="_blank" class="btn btn-primary">
           🔗 Ouvrir
         </a>
+      </div> -->
+
+      <!-- Bloc APK direct (optionnel) -->
+      <div class="view-apk-block" *ngIf="selectedExperience.appLabUrl">
+        <div class="apk-block-icon">🔗</div>
+        <div class="apk-block-info">
+          <div class="apk-block-name">Meta App Lab</div>
+          <div class="apk-link-row">
+            <span class="apk-link-url">{{ selectedExperience.appLabUrl }}</span>
+          </div>
+        </div>
+         <button class="apk-copy-btn" (click)="copyAppLabLink()">
+              {{ linkCopied ? '✅ Copié' : '📋 Copier' }}
+            </button>
       </div>
 
       <div class="modal-footer">
