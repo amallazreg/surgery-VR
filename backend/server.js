@@ -20,6 +20,8 @@ const paymentRoute       = require('./routes/clients/paiement');
 const forfaitRoutes      = require('./routes/clients/forfait');
 const abonnementRoutes   = require('./routes/clients/abonnement');
 const experienceRoutes = require('./routes/clients/experience');
+const codeFormationRoutes = require('./routes/clients/codeFormation');
+const accesEtudiantRoutes = require('./routes/etudiant/accesEtudiant') ; 
 
 
 const app  = express();
@@ -225,6 +227,9 @@ app.use('/client/abonnements',   abonnementRoutes);
 
 app.use('/admin/experiences',  experienceRoutes);
 app.use('/client/experiences', experienceRoutes);
+
+app.use('/client/codes', codeFormationRoutes);
+app.use('/client/acces', accesEtudiantRoutes);
 
 
 

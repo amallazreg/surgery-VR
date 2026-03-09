@@ -22,7 +22,13 @@ const abonnementSchema = new mongoose.Schema({
   apkRestants: { type: Number, default: 0 }, 
 
   formationUtilisee: { type: Boolean, default: false }, 
-  codesAcces:        [{ type: String }],   
+
+  
+  codesFormation: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'CodeFormation'
+  }],
+  
   
     // ─── NOUVEAU : expériences dont l'APK a été téléchargé ───
   // Persisté en BDD → survit au rechargement de page

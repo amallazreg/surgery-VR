@@ -1,10 +1,11 @@
-const crypto      = require('crypto');
-const Abonnement  = require('../../models/abonnement');
-const Paiement    = require('../../models/paiement');
-const Forfait     = require('../../models/forfait');
-const Stripe      = require('stripe');
-const stripe      = Stripe(process.env.STRIPE_SECRET_KEY);
-const PDFDocument = require('pdfkit');
+const crypto        = require('crypto');
+const Abonnement    = require('../../models/abonnement');
+const Paiement      = require('../../models/paiement');
+const Forfait       = require('../../models/forfait');
+const CodeFormation = require('../../models/codeFormation');   // NOUVEAU
+const Stripe        = require('stripe');
+const stripe        = Stripe(process.env.STRIPE_SECRET_KEY);
+const PDFDocument   = require('pdfkit');
 
 
 // ═══════════════════════════════════════════════════════════
@@ -93,18 +94,15 @@ const telechargerFacture = async (req, res) => {
     res.setHeader('Content-Disposition', `attachment; filename=facture-${paiementId}.pdf`);
     doc.pipe(res);
 
-    // ── Header ──
     doc.fontSize(24).fillColor('#1A2B5F').text('SurgeryVR', 50, 50);
     doc.fontSize(10).fillColor('#888').text('Plateforme d\'enquêtes VR', 50, 78);
     doc.moveTo(50, 100).lineTo(550, 100).strokeColor('#e0e0e0').stroke();
 
-    // ── Titre Facture ──
     doc.fontSize(20).fillColor('#1A2B5F').text('FACTURE', 50, 120);
     doc.fontSize(10).fillColor('#888')
       .text(`Réf: ${paiementId.toString().slice(0, 12).toUpperCase()}`, 50, 145)
       .text(`Date: ${new Date(paiement.createdAt).toLocaleDateString('fr-FR')}`, 50, 160);
 
-    // ── Infos Client ──
     doc.roundedRect(50, 185, 240, 80, 8).fillColor('#f8f9ff').fill();
     doc.fontSize(11).fillColor('#1A2B5F').text('CLIENT', 65, 198);
     doc.fontSize(10).fillColor('#333')
@@ -112,7 +110,6 @@ const telechargerFacture = async (req, res) => {
       .text(`${paiement.user?.email || ''}`, 65, 230)
       .text(`ID: ${paiement.user?._id?.toString().slice(0, 12)}`, 65, 245);
 
-    // ── Infos Abonnement ──
     doc.roundedRect(310, 185, 240, 80, 8).fillColor('#f8f9ff').fill();
     doc.fontSize(11).fillColor('#1A2B5F').text('ABONNEMENT', 325, 198);
     doc.fontSize(10).fillColor('#333')
@@ -120,7 +117,6 @@ const telechargerFacture = async (req, res) => {
       .text(`Début: ${new Date(paiement.abonnement?.dateDebut).toLocaleDateString('fr-FR')}`, 325, 230)
       .text(`Fin: ${paiement.abonnement?.dateFin ? new Date(paiement.abonnement.dateFin).toLocaleDateString('fr-FR') : '—'}`, 325, 245);
 
-    // ── Tableau détails ──
     doc.moveTo(50, 285).lineTo(550, 285).strokeColor('#e0e0e0').stroke();
     doc.fontSize(10).fillColor('#888')
       .text('DESCRIPTION', 50, 295)
@@ -135,17 +131,14 @@ const telechargerFacture = async (req, res) => {
 
     doc.moveTo(50, 345).lineTo(550, 345).strokeColor('#e0e0e0').stroke();
 
-    // ── Total ──
     doc.roundedRect(380, 355, 170, 40, 8).fillColor('#1A2B5F').fill();
     doc.fontSize(12).fillColor('#fff')
       .text('TOTAL', 395, 366)
       .text(`${paiement.amount} ${paiement.currency?.toUpperCase()}`, 460, 366);
 
-    // ── Statut ──
     doc.fontSize(11).fillColor('#22c55e').text(`✓ Paiement confirmé`, 50, 415);
     doc.fontSize(10).fillColor('#888').text(`Session Stripe: ${paiement.stripeSessionId}`, 50, 432);
 
-    // ── Footer ──
     doc.moveTo(50, 700).lineTo(550, 700).strokeColor('#e0e0e0').stroke();
     doc.fontSize(9).fillColor('#aaa')
       .text('SurgeryVR — Plateforme d\'enquêtes VR', 50, 710, { align: 'center', width: 500 })
@@ -188,11 +181,7 @@ const renouvelerAbonnement = async (req, res) => {
       ],
       success_url: 'https://surgery-vr.vercel.app/client/abonnements?payment=success',
       cancel_url:  'https://surgery-vr.vercel.app/client/abonnements?payment=cancel',
-      metadata: {
-        userId,
-        forfaitId: forfait._id.toString(),
-        type: 'renouvellement'
-      }
+      metadata: { userId, forfaitId: forfait._id.toString(), type: 'renouvellement' }
     });
 
     res.json({ url: session.url });
@@ -229,11 +218,7 @@ const upgradeAbonnement = async (req, res) => {
       ],
       success_url: 'https://surgery-vr.vercel.app/client/abonnements?payment=success',
       cancel_url:  'https://surgery-vr.vercel.app/client/abonnements?payment=cancel',
-      metadata: {
-        userId,
-        forfaitId: nouveauForfaitId,
-        type: 'upgrade'
-      }
+      metadata: { userId, forfaitId: nouveauForfaitId, type: 'upgrade' }
     });
 
     res.json({ url: session.url });
@@ -251,22 +236,19 @@ const getForfaitsUpgrade = async (req, res) => {
     const { userId } = req.params;
 
     const abonnementActuel = await Abonnement.findOne({
-      user: userId,
-      status: 'active'
+      user: userId, status: 'active'
     }).populate('forfait');
 
     if (!abonnementActuel) {
       return res.status(404).json({ message: 'Aucun abonnement actif' });
     }
 
-    const prixActuel = parseInt(abonnementActuel.forfait.price);
-
     const forfaitsSupérieurs = await Forfait.find({
-      price: { $gt: prixActuel }
+      price: { $gt: parseInt(abonnementActuel.forfait.price) }
     }).sort({ price: 1 });
 
     res.json({
-      forfaitActuel: abonnementActuel.forfait,
+      forfaitActuel:       abonnementActuel.forfait,
       forfaitsDisponibles: forfaitsSupérieurs
     });
   } catch (error) {
@@ -292,24 +274,18 @@ const getMesDroits = async (req, res) => {
     const forfait = abonnement.forfait;
 
     res.json({
-      forfait: forfait.name,
-
-      // APK
+      forfait:     forfait.name,
       apkTotal:    forfait.nbApk,
       apkRestants: abonnement.apkRestants,
-
-      // Formation
       formation: forfait.formation?.incluse
         ? {
-            dureeHeures:  forfait.formation.dureeHeures,
-            maxEtudiants: forfait.formation.maxEtudiants,
-            detaillee:    forfait.formation.detaillee,
-            activee:      abonnement.formationUtilisee,
-            codesAcces:   abonnement.formationUtilisee ? abonnement.codesAcces : [],
+            dureeHeures:      forfait.formation.dureeHeures,
+            maxEtudiants:     forfait.formation.maxEtudiants,
+            detaillee:        forfait.formation.detaillee,
+            activee:          abonnement.formationUtilisee,
+            // On ne renvoie plus les codes ici → passer par GET /api/codes/abonnement/:abonnementId
           }
         : null,
-
-      // Simulation esthétique (Business uniquement)
       simulationEsthetique: forfait.simulationEsthetique,
     });
   } catch (error) {
@@ -338,18 +314,15 @@ const telechargerApk = async (req, res) => {
       });
     }
 
-    // Décrémente le compteur
     abonnement.apkRestants -= 1;
     await abonnement.save();
 
-    // Retourne l'URL de téléchargement (adapte selon ton stockage S3, GCS, etc.)
     res.json({
-      message: 'APK disponible au téléchargement',
+      message:     'APK disponible au téléchargement',
       apkRestants: abonnement.apkRestants,
       apkTotal:    abonnement.forfait.nbApk,
       downloadUrl: process.env.APK_DOWNLOAD_URL || 'https://ton-bucket.s3.amazonaws.com/app.apk'
     });
-
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -357,14 +330,21 @@ const telechargerApk = async (req, res) => {
 
 
 // ═══════════════════════════════════════════════════════════
-// 10. POST — Activer la formation + générer les codes d'accès
+// 10. POST — Activer la formation + générer les CodeFormation
+//
+// MODIFIÉ : au lieu de stocker des strings dans codesAcces[],
+// on crée de vrais documents CodeFormation en base
+// et on stocke leurs _id dans abonnement.codesFormation[]
 // ═══════════════════════════════════════════════════════════
 const activerFormation = async (req, res) => {
   try {
     const { userId } = req.params;
 
     const abonnement = await Abonnement.findOne({ user: userId, status: 'active' })
-      .populate('forfait');
+      .populate({
+        path:     'forfait',
+        populate: { path: 'experiences' }
+      });
 
     if (!abonnement) {
       return res.status(404).json({ message: 'Aucun abonnement actif' });
@@ -372,40 +352,63 @@ const activerFormation = async (req, res) => {
 
     const forfait = abonnement.forfait;
 
-    // Vérifier que la formation est incluse dans ce forfait
     if (!forfait.formation?.incluse) {
       return res.status(403).json({
         message: `Le forfait "${forfait.name}" ne comprend pas de formation. Passez au forfait Pro ou Business.`
       });
     }
 
-    // Si déjà activée, on retourne simplement les codes existants
+    // Si déjà activée → retourner les codes existants
     if (abonnement.formationUtilisee) {
+      const codesExistants = await CodeFormation.find({
+        abonnement: abonnement._id
+      }).select('code statut etudiant dateExpiration');
+
       return res.status(200).json({
-        message: 'Formation déjà activée.',
+        message:      'Formation déjà activée.',
         dureeHeures:  forfait.formation.dureeHeures,
         detaillee:    forfait.formation.detaillee,
         maxEtudiants: forfait.formation.maxEtudiants,
-        codesAcces:   abonnement.codesAcces
+        codes:        codesExistants
       });
     }
 
-    // Générer un code unique par étudiant
-    const nbCodes = forfait.formation.maxEtudiants;
-    const codes = Array.from({ length: nbCodes }, () =>
-      crypto.randomBytes(4).toString('hex').toUpperCase() // ex: "A3F2C1B0"
+    // ── Générer N documents CodeFormation ────────────────────────
+    const nbCodes    = forfait.formation.maxEtudiants;
+    const maintenant = new Date();
+
+    // Générer des codes uniques (format: "A3F2C1B0")
+    const codesStrings = Array.from({ length: nbCodes }, () =>
+      crypto.randomBytes(4).toString('hex').toUpperCase()
     );
 
+    const codesACreer = codesStrings.map((code) => ({
+      code,
+      abonnement:      abonnement._id,
+      institution:     abonnement.user,
+      statut:          'disponible',
+      dateExpiration:  abonnement.dateFin ?? new Date(maintenant.setFullYear(maintenant.getFullYear() + 1)),
+    }));
+
+    const codesInseres = await CodeFormation.insertMany(codesACreer);
+
+    // ── Mettre à jour l'abonnement ────────────────────────────────
     abonnement.formationUtilisee = true;
-    abonnement.codesAcces        = codes;
+    abonnement.codesFormation    = codesInseres.map((c) => c._id);
     await abonnement.save();
 
-    res.json({
-      message:      `Formation activée avec succès !`,
+    return res.status(201).json({
+      message:      'Formation activée avec succès !',
       dureeHeures:  forfait.formation.dureeHeures,
       detaillee:    forfait.formation.detaillee,
       maxEtudiants: nbCodes,
-      codesAcces:   codes
+      abonnementId: abonnement._id,
+      codes:        codesInseres.map((c) => ({
+        _id:            c._id,
+        code:           c.code,
+        statut:         c.statut,
+        dateExpiration: c.dateExpiration,
+      })),
     });
 
   } catch (error) {
