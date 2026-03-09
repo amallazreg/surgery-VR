@@ -416,6 +416,8 @@ export class CompteClients implements OnInit, OnDestroy {
           this.updateUserInList(updatedUser);
           this.showToast(`Compte de ${user.prenom} ${user.nom} approuvé avec succès !`, 'success');
           // Recharger automatiquement les données
+                  this.cdr.detectChanges();
+
           this.loadUsers();
         },
         error: (error) => {

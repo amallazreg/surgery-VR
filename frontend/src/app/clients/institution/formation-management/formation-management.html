@@ -1,0 +1,267 @@
+<app-side-bar></app-side-bar>
+<main class="main">
+
+  <!-- ══ TOPBAR ══════════════════════════════════════════ -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="page-tag">GESTION FORMATION</div>
+      <h1 class="page-title">Formation & Codes d'accès</h1>
+      <p class="page-sub">Gérez l'accès VR de vos étudiants</p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn-refresh" (click)="chargerDonnees()" [class.spinning]="isLoading">
+        ↻
+      </button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ══ LOADER ════════════════════════════════════════ -->
+    <div *ngIf="isLoading" class="loader-wrap">
+      <div class="loader-dots">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="loader-text">Chargement des données...</div>
+    </div>
+
+    <ng-container *ngIf="!isLoading">
+
+      <!-- ══ BLOC FORMATION NON ACTIVÉE ════════════════ -->
+      <ng-container *ngIf="!formationActivee">
+
+        <div class="activation-zone">
+          <div class="az-deco">
+            <div class="az-ring az-ring-1"></div>
+            <div class="az-ring az-ring-2"></div>
+            <div class="az-icon">🎓</div>
+          </div>
+
+          <div class="az-content">
+            <div class="az-badge">FORMATION VR</div>
+            <h2 class="az-title">Activez votre<br><span class="az-gradient">module de formation</span></h2>
+            <p class="az-desc">
+              Votre forfait <strong>{{ droits?.forfait }}</strong> inclut une formation pour
+              <strong>{{ droits?.formation?.maxEtudiants }}</strong> étudiants
+              sur <strong>{{ droits?.formation?.dureeHeures }}h</strong>.
+              Générez les codes d'accès en un clic.
+            </p>
+
+            <div class="az-features">
+              <div class="az-feature">
+                <span class="azf-icon">🔑</span>
+                <span>{{ droits?.formation?.maxEtudiants }} codes uniques</span>
+              </div>
+              <div class="az-feature">
+                <span class="azf-icon">⏱</span>
+                <span>{{ droits?.formation?.dureeHeures }}h de formation</span>
+              </div>
+              <div class="az-feature">
+                <span class="azf-icon">📊</span>
+                <span>Suivi en temps réel</span>
+              </div>
+            </div>
+
+            <div *ngIf="activationError" class="alert-error">
+              ❌ {{ activationError }}
+            </div>
+
+            <button class="btn-activate-main" [disabled]="activationLoading" (click)="activerFormation()">
+              <span *ngIf="!activationLoading">
+                <span class="btn-spark">✦</span>
+                Générer les codes d'accès
+              </span>
+              <span *ngIf="activationLoading" class="btn-loading-inner">
+                <span class="mini-spinner"></span>
+                Génération en cours...
+              </span>
+            </button>
+          </div>
+        </div>
+
+      </ng-container>
+
+      <!-- ══ BLOC FORMATION ACTIVÉE ═════════════════════ -->
+      <ng-container *ngIf="formationActivee">
+
+        <!-- Stats Header -->
+        <div class="stats-header">
+          <div class="stat-pill sp-total">
+            <div class="sp-icon">🔑</div>
+            <div class="sp-body">
+              <div class="sp-val">{{ stats.total }}</div>
+              <div class="sp-lbl">Total codes</div>
+            </div>
+          </div>
+          <div class="stat-pill sp-dispo">
+            <div class="sp-icon">✅</div>
+            <div class="sp-body">
+              <div class="sp-val">{{ stats.disponibles }}</div>
+              <div class="sp-lbl">Disponibles</div>
+            </div>
+          </div>
+          <div class="stat-pill sp-used">
+            <div class="sp-icon">👤</div>
+            <div class="sp-body">
+              <div class="sp-val">{{ stats.utilises }}</div>
+              <div class="sp-lbl">Utilisés</div>
+            </div>
+          </div>
+          <div class="stat-pill sp-revoked">
+            <div class="sp-icon">🚫</div>
+            <div class="sp-body">
+              <div class="sp-val">{{ stats.revoques }}</div>
+              <div class="sp-lbl">Révoqués</div>
+            </div>
+          </div>
+
+          <!-- Barre de progression globale -->
+          <div class="usage-bar-wrap">
+            <div class="usage-bar-header">
+              <span class="usage-bar-label">Taux d'utilisation</span>
+              <span class="usage-bar-pct">{{ tauxUtilisation }}%</span>
+            </div>
+            <div class="usage-bar-track">
+              <div class="usage-bar-fill" [style.width.%]="tauxUtilisation"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filtres + Recherche -->
+        <div class="toolbar">
+          <div class="filter-tabs">
+            <button
+              class="ftab"
+              *ngFor="let f of filtres"
+              [class.active]="filtreActif === f.key"
+              (click)="setFiltre(f.key)"
+            >
+              <span class="ftab-dot" [ngClass]="'dot-' + f.key"></span>
+              {{ f.label }}
+              <span class="ftab-count">{{ getCount(f.key) }}</span>
+            </button>
+          </div>
+
+          <div class="search-box">
+            <span class="sb-icon">🔍</span>
+            <input
+              class="sb-input"
+              type="text"
+              placeholder="Rechercher un code ou étudiant..."
+              [(ngModel)]="searchQuery"
+            />
+          </div>
+        </div>
+
+        <!-- Grille des codes -->
+        <div class="codes-grid">
+
+          <div
+            class="code-card"
+            *ngFor="let code of codesFiltres; let i = index"
+            [class.cc-used]="code.statut === 'utilise'"
+            [class.cc-revoked]="code.statut === 'revoque'"
+            [class.cc-expired]="code.statut === 'expire'"
+            [style.animation-delay]="(i * 40) + 'ms'"
+          >
+            <!-- Statut badge -->
+            <div class="cc-status-badge" [ngClass]="'csb-' + code.statut">
+              <span class="csb-dot"></span>
+              {{ getStatutLabel(code.statut) }}
+            </div>
+
+            <!-- Code -->
+            <div class="cc-code-wrap">
+              <div class="cc-code" [class.cc-code-used]="code.statut !== 'disponible'">
+                {{ code.code }}
+              </div>
+              <button
+                class="cc-copy-btn"
+                *ngIf="code.statut === 'disponible'"
+                (click)="copierCode(code.code)"
+                [class.copied]="codeCopie === code.code"
+                title="Copier"
+              >
+                {{ codeCopie === code.code ? '✓' : '⎘' }}
+              </button>
+            </div>
+
+            <!-- Expiration -->
+            <div class="cc-expiry">
+              <span class="cc-expiry-icon">📅</span>
+              Expire le {{ formatDate(code.dateExpiration) }}
+            </div>
+
+            <!-- Étudiant (si utilisé) -->
+            <div *ngIf="code.statut === 'utilise' && code.etudiant" class="cc-student">
+              <div class="cc-student-avatar">
+                {{ getInitials(code.etudiant.prenom, code.etudiant.nom) }}
+              </div>
+              <div class="cc-student-info">
+                <div class="cc-student-name">{{ code.etudiant.prenom }} {{ code.etudiant.nom }}</div>
+                <div class="cc-student-email">{{ code.etudiant.email }}</div>
+              </div>
+              <div class="cc-student-badge">🎓 Actif</div>
+            </div>
+
+            <!-- Actions -->
+            <div class="cc-actions">
+              <button
+                *ngIf="code.statut !== 'revoque' && code.statut !== 'expire'"
+                class="cc-btn-revoke"
+                (click)="confirmerRevocation(code)"
+              >
+                🚫 Révoquer
+              </button>
+              <div *ngIf="code.statut === 'revoque'" class="cc-revoked-label">
+                Code révoqué
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Empty state -->
+          <div *ngIf="codesFiltres.length === 0" class="empty-state">
+            <div class="es-icon">🔍</div>
+            <div class="es-text">Aucun code trouvé</div>
+            <div class="es-sub">Essayez un autre filtre ou terme de recherche</div>
+          </div>
+
+        </div>
+
+      </ng-container>
+
+    </ng-container>
+
+  </div>
+
+</main>
+
+
+<!-- ══ MODAL CONFIRMATION RÉVOCATION ═══════════════════════ -->
+<div class="modal-overlay" [class.open]="modalRevocationOpen" (click)="closeModal($event)">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <div class="modal-title">Révoquer ce code ?</div>
+    <div class="modal-desc">
+      Le code <strong class="modal-code">{{ codeARevoquer?.code }}</strong>
+      <ng-container *ngIf="codeARevoquer?.etudiant">
+        utilisé par <strong>{{ codeARevoquer?.etudiant?.prenom }} {{ codeARevoquer?.etudiant?.nom }}</strong>
+      </ng-container>
+      sera définitivement révoqué. L'étudiant perdra immédiatement accès aux expériences VR.
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn-cancel" (click)="modalRevocationOpen = false">Annuler</button>
+      <button class="modal-btn-confirm" [disabled]="revocationLoading" (click)="revoquerCode()">
+        <span *ngIf="!revocationLoading">🚫 Confirmer la révocation</span>
+        <span *ngIf="revocationLoading">⏳ Révocation...</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ TOAST NOTIFICATION ═══════════════════════════════════ -->
+<div class="toast" [class.show]="toast.show" [class.toast-success]="toast.type === 'success'" [class.toast-error]="toast.type === 'error'">
+  {{ toast.message }}
+</div>

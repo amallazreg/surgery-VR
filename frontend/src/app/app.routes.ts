@@ -18,6 +18,7 @@ import { ForfaitManagment } from './admin/forfait-managment/forfait-managment';
 import { ExperienceManagement } from './admin/experience-management/experience-management';
 import { DashboardEtudiant } from './clients/Etudiants/dashboard-etudiant/dashboard-etudiant';
 import { MesExperiencesVR } from './clients/Etudiants/mes-experiences-vr/mes-experiences-vr';
+import { FormationManagement } from './clients/institution/formation-management/formation-management';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -42,6 +43,7 @@ export const routes: Routes = [
       {path : 'client/abonnements', component : Abonnements},
       {path : 'client/mesExperiences', component : MesExperiences}, 
       {path : 'client/chatbot', component: Chatbot} , 
+      {path : 'client/formationManagement', component: FormationManagement},
 
 
       {path : 'etudiant/dashborad' , component : DashboardEtudiant},

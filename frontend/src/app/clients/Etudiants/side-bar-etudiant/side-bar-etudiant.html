@@ -41,31 +41,33 @@
           <span>Mes Performances</span>
         </a>
       </li>
-      <li class="nav-item">
+   <!--  <li class="nav-item">
         <a routerLink="/student/leaderboard" class="nav-link" routerLinkActive="active">
           <span class="nav-icon">🏆</span>
           <span>Classement</span>
         </a>
-      </li>
+      </li> --> 
       <li class="nav-item">
         <a routerLink="/student/certifications" class="nav-link" routerLinkActive="active">
           <span class="nav-icon">🎓</span>
           <span>Certifications</span>
         </a>
       </li>
-      <li class="nav-item">
+  <!--   <li class="nav-item">
         <a routerLink="/student/settings" class="nav-link" routerLinkActive="active">
           <span class="nav-icon">⚙️</span>
           <span>Paramètres</span>
         </a>
-      </li>
+      </li> --> 
     </ul>
+
+    
+   <div class="sidebar-logout">
+  <button class="logout-btn" (click)="logout()">
+    <span class="logout-icon"></span>
+    <span>Déconnexion</span>
+  </button>
+</div>
   </nav>
 
-  <div class="sidebar-logout">
-    <button class="logout-btn" (click)="logout()">
-      <span class="logout-icon">🚪</span>
-      <span>Déconnexion</span>
-    </button>
-  </div>
 </aside>

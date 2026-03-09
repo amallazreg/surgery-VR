@@ -108,15 +108,35 @@
 }
 
 /* ─── NAV ─── */
+nav {
+  flex: 1;
+  overflow-y: auto;
+}
+
 .nav-menu {
   list-style: none;
   padding: 0 1rem;
   margin: 0;
-  flex: 1;
+  /* supprime flex: 1 ici */
 }
 
 .nav-item {
   margin-bottom: 0.4rem;
+}
+
+.sidebar {
+  /* déjà existant... ajoute : */
+  overflow: hidden;
+}
+
+nav {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* crucial en flexbox */
+}
+
+.nav-menu {
+  flex: unset; /* retire le flex:1 du ul */
 }
 
 .nav-link {
