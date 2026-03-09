@@ -93,6 +93,9 @@ const getMesExperiences = async (req, res) => {
       accesActif:   experiences.length > 0,
       experiences,
       total:        experiences.length,
+
+      dateExpiration: accesValides[0]?.dateExpiration ?? null,
+      abonnementFin:  accesValides[0]?.abonnement?.dateFin ?? null,
       // Informer l'étudiant si certains accès ont expiré
       accesExpires: accesExpires.map((a) => ({
         accesId:        a._id,

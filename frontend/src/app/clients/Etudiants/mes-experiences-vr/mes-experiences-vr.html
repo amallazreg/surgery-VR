@@ -1,0 +1,261 @@
+<app-side-bar-etudiant></app-side-bar-etudiant>>
+<main class="main">
+
+
+  <!-- ── Topbar ── -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="greeting-wrap">
+        <span class="greeting-tag">👋 Bienvenue,</span>
+        <h1 class="greeting-name">{{ userName }}</h1>
+      </div>
+      <p class="greeting-sub">Prêt pour votre session ?</p>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-btn notif-wrap">🔔<div class="notif-dot"></div></div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ════════════════════════════════════════════════
+         ÉTAT : PAS DE CODE ACTIVÉ
+    ════════════════════════════════════════════════ -->
+    <ng-container *ngIf="!accesActif && !isLoading">
+
+      <!-- Hero d'activation -->
+      <div class="activation-hero">
+        <div class="activation-glow"></div>
+        <div class="activation-orb">
+          <div class="orb-ring orb-ring-1"></div>
+          <div class="orb-ring orb-ring-2"></div>
+          <div class="orb-ring orb-ring-3"></div>
+          <span class="orb-icon">🥽</span>
+        </div>
+
+        <div class="activation-content">
+          <div class="activation-label">ACCÈS VR</div>
+          <h2 class="activation-title">Activez votre accès<br><span class="gradient-text">aux expériences VR</span></h2>
+          <p class="activation-desc">
+            Votre institution vous a fourni un code de formation.
+            Saisissez-le ci-dessous pour débloquer vos simulations chirurgicales en réalité virtuelle.
+          </p>
+
+          <!-- Input code -->
+          <div class="code-input-wrap" [class.shake]="codeError">
+            <div class="code-input-inner">
+              <span class="code-input-icon">🔑</span>
+              <input
+                class="code-input"
+                type="text"
+                placeholder="Ex: A3F2C1B0"
+                [(ngModel)]="codeInput"
+                (input)="onCodeInput()"
+                maxlength="8"
+                [class.has-value]="codeInput.length > 0"
+              />
+              <span class="code-input-count">{{ codeInput.length }}/8</span>
+            </div>
+
+            <div *ngIf="codePreview && !codeError" class="code-preview-badge">
+              <span class="cpb-dot"></span>
+              Code détecté — {{ codePreview.forfait }}
+            </div>
+            <div *ngIf="codeError" class="code-error-badge">
+              ❌ {{ codeError }}
+            </div>
+          </div>
+
+          <!-- Bouton vérifier -->
+          <button
+            class="btn-verify"
+            [disabled]="codeInput.length < 6 || verifyLoading"
+            (click)="verifierCode()"
+          >
+            <span *ngIf="!verifyLoading">
+              <span class="btn-icon">⚡</span> Vérifier le code
+            </span>
+            <span *ngIf="verifyLoading" class="btn-loading">
+              <span class="spinner"></span> Vérification...
+            </span>
+          </button>
+
+          <!-- Aperçu des expériences après vérification -->
+          <div *ngIf="codePreview" class="preview-wrap">
+            <div class="preview-header">
+              <span class="preview-label">🎯 Expériences incluses</span>
+              <span class="preview-count">{{ codePreview.experiences?.length }} modules</span>
+            </div>
+            <div class="preview-experiences">
+              <div class="preview-exp-chip" *ngFor="let exp of codePreview.experiences">
+                <span>{{ exp.emoji || '🥽' }}</span>
+                <span>{{ exp.title }}</span>
+              </div>
+            </div>
+
+            <button
+              class="btn-activate"
+              [disabled]="activateLoading"
+              (click)="activerCode()"
+            >
+              <span *ngIf="!activateLoading">
+                🚀 Activer et accéder aux expériences
+              </span>
+              <span *ngIf="activateLoading" class="btn-loading">
+                <span class="spinner"></span> Activation en cours...
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Features flottantes -->
+        <div class="floating-features">
+          <div class="ff-card ff-card-1">
+            <span class="ff-icon">🫀</span>
+            <span class="ff-text">Chirurgie cardiaque</span>
+          </div>
+          <div class="ff-card ff-card-2">
+            <span class="ff-icon">🧠</span>
+            <span class="ff-text">Neurochirurgie</span>
+          </div>
+          <div class="ff-card ff-card-3">
+            <span class="ff-icon">🦴</span>
+            <span class="ff-text">Orthopédie</span>
+          </div>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ════════════════════════════════════════════════
+         LOADER
+    ════════════════════════════════════════════════ -->
+    <div *ngIf="isLoading" class="loader-wrap">
+      <div class="loader-orb">
+        <div class="orb-ring orb-ring-1"></div>
+        <div class="orb-ring orb-ring-2"></div>
+        <span class="orb-icon">🥽</span>
+      </div>
+      <div class="loader-text">Chargement de vos expériences VR...</div>
+    </div>
+
+    <!-- ════════════════════════════════════════════════
+         ÉTAT : ACCÈS ACTIF → EXPÉRIENCES
+    ════════════════════════════════════════════════ -->
+    <ng-container *ngIf="accesActif && !isLoading">
+
+      <!-- Stats strip -->
+      <div class="stats-strip">
+        <div class="stat-card" style="--accent-color: #0066FF">
+          <div class="stat-icon-wrap" style="background: rgba(0,102,255,0.12)">🥽</div>
+          <div class="stat-info">
+            <div class="stat-val">{{ experiences.length }}</div>
+            <div class="stat-lbl">Expériences disponibles</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--accent-color: #00C48C">
+          <div class="stat-icon-wrap" style="background: rgba(0,196,140,0.12)">✅</div>
+          <div class="stat-info">
+            <div class="stat-val">{{ completedCount }}</div>
+            <div class="stat-lbl">Complétées</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--accent-color: #FF006E">
+          <div class="stat-icon-wrap" style="background: rgba(255,0,110,0.12)">🏆</div>
+          <div class="stat-info">
+            <div class="stat-val">{{ scoreMoyen }}%</div>
+            <div class="stat-lbl">Score moyen</div>
+          </div>
+        </div>
+        <div class="stat-card" style="--accent-color: #9D00FF">
+          <div class="stat-icon-wrap" style="background: rgba(157,0,255,0.12)">📅</div>
+          <div class="stat-info">
+            <div class="stat-val">{{ formatDateShort(dateExpiration) }}</div>
+            <div class="stat-lbl">Accès jusqu'au</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section titre -->
+      <div class="section-header">
+        <div class="section-header-left">
+          <div class="section-tag">MES MODULES VR</div>
+          <h2 class="section-title">Vos expériences </h2>
+        </div>
+        <div class="section-header-right">
+          <div class="search-wrap">
+            <span class="search-icon">🔍</span>
+            <input
+              class="search-input"
+              type="text"
+              placeholder="Rechercher..."
+              [(ngModel)]="searchQuery"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Grille d'expériences -->
+      <div class="experiences-grid">
+        <div
+          class="exp-card"
+          *ngFor="let exp of experiencesFiltrees; let i = index"
+          [style.animation-delay]="(i * 80) + 'ms'"
+          (click)="ouvrirExperience(exp)"
+        >
+          <!-- Fond décoratif -->
+          <div class="exp-card-bg" [ngClass]="'exp-bg-' + (i % 4)"></div>
+
+          <!-- Header card -->
+          <div class="exp-card-header">
+            <div class="exp-emoji-wrap">
+              <span class="exp-emoji">{{ exp.emoji || '🥽' }}</span>
+            </div>
+            <div class="exp-meta-top">
+              <span class="exp-compat-badge">{{ exp.compatibility || 'Quest 2 & 3' }}</span>
+            </div>
+          </div>
+
+          <!-- Contenu -->
+          <div class="exp-card-body">
+            <h3 class="exp-title">{{ exp.title }}</h3>
+            <p class="exp-desc">{{ exp.description || 'Simulation chirurgicale immersive en réalité virtuelle.' }}</p>
+          </div>
+
+          <!-- Footer card -->
+          <div class="exp-card-footer">
+            <a
+              [href]="exp.appLabUrl"
+              target="_blank"
+              class="btn-launch"
+              (click)="$event.stopPropagation()"
+            >
+              <span class="btn-launch-icon">▶</span>
+              Lancer dans VR
+            </a>
+            <div class="exp-card-arrow">→</div>
+          </div>
+
+          <!-- Hover glow -->
+          <div class="exp-card-glow"></div>
+        </div>
+
+        <!-- Empty search state -->
+        <div *ngIf="experiencesFiltrees.length === 0" class="empty-search">
+          <div style="font-size:48px">🔍</div>
+          <div style="font-size:16px;color:var(--text-gray);margin-top:12px">
+            Aucune expérience trouvée pour "{{ searchQuery }}"
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner expiration -->
+      <div class="expiration-banner" *ngIf="joursRestants <= 14">
+        <span class="eb-icon">⚠️</span>
+        <span>Votre accès expire dans <strong>{{ joursRestants }} jours</strong>. Contactez votre institution pour renouveler.</span>
+      </div>
+
+    </ng-container>
+
+  </div>
+</main>

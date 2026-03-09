@@ -232,38 +232,34 @@ export class Abonnements implements OnInit {
 
   // MODIFIÉ : getter qui retourne toujours un tableau de strings propres
   // Compatible avec formationResult (après activation) ET droits (déjà activée)
-get codesAfficher(): string[] {
-  // Cas 1 : activation fraîche (formationResult vient d'être reçu)
+// Retourne les objets complets { code, statut, etudiant }
+get codesAfficher(): any[] {
   const fromResult = this.formationResult?.codes;
   if (Array.isArray(fromResult) && fromResult.length > 0) {
-    return fromResult.map((c: any) => typeof c === 'string' ? c : c.code).filter(Boolean);
+    return fromResult;
   }
-
-  // Cas 2 : formation déjà activée → codes dans droits
   const fromDroits = this.droits?.formation?.codes;
   if (Array.isArray(fromDroits) && fromDroits.length > 0) {
-    return fromDroits.map((c: any) => typeof c === 'string' ? c : c.code).filter(Boolean);
+    return fromDroits;
   }
-
   return [];
 }
 
 get codesUtilises(): number {
-  const codes = this.formationResult?.codes ?? this.droits?.formation?.codes ?? [];
-  if (!Array.isArray(codes)) return 0;
-  return codes.filter((c: any) => c?.statut === 'utilise').length;
+  return this.codesAfficher.filter((c: any) => c?.statut === 'utilise').length;
 }
-  // Copier un code avec feedback visuel
-  copierCode(code: string): void {
-    navigator.clipboard.writeText(code).then(() => {
-      this.codeCopie = code;
-      setTimeout(() => {
-        this.codeCopie = '';
-        this.cdr.detectChanges();
-      }, 1500);
+copierCode(codeObj: any): void {
+  if (codeObj.statut === 'utilise') return;
+
+  navigator.clipboard.writeText(codeObj.code).then(() => {
+    this.codeCopie = codeObj.code;
+    setTimeout(() => {
+      this.codeCopie = '';
       this.cdr.detectChanges();
-    });
-  }
+    }, 1500);
+    this.cdr.detectChanges();
+  });
+}
 
   // ════════════════════════════════════════════════════════
   // HELPERS

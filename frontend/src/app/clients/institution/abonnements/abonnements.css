@@ -901,3 +901,38 @@ body {
   color: #16a34a !important;
   font-weight: 700;
 }
+
+/* Code utilisé — grisé, non cliquable */
+.code-chip-used {
+  background: #f3f4f6 !important;
+  border-color: #e5e7eb !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chip-used-code {
+  font-size: 11px;
+  text-decoration: line-through;
+  color: #9ca3af;
+  letter-spacing: 1px;
+}
+
+.chip-used-name {
+  font-size: 10px;
+  color: #6b7280;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Code copié — feedback vert */
+.code-chip-copied {
+  background: #f0fdf4 !important;
+  border-color: #22c55e !important;
+  color: #16a34a !important;
+  font-weight: 700;
+}

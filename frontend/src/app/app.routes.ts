@@ -17,6 +17,7 @@ import { Chatbot } from './clients/institution/chatbot/chatbot';
 import { ForfaitManagment } from './admin/forfait-managment/forfait-managment';
 import { ExperienceManagement } from './admin/experience-management/experience-management';
 import { DashboardEtudiant } from './clients/Etudiants/dashboard-etudiant/dashboard-etudiant';
+import { MesExperiencesVR } from './clients/Etudiants/mes-experiences-vr/mes-experiences-vr';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -44,6 +45,8 @@ export const routes: Routes = [
 
 
       {path : 'etudiant/dashborad' , component : DashboardEtudiant},
+      {path : 'etudiant/mesExperiencesVR' , component : MesExperiencesVR },
+
 
 
        { path: '**', redirectTo: '' }

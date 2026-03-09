@@ -460,19 +460,29 @@
         </div>
 
         <!-- Grille des codes -->
-        <div class="codes-grid">
+      <div class="codes-grid">
           <div
             class="code-chip"
-            *ngFor="let code of codesAfficher"
-            (click)="copierCode(code)"
-            [class.code-chip-copied]="codeCopie === code"
-            title="Cliquer pour copier"
+            *ngFor="let c of codesAfficher"
+            (click)="copierCode(c)"
+            [class.code-chip-copied]="codeCopie === c.code"
+            [class.code-chip-used]="c.statut === 'utilise'"
+            [title]="c.statut === 'utilise'
+              ? 'Utilisé par ' + (c.etudiant?.prenom || '') + ' ' + (c.etudiant?.nom || '')
+              : 'Cliquer pour copier'"
           >
-            <!-- Feedback visuel : affiche ✓ Copié pendant 1.5s -->
-            {{ codeCopie === code ? '✓ Copié !' : code }}
+            <ng-container *ngIf="c.statut === 'utilise'">
+              <span class="chip-used-code">{{ c.code }}</span>
+              <span class="chip-used-name">
+                🎓 {{ c.etudiant?.prenom }} {{ c.etudiant?.nom }}
+              </span>
+            </ng-container>
+
+            <ng-container *ngIf="c.statut !== 'utilise'">
+              {{ codeCopie === c.code ? '✓ Copié !' : c.code }}
+            </ng-container>
           </div>
         </div>
-
         <div style="font-size:11px;color:#aaa;text-align:center;margin-top:10px">
           Cliquez sur un code pour le copier dans le presse-papier
         </div>
