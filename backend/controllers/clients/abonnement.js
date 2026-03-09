@@ -273,26 +273,37 @@ const getMesDroits = async (req, res) => {
 
     const forfait = abonnement.forfait;
 
+    // ── NOUVEAU : charger les codes si formation activée ──────────
+    let codesFormation = [];
+    if (forfait.formation?.incluse && abonnement.formationUtilisee) {
+      const CodeFormation = require('../../models/codeFormation'); // adapte le chemin
+      codesFormation = await CodeFormation.find({ abonnement: abonnement._id })
+        .select('code statut etudiant dateExpiration')
+        .populate('etudiant', 'nom prenom email')
+        .sort({ createdAt: 1 });
+    }
+
     res.json({
-      forfait:     forfait.name,
-      apkTotal:    forfait.nbApk,
-      apkRestants: abonnement.apkRestants,
+      forfait:        forfait.name,
+      abonnementId:   abonnement._id,
+      apkTotal:       forfait.nbApk,
+      apkRestants:    abonnement.apkRestants,
       formation: forfait.formation?.incluse
         ? {
-            dureeHeures:      forfait.formation.dureeHeures,
-            maxEtudiants:     forfait.formation.maxEtudiants,
-            detaillee:        forfait.formation.detaillee,
-            activee:          abonnement.formationUtilisee,
-            // On ne renvoie plus les codes ici → passer par GET /api/codes/abonnement/:abonnementId
+            dureeHeures:  forfait.formation.dureeHeures,
+            maxEtudiants: forfait.formation.maxEtudiants,
+            detaillee:    forfait.formation.detaillee,
+            activee:      abonnement.formationUtilisee,
+            codes:        codesFormation,   // ← AJOUTÉ
           }
         : null,
       simulationEsthetique: forfait.simulationEsthetique,
     });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 // ═══════════════════════════════════════════════════════════
 // 9. POST — Télécharger un APK (décrémente le compteur)

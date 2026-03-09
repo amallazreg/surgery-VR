@@ -118,15 +118,15 @@
 
             <ng-container *ngIf="droits.formation">
               <!-- Déjà activée -->
-              <div *ngIf="droits.formation.activee" class="formation-activated">
-                <div class="fa-badge">✅ Formation activée</div>
-                <div style="font-size:12px;color:#888;margin:8px 0">
-                  {{ droits.formation.codesAcces.length }} codes d'accès générés
-                </div>
-                <button class="action-btn btn-invoice" (click)="openFormationModal()">
-                  👁 Voir les codes d'accès
-                </button>
+            <div *ngIf="droits.formation.activee" class="formation-activated">
+              <div class="fa-badge">✅ Formation activée</div>
+              <div style="font-size:12px;color:#888;margin:8px 0">
+                {{ codesAfficher.length }} codes générés · {{ codesUtilises }} utilisés
               </div>
+              <button class="action-btn btn-invoice" (click)="openFormationModal()">
+                👁 Voir les codes d'accès
+              </button>
+            </div>
 
               <!-- Pas encore activée -->
               <div *ngIf="!droits.formation.activee">
@@ -424,11 +424,13 @@
     <!-- Body -->
     <div class="formation-modal-body">
 
-      <!-- Avant activation -->
+      <!-- ── Avant activation ── -->
       <ng-container *ngIf="!formationResult && !droits?.formation?.activee">
         <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:20px">
-          En activant la formation, vous allez générer <strong>{{ droits?.formation?.maxEtudiants }} codes d'accès</strong>
-          uniques à distribuer à vos étudiants. Cette action ne peut être effectuée qu'une seule fois par cycle.
+          En activant la formation, vous allez générer
+          <strong>{{ droits?.formation?.maxEtudiants }} codes d'accès</strong>
+          uniques à distribuer à vos étudiants.
+          Cette action ne peut être effectuée qu'une seule fois par cycle.
         </p>
         <div *ngIf="formationError" class="apk-error-msg">❌ {{ formationError }}</div>
         <button
@@ -440,14 +442,20 @@
         </button>
       </ng-container>
 
-      <!-- Codes générés (après activation OU déjà activée) -->
+      <!-- ── Codes (après activation OU déjà activée) ── -->
+      <!-- Utilise le getter codesAfficher → toujours un string[] propre -->
       <ng-container *ngIf="formationResult || droits?.formation?.activee">
+
         <div class="codes-success-header">
           <div style="font-size:32px">🎉</div>
           <div class="codes-success-title">Formation activée !</div>
           <div class="codes-success-sub">
             Distribuez ces codes à vos étudiants pour accéder à la formation de
             <strong>{{ droits?.formation?.dureeHeures }}h</strong>.
+            <br>
+            <span style="font-size:11px;color:#aaa">
+              {{ codesUtilises }} / {{ codesAfficher.length }} codes utilisés
+            </span>
           </div>
         </div>
 
@@ -455,16 +463,18 @@
         <div class="codes-grid">
           <div
             class="code-chip"
-            *ngFor="let code of (formationResult?.codesAcces || droits?.formation?.codesAcces)"
+            *ngFor="let code of codesAfficher"
             (click)="copierCode(code)"
+            [class.code-chip-copied]="codeCopie === code"
             title="Cliquer pour copier"
           >
-            {{ code }}
+            <!-- Feedback visuel : affiche ✓ Copié pendant 1.5s -->
+            {{ codeCopie === code ? '✓ Copié !' : code }}
           </div>
         </div>
 
         <div style="font-size:11px;color:#aaa;text-align:center;margin-top:10px">
-          Cliquez sur un code pour le copier
+          Cliquez sur un code pour le copier dans le presse-papier
         </div>
       </ng-container>
 
@@ -477,4 +487,5 @@
 
   </div>
 </div>
+
 </body>

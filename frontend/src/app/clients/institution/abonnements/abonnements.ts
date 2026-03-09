@@ -16,21 +16,23 @@ export class Abonnements implements OnInit {
   userId = localStorage.getItem('userId') || '';
 
   // ── Data ────────────────────────────────────────────────
-  abonnementActif: any = null;
-  historique: any[]   = [];
-  factures: any[]     = [];
+  abonnementActif: any   = null;
+  historique: any[]      = [];
+  factures: any[]        = [];
   forfaitsUpgrade: any[] = [];
-  forfaitActuel: any  = null;
+  forfaitActuel: any     = null;
 
   // ── Droits & Fonctionnalités ────────────────────────────
-  droits: any = null;          // { apkTotal, apkRestants, formation, simulationEsthetique }
-  droitsLoading = false;
+  droits: any    = null;
+  droitsLoading  = false;
 
   // ── Formation ───────────────────────────────────────────
   formationModalOpen  = false;
-  formationResult: any = null;  // réponse du serveur après activation
   formationLoading    = false;
   formationError      = '';
+
+  // MODIFIÉ : formationResult stocke maintenant { codes: [{_id, code, statut, etudiant}] }
+  formationResult: any = null;
 
   // ── APK ─────────────────────────────────────────────────
   apkLoading  = false;
@@ -39,13 +41,14 @@ export class Abonnements implements OnInit {
   apkSuccess  = false;
 
   // ── Stats ───────────────────────────────────────────────
-  totalDepense: number      = 0;
+  totalDepense: number       = 0;
   expireBientotCount: number = 0;
 
   // ── UI ──────────────────────────────────────────────────
-  selectedFilter      = 'all';
+  selectedFilter          = 'all';
   showPaymentSuccessPopup = false;
-  isLoading           = true;
+  isLoading               = true;
+  codeCopie: string       = ''; // feedback visuel copie
 
   // ── Pay Modal ───────────────────────────────────────────
   payModalOpen    = false;
@@ -81,7 +84,7 @@ export class Abonnements implements OnInit {
   loadData(): void {
     this.isLoading = true;
 
-    // ── Historique ──
+    // ── Historique ──────────────────────────────────────────
     this.abonnementService.getHistoriqueAbonnements(this.userId).subscribe({
       next: (data) => {
         this.historique = Array.isArray(data) ? data : [];
@@ -93,14 +96,14 @@ export class Abonnements implements OnInit {
       },
       error: () => {
         this.historique = [];
-        this.isLoading = false;
+        this.isLoading  = false;
       }
     });
 
-    // ── Factures ──
+    // ── Factures ────────────────────────────────────────────
     this.abonnementService.getMesFactures(this.userId).subscribe({
       next: (data) => {
-        this.factures = Array.isArray(data) ? data : [];
+        this.factures     = Array.isArray(data) ? data : [];
         this.totalDepense = this.factures.reduce(
           (sum, f) => sum + (parseFloat(f.amount) || 0), 0
         );
@@ -109,12 +112,12 @@ export class Abonnements implements OnInit {
       error: () => { this.factures = []; }
     });
 
-    // ── Abonnement actif ──
+    // ── Abonnement actif ────────────────────────────────────
     this.abonnementService.getMonAbonnement(this.userId).subscribe({
       next: (data) => {
         this.abonnementActif = data;
         this.loadForfaitsUpgrade();
-        this.loadDroits();        // ← charge les droits dès qu'on a l'abonnement
+        this.loadDroits();
         this.cdr.detectChanges();
       },
       error: () => { this.abonnementActif = null; }
@@ -133,48 +136,47 @@ export class Abonnements implements OnInit {
   }
 
   // ════════════════════════════════════════════════════════
-  // DROITS — APK — FORMATION
+  // DROITS
   // ════════════════════════════════════════════════════════
 
-  // ── Charger les droits ──────────────────────────────────
   loadDroits(): void {
     this.droitsLoading = true;
     this.abonnementService.getMesDroits(this.userId).subscribe({
       next: (data) => {
-        this.droits = data;
+        this.droits        = data;
+        console.log('DROITS:', JSON.stringify(data.formation)); 
         this.droitsLoading = false;
         this.cdr.detectChanges();
       },
       error: () => {
-        this.droits = null;
+        this.droits        = null;
         this.droitsLoading = false;
       }
     });
   }
 
-  // ── Télécharger un APK ──────────────────────────────────
+  // ════════════════════════════════════════════════════════
+  // APK
+  // ════════════════════════════════════════════════════════
+
   telechargerApk(): void {
-    this.apkLoading  = true;
-    this.apkMessage  = '';
-    this.apkError    = '';
-    this.apkSuccess  = false;
+    this.apkLoading = true;
+    this.apkMessage = '';
+    this.apkError   = '';
+    this.apkSuccess = false;
 
     this.abonnementService.telechargerApk(this.userId).subscribe({
       next: (res) => {
-        this.apkLoading  = false;
-        this.apkSuccess  = true;
-        this.apkMessage  = `APK téléchargé ! Il vous reste ${res.apkRestants} / ${res.apkTotal} APK ce mois-ci.`;
+        this.apkLoading = false;
+        this.apkSuccess = true;
+        this.apkMessage = `APK téléchargé ! Il vous reste ${res.apkRestants} / ${res.apkTotal} APK ce mois-ci.`;
 
-        // Met à jour le compteur local immédiatement
         if (this.droits) {
           this.droits.apkRestants = res.apkRestants;
         }
-
-        // Ouvre le lien de téléchargement
         if (res.downloadUrl) {
           window.open(res.downloadUrl, '_blank');
         }
-
         this.cdr.detectChanges();
       },
       error: (err) => {
@@ -185,33 +187,37 @@ export class Abonnements implements OnInit {
     });
   }
 
-  // ── Ouvrir modal formation ──────────────────────────────
-  openFormationModal(): void {
-    this.formationModalOpen = true;
-    this.formationResult    = null;
-    this.formationError     = '';
+  // ════════════════════════════════════════════════════════
+  // FORMATION
+  // ════════════════════════════════════════════════════════
+
+    openFormationModal(): void {
+    this.formationModalOpen      = true;
+    this.formationResult         = null;
+    this.formationError          = '';
+    this.codeCopie               = '';
     document.body.style.overflow = 'hidden';
   }
 
   closeFormationModal(): void {
-    this.formationModalOpen = false;
+    this.formationModalOpen      = false;
     document.body.style.overflow = '';
   }
 
-  // ── Activer la formation ────────────────────────────────
   activerFormation(): void {
     this.formationLoading = true;
     this.formationError   = '';
 
     this.abonnementService.activerFormation(this.userId).subscribe({
       next: (res) => {
+        // res = { message, codes: [{_id, code, statut, dateExpiration}], ... }
         this.formationResult  = res;
         this.formationLoading = false;
 
-        // Met à jour les droits localement
+        // Mettre à jour les droits localement pour éviter un rechargement
         if (this.droits?.formation) {
-          this.droits.formation.activee    = true;
-          this.droits.formation.codesAcces = res.codesAcces;
+          this.droits.formation.activee = true;
+          this.droits.formation.codes   = res.codes ?? [];
         }
 
         this.cdr.detectChanges();
@@ -224,10 +230,38 @@ export class Abonnements implements OnInit {
     });
   }
 
-  // ── Copier un code dans le presse-papier ────────────────
+  // MODIFIÉ : getter qui retourne toujours un tableau de strings propres
+  // Compatible avec formationResult (après activation) ET droits (déjà activée)
+get codesAfficher(): string[] {
+  // Cas 1 : activation fraîche (formationResult vient d'être reçu)
+  const fromResult = this.formationResult?.codes;
+  if (Array.isArray(fromResult) && fromResult.length > 0) {
+    return fromResult.map((c: any) => typeof c === 'string' ? c : c.code).filter(Boolean);
+  }
+
+  // Cas 2 : formation déjà activée → codes dans droits
+  const fromDroits = this.droits?.formation?.codes;
+  if (Array.isArray(fromDroits) && fromDroits.length > 0) {
+    return fromDroits.map((c: any) => typeof c === 'string' ? c : c.code).filter(Boolean);
+  }
+
+  return [];
+}
+
+get codesUtilises(): number {
+  const codes = this.formationResult?.codes ?? this.droits?.formation?.codes ?? [];
+  if (!Array.isArray(codes)) return 0;
+  return codes.filter((c: any) => c?.statut === 'utilise').length;
+}
+  // Copier un code avec feedback visuel
   copierCode(code: string): void {
     navigator.clipboard.writeText(code).then(() => {
-      // feedback visuel géré dans le template via une variable
+      this.codeCopie = code;
+      setTimeout(() => {
+        this.codeCopie = '';
+        this.cdr.detectChanges();
+      }, 1500);
+      this.cdr.detectChanges();
     });
   }
 
@@ -338,7 +372,6 @@ export class Abonnements implements OnInit {
     return id.toString().slice(0, 12).toUpperCase();
   }
 
-  // ── APK bar width ────────────────────────────────────────
   apkBarWidth(): number {
     if (!this.droits || !this.droits.apkTotal) return 0;
     return Math.round((this.droits.apkRestants / this.droits.apkTotal) * 100);
@@ -352,7 +385,7 @@ export class Abonnements implements OnInit {
   }
 
   // ════════════════════════════════════════════════════════
-  // ACTIONS
+  // ACTIONS PAY MODAL
   // ════════════════════════════════════════════════════════
 
   filterSubs(status: string): void {
@@ -361,26 +394,26 @@ export class Abonnements implements OnInit {
 
   openRenouvelerModal(): void {
     if (!this.abonnementActif) return;
-    this.payModalType    = 'renouveler';
-    this.pmTitle         = `Renouveler ${this.abonnementActif.forfait.name}`;
-    this.pmAmount        = this.abonnementActif.forfait.price;
-    this.paymentSuccess  = false;
-    this.payModalOpen    = true;
+    this.payModalType   = 'renouveler';
+    this.pmTitle        = `Renouveler ${this.abonnementActif.forfait.name}`;
+    this.pmAmount       = this.abonnementActif.forfait.price;
+    this.paymentSuccess = false;
+    this.payModalOpen   = true;
     document.body.style.overflow = 'hidden';
   }
 
   openUpgradeModal(forfait: any): void {
-    this.payModalType          = 'upgrade';
+    this.payModalType           = 'upgrade';
     this.selectedUpgradeForfait = forfait;
-    this.pmTitle               = `Passer à ${forfait.name}`;
-    this.pmAmount              = forfait.price;
-    this.paymentSuccess        = false;
-    this.payModalOpen          = true;
+    this.pmTitle                = `Passer à ${forfait.name}`;
+    this.pmAmount               = forfait.price;
+    this.paymentSuccess         = false;
+    this.payModalOpen           = true;
     document.body.style.overflow = 'hidden';
   }
 
   closePayModal(): void {
-    this.payModalOpen = false;
+    this.payModalOpen            = false;
     document.body.style.overflow = '';
   }
 
@@ -409,8 +442,9 @@ export class Abonnements implements OnInit {
   }
 
   onOverlayClick(event: MouseEvent): void {
-    if ((event.target as HTMLElement).classList.contains('pay-overlay') ||
-        (event.target as HTMLElement).classList.contains('formation-overlay')) {
+    const target = event.target as HTMLElement;
+    if (target.classList.contains('pay-overlay') ||
+        target.classList.contains('formation-overlay')) {
       this.closePayModal();
       this.closeFormationModal();
     }
@@ -427,3 +461,15 @@ export class Abonnements implements OnInit {
     }
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+

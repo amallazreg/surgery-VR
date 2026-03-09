@@ -893,3 +893,11 @@ body {
 .code-chip:active {
   background: #bfdbfe;
 }
+
+
+.code-chip-copied {
+  background: #f0fdf4 !important;
+  border-color: #22c55e !important;
+  color: #16a34a !important;
+  font-weight: 700;
+}
