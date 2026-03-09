@@ -64,6 +64,6 @@ const accesEtudiantSchema = new mongoose.Schema({
 
 // Index composé : un étudiant ne peut pas avoir deux accès
 // actifs sur le même abonnement
-accesEtudiantSchema.index({ etudiant: 1, abonnement: 1 }, { unique: true });
+accesEtudiantSchema.index({ codeFormation: 1 }, { unique: true });
 
 module.exports = mongoose.model('AccesEtudiant', accesEtudiantSchema);
