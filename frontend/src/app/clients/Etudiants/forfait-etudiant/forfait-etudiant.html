@@ -1,0 +1,358 @@
+<p>forfait-etudiant works!</p>
+<div class="app-shell">
+  <app-side-bar-etudiant></app-side-bar-etudiant>
+
+  <main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <h1>Forfaits Étudiants 🎓</h1>
+        <p>Choisissez le plan adapté à votre formation chirurgicale</p>
+      </div>
+      <div class="topbar-right">
+        <div class="topbar-btn notif-wrap">🔔<div class="notif-dot"></div></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- ── Loader ── -->
+      <div class="loader-wrap" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Chargement des forfaits...</p>
+      </div>
+
+      <ng-container *ngIf="!isLoading">
+
+        <!-- ── Abonnement actif banner ── -->
+        <div class="current-plan-banner" *ngIf="abonnementActif">
+          <div class="cpb-dot"></div>
+          <span>Votre abonnement actuel : <strong>{{ abonnementActif.forfait }}</strong></span>
+          <div class="cpb-spacer"></div>
+          <span class="cpb-expiry">Expire le {{ formatDate(abonnementActif.dateFin) }}</span>
+          <span class="cpb-days" [class.cpb-days-warn]="abonnementActif.joursRestants <= 7">
+            {{ abonnementActif.joursRestants }} jours restants
+          </span>
+        </div>
+
+        <!-- ── Hero ── -->
+        <div class="page-hero">
+          <h2>Des forfaits <span>pensés pour votre réussite</span></h2>
+          <p>Accédez aux meilleures simulations chirurgicales en VR, à votre rythme et en toute autonomie.</p>
+        </div>
+
+        <!-- ── Stats ── -->
+        <div class="stats-grid" *ngIf="forfaits.length > 0">
+          <div class="stat-card" style="animation-delay:0.1s">
+            <div class="stat-header">
+              <div class="stat-icon si-1">🎓</div>
+              <div class="stat-change positive">↗ Dispo</div>
+            </div>
+            <div class="stat-value">{{ forfaits.length }}</div>
+            <div class="stat-label">Forfaits disponibles</div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.2s">
+            <div class="stat-header">
+              <div class="stat-icon si-2">🥽</div>
+              <div class="stat-change positive">↗ Max</div>
+            </div>
+            <div class="stat-value">{{ getMaxExperiences() }}</div>
+            <div class="stat-label">Expériences (forfait max)</div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.3s">
+            <div class="stat-header">
+              <div class="stat-icon si-3">💰</div>
+              <div class="stat-change neutral">DT</div>
+            </div>
+            <div class="stat-value">{{ getMinPrice() }}</div>
+            <div class="stat-label">À partir de (DT/mois)</div>
+          </div>
+          <div class="stat-card" style="animation-delay:0.4s">
+            <div class="stat-header">
+              <div class="stat-icon si-4">✅</div>
+              <div class="stat-change positive">↗ Actif</div>
+            </div>
+            <div class="stat-value">{{ abonnementActif ? '1' : '0' }}</div>
+            <div class="stat-label">Abonnement actif</div>
+          </div>
+        </div>
+
+        <!-- ── Forfaits Grid ── -->
+        <div class="section-card" style="animation-delay:0.3s">
+          <div class="section-header">
+            <h3 class="section-title">Choisissez votre forfait</h3>
+            <div class="badge-count">{{ forfaits.length }} offres disponibles</div>
+          </div>
+
+          <!-- Empty state -->
+          <div class="empty-state" *ngIf="forfaits.length === 0">
+            <div style="font-size:3rem">📦</div>
+            <p>Aucun forfait disponible pour le moment.</p>
+          </div>
+
+          <div class="forfaits-grid" *ngIf="forfaits.length > 0">
+            <div
+              class="plan-card"
+              *ngFor="let plan of forfaits; let i = index"
+              [class.popular]="plan.badge === 'Populaire'"
+              [class.best]="plan.badge === 'Meilleure offre'"
+              [class.current-plan]="abonnementActif?.forfait === plan.name"
+              [style.animation-delay]="(i * 0.1) + 's'"
+              (click)="openModal(plan)"
+            >
+              <!-- Badges -->
+              <div class="popular-badge" *ngIf="plan.badge === 'Populaire'">⭐ Populaire</div>
+              <div class="best-badge"    *ngIf="plan.badge === 'Meilleure offre'">🏆 Meilleure offre</div>
+              <div class="current-badge" *ngIf="abonnementActif?.forfait === plan.name">✓ Actuel</div>
+
+              <!-- Header -->
+              <div class="plan-header">
+                <span class="plan-icon">🎓</span>
+                <div class="plan-name">{{ plan.name }}</div>
+                <div class="plan-tagline">{{ plan.tagline || plan.desc }}</div>
+                <div class="plan-price-wrap">
+                  <span class="plan-currency">DT</span>
+                  <span class="plan-price">{{ plan.price }}</span>
+                  <span class="plan-period">/ {{ plan.dureeJours }} jours</span>
+                </div>
+              </div>
+
+              <!-- Body -->
+              <div class="plan-body">
+                <!-- Stats du forfait -->
+                <div class="plan-stats-row">
+                  <div class="plan-stat-item">
+                    <span class="psi-icon">🥽</span>
+                    <span class="psi-val">{{ plan.nbExperiences || 0 }}</span>
+                    <span class="psi-lbl">expériences</span>
+                  </div>
+                  <div class="plan-stat-item">
+                    <span class="psi-icon">📅</span>
+                    <span class="psi-val">{{ plan.dureeJours }}</span>
+                    <span class="psi-lbl">jours</span>
+                  </div>
+                </div>
+
+                <!-- Features -->
+                <ul class="plan-features" *ngIf="plan.features?.length > 0">
+                  <li *ngFor="let f of plan.features">
+                    <div class="feat-check" [ngClass]="f.yes ? 'check-yes' : 'check-no'">
+                      {{ f.yes ? '✓' : '✕' }}
+                    </div>
+                    <div class="feat-text" [style.opacity]="f.yes ? 1 : 0.4">{{ f.text }}</div>
+                  </li>
+                </ul>
+
+                <!-- CTA -->
+                <button
+                  class="plan-cta"
+                  [class.current-cta]="abonnementActif?.forfait === plan.name"
+                  [disabled]="souscriptionLoading === plan._id"
+                >
+                  <ng-container *ngIf="abonnementActif?.forfait === plan.name">✓ Plan actuel</ng-container>
+                  <ng-container *ngIf="abonnementActif?.forfait !== plan.name && souscriptionLoading !== plan._id">
+                    Choisir {{ plan.name }} →
+                  </ng-container>
+                  <ng-container *ngIf="souscriptionLoading === plan._id">
+                    <span class="spinner-sm"></span> Redirection...
+                  </ng-container>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── FAQ ── -->
+        <div class="faq-section">
+          <div class="faq-title">Questions fréquentes</div>
+          <div
+            *ngFor="let faq of faqs"
+            class="faq-item"
+            [class.open]="faq.open"
+            (click)="toggleFaq(faq)"
+          >
+            <div class="faq-q">
+              {{ faq.q }}
+              <span class="faq-chevron">▾</span>
+            </div>
+            <div class="faq-a" *ngIf="faq.open">{{ faq.a }}</div>
+          </div>
+        </div>
+
+      </ng-container>
+    </div>
+  </main>
+
+  <!-- BG -->
+  <div class="bg-animated">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════
+     MODAL PAIEMENT
+═══════════════════════════════════════════════ -->
+<div class="modal-overlay" [class.open]="isModalOpen" (click)="onOverlayClick($event)">
+  <div class="modal" *ngIf="selectedPlan">
+
+    <!-- Modal Header -->
+    <div class="modal-header">
+      <div class="modal-hero">
+        <button class="modal-close" (click)="closeModal()">✕</button>
+        <span class="modal-plan-icon">🎓</span>
+        <div class="modal-plan-name">Forfait {{ selectedPlan.name }}</div>
+        <div class="modal-plan-desc">{{ selectedPlan.tagline || selectedPlan.desc }}</div>
+        <div class="modal-price-row">
+          <span class="modal-price">{{ selectedPlan.price }} DT</span>
+          <span class="modal-price-sub">/ {{ selectedPlan.dureeJours }} jours</span>
+        </div>
+      </div>
+
+      <!-- Progress Steps -->
+      <div class="modal-steps">
+        <div class="step" [class.active]="isStepActive(1)" [class.done]="isStepDone(1)">
+          <div class="step-num">{{ isStepDone(1) ? '✓' : '1' }}</div>
+          <div class="step-label">Détails</div>
+        </div>
+        <div class="step" [class.active]="isStepActive(2)" [class.done]="isStepDone(2)">
+          <div class="step-num">{{ isStepDone(2) ? '✓' : '2' }}</div>
+          <div class="step-label">Paiement</div>
+        </div>
+        <div class="step" [class.active]="isStepActive(3)" [class.done]="isStepDone(3)">
+          <div class="step-num">3</div>
+          <div class="step-label">Confirmation</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="modal-body">
+
+      <!-- SUCCESS -->
+      <div class="success-screen" *ngIf="isSuccess">
+        <div class="success-anim">🎉</div>
+        <div class="success-title">Redirection vers le paiement...</div>
+        <div class="success-text">
+          Vous allez être redirigé vers la page de paiement sécurisée Stripe pour votre forfait
+          <strong>{{ selectedPlan.name }}</strong>.
+        </div>
+        <button class="btn-success-close" (click)="closeModal()">Annuler</button>
+      </div>
+
+      <!-- STEP 1 : Détails du forfait -->
+      <div class="step-content" *ngIf="!isSuccess && currentStep === 1">
+        <div class="detail-grid">
+          <div class="detail-card">
+            <div class="detail-icon">🥽</div>
+            <div class="detail-info">
+              <div class="detail-label">Expériences VR incluses</div>
+              <div class="detail-value">{{ selectedPlan.nbExperiences || 0 }} modules</div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-icon">📅</div>
+            <div class="detail-info">
+              <div class="detail-label">Durée d'accès</div>
+              <div class="detail-value">{{ selectedPlan.dureeJours }} jours</div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-icon">💰</div>
+            <div class="detail-info">
+              <div class="detail-label">Prix total</div>
+              <div class="detail-value">{{ selectedPlan.price }} DT</div>
+            </div>
+          </div>
+          <div class="detail-card">
+            <div class="detail-icon">🔒</div>
+            <div class="detail-info">
+              <div class="detail-label">Paiement</div>
+              <div class="detail-value">Sécurisé SSL</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="features-full" *ngIf="selectedPlan.features?.length > 0">
+          <div class="features-full-title">✦ Ce qui est inclus</div>
+          <div class="features-cols">
+            <div class="feature-row" *ngFor="let f of selectedPlan.features">
+        <!--     <span class="check" [ngClass]="f.yes ? 'yes' : 'no'">{{ f.yes ? '✓' : '✕' }}</span> --> 
+              <span [style.color]="f.yes ? 'var(--text-dark)' : '#aaa'">{{ f.text }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 2 : Paiement -->
+      <div class="step-content" *ngIf="!isSuccess && currentStep === 2">
+        <div class="pay-section-title">Moyen de paiement :</div>
+        <div class="payment-methods">
+          <div class="pay-method selected">
+            <div class="pay-icon">💳</div>
+            <div>
+              <div class="pay-name">Carte bancaire</div>
+              <div class="pay-desc">Paiement sécurisé via Stripe</div>
+            </div>
+          </div>
+        </div>
+        <div class="stripe-info-box">
+          <div class="sib-icon">🔒</div>
+          <div class="sib-text">
+            <strong>Paiement Stripe</strong><br>
+            Vous serez redirigé vers la page de paiement sécurisée Stripe. Vos données bancaires ne sont jamais stockées sur nos serveurs.
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3 : Confirmation -->
+      <div class="step-content" *ngIf="!isSuccess && currentStep === 3">
+        <div class="confirm-summary">
+          <div class="confirm-row">
+            <span class="label">Forfait</span>
+            <span class="value">{{ selectedPlan.name }}</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">Durée</span>
+            <span class="value">{{ selectedPlan.dureeJours }} jours</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">Expériences incluses</span>
+            <span class="value">{{ selectedPlan.nbExperiences || 0 }}</span>
+          </div>
+          <div class="confirm-row">
+            <span class="label">Moyen de paiement</span>
+            <span class="value">💳 Carte bancaire (Stripe)</span>
+          </div>
+          <div class="confirm-row total">
+            <span class="label">Total à payer</span>
+            <span class="value">{{ selectedPlan.price }} DT</span>
+          </div>
+        </div>
+        <div class="security-note">
+          🔒 Paiement 100% sécurisé via Stripe — Vos données sont chiffrées SSL 256-bit.
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="modal-footer" *ngIf="!isSuccess">
+      <button class="btn-back" [style.visibility]="currentStep > 1 ? 'visible' : 'hidden'" (click)="prevStep()">← Retour</button>
+      <div class="step-hint">{{ stepHint }}</div>
+      <button
+        class="btn-next"
+        [class.btn-pay]="currentStep === 3"
+        [disabled]="isProcessing"
+        (click)="nextStep()"
+      >
+        {{ nextBtnLabel }}
+        <span class="spinner-sm" *ngIf="isProcessing"></span>
+      </button>
+    </div>
+
+  </div>
+</div>

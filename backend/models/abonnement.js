@@ -16,6 +16,12 @@ const abonnementSchema = new mongoose.Schema({
     enum: ['active', 'expired', 'cancelled'],
     default: 'active'
   },
+  cible: {
+    type:    String,
+    enum:    ['professionnel', 'etudiant'],
+    default: 'professionnel',
+  },
+
 
   experiencesRestantes: { type: Number, required: true },
 

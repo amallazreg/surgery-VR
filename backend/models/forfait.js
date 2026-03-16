@@ -29,6 +29,21 @@ const forfaitSchema = new mongoose.Schema({
   simulationEsthetique:{ type: Boolean, default: false },
 
   features: [featureSchema],
-}, { timestamps: true });
+
+    cible: {
+    type:    String,
+    enum:    ['professionnel', 'etudiant'],
+    default: 'professionnel',
+  },
+
+    dureeJours: {
+    type:    Number,
+    default: 30,
+  },
+},
+
+{ timestamps: true });
+
+
 
 module.exports = mongoose.model('Forfait', forfaitSchema);

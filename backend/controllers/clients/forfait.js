@@ -1,16 +1,17 @@
 const Forfait = require('../../models/forfait');
 
-// Récupérer tous les forfaits
+// ── Forfaits professionnel (existant — inchangé côté routes) ──
+
 const getAllForfaits = async (req, res) => {
   try {
-    const forfaits = await Forfait.find();
+    // ✅ Filtre : seulement les forfaits professionnel
+    const forfaits = await Forfait.find({ cible: 'professionnel' });
     res.json(forfaits);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
-// Récupérer un forfait par id
 const getForfaitById = async (req, res) => {
   try {
     const forfait = await Forfait.findById(req.params.id);
@@ -21,21 +22,27 @@ const getForfaitById = async (req, res) => {
   }
 };
 
-// Ajouter un forfait
 const createForfait = async (req, res) => {
-  const forfait = new Forfait(req.body);
   try {
-    const newForfait = await forfait.save();
+    // ✅ Force cible: 'professionnel' pour ce controller
+  const forfait = new Forfait({
+      ...req.body,
+      cible: req.body.cible ?? 'professionnel',
+    });    const newForfait = await forfait.save();
     res.status(201).json(newForfait);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
 
-// Mettre à jour un forfait par id
 const updateForfait = async (req, res) => {
   try {
-    const updatedForfait = await Forfait.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    delete req.body.cible; // sécurité — on ne laisse pas changer cible
+    const updatedForfait = await Forfait.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
     if (!updatedForfait) return res.status(404).json({ message: 'Forfait non trouvé' });
     res.json(updatedForfait);
   } catch (err) {
@@ -43,12 +50,30 @@ const updateForfait = async (req, res) => {
   }
 };
 
-// Supprimer un forfait par id
 const deleteForfait = async (req, res) => {
   try {
     const deletedForfait = await Forfait.findByIdAndDelete(req.params.id);
     if (!deletedForfait) return res.status(404).json({ message: 'Forfait non trouvé' });
     res.json({ message: 'Forfait supprimé avec succès' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// GET /forfaits/cible/:cible  →  ex: /forfaits/cible/etudiant
+const getForfaitsByCible = async (req, res) => {
+  try {
+    const { cible } = req.params;
+
+    if (!['professionnel', 'etudiant'].includes(cible)) {
+      return res.status(400).json({ message: 'cible invalide. Valeurs acceptées : professionnel, etudiant' });
+    }
+
+    const forfaits = await Forfait.find({ cible, actif: true })
+      .populate('experiencesEtudiant', 'title emoji description')
+      .sort({ price: 1 });
+
+    res.json(forfaits);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -60,4 +85,5 @@ module.exports = {
   createForfait,
   updateForfait,
   deleteForfait,
+  getForfaitsByCible,
 };

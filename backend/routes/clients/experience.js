@@ -35,13 +35,13 @@ const storage = new CloudinaryStorage({
 // ── Routes ADMIN ────────────────────────────────────────────
 router.post('/',   createExperience);
 router.get('/',       getAllExperiences);
-router.delete('/:id', deleteExperience);
 router.put('/:id',    updateExperience);   
+router.delete('/:id', deleteExperience);
 
 // ── Routes CLIENT ───────────────────────────────────────────
 router.get('/mes-experiences/:userId',         getMesExperiences);
 router.post('/download/:userId/:experienceId', downloadExperienceApk);
-router.get('/:forfaitId', getExperiencesByForfait);
+router.get('/by-forfait/:forfaitId',            getExperiencesByForfait); 
 
 
 module.exports = router;

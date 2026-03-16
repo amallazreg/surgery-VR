@@ -19,6 +19,7 @@ import { ExperienceManagement } from './admin/experience-management/experience-m
 import { DashboardEtudiant } from './clients/Etudiants/dashboard-etudiant/dashboard-etudiant';
 import { MesExperiencesVR } from './clients/Etudiants/mes-experiences-vr/mes-experiences-vr';
 import { FormationManagement } from './clients/institution/formation-management/formation-management';
+import { ForfaitEtudiant } from './clients/Etudiants/forfait-etudiant/forfait-etudiant';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -48,7 +49,7 @@ export const routes: Routes = [
 
       {path : 'etudiant/dashborad' , component : DashboardEtudiant},
       {path : 'etudiant/mesExperiencesVR' , component : MesExperiencesVR },
-
+      { path: 'etudiant/forfaits', component: ForfaitEtudiant },
 
 
        { path: '**', redirectTo: '' }

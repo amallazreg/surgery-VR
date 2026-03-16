@@ -136,7 +136,7 @@ ngOnInit(): void {
 }
 
 loadForfaits(): void {
-  this.forfaitService.getAllForfaits().subscribe({
+  this.forfaitService.getForfaitsByCible('professionnel').subscribe({
     next: (data) => {
       this.plans = data.map((f: any) => ({
         _id: f._id,

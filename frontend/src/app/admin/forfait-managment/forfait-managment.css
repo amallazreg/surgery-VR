@@ -1055,3 +1055,378 @@ tbody td:last-child  { border-radius: 0 12px 12px 0; }
   border-color: #0066FF;
   transform: translateY(-1px);
 }
+
+/* ══════════════════════════════════════════════════════════
+   AJOUTER À LA FIN DE forfait-managment.css
+   (garder tout le CSS existant + coller ceci en dessous)
+══════════════════════════════════════════════════════════ */
+
+/* ── FILTRE CIBLE TABS ─────────────────────────────────── */
+.cible-filter-tabs {
+  display: flex;
+  gap: 6px;
+  background: #F0F4FF;
+  padding: 5px;
+  border-radius: 12px;
+}
+
+.cft-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 9px;
+  border: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5A6B8C;
+  cursor: pointer;
+  transition: all 0.22s;
+}
+
+.cft-btn:hover { background: white; color: #1A2B5F; }
+
+.cft-btn.active {
+  background: white;
+  color: #1A2B5F;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.cft-pro.active { color: #0066FF; }
+.cft-etu.active { color: #7C00CC; }
+
+.cft-count {
+  background: rgba(0,0,0,0.07);
+  border-radius: 20px;
+  padding: 1px 7px;
+  font-size: 11px;
+}
+
+/* ── CIBLE BADGES ──────────────────────────────────────── */
+.cible-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
+}
+
+.badge-pro {
+  background: rgba(0,102,255,0.08);
+  color: #0044CC;
+  border: 1px solid rgba(0,102,255,0.15);
+}
+
+.badge-etudiant {
+  background: rgba(124,0,204,0.08);
+  color: #7C00CC;
+  border: 1px solid rgba(124,0,204,0.15);
+}
+
+/* Badges row dans la card */
+.forfait-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── CARD ÉTUDIANT — accent violet ─────────────────────── */
+.forfait-card-etudiant::before {
+  background: linear-gradient(135deg, #9D00FF 0%, #FF00E5 100%) !important;
+}
+
+.forfait-card-etudiant .price-main {
+  background: linear-gradient(135deg, #9D00FF 0%, #FF00E5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.price-duree {
+  font-size: 0.8rem;
+  color: #5A6B8C;
+  margin-left: 4px;
+  -webkit-text-fill-color: #5A6B8C;
+}
+
+/* ── SECTION HEADER RIGHT ──────────────────────────────── */
+.section-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-experiences {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1.5px solid #E8EFF9;
+  background: white;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5A6B8C;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-experiences:hover { border-color: #0066FF; color: #0066FF; }
+
+/* ── MODAL WIDE (formulaire) ───────────────────────────── */
+.modal-wide { max-width: 820px; }
+
+/* ── STEP BACK BUTTON ──────────────────────────────────── */
+.btn-step-back {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1.5px solid #E8EFF9;
+  background: white;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: #5A6B8C;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-step-back:hover { border-color: #0066FF; color: #0066FF; }
+
+/* ── CIBLE SELECTOR ────────────────────────────────────── */
+.cible-selector { padding: 8px 0 16px; }
+
+.cible-selector-sub {
+  font-size: 14px;
+  color: #5A6B8C;
+  line-height: 1.6;
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.cible-cards {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.cible-card {
+  flex: 1;
+  background: #F8FAFF;
+  border: 2px solid #EEF2FF;
+  border-radius: 20px;
+  padding: 32px 28px;
+  cursor: pointer;
+  transition: all 0.32s cubic-bezier(0.23,1,0.32,1);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.cible-card:hover {
+  background: white;
+  border-color: #0066FF;
+  transform: translateY(-6px);
+  box-shadow: 0 16px 40px rgba(0,102,255,0.14);
+}
+
+.cible-card-etu:hover {
+  border-color: #9D00FF;
+  box-shadow: 0 16px 40px rgba(157,0,255,0.14);
+}
+
+.cible-card-glow {
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 180px; height: 180px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.cc-glow-pro { background: radial-gradient(circle, rgba(0,102,255,0.1), transparent 70%); }
+.cc-glow-etu { background: radial-gradient(circle, rgba(157,0,255,0.1), transparent 70%); }
+.cible-card:hover .cible-card-glow { opacity: 1; }
+
+.cible-card-icon {
+  font-size: 44px;
+  margin-bottom: 14px;
+  display: block;
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1));
+}
+
+.cible-card-label {
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 800;
+  color: #1A2B5F;
+  margin-bottom: 10px;
+}
+
+.cible-card-desc {
+  font-size: 13px;
+  color: #5A6B8C;
+  line-height: 1.65;
+  margin-bottom: 18px;
+}
+
+.cible-card-features {
+  list-style: none;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.cible-card-features li {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1A2B5F;
+}
+
+.cible-card-btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 18px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  transition: all 0.2s;
+}
+
+.cc-btn-pro {
+  background: rgba(0,102,255,0.07);
+  color: #0044CC;
+  border: 1.5px solid rgba(0,102,255,0.2);
+}
+
+.cible-card:hover .cc-btn-pro {
+  background: linear-gradient(135deg, #0066FF, #00D9FF);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 5px 16px rgba(0,102,255,0.35);
+}
+
+.cc-btn-etu {
+  background: rgba(157,0,255,0.07);
+  color: #7C00CC;
+  border: 1.5px solid rgba(157,0,255,0.2);
+}
+
+.cible-card:hover .cc-btn-etu {
+  background: linear-gradient(135deg, #9D00FF, #FF00E5);
+  color: white;
+  border-color: transparent;
+  box-shadow: 0 5px 16px rgba(157,0,255,0.35);
+}
+
+/* Séparateur OU */
+.cible-or {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 20px;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.cor-line {
+  width: 1px; flex: 1;
+  background: linear-gradient(to bottom, transparent, #DDE4EF, transparent);
+}
+
+.cor-text {
+  font-size: 11px;
+  font-weight: 700;
+  color: #C0CADC;
+  letter-spacing: 2px;
+}
+
+/* ── FORM CIBLE INDICATOR ──────────────────────────────── */
+.form-cible-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  background: rgba(0,102,255,0.07);
+  color: #0044CC;
+  border: 1px solid rgba(0,102,255,0.15);
+}
+
+.form-cible-indicator.fci-etu {
+  background: rgba(157,0,255,0.07);
+  color: #7C00CC;
+  border-color: rgba(157,0,255,0.15);
+}
+
+/* ── FORM HINTS ────────────────────────────────────────── */
+.form-hint {
+  font-size: 11px;
+  font-weight: 400;
+  color: #5A6B8C;
+  margin-left: 4px;
+}
+
+.form-hint-block {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #5A6B8C;
+  line-height: 1.5;
+}
+
+.form-hint-block code {
+  background: #EEF2FF;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  color: #0044CC;
+}
+
+/* ── BTN EXPERIENCES LINK ──────────────────────────────── */
+.btn-experiences-link {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1.5px dashed rgba(0,102,255,0.3);
+  border-radius: 10px;
+  background: rgba(0,102,255,0.04);
+  color: #0066FF;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: inherit;
+  margin-top: 10px;
+}
+
+.btn-experiences-link:hover {
+  background: rgba(0,102,255,0.1);
+  border-color: #0066FF;
+  transform: translateY(-1px);
+}
+
+.btn-exp-count {
+  margin-left: auto;
+  background: rgba(0,102,255,0.1);
+  color: #0044CC;
+  padding: 2px 8px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.btn-exp-arrow { margin-left: 4px; }

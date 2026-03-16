@@ -36,5 +36,11 @@ export class ForfaitService {
   deleteForfait(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/deleteForfait/${id}`);
   }
+
+   getForfaitsByCible(cible: 'professionnel' | 'etudiant'): Observable<any[]> {
+    return this.http.get<any[]>(
+      `${this.apiUrl}/cible/${cible}`,
+    );
+  }
   
 }
