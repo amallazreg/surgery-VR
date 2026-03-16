@@ -181,6 +181,24 @@ const getExperiencesByForfait = async (req, res) => {
   }
 };
 
+
+const updateExperience = async (req, res) => {
+  try {
+    const exp = await Experience.findById(req.params.id);
+    if (!exp) return res.status(404).json({ message: 'Expérience introuvable' });
+
+    const updated = await Experience.findByIdAndUpdate(
+      req.params.id,
+      { ...req.body },
+      { new: true, runValidators: true }
+    ).populate('forfaits', 'name price tagline');
+
+    res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   createExperience,
   getAllExperiences,
@@ -188,4 +206,5 @@ module.exports = {
   getMesExperiences,
   downloadExperienceApk,
   getExperiencesByForfait,
+  updateExperience,
 };

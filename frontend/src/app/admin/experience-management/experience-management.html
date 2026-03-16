@@ -119,7 +119,8 @@
           <div class="exp-card-top" [class]="'thumb-' + exp.thumbClass">
             <div class="exp-emoji">{{ exp.emoji }}</div>
             <div class="exp-actions-overlay">
-              <button class="action-btn btn-view" data-tooltip="Détails" (click)="viewExperience(exp)">👁️</button>
+              <button class="action-btn btn-view"   data-tooltip="Détails"   (click)="viewExperience(exp)">👁️</button>
+              <button class="action-btn btn-edit"   data-tooltip="Modifier"  (click)="editExperience(exp)">✏️</button>
               <button class="action-btn btn-delete" data-tooltip="Supprimer" (click)="confirmDelete(exp)">🗑️</button>
             </div>
           </div>
@@ -182,11 +183,14 @@
   </div>
 </div>
 
-<!-- ═══════════════ MODAL CRÉATION ═══════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL CRÉATION / ÉDITION
+     isEditMode détermine le titre, le bouton submit et la logique TS
+════════════════════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" *ngIf="showModal" (click)="$event.target === $event.currentTarget && closeModal()">
   <div class="modal modal-large">
-    <div class="modal-header">
-      <h3>🥽 Nouvelle expérience VR</h3>
+    <div class="modal-header" [class.edit-header]="isEditMode">
+      <h3>{{ isEditMode ? '✏️ Modifier l\'expérience' : '🥽 Nouvelle expérience VR' }}</h3>
       <button class="modal-close" (click)="closeModal()">✕</button>
     </div>
     <div class="modal-body">
@@ -247,7 +251,7 @@
         <!-- ── Colonne droite ── -->
         <div class="modal-col">
 
-          <!-- Liens APK -->
+          <!-- Liens App Lab -->
           <div class="form-section">
             <div class="form-section-title">
               <span>🔗 Lien Meta App Lab *</span>
@@ -322,12 +326,15 @@
         <button type="button" class="btn btn-secondary" (click)="closeModal()">Annuler</button>
         <button
           type="button"
-          class="btn btn-primary"
+          class="btn"
+          [class.btn-primary]="!isEditMode"
+          [class.btn-warning]="isEditMode"
           [disabled]="isSaving"
           (click)="saveExperience()"
         >
           <span *ngIf="isSaving">⏳ Enregistrement...</span>
-          <span *ngIf="!isSaving">🚀 Créer l'expérience</span>
+          <span *ngIf="!isSaving && !isEditMode">🚀 Créer l'expérience</span>
+          <span *ngIf="!isSaving && isEditMode">💾 Mettre à jour</span>
         </button>
       </div>
 
@@ -335,7 +342,9 @@
   </div>
 </div>
 
-<!-- ═══════════════ MODAL DÉTAIL ═══════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL DÉTAIL
+════════════════════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" *ngIf="showViewModal" (click)="$event.target === $event.currentTarget && closeViewModal()">
   <div class="modal modal-view" *ngIf="selectedExperience">
     <div class="modal-header">
@@ -380,24 +389,7 @@
         </div>
       </div>
 
-      <!-- Bloc App Lab 
-      <div class="view-apk-block" *ngIf="selectedExperience.appLabUrl">
-        <div class="apk-block-icon">🔗</div>
-        <div class="apk-block-info">
-          <div class="apk-block-name">Meta App Lab</div>
-          <div class="apk-link-row">
-            <span class="apk-link-url">{{ selectedExperience.appLabUrl }}</span>
-            <button class="apk-copy-btn" (click)="copyAppLabLink()">
-              {{ linkCopied ? '✅ Copié' : '📋 Copier' }}
-            </button>
-          </div>
-        </div>
-        <a [href]="selectedExperience.appLabUrl" target="_blank" class="btn btn-primary">
-          🔗 Ouvrir
-        </a>
-      </div> -->
-
-      <!-- Bloc APK direct (optionnel) -->
+      <!-- Bloc App Lab -->
       <div class="view-apk-block" *ngIf="selectedExperience.appLabUrl">
         <div class="apk-block-icon">🔗</div>
         <div class="apk-block-info">
@@ -406,14 +398,23 @@
             <span class="apk-link-url">{{ selectedExperience.appLabUrl }}</span>
           </div>
         </div>
-         <button class="apk-copy-btn" (click)="copyAppLabLink()">
-              {{ linkCopied ? '✅ Copié' : '📋 Copier' }}
-            </button>
+        <button class="apk-copy-btn" (click)="copyAppLabLink()">
+          {{ linkCopied ? '✅ Copié' : '📋 Copier' }}
+        </button>
       </div>
 
       <div class="modal-footer">
         <button class="btn btn-secondary" (click)="closeViewModal()">Fermer</button>
-        <button class="btn btn-danger" (click)="closeViewModal(); confirmDelete(selectedExperience!)">
+        <button
+          class="btn btn-warning"
+          (click)="closeViewModal(); editExperience(selectedExperience!)"
+        >
+          ✏️ Modifier
+        </button>
+        <button
+          class="btn btn-danger"
+          (click)="closeViewModal(); confirmDelete(selectedExperience!)"
+        >
           🗑️ Supprimer
         </button>
       </div>
@@ -421,7 +422,9 @@
   </div>
 </div>
 
-<!-- ═══════════════ MODAL SUPPRESSION ═══════════════ -->
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MODAL SUPPRESSION
+════════════════════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" *ngIf="showDeleteModal" (click)="$event.target === $event.currentTarget && closeDeleteModal()">
   <div class="modal modal-confirm">
     <div class="modal-header danger">

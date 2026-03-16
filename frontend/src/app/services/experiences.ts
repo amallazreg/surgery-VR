@@ -72,5 +72,9 @@ createExperience(data: any): Observable<any> {
   getExperiencesByForfait(forfaitId: string): Observable<any> {
   return this.http.get(`${this.api}/${forfaitId}`);
 }
+
+updateExperience(id: string, data: any): Observable<any> {
+  return this.http.put(`${this.apiUrl}/${id}`, data);
+}
   
 }

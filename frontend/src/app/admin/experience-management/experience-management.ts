@@ -13,8 +13,8 @@ export interface Experience {
   emoji: string;
   thumbClass: string;
   compatibility: string;
-  apkUrl?: string;       // optionnel
-  appLabUrl: string;     // obligatoire
+  apkUrl?: string;
+  appLabUrl: string;
   forfaits?: any[];
   respondents: number;
   avgTime: string;
@@ -61,6 +61,10 @@ export class ExperienceManagement implements OnInit {
   isDeleting   = false;
   errorMessage = '';
 
+  // ─── Edit mode ────────────────────────────────────────────────────────────
+  isEditMode    = false;
+  editingId: string | null = null;
+
   // ─── Modals ───────────────────────────────────────────────────────────────
   showModal       = false;
   showDeleteModal = false;
@@ -71,8 +75,8 @@ export class ExperienceManagement implements OnInit {
 
   // ─── Formulaire ───────────────────────────────────────────────────────────
   formData   = { ...DEFAULT_FORM, forfaits: [] as string[] };
-  appLabUrl  = '';   // obligatoire
-  apkUrl     = '';   // optionnel
+  appLabUrl  = '';
+  apkUrl     = '';
 
   // ─── Constantes template ──────────────────────────────────────────────────
   readonly emojis       = EMOJIS;
@@ -130,6 +134,8 @@ export class ExperienceManagement implements OnInit {
     });
   }
 
+  // ─── Save (create ou update) ──────────────────────────────────────────────
+
   saveExperience(): void {
     if (!this.formData.title.trim()) {
       this.showToast('❌ Le titre est obligatoire.', 'error');
@@ -150,23 +156,45 @@ export class ExperienceManagement implements OnInit {
       compatibility: this.formData.compatibility,
       forfaits:      this.formData.forfaits,
       appLabUrl:     this.appLabUrl,
-      apkUrl: this.apkUrl.trim() || this.appLabUrl,    };
+      apkUrl:        this.apkUrl.trim() || this.appLabUrl,
+    };
 
-    this.experienceService.createExperience(payload).subscribe({
-      next: (created) => {
-        this.experiences.unshift(created);
-        this.applyFilters();
-        this.closeModal();
-        this.isSaving = false;
-        this.cdr.detectChanges();
-        this.showToast('✅ Expérience créée avec succès !', 'success');
-      },
-      error: (err) => {
-        this.isSaving = false;
-        this.showToast('❌ Erreur lors de la création. Vérifiez les données.', 'error');
-        console.error('Erreur création expérience:', err);
-      },
-    });
+    if (this.isEditMode && this.editingId) {
+      // ── MODE MISE À JOUR ──────────────────────────────────
+      this.experienceService.updateExperience(this.editingId, payload).subscribe({
+        next: (updated) => {
+          const idx = this.experiences.findIndex(e => e._id === this.editingId);
+          if (idx !== -1) this.experiences[idx] = updated;
+          this.applyFilters();
+          this.closeModal();
+          this.isSaving = false;
+          this.cdr.detectChanges();
+          this.showToast('✅ Expérience mise à jour avec succès !', 'success');
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.showToast('❌ Erreur lors de la mise à jour.', 'error');
+          console.error('Erreur mise à jour expérience:', err);
+        },
+      });
+    } else {
+      // ── MODE CRÉATION ─────────────────────────────────────
+      this.experienceService.createExperience(payload).subscribe({
+        next: (created) => {
+          this.experiences.unshift(created);
+          this.applyFilters();
+          this.closeModal();
+          this.isSaving = false;
+          this.cdr.detectChanges();
+          this.showToast('✅ Expérience créée avec succès !', 'success');
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.showToast('❌ Erreur lors de la création. Vérifiez les données.', 'error');
+          console.error('Erreur création expérience:', err);
+        },
+      });
+    }
   }
 
   deleteExperience(): void {
@@ -255,15 +283,37 @@ export class ExperienceManagement implements OnInit {
 
   // ─── Modals ───────────────────────────────────────────────────────────────
 
+  /** Ouvrir en mode CRÉATION */
   openModal(): void {
-    this.formData  = { ...DEFAULT_FORM, forfaits: [] };
-    this.appLabUrl = '';
-    this.apkUrl    = '';
-    this.showModal = true;
+    this.isEditMode  = false;
+    this.editingId   = null;
+    this.formData    = { ...DEFAULT_FORM, forfaits: [] };
+    this.appLabUrl   = '';
+    this.apkUrl      = '';
+    this.showModal   = true;
+  }
+
+  /** Ouvrir en mode ÉDITION — pré-remplit le formulaire */
+  editExperience(exp: Experience): void {
+    this.isEditMode  = true;
+    this.editingId   = exp._id || null;
+    this.formData    = {
+      title:         exp.title,
+      description:   exp.description || '',
+      emoji:         exp.emoji,
+      thumbClass:    exp.thumbClass,
+      compatibility: exp.compatibility,
+      forfaits:      (exp.forfaits || []).map((f: any) => f._id || f),
+    };
+    this.appLabUrl   = exp.appLabUrl || '';
+    this.apkUrl      = exp.apkUrl    || '';
+    this.showModal   = true;
   }
 
   closeModal(): void {
-    this.showModal = false;
+    this.showModal   = false;
+    this.isEditMode  = false;
+    this.editingId   = null;
   }
 
   viewExperience(exp: Experience): void {

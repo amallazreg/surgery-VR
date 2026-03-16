@@ -13,6 +13,7 @@ const {
   getMesExperiences,
   downloadExperienceApk,
   getExperiencesByForfait,
+  updateExperience,
 } = require('../../controllers/clients/experience');
 
 
@@ -35,6 +36,7 @@ const storage = new CloudinaryStorage({
 router.post('/',   createExperience);
 router.get('/',       getAllExperiences);
 router.delete('/:id', deleteExperience);
+router.put('/:id',    updateExperience);   
 
 // ── Routes CLIENT ───────────────────────────────────────────
 router.get('/mes-experiences/:userId',         getMesExperiences);
