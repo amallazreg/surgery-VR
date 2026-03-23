@@ -48,7 +48,7 @@ const createCheckoutSession = async (req, res) => {
       ],
       success_url: 'https://surgery-vr.vercel.app/etudiant/mesExperiencesVR?payment=success',
       cancel_url:  'https://surgery-vr.vercel.app/etudiant/mesExperiencesVR?payment=cancel',
-      metadata: { userId, forfaitId, type }, // type: nouveau | renouvellement | upgrade
+      metadata: { userId, forfaitId, type ,cible: 'etudiant'}, // type: nouveau | renouvellement | upgrade
     });
 
     res.json({ url: session.url });

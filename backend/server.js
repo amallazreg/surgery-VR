@@ -23,6 +23,7 @@ const experienceRoutes = require('./routes/clients/experience');
 const codeFormationRoutes = require('./routes/clients/codeFormation');
 const accesEtudiantRoutes = require('./routes/etudiant/accesEtudiant') ; 
 const paiementEtudiantRoutes = require('./routes/etudiant/Paiementetudiant') ; 
+const abonnementEtudiantRoutes = require('./routes/etudiant/Abonnementetudiant') ; 
 
 
 const app  = express();
@@ -234,7 +235,7 @@ app.post(
         return {
           user:                  userId,              // ← 'user' pas 'utilisateur'
           forfait:               forfaitId,
-          cible:                 'etudiant',
+          cible:                session.metadata.cible || 'etudiant',
           status:                'active',
           dateDebut:             new Date(),
           dateFin:               dateFin,
@@ -267,7 +268,7 @@ app.post(
         else if (type === 'renouvellement') {
  
           const abonnement = await Abonnement.findOneAndUpdate(
-            { utilisateur: userId, forfait: forfaitId, cible: 'etudiant' },
+            { user: userId, forfait: forfaitId, cible: 'etudiant' },
             buildData(),
             { new: true }
           );
@@ -291,7 +292,7 @@ app.post(
  
           // Annuler l'ancien abonnement étudiant actif
           await Abonnement.findOneAndUpdate(
-            { utilisateur: userId, cible: 'etudiant', status: 'active' },
+            { user: userId, cible: 'etudiant', status: 'active' },
             { status: 'cancelled' }
           );
  
@@ -355,7 +356,10 @@ app.use('/client/experiences', experienceRoutes);
 
 app.use('/client/codes', codeFormationRoutes);
 app.use('/client/acces', accesEtudiantRoutes);
+
+
 app.use('/client/etudiant/paiement', paiementEtudiantRoutes);
+app.use('/client/etudiant', abonnementEtudiantRoutes);
 
 
 
