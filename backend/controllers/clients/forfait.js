@@ -66,11 +66,13 @@ const getForfaitsByCible = async (req, res) => {
     const { cible } = req.params;
 
     if (!['professionnel', 'etudiant'].includes(cible)) {
-      return res.status(400).json({ message: 'cible invalide. Valeurs acceptées : professionnel, etudiant' });
+      return res.status(400).json({ 
+        message: 'cible invalide. Valeurs acceptées : professionnel, etudiant' 
+      });
     }
 
-    const forfaits = await Forfait.find({ cible, actif: true })
-      .populate('experiencesEtudiant', 'title emoji description')
+    // ✅ Supprimé actif: true — le champ n'existe pas dans le modèle
+    const forfaits = await Forfait.find({ cible })
       .sort({ price: 1 });
 
     res.json(forfaits);
