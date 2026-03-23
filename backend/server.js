@@ -228,20 +228,20 @@ app.post(
         }
  
         // ── Helper local ────────────────────────────────
-        const buildData = () => {
-          const dateFin = new Date();
-          dateFin.setDate(dateFin.getDate() + (forfait.dureeJours || 30));
-          return {
-            utilisateur:           userId,
-            forfait:               forfaitId,
-            cible:                 'etudiant',  // ← seule différence vs institution
-            status:                'active',
-            dateDebut:             new Date(),
-            dateFin:               dateFin,
-            stripePaymentIntentId: session.id,
-          };
+      const buildData = () => {
+        const dateFin = new Date();
+        dateFin.setDate(dateFin.getDate() + (forfait.dureeJours || 30));
+        return {
+          user:                  userId,              // ← 'user' pas 'utilisateur'
+          forfait:               forfaitId,
+          cible:                 'etudiant',
+          status:                'active',
+          dateDebut:             new Date(),
+          dateFin:               dateFin,
+          experiencesRestantes:  forfait.nbExperiences || 0,  // ← REQUIS, sans ça ça crash
+          stripeSessionId:       session.id,          // ← 'stripeSessionId' pas 'stripePaymentIntentId'
         };
- 
+      };
         // ──────────────────────────────────────────────
         // CAS 1 : Nouvel abonnement étudiant
         // ──────────────────────────────────────────────
