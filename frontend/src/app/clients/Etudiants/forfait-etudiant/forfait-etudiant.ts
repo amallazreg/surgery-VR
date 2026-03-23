@@ -3,6 +3,8 @@ import { ForfaitService } from '../../../services/forfait-service';
 import { SideBarEtudiant } from '../side-bar-etudiant/side-bar-etudiant';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { Payement } from '../../../services/payement';
 
 @Component({
   selector: 'app-forfait-etudiant',
@@ -57,7 +59,9 @@ export class ForfaitEtudiant  implements OnInit {
  
   constructor(
    private forfaitService: ForfaitService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+  private paymentService : Payement,
+  private route: ActivatedRoute
   ) {}
  
   ngOnInit(): void {
@@ -123,29 +127,14 @@ loadForfaits(): void {
   // ════════════════════════════════════════════════════════
   // NAVIGATION STEPS
   // ════════════════════════════════════════════════════════
-  nextStep(): void {
-    if (this.currentStep < 3) {
-      this.currentStep++;
-      return;
-    }
- 
-    // Step 3 → confirmer → appel Stripe
-    this.isProcessing = true;
-    this.souscriptionLoading = this.selectedPlan._id;
- 
-   // this.abonnementService.souscrireForfait(this.selectedPlan._id).subscribe({
-    //  next: (res) => {
-        // Redirection vers Stripe Checkout
-    //    window.location.href = res.url;
-   //   },
-    //  error: (err) => {
-   //     this.isProcessing        = false;
-    //    this.souscriptionLoading = '';
-    //   alert(err.error?.message || 'Erreur lors de la souscription. Réessayez.');
-    //    this.cdr.detectChanges();
-   //   }
-  //  });
+nextStep(): void {
+  if (this.currentStep < 3) {
+    this.currentStep++;
+    return;
   }
+  // Step 3 → lancer le paiement
+  this.processPayment();
+}
  
   prevStep(): void {
     if (this.currentStep > 1) this.currentStep--;
@@ -195,4 +184,86 @@ loadForfaits(): void {
   toggleFaq(faq: any): void {
     faq.open = !faq.open;
   }
+
+  // ── Ajoute ces méthodes dans ForfaitEtudiant (forfait-etudiant.ts) ──
+
+// Classe du header selon la position de la card
+getPlanHeaderClass(index: number): string {
+  const classes = ['h-0', 'h-1', 'h-2'];
+  return classes[index % 3];
+}
+
+// Couleur du texte : blanc sur fond sombre/coloré, sombre sur fond clair
+getPlanTextClass(index: number): string {
+  return index % 3 === 0 ? 'text-dark' : 'text-white';
+}
+
+// Classe du bouton CTA selon la position
+getPlanCtaClass(index: number): string {
+  const classes = ['cta-0', 'cta-1', 'cta-2'];
+  return classes[index % 3];
+}
+
+// Background de la modal hero selon le forfait
+getModalBg(plan: any): string {
+  const idx = this.forfaits.indexOf(plan);
+  const bgs = [
+    'linear-gradient(145deg, #1A2B5F, #2D3E6F)',
+    'linear-gradient(145deg, #0A1635, #1a2d5a)',
+    'linear-gradient(135deg, #F59E0B 0%, #F97316 100%)',
+  ];
+  return bgs[idx % 3];
+}
+
+// ══════════════════════════════════════════════════════════
+// AJOUTER dans ForfaitEtudiant (forfait-etudiant.ts)
+// ══════════════════════════════════════════════════════════
+
+// ── Getter compareRows ────────────────────────────────────
+// Construit les lignes du tableau comparatif dynamiquement
+// en faisant l'union de toutes les features des forfaits
+get compareRows(): { label: string; vals: boolean[] }[] {
+  if (!this.forfaits?.length) return [];
+
+  // Récupère tous les labels uniques de features
+  const allLabels = new Set<string>();
+  this.forfaits.forEach(f => {
+    (f.features || []).forEach((feat: any) => {
+      allLabels.add(feat.text);
+    });
+  });
+
+  // Pour chaque label, vérifie si chaque forfait l'a à true
+  return Array.from(allLabels).map(label => ({
+    label,
+    vals: this.forfaits.map(f => {
+      const feat = (f.features || []).find((ft: any) => ft.text === label);
+      return feat?.yes === true;
+    })
+  }));
+}
+
+
+processPayment(): void {
+  if (!this.selectedPlan) return;
+  this.isProcessing        = true;
+  this.souscriptionLoading = this.selectedPlan._id;
+ 
+  const userId    = localStorage.getItem('userId') || '';
+  const forfaitId = this.selectedPlan._id;
+ 
+  this.paymentService.createCheckoutSessionEtudiant(userId, forfaitId, 'nouveau').subscribe({
+    next: (res) => {
+      window.location.href = res.url; // redirection Stripe
+    },
+    error: (err) => {
+      console.error(err);
+      this.isProcessing        = false;
+      this.souscriptionLoading = '';
+      this.cdr.detectChanges();
+    },
+  });
+}
+
+
 }

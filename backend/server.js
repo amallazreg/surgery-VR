@@ -22,6 +22,7 @@ const abonnementRoutes   = require('./routes/clients/abonnement');
 const experienceRoutes = require('./routes/clients/experience');
 const codeFormationRoutes = require('./routes/clients/codeFormation');
 const accesEtudiantRoutes = require('./routes/etudiant/accesEtudiant') ; 
+const paiementEtudiantRoutes = require('./routes/etudiant/Paiementetudiant') ; 
 
 
 const app  = express();
@@ -193,7 +194,131 @@ app.post(
 );
 
 
-
+app.post(
+  '/webhook-etudiant',
+  express.raw({ type: 'application/json' }),
+  async (req, res) => {
+ 
+    const sig = req.headers['stripe-signature'];
+ 
+    try {
+      const event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET_ETUDIANT // ← clé différente de l'institution
+      );
+ 
+      console.log('Webhook étudiant reçu :', event.type);
+ 
+      if (event.type === 'checkout.session.completed') {
+        const session   = event.data.object;
+        const userId    = session.metadata.userId;
+        const forfaitId = session.metadata.forfaitId;
+        const type      = session.metadata.type || 'nouveau'; // nouveau | renouvellement | upgrade
+ 
+        if (!userId || !forfaitId) {
+          console.log('Metadata manquante !');
+          return res.json({ received: true });
+        }
+ 
+        const forfait = await Forfait.findById(forfaitId);
+        if (!forfait) {
+          console.log('Forfait étudiant introuvable !');
+          return res.json({ received: true });
+        }
+ 
+        // ── Helper local ────────────────────────────────
+        const buildData = () => {
+          const dateFin = new Date();
+          dateFin.setDate(dateFin.getDate() + (forfait.dureeJours || 30));
+          return {
+            utilisateur:           userId,
+            forfait:               forfaitId,
+            cible:                 'etudiant',  // ← seule différence vs institution
+            status:                'active',
+            dateDebut:             new Date(),
+            dateFin:               dateFin,
+            stripePaymentIntentId: session.id,
+          };
+        };
+ 
+        // ──────────────────────────────────────────────
+        // CAS 1 : Nouvel abonnement étudiant
+        // ──────────────────────────────────────────────
+        if (type === 'nouveau') {
+ 
+          const abonnement = await Abonnement.create(buildData());
+ 
+          await Paiement.create({
+            user:            userId,
+            abonnement:      abonnement._id,
+            amount:          session.amount_total / 100,
+            currency:        session.currency,
+            stripeSessionId: session.id,
+            status:          'paid',
+          });
+ 
+          console.log('✅ Nouvel abonnement étudiant créé !');
+        }
+ 
+        // ──────────────────────────────────────────────
+        // CAS 2 : Renouvellement (même forfait étudiant)
+        // ──────────────────────────────────────────────
+        else if (type === 'renouvellement') {
+ 
+          const abonnement = await Abonnement.findOneAndUpdate(
+            { utilisateur: userId, forfait: forfaitId, cible: 'etudiant' },
+            buildData(),
+            { new: true }
+          );
+ 
+          await Paiement.create({
+            user:            userId,
+            abonnement:      abonnement._id,
+            amount:          session.amount_total / 100,
+            currency:        session.currency,
+            stripeSessionId: session.id,
+            status:          'paid',
+          });
+ 
+          console.log('✅ Abonnement étudiant renouvelé !');
+        }
+ 
+        // ──────────────────────────────────────────────
+        // CAS 3 : Upgrade vers forfait étudiant supérieur
+        // ──────────────────────────────────────────────
+        else if (type === 'upgrade') {
+ 
+          // Annuler l'ancien abonnement étudiant actif
+          await Abonnement.findOneAndUpdate(
+            { utilisateur: userId, cible: 'etudiant', status: 'active' },
+            { status: 'cancelled' }
+          );
+ 
+          // Créer le nouvel abonnement étudiant
+          const nouvelAbonnement = await Abonnement.create(buildData());
+ 
+          await Paiement.create({
+            user:            userId,
+            abonnement:      nouvelAbonnement._id,
+            amount:          session.amount_total / 100,
+            currency:        session.currency,
+            stripeSessionId: session.id,
+            status:          'paid',
+          });
+ 
+          console.log('✅ Abonnement étudiant upgradé !');
+        }
+      }
+ 
+      res.json({ received: true });
+ 
+    } catch (err) {
+      console.error('Erreur webhook étudiant:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+  }
+);
 
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));
@@ -230,6 +355,8 @@ app.use('/client/experiences', experienceRoutes);
 
 app.use('/client/codes', codeFormationRoutes);
 app.use('/client/acces', accesEtudiantRoutes);
+app.use('/client/etudiant/paiement', paiementEtudiantRoutes);
+
 
 
 
