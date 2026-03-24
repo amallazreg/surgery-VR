@@ -99,7 +99,8 @@ app.post(
 
         const userId    = session.metadata.userId;
         const forfaitId = session.metadata.forfaitId;
-        const type      = session.metadata.type || 'nouveau'; // nouveau | renouvellement | upgrade
+        const type      = session.metadata.type  || 'nouveau';
+        const cible     = session.metadata.cible || 'professionnel'; // ← NOUVEAU
 
         if (!userId || !forfaitId) {
           console.log('Metadata manquante !');
@@ -112,14 +113,39 @@ app.post(
           return res.json({ received: true });
         }
 
+        console.log(`📦 Traitement abonnement — cible: ${cible}, type: ${type}`);
+
+        // ── buildData unifié selon la cible ────────────────
+        const buildData = () => {
+          const dateFin = new Date();
+
+          if (cible === 'etudiant') {
+            // Étudiant : durée basée sur dureeJours du forfait
+            dateFin.setDate(dateFin.getDate() + (forfait.dureeJours || 30));
+          } else {
+            // Institution : 30 jours par défaut (comme avant)
+            dateFin.setDate(dateFin.getDate() + 30);
+          }
+
+          return {
+            user:                 userId,
+            forfait:              forfaitId,
+            cible,                                             // ← 'etudiant' ou 'professionnel'
+            status:               'active',
+            dateDebut:            new Date(),
+            dateFin,
+            experiencesRestantes: forfait.nbExperiences || 0,
+            apkRestants:          cible === 'professionnel' ? (forfait.nbApk || 0) : 0,
+            stripeSessionId:      session.id,
+          };
+        };
+
         // ──────────────────────────────────────
         // CAS 1 : Nouvel abonnement
         // ──────────────────────────────────────
         if (type === 'nouveau') {
 
-          const abonnement = await Abonnement.create(
-            buildAbonnementData(userId, forfaitId, forfait, session.id)
-          );
+          const abonnement = await Abonnement.create(buildData());
 
           await Paiement.create({
             user:            userId,
@@ -127,10 +153,10 @@ app.post(
             amount:          session.amount_total / 100,
             currency:        session.currency,
             stripeSessionId: session.id,
-            status:          'paid'
+            status:          'paid',
           });
 
-          console.log('✅ Nouvel abonnement créé !');
+          console.log(`✅ Nouvel abonnement ${cible} créé !`);
         }
 
         // ──────────────────────────────────────
@@ -139,8 +165,8 @@ app.post(
         else if (type === 'renouvellement') {
 
           const abonnement = await Abonnement.findOneAndUpdate(
-            { user: userId, forfait: forfaitId },
-            buildAbonnementData(userId, forfaitId, forfait, session.id),
+            { user: userId, forfait: forfaitId, cible }, // ← filtre par cible
+            buildData(),
             { new: true }
           );
 
@@ -150,10 +176,10 @@ app.post(
             amount:          session.amount_total / 100,
             currency:        session.currency,
             stripeSessionId: session.id,
-            status:          'paid'
+            status:          'paid',
           });
 
-          console.log('✅ Abonnement renouvelé !');
+          console.log(`✅ Abonnement ${cible} renouvelé !`);
         }
 
         // ──────────────────────────────────────
@@ -161,16 +187,13 @@ app.post(
         // ──────────────────────────────────────
         else if (type === 'upgrade') {
 
-          // Annuler l'ancien abonnement actif
+          // Annuler l'ancien abonnement actif de la même cible
           await Abonnement.findOneAndUpdate(
-            { user: userId, status: 'active' },
+            { user: userId, cible, status: 'active' }, // ← filtre par cible
             { status: 'cancelled' }
           );
 
-          // Créer le nouvel abonnement avec le nouveau forfait
-          const nouvelAbonnement = await Abonnement.create(
-            buildAbonnementData(userId, forfaitId, forfait, session.id)
-          );
+          const nouvelAbonnement = await Abonnement.create(buildData());
 
           await Paiement.create({
             user:            userId,
@@ -178,10 +201,10 @@ app.post(
             amount:          session.amount_total / 100,
             currency:        session.currency,
             stripeSessionId: session.id,
-            status:          'paid'
+            status:          'paid',
           });
 
-          console.log('✅ Abonnement upgradé !');
+          console.log(`✅ Abonnement ${cible} upgradé !`);
         }
       }
 
@@ -195,131 +218,7 @@ app.post(
 );
 
 
-app.post(
-  '/webhook-etudiant',
-  express.raw({ type: 'application/json' }),
-  async (req, res) => {
- 
-    const sig = req.headers['stripe-signature'];
- 
-    try {
-      const event = stripe.webhooks.constructEvent(
-        req.body,
-        sig,
-        process.env.STRIPE_WEBHOOK_SECRET_ETUDIANT // ← clé différente de l'institution
-      );
- 
-      console.log('Webhook étudiant reçu :', event.type);
- 
-      if (event.type === 'checkout.session.completed') {
-        const session   = event.data.object;
-        const userId    = session.metadata.userId;
-        const forfaitId = session.metadata.forfaitId;
-        const type      = session.metadata.type || 'nouveau'; // nouveau | renouvellement | upgrade
- 
-        if (!userId || !forfaitId) {
-          console.log('Metadata manquante !');
-          return res.json({ received: true });
-        }
- 
-        const forfait = await Forfait.findById(forfaitId);
-        if (!forfait) {
-          console.log('Forfait étudiant introuvable !');
-          return res.json({ received: true });
-        }
- 
-        // ── Helper local ────────────────────────────────
-      const buildData = () => {
-        const dateFin = new Date();
-        dateFin.setDate(dateFin.getDate() + (forfait.dureeJours || 30));
-        return {
-          user:                  userId,              // ← 'user' pas 'utilisateur'
-          forfait:               forfaitId,
-          cible:                session.metadata.cible || 'etudiant',
-          status:                'active',
-          dateDebut:             new Date(),
-          dateFin:               dateFin,
-          experiencesRestantes:  forfait.nbExperiences || 0,  // ← REQUIS, sans ça ça crash
-          stripeSessionId:       session.id,          // ← 'stripeSessionId' pas 'stripePaymentIntentId'
-        };
-      };
-        // ──────────────────────────────────────────────
-        // CAS 1 : Nouvel abonnement étudiant
-        // ──────────────────────────────────────────────
-        if (type === 'nouveau') {
- 
-          const abonnement = await Abonnement.create(buildData());
- 
-          await Paiement.create({
-            user:            userId,
-            abonnement:      abonnement._id,
-            amount:          session.amount_total / 100,
-            currency:        session.currency,
-            stripeSessionId: session.id,
-            status:          'paid',
-          });
- 
-          console.log('✅ Nouvel abonnement étudiant créé !');
-        }
- 
-        // ──────────────────────────────────────────────
-        // CAS 2 : Renouvellement (même forfait étudiant)
-        // ──────────────────────────────────────────────
-        else if (type === 'renouvellement') {
- 
-          const abonnement = await Abonnement.findOneAndUpdate(
-            { user: userId, forfait: forfaitId, cible: 'etudiant' },
-            buildData(),
-            { new: true }
-          );
- 
-          await Paiement.create({
-            user:            userId,
-            abonnement:      abonnement._id,
-            amount:          session.amount_total / 100,
-            currency:        session.currency,
-            stripeSessionId: session.id,
-            status:          'paid',
-          });
- 
-          console.log('✅ Abonnement étudiant renouvelé !');
-        }
- 
-        // ──────────────────────────────────────────────
-        // CAS 3 : Upgrade vers forfait étudiant supérieur
-        // ──────────────────────────────────────────────
-        else if (type === 'upgrade') {
- 
-          // Annuler l'ancien abonnement étudiant actif
-          await Abonnement.findOneAndUpdate(
-            { user: userId, cible: 'etudiant', status: 'active' },
-            { status: 'cancelled' }
-          );
- 
-          // Créer le nouvel abonnement étudiant
-          const nouvelAbonnement = await Abonnement.create(buildData());
- 
-          await Paiement.create({
-            user:            userId,
-            abonnement:      nouvelAbonnement._id,
-            amount:          session.amount_total / 100,
-            currency:        session.currency,
-            stripeSessionId: session.id,
-            status:          'paid',
-          });
- 
-          console.log('✅ Abonnement étudiant upgradé !');
-        }
-      }
- 
-      res.json({ received: true });
- 
-    } catch (err) {
-      console.error('Erreur webhook étudiant:', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
-  }
-);
+
 
 app.use(express.json({ limit: '500mb' }));
 app.use(express.urlencoded({ extended: true, limit: '500mb' }));

@@ -1,23 +1,6 @@
-const Stripe      = require('stripe');
-const stripe      = Stripe(process.env.STRIPE_SECRET_KEY);
-const Forfait     = require('../../models/forfait');
-const Abonnement  = require('../../models/abonnement');
-const Paiement    = require('../../models/paiement'); 
-
-const buildAbonnementEtudiantData = (userId, forfaitId, forfait, sessionId) => {
-  const dateFin = new Date();
-  dateFin.setDate(dateFin.getDate() + (forfait.dureeJours || 30));
-
-  return {
-    utilisateur:           userId,
-    forfait:               forfaitId,
-    cible:                 'etudiant',      
-    status:                'active',
-    dateDebut:             new Date(),
-    dateFin:               dateFin,
-    stripePaymentIntentId: sessionId,
-  };
-};
+const Stripe  = require('stripe');
+const stripe  = Stripe(process.env.STRIPE_SECRET_KEY);
+const Forfait = require('../../models/forfait');
 
 
 const createCheckoutSession = async (req, res) => {
@@ -41,14 +24,19 @@ const createCheckoutSession = async (req, res) => {
           price_data: {
             currency:     'usd',
             product_data: { name: `Forfait Étudiant — ${forfait.name}` },
-            unit_amount:  forfait.price * 100, // en centimes
+            unit_amount:  forfait.price * 100,
           },
           quantity: 1,
         },
       ],
       success_url: 'https://surgery-vr.vercel.app/etudiant/mesExperiencesVR?payment=success',
       cancel_url:  'https://surgery-vr.vercel.app/etudiant/mesExperiencesVR?payment=cancel',
-      metadata: { userId, forfaitId, type ,cible: 'etudiant'}, // type: nouveau | renouvellement | upgrade
+      metadata: {
+        userId,
+        forfaitId,
+        type,
+        cible: 'etudiant',  // ← OBLIGATOIRE — lu par le webhook pour créer cible:'etudiant'
+      },
     });
 
     res.json({ url: session.url });

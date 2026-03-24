@@ -1,8 +1,8 @@
 const express    = require('express');
 const router     = express.Router();
-const paiementEtudiantController = require('../../controllers/etudiant/Paiementetudiant');
+const {createCheckoutSession} = require('../../controllers/etudiant/Paiementetudiant');
 
 
-router.post('/create-checkout-session', paiementEtudiantController.createCheckoutSession);
+router.post('/create-checkout-session', createCheckoutSession);
 
 module.exports = router;
