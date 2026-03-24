@@ -2,6 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+export type Cible = 'etudiant' | 'professionnel' | 'les deux';
+
 export interface ExperienceBackend {
   _id: string;
   title: string;
@@ -20,6 +22,7 @@ export interface ExperienceBackend {
   apkInstalled: boolean;   // enrichi par le backend
   status: 'live' | 'new' | 'paused' | 'draft';
   appLabUrl?: string;  
+  cible: Cible;
 }
 
 export interface DownloadApkResponse {
@@ -27,6 +30,7 @@ export interface DownloadApkResponse {
   fileName: string;
   apkRestants: number;
   dejaInstalle: boolean;
+  cible: Cible;
 }
 
 
@@ -35,18 +39,19 @@ export interface DownloadApkResponse {
 })
 export class Experiences {
 
-    private api = "https://surgery-vr.onrender.com/client/experiences" ; // ex: http://localhost:3000/api
+    private api = "https://surgery-vr.onrender.com/client/experiences" ; 
+    private apiUrl = 'https://surgery-vr.onrender.com/admin/experiences';
+
 
   constructor(private http: HttpClient) {}
 
-  // GET /client/experiences/:userId  (route: /mes-experiences/:userId selon le router)
+
+  //CLIENT
   getMesExperiences(userId: string): Observable<any> {
     return this.http.get<any>(
       `${this.api}/mes-experiences/${userId}`
     );
   }
-
-  // POST /client/experiences/download/:userId/:experienceId
   downloadExperienceApk(userId: string, experienceId: string): Observable<any> {
     return this.http.post<any>(
       `${this.api}/download/${userId}/${experienceId}`,
@@ -54,28 +59,34 @@ export class Experiences {
     );
   }
 
-  private apiUrl = 'https://surgery-vr.onrender.com/admin/experiences';
 
-
+//ADMIN
   getAllExperiences(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}`);
   }
 
-createExperience(data: any): Observable<any> {
-  return this.http.post(`${this.apiUrl}`, data);
-}
+  createExperience(data: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}`, data);
+  }
 
   deleteExperience(id: string): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 
-getExperiencesByForfait(forfaitId: string): Observable<any> {
-  return this.http.get(`${this.api}/by-forfait/${forfaitId}`);
-                         
-}
+  getExperiencesByForfait(forfaitId: string): Observable<any> {
+    return this.http.get(`${this.api}/by-forfait/${forfaitId}`);                      
+  }
 
-updateExperience(id: string, data: any): Observable<any> {
-  return this.http.put(`${this.apiUrl}/${id}`, data);
-}
+  updateExperience(id: string, data: any): Observable<any> {
+    return this.http.put(`${this.apiUrl}/${id}`, data);
+  }
+
+  getExperiencesForEtudiant(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/etudiants`);
+  }
+
+  getExperiencesForProfessionnel(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/professionnels`);
+  }
   
 }

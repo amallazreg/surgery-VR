@@ -2,15 +2,10 @@ const cloudinary = require('cloudinary').v2;
 const Experience = require('../../models/experience');
 const Abonnement = require('../../models/abonnement');
 
-// ═══════════════════════════════════════════════════════════
-// 1. ADMIN — Créer une expérience + uploader APK sur Cloudinary
-//    POST /admin/experiences
-//    Body : multipart/form-data
-// ═══════════════════════════════════════════════════════════
-
 
 const createExperience = async (req, res) => {
   try {
+  
     const experience = await Experience.create({
       ...req.body,
       forfaits: req.body.forfaits || [],
@@ -21,35 +16,36 @@ const createExperience = async (req, res) => {
   }
 };
 
-// ═══════════════════════════════════════════════════════════
-// 2. ADMIN — Lister toutes les expériences
-//    GET /admin/experiences
-// ═══════════════════════════════════════════════════════════
+
 const getAllExperiences = async (req, res) => {
   try {
-    const experiences = await Experience.find()
+    const filter = {};
+
+    // Filtrage optionnel par cible via query param
+    const { cible } = req.query;
+    const validCibles = ['etudiant', 'professionnel', 'les deux'];
+    if (cible && validCibles.includes(cible)) {
+      filter.cible = cible;
+    }
+
+    const experiences = await Experience.find(filter)
       .populate('forfaits', 'name price')
       .sort({ createdAt: -1 });
+
     res.json(experiences);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-// ═══════════════════════════════════════════════════════════
-// 3. ADMIN — Supprimer expérience + fichier Cloudinary
-//    DELETE /admin/experiences/:id
-// ═══════════════════════════════════════════════════════════
+
 const deleteExperience = async (req, res) => {
   try {
     const exp = await Experience.findById(req.params.id);
     if (!exp) return res.status(404).json({ message: 'Expérience introuvable' });
 
-    // Supprimer le fichier de Cloudinary
     if (exp.apkPublicId) {
-      await cloudinary.uploader.destroy(exp.apkPublicId, {
-        resource_type: 'raw' // APK = fichier "raw" sur Cloudinary (pas image/vidéo)
-      });
+      await cloudinary.uploader.destroy(exp.apkPublicId, { resource_type: 'raw' });
     }
 
     await Experience.findByIdAndDelete(req.params.id);
@@ -59,10 +55,7 @@ const deleteExperience = async (req, res) => {
   }
 };
 
-// ═══════════════════════════════════════════════════════════
-// 4. CLIENT — Mes expériences (liées au forfait actif)
-//    GET /client/experiences/:userId
-// ═══════════════════════════════════════════════════════════
+
 const getMesExperiences = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -75,15 +68,20 @@ const getMesExperiences = async (req, res) => {
       return res.status(404).json({ message: 'Aucun abonnement actif' });
     }
 
-    // Toutes les expériences liées au forfait de l'user
-    const experiences = await Experience.find({
-      forfaits: abonnement.forfait._id
-    });
+    // Filtre de base : expériences liées au forfait
+    const filter = { forfaits: abonnement.forfait._id };
 
-    // IDs des expériences dont l'APK est déjà téléchargé
+    // Filtrage optionnel par cible
+    const { cible } = req.query;
+    const validCibles = ['etudiant', 'professionnel', 'les deux'];
+    if (cible && validCibles.includes(cible)) {
+      filter.cible = cible;
+    }
+
+    const experiences = await Experience.find(filter);
+
     const deblouqueesIds = abonnement.experiencesDebloquees.map(e => e._id.toString());
 
-    // Enrichir avec apkInstalled + status
     const result = experiences.map(exp => ({
       ...exp.toObject(),
       apkInstalled: deblouqueesIds.includes(exp._id.toString()),
@@ -105,10 +103,6 @@ const getMesExperiences = async (req, res) => {
   }
 };
 
-// ═══════════════════════════════════════════════════════════
-// 5. CLIENT — Télécharger APK (retourne URL Cloudinary)
-//    POST /client/experiences/download/:userId/:experienceId
-// ═══════════════════════════════════════════════════════════
 const downloadExperienceApk = async (req, res) => {
   try {
     const { userId, experienceId } = req.params;
@@ -120,7 +114,6 @@ const downloadExperienceApk = async (req, res) => {
       return res.status(404).json({ message: 'Aucun abonnement actif' });
     }
 
-    // Vérifier que l'expérience appartient au forfait de l'user
     const experience = await Experience.findOne({
       _id:     experienceId,
       forfaits: abonnement.forfait._id
@@ -128,11 +121,10 @@ const downloadExperienceApk = async (req, res) => {
 
     if (!experience) {
       return res.status(403).json({
-        message: 'Cette expérience n\'est pas disponible dans votre forfait.'
+        message: "Cette expérience n'est pas disponible dans votre forfait."
       });
     }
 
-    // Déjà téléchargé = pas de décompte quota
     const dejaTelechargee = abonnement.experiencesDebloquees
       .map(id => id.toString())
       .includes(experienceId);
@@ -143,19 +135,18 @@ const downloadExperienceApk = async (req, res) => {
           message: `Quota APK épuisé (${abonnement.forfait.nbApk}/mois). Renouvelez votre abonnement.`
         });
       }
-      // Décrémenter + marquer débloquée (persisté en BDD)
       abonnement.apkRestants -= 1;
       abonnement.experiencesDebloquees.push(experienceId);
       await abonnement.save();
     }
 
-    // Retourner l'URL Cloudinary
-    // Le frontend va déclencher le téléchargement via un <a> tag
     res.json({
       downloadUrl:  experience.apkUrl,
       fileName:     experience.apkOriginalName || `${experience.title}.apk`,
       apkRestants:  abonnement.apkRestants,
       dejaInstalle: dejaTelechargee,
+      // ✅ cible retourné dans la réponse pour info côté client
+      cible:        experience.cible,
     });
 
   } catch (error) {
@@ -163,11 +154,20 @@ const downloadExperienceApk = async (req, res) => {
   }
 };
 
+
 const getExperiencesByForfait = async (req, res) => {
   try {
     const { forfaitId } = req.params;
 
-    const experiences = await Experience.find({ forfaits: forfaitId })
+    const filter = { forfaits: forfaitId };
+
+    const { cible } = req.query;
+    const validCibles = ['etudiant', 'professionnel', 'les deux'];
+    if (cible && validCibles.includes(cible)) {
+      filter.cible = cible;
+    }
+
+    const experiences = await Experience.find(filter)
       .populate('forfaits', 'name price tagline')
       .sort({ createdAt: -1 });
 
@@ -187,6 +187,16 @@ const updateExperience = async (req, res) => {
     const exp = await Experience.findById(req.params.id);
     if (!exp) return res.status(404).json({ message: 'Expérience introuvable' });
 
+    // Validation manuelle de cible si fourni dans le body
+    if (req.body.cible) {
+      const validCibles = ['etudiant', 'professionnel', 'les deux'];
+      if (!validCibles.includes(req.body.cible)) {
+        return res.status(400).json({
+          message: `Cible invalide. Valeurs acceptées : ${validCibles.join(', ')}`
+        });
+      }
+    }
+
     const updated = await Experience.findByIdAndUpdate(
       req.params.id,
       { ...req.body },
@@ -194,6 +204,35 @@ const updateExperience = async (req, res) => {
     ).populate('forfaits', 'name price tagline');
 
     res.json(updated);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+const getExperiencesForEtudiant = async (req, res) => {
+  try {
+    const experiences = await Experience.find({
+      cible: { $in: ['etudiant', 'les deux'] }
+    })
+      .populate('forfaits', 'name price tagline')
+      .sort({ createdAt: -1 });
+
+    res.json({ total: experiences.length, experiences });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const getExperiencesForProfessionnel = async (req, res) => {
+  try {
+    const experiences = await Experience.find({
+      cible: { $in: ['professionnel', 'les deux'] }
+    })
+      .populate('forfaits', 'name price tagline')
+      .sort({ createdAt: -1 });
+
+    res.json({ total: experiences.length, experiences });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -207,4 +246,6 @@ module.exports = {
   downloadExperienceApk,
   getExperiencesByForfait,
   updateExperience,
+  getExperiencesForEtudiant,
+  getExperiencesForProfessionnel
 };

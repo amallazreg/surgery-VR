@@ -8,6 +8,7 @@ import { Observable } from 'rxjs';
 export class FormationAccessService {
   private apiCodes = 'https://surgery-vr.onrender.com/client/codes';
   private apiAcces = 'https://surgery-vr.onrender.com/client/acces';
+  private apiUrl = 'https://surgery-vr.onrender.com'
 
   constructor(private http: HttpClient) {}
 
@@ -43,5 +44,15 @@ export class FormationAccessService {
       { headers: this.getHeaders() }
     );
   }
+
+  getMesExperiencesForfait(userId: string): Observable<any> {
+  const token = localStorage.getItem('token') || '';
+  const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
+  return this.http.get<any>(
+    `${this.apiUrl}/client/etudiant/experiences-forfait/${userId}`,
+    { headers }
+  );
+}
+ 
 
 }

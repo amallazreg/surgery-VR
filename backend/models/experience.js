@@ -7,6 +7,13 @@ const experienceSchema = new mongoose.Schema({
   thumbClass:    { type: String, default: 'vrt-1' },
   compatibility: { type: String, default: 'Quest 2 & 3' },
 
+    cible: {
+    type: String,
+    enum: ['etudiant', 'professionnel', 'les deux'],
+    required: true,
+    default: 'les deux',
+  },
+
   // Liens APK / App Lab (seul App Lab requis)
   apkUrl:        { type: String },           // optionnel
   appLabUrl:     { type: String, required: true }, // obligatoire

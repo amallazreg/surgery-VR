@@ -69,6 +69,8 @@
       <div class="section-header">
         <h3 class="section-title">Expériences VR</h3>
         <div class="filters-bar">
+
+          <!-- Recherche -->
           <div class="search-box">
             <span class="search-icon">🔍</span>
             <input
@@ -78,11 +80,20 @@
               (input)="applyFilters()"
             />
           </div>
+
+          <!-- Filtre forfait -->
           <select class="filter-select" [(ngModel)]="selectedForfaitFilter" (change)="applyFilters()">
             <option value="">Tous les forfaits</option>
             <option *ngFor="let f of forfaits" [value]="f._id">{{ f.name }}</option>
           </select>
-          <button class="btn-clear" *ngIf="searchQuery || selectedForfaitFilter" (click)="clearFilters()">
+
+          <!-- ✅ Filtre cible -->
+          <select class="filter-select" [(ngModel)]="selectedCibleFilter" (change)="applyFilters()">
+            <option value="">Toutes les cibles</option>
+            <option *ngFor="let c of cibles" [value]="c.value">{{ c.icon }} {{ c.label }}</option>
+          </select>
+
+          <button class="btn-clear" *ngIf="searchQuery || selectedForfaitFilter || selectedCibleFilter" (click)="clearFilters()">
             ✕ Effacer
           </button>
         </div>
@@ -130,8 +141,19 @@
             <div class="exp-title">{{ exp.title }}</div>
             <div class="exp-desc">{{ exp.description || 'Aucune description' }}</div>
 
+            <!-- Meta chips : compatibilité + cible -->
             <div class="exp-meta">
               <span class="meta-chip">🥽 {{ exp.compatibility }}</span>
+              <!-- ✅ Badge cible -->
+              <span
+                class="meta-chip cible-chip"
+                [class.cible-etudiant]="exp.cible === 'etudiant'"
+                [class.cible-professionnel]="exp.cible === 'professionnel'"
+                [class.cible-les-deux]="exp.cible === 'les deux'"
+                *ngIf="exp.cible"
+              >
+                {{ getCibleIcon(exp.cible) }} {{ getCibleLabel(exp.cible) }}
+              </span>
             </div>
 
             <div class="exp-forfaits" *ngIf="exp.forfaits && exp.forfaits.length">
@@ -170,6 +192,7 @@
       <div class="results-count" *ngIf="!isLoading && filteredExperiences.length > 0">
         {{ filteredExperiences.length }} expérience{{ filteredExperiences.length > 1 ? 's' : '' }} affichée{{ filteredExperiences.length > 1 ? 's' : '' }}
         <span *ngIf="selectedForfaitFilter"> · filtrée{{ filteredExperiences.length > 1 ? 's' : '' }} par forfait</span>
+        <span *ngIf="selectedCibleFilter"> · filtrée{{ filteredExperiences.length > 1 ? 's' : '' }} par cible</span>
       </div>
     </div>
 
@@ -183,9 +206,9 @@
   </div>
 </div>
 
+
 <!-- ═══════════════════════════════════════════════════════════════════════
      MODAL CRÉATION / ÉDITION
-     isEditMode détermine le titre, le bouton submit et la logique TS
 ════════════════════════════════════════════════════════════════════════ -->
 <div class="modal-overlay" *ngIf="showModal" (click)="$event.target === $event.currentTarget && closeModal()">
   <div class="modal modal-large">
@@ -230,6 +253,23 @@
               <select [(ngModel)]="formData.thumbClass" name="thumbClass">
                 <option *ngFor="let t of thumbClasses" [value]="t">{{ t }}</option>
               </select>
+            </div>
+          </div>
+
+          <!-- ✅ Public cible -->
+          <div class="form-section">
+            <div class="form-section-title">🎯 Public cible *</div>
+            <p class="form-hint">Sélectionnez le profil d'utilisateur visé par cette expérience.</p>
+            <div class="cible-picker">
+              <div
+                class="cible-option"
+                *ngFor="let c of cibles"
+                [class.selected]="formData.cible === c.value"
+                (click)="formData.cible = c.value"
+              >
+                <span class="cible-icon">{{ c.icon }}</span>
+                <span class="cible-label">{{ c.label }}</span>
+              </div>
             </div>
           </div>
 
@@ -342,6 +382,7 @@
   </div>
 </div>
 
+
 <!-- ═══════════════════════════════════════════════════════════════════════
      MODAL DÉTAIL
 ════════════════════════════════════════════════════════════════════════ -->
@@ -376,6 +417,13 @@
           <div class="view-detail-label">⭐ Note</div>
           <div class="view-detail-value">
             {{ selectedExperience.rating ? (selectedExperience.rating + '/5') : '—' }}
+          </div>
+        </div>
+        <!-- ✅ Cible dans le détail -->
+        <div class="view-detail-item" *ngIf="selectedExperience.cible">
+          <div class="view-detail-label">🎯 Public cible</div>
+          <div class="view-detail-value">
+            {{ getCibleIcon(selectedExperience.cible) }} {{ getCibleLabel(selectedExperience.cible) }}
           </div>
         </div>
       </div>
@@ -422,6 +470,7 @@
   </div>
 </div>
 
+
 <!-- ═══════════════════════════════════════════════════════════════════════
      MODAL SUPPRESSION
 ════════════════════════════════════════════════════════════════════════ -->
@@ -448,6 +497,7 @@
     </div>
   </div>
 </div>
+
 
 <!-- Toast -->
 <div

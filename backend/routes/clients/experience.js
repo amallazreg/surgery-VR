@@ -14,6 +14,8 @@ const {
   downloadExperienceApk,
   getExperiencesByForfait,
   updateExperience,
+  getExperiencesForEtudiant,     
+  getExperiencesForProfessionnel,
 } = require('../../controllers/clients/experience');
 
 
@@ -32,16 +34,20 @@ const storage = new CloudinaryStorage({
 
 
 
-// ── Routes ADMIN ────────────────────────────────────────────
+// ── Routes ADMIN 
 router.post('/',   createExperience);
 router.get('/',       getAllExperiences);
 router.put('/:id',    updateExperience);   
 router.delete('/:id', deleteExperience);
+router.get('/etudiants',      getExperiencesForEtudiant);
+router.get('/professionnels', getExperiencesForProfessionnel);
 
-// ── Routes CLIENT ───────────────────────────────────────────
+
+// ── Routes CLIENT 
 router.get('/mes-experiences/:userId',         getMesExperiences);
 router.post('/download/:userId/:experienceId', downloadExperienceApk);
 router.get('/by-forfait/:forfaitId',            getExperiencesByForfait); 
+
 
 
 module.exports = router;

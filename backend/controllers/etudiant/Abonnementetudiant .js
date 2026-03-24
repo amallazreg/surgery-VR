@@ -320,7 +320,7 @@ const getMesExperiencesForfait = async (req, res) => {
     }).populate({
       path:     'forfait',
       populate: {
-        path:   'experiencesEtudiant',
+        path:   'experiences',
         select: 'title description emoji appLabUrl compatibility'
       }
     });

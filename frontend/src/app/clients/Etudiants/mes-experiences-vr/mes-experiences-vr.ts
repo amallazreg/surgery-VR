@@ -1,9 +1,11 @@
 import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
-import { SideBarEtudiant } from '../side-bar-etudiant/side-bar-etudiant';
+import { SideBarEtudiant }        from '../side-bar-etudiant/side-bar-etudiant';
 import { FormationAccessService } from '../../../services/formation-access-service';
-import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { CommonModule }           from '@angular/common';
+import { FormsModule }            from '@angular/forms';
+import { Router, ActivatedRoute } from '@angular/router';
+import { forkJoin, of }           from 'rxjs';
+import { catchError }             from 'rxjs/operators';
 
 @Component({
   selector:    'app-mes-experiences-vr',
@@ -49,8 +51,9 @@ export class MesExperiencesVR implements OnInit {
 
   constructor(
     private codeService: FormationAccessService,
-    private router: Router,
-    private cdr: ChangeDetectorRef
+    private router:      Router,
+    private route:       ActivatedRoute,
+    private cdr:         ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -59,65 +62,90 @@ export class MesExperiencesVR implements OnInit {
     this.userName = `${prenom} ${nom}`.trim() || 'Étudiant';
 
     this.chargerMesExperiences();
+
+    // ── Retour depuis Stripe success_url ──────────────────
+    this.route.queryParams.subscribe(params => {
+      if (params['payment'] === 'success') {
+        // Attendre 1s que le webhook ait le temps d'écrire en base
+        setTimeout(() => this.chargerMesExperiences(), 1500);
+      }
+    });
   }
 
   // ════════════════════════════════════════════════════════
-  // CHARGEMENT — getMesExperiences retourne les 2 sources
+  // CHARGEMENT — appels parallèles code + forfait
   // ════════════════════════════════════════════════════════
-chargerMesExperiences(): void {
-  this.isLoading = true;
+  chargerMesExperiences(): void {
+    this.isLoading = true;
 
-  this.codeService.getMesExperiences().subscribe({
-    next: (res) => {
-      this.isLoading = false;
+    const userId = localStorage.getItem('userId') || '';
 
-      const toutesExps = res.experiences ?? [];
+    // ── Appels en parallèle ──────────────────────────────
+    forkJoin({
+      code:    this.codeService.getMesExperiences().pipe(catchError(() => of(null))),
+      forfait: this.codeService.getMesExperiencesForfait(userId).pipe(catchError(() => of(null))),
+    }).subscribe({
+      next: ({ code, forfait }) => {
+        this.isLoading = false;
 
-      // ── Source code institution ──────────────────────
-      // Si sources.codeInstitution est vrai → toutes les exps sans source 'abonnement_propre'
-      if (res.sources?.codeInstitution || res.accesActif) {
-        const expsCode = toutesExps.filter((e: any) =>
-          e.source === 'institution' || !e.source  // ← compatibilité ancienne route
-        );
-        if (expsCode.length > 0) {
-          this.accesCodeActif     = true;
-          this.experiencesCode    = expsCode;
-          this.dateExpirationCode = res.dateExpiration ?? res.abonnementFin ?? '';
+        // ── SOURCE 1 : Code institution ──────────────────
+        if (code) {
+          const toutesExps = code.experiences ?? [];
+
+          if (code.sources?.codeInstitution || code.accesActif) {
+            const expsCode = toutesExps.filter((e: any) =>
+              e.source === 'institution' || !e.source
+            );
+            if (expsCode.length > 0) {
+              this.accesCodeActif     = true;
+              this.experiencesCode    = expsCode;
+              this.dateExpirationCode = code.dateExpiration ?? code.abonnementFin ?? '';
+            }
+          }
+
+          // Ancienne route sans champ sources
+          if (!code.sources && code.accesActif && toutesExps.length > 0) {
+            this.accesCodeActif     = true;
+            this.experiencesCode    = toutesExps;
+            this.dateExpirationCode = code.dateExpiration ?? code.abonnementFin ?? '';
+          }
         }
-      }
 
-      // ── Source forfait personnel ─────────────────────
-      if (res.sources?.abonnementPropre) {
-        const expsForfait = toutesExps.filter((e: any) => e.source === 'abonnement_propre');
-        if (expsForfait.length > 0) {
+        // ── SOURCE 2 : Forfait personnel ─────────────────
+        // Appel direct à getMesExperiencesForfait/:userId
+        if (forfait?.abonnementActif) {
           this.accesForfaitActif     = true;
-          this.experiencesForfait    = expsForfait;
-          this.dateExpirationForfait = res.abonnementFin ?? '';
-          this.nomForfaitActif       = expsForfait[0]?.forfait ?? 'Personnel';
+          this.experiencesForfait    = forfait.experiences ?? [];
+          this.dateExpirationForfait = forfait.dateExpiration ?? '';
+          this.nomForfaitActif       = forfait.forfait ?? 'Personnel';
+        } else {
+          this.accesForfaitActif  = false;
+          this.experiencesForfait = [];
         }
-      }
 
-      // ── Si pas de champ sources (ancienne route) → tout va dans code ──
-      if (!res.sources && res.accesActif && toutesExps.length > 0) {
-        this.accesCodeActif     = true;
-        this.experiencesCode    = toutesExps;
-        this.dateExpirationCode = res.dateExpiration ?? res.abonnementFin ?? '';
-      }
+        // ── Onglet par défaut ────────────────────────────
+        // Si on revient de Stripe → aller sur forfait
+        const params = this.route.snapshot.queryParams;
+        if (params['payment'] === 'success') {
+          this.activeTab = 'forfait';
+        } else {
+          this.activeTab = this.accesCodeActif ? 'code' : 'forfait';
+        }
 
-      this.activeTab = this.accesCodeActif ? 'code' : 'forfait';
-      this.cdr.detectChanges();
-    },
-    error: () => {
-      this.isLoading = false;
-      this.cdr.detectChanges();
-    }
-  });
-}
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
+
   // ════════════════════════════════════════════════════════
   // NAVIGATION ONGLETS
   // ════════════════════════════════════════════════════════
   setTab(tab: 'code' | 'forfait'): void {
-    this.activeTab  = tab;
+    this.activeTab   = tab;
     this.searchQuery = '';
   }
 
@@ -213,10 +241,7 @@ chargerMesExperiences(): void {
     if (exp.appLabUrl) window.open(exp.appLabUrl, '_blank');
   }
 
-  // Garde de compatibilité — accès global
   get accesActif(): boolean {
     return this.accesCodeActif || this.accesForfaitActif;
   }
-
-  
 }
