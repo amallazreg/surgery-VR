@@ -5,7 +5,7 @@ const Forfait = require('../../models/forfait');
 const getAllForfaits = async (req, res) => {
   try {
     // ✅ Filtre : seulement les forfaits professionnel
-    const forfaits = await Forfait.find({ cible: 'professionnel' });
+    const forfaits = await Forfait.find();
     res.json(forfaits);
   } catch (err) {
     res.status(500).json({ message: err.message });

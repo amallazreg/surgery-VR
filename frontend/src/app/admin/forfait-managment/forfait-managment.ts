@@ -117,7 +117,7 @@ export class ForfaitManagment implements OnInit {
     this.forfaitService.getAllForfaits().subscribe({
       next: (data) => {
         this.forfaits = data;
-        this.applySearch();
+        this.applyFilters();
         this.isLoading = false;
         this.cdr.detectChanges();
       },
