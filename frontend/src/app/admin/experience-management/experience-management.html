@@ -148,7 +148,6 @@
                 class="meta-chip cible-chip"
                 [class.cible-etudiant]="exp.cible === 'etudiant'"
                 [class.cible-professionnel]="exp.cible === 'professionnel'"
-                [class.cible-les-deux]="exp.cible === 'les deux'"
                 *ngIf="exp.cible"
               >
                 {{ getCibleIcon(exp.cible) }} {{ getCibleLabel(exp.cible) }}
@@ -341,7 +340,6 @@
                 class="forfait-cible-badge"
                 [class.cible-etudiant]="formData.cible === 'etudiant'"
                 [class.cible-professionnel]="formData.cible === 'professionnel'"
-                [class.cible-les-deux]="formData.cible === 'les deux'"
                 *ngIf="formData.cible"
               >
                 {{ getCibleIcon(formData.cible) }} {{ getCibleLabel(formData.cible) }}

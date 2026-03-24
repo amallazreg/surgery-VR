@@ -1,6 +1,7 @@
 const Abonnement  = require('../../models/abonnement');
 const Paiement    = require('../../models/paiement');
 const Forfait     = require('../../models/forfait');
+const Experience = require('../../models/experience');
 const Stripe      = require('stripe');
 const stripe      = Stripe(process.env.STRIPE_SECRET_KEY);
 const PDFDocument = require('pdfkit');
@@ -308,48 +309,66 @@ const getMesExperiencesForfait = async (req, res) => {
     const { userId } = req.params;
 
     await Abonnement.updateMany(
-      { user: userId, cible: 'etudiant', status: 'active', dateFin: { $lt: new Date() } },
+      {
+        user: userId,
+        cible: 'etudiant',
+        status: 'active',
+        dateFin: { $lt: new Date() }
+      },
       { status: 'expired' }
     );
 
     const abonnement = await Abonnement.findOne({
-      user:    userId,
-      cible:   'etudiant',
-      status:  'active',
+      user: userId,
+      cible: 'etudiant',
+      status: 'active',
       dateFin: { $gt: new Date() }
-    }).populate({
-      path:     'forfait',
-      populate: {
-        path:   'experiences',
-        select: 'title description emoji appLabUrl compatibility'
-      }
-    });
+    })
+      .populate('forfait')
+      .populate('experiencesDebloquees', '_id');
 
     if (!abonnement) {
       return res.json({
         abonnementActif: false,
-        experiences:     [],
-        message:         'Aucun abonnement étudiant actif'
+        experiences: [],
+        message: 'Aucun abonnement étudiant actif'
       });
     }
 
-    const experiences   = abonnement.forfait?.experiencesEtudiant ?? [];
+    const experiences = await Experience.find({
+      forfaits: abonnement.forfait._id,
+      cible: 'etudiant'
+    }).select('title description emoji appLabUrl compatibility thumbClass cible apkUrl');
+
     const joursRestants = Math.max(
       0,
       Math.ceil((new Date(abonnement.dateFin) - new Date()) / (1000 * 60 * 60 * 24))
     );
 
+    const deblouqueesIds = abonnement.experiencesDebloquees.map(e => e._id.toString());
+
+    const result = experiences.map(exp => ({
+      ...exp.toObject(),
+      source: 'abonnement_propre',
+      apkInstalled: deblouqueesIds.includes(exp._id.toString()),
+      status: deblouqueesIds.includes(exp._id.toString()) ? 'live' : 'new'
+    }));
+
     res.json({
       abonnementActif: true,
-      forfait:         abonnement.forfait?.name,
-      forfaitId:       abonnement.forfait?._id,
-      dateExpiration:  abonnement.dateFin,
+      forfait: abonnement.forfait?.name,
+      forfaitId: abonnement.forfait?._id,
+      dateExpiration: abonnement.dateFin,
       joursRestants,
-      experiences: experiences.map(exp => ({
-        ...exp.toObject(),
-        source: 'abonnement_propre'
-      }))
+      experiences: result,
+      abonnement: {
+        apkRestants: abonnement.apkRestants,
+        apkTotal: abonnement.forfait?.nbApk,
+        forfaitName: abonnement.forfait?.name,
+        dateFin: abonnement.dateFin
+      }
     });
+
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
