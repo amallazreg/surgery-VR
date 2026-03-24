@@ -5,6 +5,7 @@ import { Cible, Experiences } from '../../services/experiences';
 import { ForfaitService } from '../../services/forfait-service';
 import { SideBar } from "../side-bar/side-bar";
 
+
 export interface Experience {
   _id?: string;
   title: string;
@@ -18,9 +19,11 @@ export interface Experience {
   respondents: number;
   avgTime: string;
   rating: number | null;
-  cible: Cible; // ✅ nouveau champ
+  cible: Cible;
   createdAt?: string;
 }
+
+// ─── Constantes ───────────────────────────────────────────────────────────────
 
 const DEFAULT_FORM = {
   title: '',
@@ -28,17 +31,18 @@ const DEFAULT_FORM = {
   emoji: '🥽',
   thumbClass: 'vrt-1',
   compatibility: 'Quest 2 & 3',
-  cible: 'les deux' as Cible, // ✅ valeur par défaut
+  cible: 'les deux' as Cible,
   forfaits: [] as string[],
 };
 
 const EMOJIS        = ['🥽', '🫀', '🧠', '🦷', '🦴', '💉', '🩺', '🔬', '🩻', '⚕️', '🧬', '🏥'];
 const THUMB_CLASSES = ['vrt-1', 'vrt-2', 'vrt-3', 'vrt-4', 'vrt-5', 'vrt-6'];
 const CIBLES: { value: Cible; label: string; icon: string }[] = [
-  { value: 'etudiant',       label: 'Étudiant',       icon: '🎓' },
-  { value: 'professionnel',  label: 'Professionnel',  icon: '💼' },
-  { value: 'les deux',       label: 'Les deux',        icon: '👥' },
+  { value: 'etudiant',      label: 'Étudiant',      icon: '🎓' },
+  { value: 'professionnel', label: 'Professionnel', icon: '💼' },
+  { value: 'les deux',      label: 'Les deux',       icon: '👥' },
 ];
+
 
 @Component({
   selector: 'app-experience-management',
@@ -49,22 +53,27 @@ const CIBLES: { value: Cible; label: string; icon: string }[] = [
 })
 export class ExperienceManagement implements OnInit {
 
+  // ─── Data ─────────────────────────────────────────────────────────────────
   experiences: Experience[]         = [];
   filteredExperiences: Experience[] = [];
   forfaits: any[]                   = [];
 
+  // ─── Filters ──────────────────────────────────────────────────────────────
   searchQuery           = '';
   selectedForfaitFilter = '';
-  selectedCibleFilter   = ''; // ✅ filtre cible
+  selectedCibleFilter   = '';
 
+  // ─── State ────────────────────────────────────────────────────────────────
   isLoading    = false;
   isSaving     = false;
   isDeleting   = false;
   errorMessage = '';
 
+  // ─── Edit mode ────────────────────────────────────────────────────────────
   isEditMode    = false;
   editingId: string | null = null;
 
+  // ─── Modals ───────────────────────────────────────────────────────────────
   showModal       = false;
   showDeleteModal = false;
   showViewModal   = false;
@@ -72,14 +81,17 @@ export class ExperienceManagement implements OnInit {
   selectedExperience: Experience | null = null;
   experienceToDelete: Experience | null = null;
 
+  // ─── Formulaire ───────────────────────────────────────────────────────────
   formData   = { ...DEFAULT_FORM, forfaits: [] as string[] };
   appLabUrl  = '';
   apkUrl     = '';
 
+  // ─── Constantes template ──────────────────────────────────────────────────
   readonly emojis       = EMOJIS;
   readonly thumbClasses = THUMB_CLASSES;
-  readonly cibles       = CIBLES; // ✅ exposé au template
+  readonly cibles       = CIBLES;
 
+  // ─── Toast ────────────────────────────────────────────────────────────────
   toastVisible = false;
   toastMessage = '';
   toastType: 'success' | 'error' = 'success';
@@ -93,10 +105,14 @@ export class ExperienceManagement implements OnInit {
     private cdr: ChangeDetectorRef,
   ) {}
 
+  // ─── Lifecycle ────────────────────────────────────────────────────────────
+
   ngOnInit(): void {
     this.loadExperiences();
     this.loadForfaits();
   }
+
+  // ─── API ──────────────────────────────────────────────────────────────────
 
   loadExperiences(): void {
     this.isLoading    = true;
@@ -119,10 +135,45 @@ export class ExperienceManagement implements OnInit {
 
   loadForfaits(): void {
     this.forfaitService.getAllForfaits().subscribe({
-      next: (data) => { this.forfaits = data; this.cdr.detectChanges(); },
+      next: (data) => {
+        this.forfaits = data;
+        this.cdr.detectChanges();
+      },
       error: (err) => console.error('Erreur chargement forfaits:', err),
     });
   }
+
+  // ─── Forfaits filtrés selon la cible du formulaire ────────────────────────
+
+  /**
+   * Retourne uniquement les forfaits compatibles avec la cible sélectionnée.
+   * - cible 'etudiant'      → forfaits où f.cible === 'etudiant' OU 'les deux'
+   * - cible 'professionnel' → forfaits où f.cible === 'professionnel' OU 'les deux'
+   * - cible 'les deux'      → tous les forfaits
+   */
+  get forfaitsFiltres(): any[] {
+    const cible = this.formData.cible;
+    if (!cible || cible === 'les deux') return this.forfaits;
+    return this.forfaits.filter(f =>
+      f.cible === cible || f.cible === 'les deux'
+    );
+  }
+
+  /**
+   * Change la cible et désélectionne automatiquement les forfaits
+   * qui ne sont plus compatibles avec la nouvelle cible.
+   */
+  selectCible(cible: Cible): void {
+    this.formData.cible = cible;
+
+    // Recalcule les IDs valides après changement de cible
+    const idsValides = this.forfaitsFiltres.map(f => f._id);
+    this.formData.forfaits = this.formData.forfaits.filter(id =>
+      idsValides.includes(id)
+    );
+  }
+
+  // ─── Save (create ou update) ──────────────────────────────────────────────
 
   saveExperience(): void {
     if (!this.formData.title.trim()) {
@@ -143,7 +194,7 @@ export class ExperienceManagement implements OnInit {
       forfaits:      this.formData.forfaits,
       appLabUrl:     this.appLabUrl,
       apkUrl:        this.apkUrl.trim() || this.appLabUrl,
-      cible:         this.formData.cible, // ✅ inclus dans le payload
+      cible:         this.formData.cible,
     };
 
     if (this.isEditMode && this.editingId) {
@@ -203,7 +254,8 @@ export class ExperienceManagement implements OnInit {
     });
   }
 
-  // ✅ filtre cible ajouté
+  // ─── Filtres liste principale ─────────────────────────────────────────────
+
   applyFilters(): void {
     let result = [...this.experiences];
 
@@ -232,11 +284,15 @@ export class ExperienceManagement implements OnInit {
   clearFilters(): void {
     this.searchQuery           = '';
     this.selectedForfaitFilter = '';
-    this.selectedCibleFilter   = ''; // ✅ reset cible
+    this.selectedCibleFilter   = '';
     this.applyFilters();
   }
 
-  getTotalExperiences(): number { return this.experiences.length; }
+  // ─── Stats ────────────────────────────────────────────────────────────────
+
+  getTotalExperiences(): number {
+    return this.experiences.length;
+  }
 
   getAvgRating(): string {
     const rated = this.experiences.filter(e => e.rating !== null);
@@ -248,10 +304,7 @@ export class ExperienceManagement implements OnInit {
     return this.experiences.reduce((s, e) => s + (e.respondents || 0), 0);
   }
 
-  // ✅ stat par cible
-  getCountByCible(cible: Cible): number {
-    return this.experiences.filter(e => e.cible === cible || e.cible === 'les deux').length;
-  }
+  // ─── Helpers cible ────────────────────────────────────────────────────────
 
   getCibleLabel(cible: Cible): string {
     return this.cibles.find(c => c.value === cible)?.label ?? cible;
@@ -265,6 +318,8 @@ export class ExperienceManagement implements OnInit {
     return this.forfaits.find(f => f._id === id)?.name || id;
   }
 
+  // ─── Forfait multi-select ─────────────────────────────────────────────────
+
   toggleForfait(id: string): void {
     const idx = this.formData.forfaits.indexOf(id);
     if (idx === -1) this.formData.forfaits.push(id);
@@ -274,6 +329,8 @@ export class ExperienceManagement implements OnInit {
   isForfaitSelected(id: string): boolean {
     return this.formData.forfaits.includes(id);
   }
+
+  // ─── Modals ───────────────────────────────────────────────────────────────
 
   openModal(): void {
     this.isEditMode = false;
@@ -293,7 +350,7 @@ export class ExperienceManagement implements OnInit {
       emoji:         exp.emoji,
       thumbClass:    exp.thumbClass,
       compatibility: exp.compatibility,
-      cible:         exp.cible || 'les deux', // ✅ pré-rempli
+      cible:         exp.cible || 'les deux',
       forfaits:      (exp.forfaits || []).map((f: any) => f._id || f),
     };
     this.appLabUrl  = exp.appLabUrl || '';
@@ -334,6 +391,8 @@ export class ExperienceManagement implements OnInit {
       setTimeout(() => { this.linkCopied = false; }, 2500);
     });
   }
+
+  // ─── Toast ────────────────────────────────────────────────────────────────
 
   showToast(message: string, type: 'success' | 'error'): void {
     clearTimeout(this.toastTimer);

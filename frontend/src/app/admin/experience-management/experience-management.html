@@ -87,7 +87,7 @@
             <option *ngFor="let f of forfaits" [value]="f._id">{{ f.name }}</option>
           </select>
 
-          <!-- ✅ Filtre cible -->
+          <!-- Filtre cible -->
           <select class="filter-select" [(ngModel)]="selectedCibleFilter" (change)="applyFilters()">
             <option value="">Toutes les cibles</option>
             <option *ngFor="let c of cibles" [value]="c.value">{{ c.icon }} {{ c.label }}</option>
@@ -144,7 +144,6 @@
             <!-- Meta chips : compatibilité + cible -->
             <div class="exp-meta">
               <span class="meta-chip">🥽 {{ exp.compatibility }}</span>
-              <!-- ✅ Badge cible -->
               <span
                 class="meta-chip cible-chip"
                 [class.cible-etudiant]="exp.cible === 'etudiant'"
@@ -256,16 +255,16 @@
             </div>
           </div>
 
-          <!-- ✅ Public cible -->
+          <!-- Public cible — le choix déclenche le filtrage des forfaits -->
           <div class="form-section">
             <div class="form-section-title">🎯 Public cible *</div>
-            <p class="form-hint">Sélectionnez le profil d'utilisateur visé par cette expérience.</p>
+            <p class="form-hint">Sélectionnez le profil visé. Les forfaits s'adapteront automatiquement.</p>
             <div class="cible-picker">
               <div
                 class="cible-option"
                 *ngFor="let c of cibles"
                 [class.selected]="formData.cible === c.value"
-                (click)="formData.cible = c.value"
+                (click)="selectCible(c.value)"
               >
                 <span class="cible-icon">{{ c.icon }}</span>
                 <span class="cible-label">{{ c.label }}</span>
@@ -333,14 +332,37 @@
             </div>
           </div>
 
-          <!-- Forfaits -->
+          <!-- Forfaits — filtrés dynamiquement selon la cible choisie -->
           <div class="form-section">
-            <div class="form-section-title">💎 Forfaits associés</div>
-            <p class="form-hint">Sélectionnez les forfaits qui auront accès à cette expérience.</p>
-            <div class="forfaits-picker">
+            <div class="form-section-title">
+              💎 Forfaits associés
+              <!-- Badge cible active -->
+              <span
+                class="forfait-cible-badge"
+                [class.cible-etudiant]="formData.cible === 'etudiant'"
+                [class.cible-professionnel]="formData.cible === 'professionnel'"
+                [class.cible-les-deux]="formData.cible === 'les deux'"
+                *ngIf="formData.cible"
+              >
+                {{ getCibleIcon(formData.cible) }} {{ getCibleLabel(formData.cible) }}
+              </span>
+            </div>
+
+            <!-- Aucune cible sélectionnée -->
+            <div class="forfait-cible-hint" *ngIf="!formData.cible">
+              <span>⬅️ Choisissez d'abord un public cible pour voir les forfaits disponibles.</span>
+            </div>
+
+            <!-- Liste filtrée -->
+            <div class="forfaits-picker" *ngIf="formData.cible">
+              <p class="form-hint" style="margin-bottom: 0.8rem;">
+                {{ forfaitsFiltres.length }} forfait{{ forfaitsFiltres.length > 1 ? 's' : '' }}
+                disponible{{ forfaitsFiltres.length > 1 ? 's' : '' }} pour ce profil.
+              </p>
+
               <div
                 class="forfait-option"
-                *ngFor="let f of forfaits"
+                *ngFor="let f of forfaitsFiltres"
                 [class.selected]="isForfaitSelected(f._id)"
                 (click)="toggleForfait(f._id)"
               >
@@ -352,8 +374,15 @@
                   </div>
                 </div>
               </div>
-              <div class="forfaits-empty" *ngIf="forfaits.length === 0">
-                Aucun forfait disponible. Créez d'abord un forfait.
+
+              <!-- Aucun forfait pour cette cible -->
+              <div class="forfaits-empty" *ngIf="forfaitsFiltres.length === 0">
+                <span style="font-size:1.4rem">🔍</span>
+                <span>
+                  Aucun forfait pour
+                  <strong>{{ getCibleLabel(formData.cible) }}</strong>.
+                  Créez-en un d'abord.
+                </span>
               </div>
             </div>
           </div>
@@ -419,7 +448,7 @@
             {{ selectedExperience.rating ? (selectedExperience.rating + '/5') : '—' }}
           </div>
         </div>
-        <!-- ✅ Cible dans le détail -->
+        <!-- Cible dans le détail -->
         <div class="view-detail-item" *ngIf="selectedExperience.cible">
           <div class="view-detail-label">🎯 Public cible</div>
           <div class="view-detail-value">
