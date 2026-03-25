@@ -15,6 +15,7 @@
   "dependencies": {
     "@langchain/community": "^1.1.25",
     "@langchain/groq": "^1.1.5",
+    "@langchain/mongodb": "^1.1.0",
     "bcrypt": "^6.0.0",
     "chromadb": "^3.4.0",
     "cloudinary": "^1.41.3",
