@@ -5,6 +5,9 @@ const mongoose   = require('mongoose');
 const Stripe     = require('stripe');
 const stripe     = Stripe(process.env.STRIPE_SECRET_KEY);
 
+const chatRoutes = require('./routes/chatbot/chat');
+
+
 const User       = require('./models/userModels');
 const Forfait    = require('./models/forfait');
 const Abonnement = require('./models/abonnement');
@@ -237,6 +240,8 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connexion à la base de données réussie'))
   .catch((error) => console.error('❌ Erreur de connexion à la base de données:', error));
 
+
+app.use('/chatbot', chatRoutes);
 
 
 app.use('/admin/demande',   demandeDemoRoutes);
