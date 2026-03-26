@@ -1,12 +1,66 @@
 const Conversation = require('../../models/chatbot/conversation');
 const { getChatResponse } = require('../../services/chatbot/groqService');
 
+// ── Générer un titre depuis le 1er message ──
+// On prend les 50 premiers caractères du message
+const generateTitle = (message) => {
+  const clean = message.trim();
+  return clean.length > 50
+    ? clean.substring(0, 50) + '...'
+    : clean;
+};
+
 // ──────────────────────────────────────────
-// Envoyer un message et recevoir une réponse
+// POST /chatbot/new
+// Créer une nouvelle conversation vide
+// ──────────────────────────────────────────
+const createConversation = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).json({
+        success: false,
+        error: 'userId est obligatoire'
+      });
+    }
+
+    // Désactiver toutes les conversations actives de cet utilisateur
+    await Conversation.updateMany(
+      { userId, isActive: true },
+      { isActive: false }
+    );
+
+    // Créer une nouvelle conversation active
+    const conversation = await Conversation.create({
+      userId,
+      title: 'Nouvelle conversation',
+      isActive: true,
+      messages: []
+    });
+
+    return res.status(201).json({
+      success: true,
+      conversationId: conversation._id,
+      title: conversation.title
+    });
+
+  } catch (error) {
+    console.error('[ChatController] createConversation error:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Erreur serveur'
+    });
+  }
+};
+
+// ──────────────────────────────────────────
+// POST /chatbot/message
+// Envoyer un message dans la conversation active
 // ──────────────────────────────────────────
 const sendMessage = async (req, res) => {
   try {
-    const { userId, message } = req.body;
+    const { userId, message, conversationId } = req.body;
 
     // 1. Validation
     if (!userId || !message) {
@@ -16,27 +70,42 @@ const sendMessage = async (req, res) => {
       });
     }
 
-    if (message.trim().length === 0) {
-      return res.status(400).json({
-        success: false,
-        error: 'Le message ne peut pas être vide'
+    // 2. Trouver la conversation
+    // → Si conversationId fourni : utiliser cette conversation
+    // → Sinon : chercher la conversation active
+    // → Si aucune : en créer une nouvelle automatiquement
+    let conversation;
+
+    if (conversationId) {
+      conversation = await Conversation.findById(conversationId);
+    } else {
+      conversation = await Conversation.findOne({
+        userId,
+        isActive: true
       });
     }
 
-    // 2. Chercher ou créer la conversation en base
-    let conversation = await Conversation.findOne({ userId });
     if (!conversation) {
-      conversation = new Conversation({ userId, messages: [] });
+      conversation = await Conversation.create({
+        userId,
+        title: generateTitle(message),
+        isActive: true,
+        messages: []
+      });
     }
 
-    // 3. Ajouter le message utilisateur
+    // 3. Générer le titre si c'est le 1er message
+    if (conversation.messages.length === 0) {
+      conversation.title = generateTitle(message);
+    }
+
+    // 4. Ajouter le message utilisateur
     conversation.messages.push({
       role: 'user',
       content: message
     });
 
-    // 4. Préparer l'historique pour Groq
-    // On garde seulement les 20 derniers messages pour économiser les tokens
+    // 5. Préparer l'historique pour Groq (20 derniers messages)
     const recentMessages = conversation.messages
       .slice(-20)
       .map(msg => ({
@@ -44,19 +113,21 @@ const sendMessage = async (req, res) => {
         content: msg.content
       }));
 
-    // 5. Appeler Groq
+    // 6. Appeler Groq
     const aiResponse = await getChatResponse(recentMessages);
 
-    // 6. Sauvegarder la réponse en base
+    // 7. Sauvegarder la réponse
     conversation.messages.push({
       role: 'assistant',
       content: aiResponse
     });
+
     await conversation.save();
 
-    // 7. Retourner la réponse
     return res.status(200).json({
       success: true,
+      conversationId: conversation._id,
+      title: conversation.title,
       response: aiResponse
     });
 
@@ -70,30 +141,78 @@ const sendMessage = async (req, res) => {
 };
 
 // ──────────────────────────────────────────
-// Récupérer l'historique d'un utilisateur
+// GET /chatbot/conversations/:userId
+// Récupérer toutes les conversations d'un utilisateur
+// ──────────────────────────────────────────
+const getConversations = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const conversations = await Conversation.find(
+      { userId },
+      'title isActive createdAt updatedAt messages'
+    ).sort({ updatedAt: -1 }); // Plus récente en premier
+
+    // Formater pour le frontend
+    const formatted = conversations.map(conv => ({
+      id: conv._id,
+      title: conv.title,
+      isActive: conv.isActive,
+      messageCount: conv.messages.length,
+      lastMessage: conv.messages.length > 0
+        ? conv.messages[conv.messages.length - 1].content.substring(0, 60) + '...'
+        : '',
+      createdAt: conv.createdAt,
+      updatedAt: conv.updatedAt
+    }));
+
+    return res.status(200).json({
+      success: true,
+      conversations: formatted
+    });
+
+  } catch (error) {
+    console.error('[ChatController] getConversations error:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Erreur serveur'
+    });
+  }
+};
+
+// ──────────────────────────────────────────
+// GET /chatbot/history/:userId
+// Récupérer les messages de la conversation active
 // ──────────────────────────────────────────
 const getHistory = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { conversationId } = req.query;
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        error: 'userId est obligatoire'
+    let conversation;
+
+    if (conversationId) {
+      conversation = await Conversation.findById(conversationId);
+    } else {
+      conversation = await Conversation.findOne({
+        userId,
+        isActive: true
       });
     }
-
-    const conversation = await Conversation.findOne({ userId });
 
     if (!conversation) {
       return res.status(200).json({
         success: true,
-        messages: []
+        messages: [],
+        conversationId: null,
+        title: null
       });
     }
 
     return res.status(200).json({
       success: true,
+      conversationId: conversation._id,
+      title: conversation.title,
       messages: conversation.messages
     });
 
@@ -107,24 +226,28 @@ const getHistory = async (req, res) => {
 };
 
 // ──────────────────────────────────────────
-// Effacer l'historique d'un utilisateur
+// DELETE /chatbot/clear/:userId
+// Effacer une conversation spécifique
 // ──────────────────────────────────────────
 const clearHistory = async (req, res) => {
   try {
     const { userId } = req.params;
+    const { conversationId } = req.query;
 
-    if (!userId) {
-      return res.status(400).json({
-        success: false,
-        error: 'userId est obligatoire'
+    if (conversationId) {
+      // Supprimer une conversation spécifique
+      await Conversation.findByIdAndDelete(conversationId);
+    } else {
+      // Supprimer la conversation active
+      await Conversation.findOneAndDelete({
+        userId,
+        isActive: true
       });
     }
 
-    await Conversation.findOneAndDelete({ userId });
-
     return res.status(200).json({
       success: true,
-      message: 'Historique effacé avec succès'
+      message: 'Conversation supprimée avec succès'
     });
 
   } catch (error) {
@@ -136,8 +259,56 @@ const clearHistory = async (req, res) => {
   }
 };
 
+// ──────────────────────────────────────────
+// PUT /chatbot/switch/:conversationId
+// Switcher vers une autre conversation
+// ──────────────────────────────────────────
+const switchConversation = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const { userId } = req.body;
+
+    // Désactiver toutes les conversations de cet utilisateur
+    await Conversation.updateMany(
+      { userId, isActive: true },
+      { isActive: false }
+    );
+
+    // Activer la conversation sélectionnée
+    const conversation = await Conversation.findByIdAndUpdate(
+      conversationId,
+      { isActive: true },
+      { new: true }
+    );
+
+    if (!conversation) {
+      return res.status(404).json({
+        success: false,
+        error: 'Conversation introuvable'
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      conversationId: conversation._id,
+      title: conversation.title,
+      messages: conversation.messages
+    });
+
+  } catch (error) {
+    console.error('[ChatController] switchConversation error:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Erreur serveur'
+    });
+  }
+};
+
 module.exports = {
+  createConversation,
   sendMessage,
+  getConversations,
   getHistory,
-  clearHistory
+  clearHistory,
+  switchConversation
 };

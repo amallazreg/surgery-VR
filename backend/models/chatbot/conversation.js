@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-// Schéma d'un message 
+// ── Schéma d'un message ──
 const MessageSchema = new mongoose.Schema({
   role: {
     type: String,
@@ -17,7 +17,7 @@ const MessageSchema = new mongoose.Schema({
   }
 });
 
-//  Schéma d'une conversation 
+// ── Schéma d'une conversation ──
 const ConversationSchema = new mongoose.Schema(
   {
     userId: {
@@ -25,10 +25,21 @@ const ConversationSchema = new mongoose.Schema(
       required: true,
       index: true
     },
+
+    title: {
+      type: String,
+      default: 'Nouvelle conversation'
+    },
+
+    isActive: {
+      type: Boolean,
+      default: true
+    },
+
     messages: [MessageSchema]
   },
   {
-    timestamps: true 
+    timestamps: true
   }
 );
 
