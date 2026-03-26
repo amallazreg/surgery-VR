@@ -68,12 +68,12 @@ export class Chatbot implements OnInit, AfterViewChecked {
     this.loadHistory();
   }
 
-  ngAfterViewChecked(): void {
-    if (this.shouldScroll) {
-      this.scrollToBottom();
-      this.shouldScroll = false;
-    }
+ ngAfterViewChecked(): void {
+  if (this.shouldScroll) {
+    this.shouldScroll = false; 
+    this.scrollToBottom();
   }
+}
 
   // ── Charger l'historique depuis le backend ──
   loadHistory(): void {
@@ -82,6 +82,7 @@ export class Chatbot implements OnInit, AfterViewChecked {
     this.chatbotApi.getHistory(this.userId).subscribe({
       next: (res) => {
         this.isLoadingHistory = false;
+                this.cdr.detectChanges();
 
         if (res.messages && res.messages.length > 0) {
           // Historique existant → afficher les messages
@@ -92,8 +93,10 @@ export class Chatbot implements OnInit, AfterViewChecked {
             role: msg.role === 'assistant' ? 'ai' : 'user',
             text: msg.content,
             time: this.formatDate(msg.createdAt)
+            
           }));
-         this.cdr.detectChanges();
+                          this.cdr.detectChanges();
+
           this.shouldScroll = true;
         } else {
           // Pas d'historique → message de bienvenue
