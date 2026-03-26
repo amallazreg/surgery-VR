@@ -1,11 +1,12 @@
 // chatbot.component.ts
 
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewChecked, ChangeDetectorRef, ChangeDetectionStrategy } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { SideBar } from '../side-bar/side-bar';
 import { ChatbotService, Conversation } from '../../../services/chatbot-service';
+import { forkJoin } from 'rxjs';
 
 export interface ChatMessage {
   role: 'ai' | 'user';
@@ -30,6 +31,9 @@ export interface GroupedConversations {
   imports: [CommonModule, FormsModule, SideBar],
   templateUrl: './chatbot.html',
   styleUrl: './chatbot.css',
+  // OnPush: Angular ne re-rend que quand une @Input change ou qu'on appelle markForCheck()
+  // On garde Default ici car le composant a beaucoup d'état interne,
+  // mais on centralise les detectChanges en un seul endroit par flux.
 })
 export class Chatbot implements OnInit, AfterViewChecked {
 
@@ -58,6 +62,8 @@ export class Chatbot implements OnInit, AfterViewChecked {
   groupedConversations: GroupedConversations[] = [];
 
   private shouldScroll = false;
+  // Évite de recharger les conversations si un chargement est déjà en cours
+  private conversationsLoadPending = false;
 
   suggestions: Suggestion[] = [
     { icon: '🥽', text: 'Comment démarrer une simulation ?' },
@@ -68,33 +74,29 @@ export class Chatbot implements OnInit, AfterViewChecked {
 
   constructor(
     private chatbotApi: ChatbotService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    this.loadHistory();
-    this.loadConversations();
-  }
-
-  ngAfterViewChecked(): void {
-    if (this.shouldScroll) {
-      this.shouldScroll = false;
-      this.scrollToBottom();
-    }
-  }
-
-  // ── Charger la conversation active ──
-  loadHistory(): void {
+    // FIX: Un seul forkJoin au lieu de 2 appels séquentiels indépendants.
+    // Les deux requêtes partent en parallèle, et on fait UN SEUL detectChanges
+    // quand les deux sont terminées → moitié moins de temps d'attente perçu.
     this.isLoadingHistory = true;
-    this.chatbotApi.getHistory(this.userId).subscribe({
-      next: (res) => {
-        this.isLoadingHistory = false;
-        if (res.messages && res.messages.length > 0) {
+    this.isLoadingConversations = true;
+
+    forkJoin({
+      history: this.chatbotApi.getHistory(this.userId),
+      conversations: this.chatbotApi.getConversations(this.userId)
+    }).subscribe({
+      next: ({ history, conversations }) => {
+        // ── Traiter l'historique ──
+        if (history.messages && history.messages.length > 0) {
           this.showWelcome = false;
           this.showSuggestions = false;
-          this.currentConversationId = res.conversationId;
-          this.currentTitle = res.title;
-          this.messages = res.messages.map(msg => ({
+          this.currentConversationId = history.conversationId;
+          this.currentTitle = history.title;
+          this.messages = history.messages.map(msg => ({
             role: msg.role === 'assistant' ? 'ai' : 'user',
             text: msg.content,
             time: this.formatDate(msg.createdAt)
@@ -105,23 +107,51 @@ export class Chatbot implements OnInit, AfterViewChecked {
           this.showSuggestions = true;
           this.addWelcomeMessage();
         }
+
+        // ── Traiter les conversations ──
+        this.groupConversationsByDate(conversations.conversations);
+
+        // ── UN SEUL detectChanges pour tout ──
+        this.isLoadingHistory = false;
+        this.isLoadingConversations = false;
+        this.cdr.detectChanges();
       },
       error: () => {
         this.isLoadingHistory = false;
+        this.isLoadingConversations = false;
         this.addWelcomeMessage();
+        this.cdr.detectChanges();
       }
     });
   }
 
-  // ── Charger toutes les conversations ──
+  ngAfterViewChecked(): void {
+    if (this.shouldScroll) {
+      this.shouldScroll = false;
+      this.scrollToBottom();
+    }
+  }
+
+  // ── Charger toutes les conversations (panel historique) ──
   loadConversations(): void {
+    // FIX: anti-doublon — si un chargement est déjà en cours, on skip
+    if (this.conversationsLoadPending) return;
+    this.conversationsLoadPending = true;
     this.isLoadingConversations = true;
+
     this.chatbotApi.getConversations(this.userId).subscribe({
       next: (res) => {
+        this.conversationsLoadPending = false;
         this.isLoadingConversations = false;
         this.groupConversationsByDate(res.conversations);
+        // Un seul detectChanges à la fin
+        this.cdr.detectChanges();
       },
-      error: () => { this.isLoadingConversations = false; }
+      error: () => {
+        this.conversationsLoadPending = false;
+        this.isLoadingConversations = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -165,6 +195,8 @@ export class Chatbot implements OnInit, AfterViewChecked {
           this.showSuggestions = true;
           this.showHistoryPanel = false;
           this.addWelcomeMessage();
+          // detectChanges immédiat pour l'UI, puis on charge les convs en arrière-plan
+          this.cdr.detectChanges();
           this.loadConversations();
         }
       }
@@ -179,10 +211,11 @@ export class Chatbot implements OnInit, AfterViewChecked {
     }
     this.isLoadingHistory = true;
     this.showHistoryPanel = false;
+    // FIX: on reflète la fermeture du panel immédiatement
+    this.cdr.detectChanges();
 
     this.chatbotApi.switchConversation(conv.id, this.userId).subscribe({
       next: (res) => {
-        this.isLoadingHistory = false;
         this.currentConversationId = res.conversationId;
         this.currentTitle = res.title;
         this.messages = res.messages.map(msg => ({
@@ -192,10 +225,17 @@ export class Chatbot implements OnInit, AfterViewChecked {
         }));
         this.showWelcome = false;
         this.showSuggestions = false;
+        this.isLoadingHistory = false;
         this.shouldScroll = true;
+        // Un seul detectChanges
+        this.cdr.detectChanges();
+        // Rafraîchir la liste en arrière-plan (pas bloquant)
         this.loadConversations();
       },
-      error: () => { this.isLoadingHistory = false; }
+      error: () => {
+        this.isLoadingHistory = false;
+        this.cdr.detectChanges();
+      }
     });
   }
 
@@ -212,6 +252,8 @@ export class Chatbot implements OnInit, AfterViewChecked {
             this.showSuggestions = true;
             this.addWelcomeMessage();
           }
+          // Un seul detectChanges, puis reload en arrière-plan
+          this.cdr.detectChanges();
           this.loadConversations();
         }
       }
@@ -230,6 +272,8 @@ export class Chatbot implements OnInit, AfterViewChecked {
     this.showWelcome = false;
     this.isTyping = true;
     this.shouldScroll = true;
+    // FIX: detectChanges une fois pour afficher le message user + spinner
+    this.cdr.detectChanges();
 
     this.chatbotApi.sendMessage(this.userId, text, this.currentConversationId || undefined).subscribe({
       next: (res) => {
@@ -238,6 +282,9 @@ export class Chatbot implements OnInit, AfterViewChecked {
           this.currentConversationId = res.conversationId;
           this.currentTitle = res.title;
           this.addMessage({ role: 'ai', text: res.response, time: this.now() });
+          // Un seul detectChanges pour la réponse AI
+          this.cdr.detectChanges();
+          // Mise à jour de la liste en arrière-plan
           this.loadConversations();
         }
       },
@@ -249,6 +296,7 @@ export class Chatbot implements OnInit, AfterViewChecked {
           time: this.now(),
           isError: true
         });
+        this.cdr.detectChanges();
       }
     });
   }
@@ -265,6 +313,7 @@ export class Chatbot implements OnInit, AfterViewChecked {
           this.showWelcome = true;
           this.showSuggestions = true;
           this.addWelcomeMessage();
+          this.cdr.detectChanges();
           this.loadConversations();
         }
       }
@@ -313,6 +362,7 @@ export class Chatbot implements OnInit, AfterViewChecked {
   private addMessage(msg: ChatMessage): void {
     this.messages.push(msg);
     this.shouldScroll = true;
+    // FIX: pas de detectChanges ici — l'appelant s'en charge une seule fois
   }
 
   private scrollToBottom(): void {
