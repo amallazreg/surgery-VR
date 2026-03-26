@@ -1,37 +1,50 @@
-<div class="chat-page">
-<app-side-bar></app-side-bar>
+<!-- chatbot.component.html -->
 
-  <!-- ─── MAIN CHAT ─── -->
+<div class="chat-page">
+  <app-side-bar></app-side-bar>
+
   <main class="main">
 
-    <!-- Topbar -->
+    <!-- ─── TOPBAR ─── -->
     <div class="topbar">
       <div class="topbar-left">
         <div class="ai-avatar">🤖</div>
         <div>
           <div class="topbar-title">Assistant SurgeryVR</div>
           <div class="topbar-subtitle">
-            <span class="status-dot"></span>
-            En ligne · IA médicale spécialisée
+            <span class="status-dot" [class.offline]="isTyping"></span>
+            {{ isTyping ? 'En train d\'écrire...' : 'En ligne · Assistant pédagogique' }}
           </div>
         </div>
       </div>
       <div class="topbar-actions">
-        <button class="topbar-btn ghost">📎 Historique</button>
-        <button class="topbar-btn ghost">⚙️ Paramètres</button>
-        <button class="topbar-btn danger" (click)="clearChat()">🗑 Effacer</button>
+        <button class="topbar-btn ghost" (click)="loadHistory()">
+          📎 Historique
+        </button>
+        <button
+          class="topbar-btn danger"
+          (click)="clearChat()"
+          [disabled]="messages.length === 0">
+          🗑 Effacer
+        </button>
       </div>
     </div>
 
-    <!-- Chat messages -->
-    <div class="chat-area" #chatArea>
+    <!-- ─── LOADING HISTORY ─── -->
+    <div class="loading-history" *ngIf="isLoadingHistory">
+      <div class="loading-spinner"></div>
+      <span>Chargement de l'historique...</span>
+    </div>
+
+    <!-- ─── CHAT AREA ─── -->
+    <div class="chat-area" #chatArea *ngIf="!isLoadingHistory">
 
       <!-- Welcome banner -->
       <div class="welcome-banner" *ngIf="showWelcome">
         <div class="welcome-icon">🧠</div>
         <div class="welcome-text">
-          <h2>Bonjour, {{ userName }} 👋</h2>
-          <p>Je suis votre assistant IA dédié à SurgeryVR. Posez-moi vos questions sur vos simulations, protocoles chirurgicaux ou l'utilisation de la plateforme.</p>
+          <h2>Bonjour, <span>{{ userName }}</span> 👋</h2>
+          <p>Je suis votre assistant pédagogique SurgeryVR. Posez-moi vos questions sur les simulations chirurgicales ou l'utilisation du casque VR.</p>
         </div>
       </div>
 
@@ -45,42 +58,25 @@
         </div>
       </div>
 
+      <!-- Date divider -->
       <div class="chat-date">Aujourd'hui</div>
 
-      <!-- Messages list -->
+      <!-- ─── Messages ─── -->
       <ng-container *ngFor="let msg of messages">
 
-        <!-- AI message -->
+        <!-- Message AI -->
         <div class="message-group ai" *ngIf="msg.role === 'ai'">
           <div class="msg-avatar ai">🤖</div>
           <div class="msg-content">
-            <div class="msg-bubble ai">
-              {{ msg.text }}
-              <!-- Optional info cards -->
-              <ng-container *ngIf="msg.cards">
-                <div class="info-card" *ngFor="let card of msg.cards">
-                  <div class="info-card-icon" [ngClass]="card.color">{{ card.icon }}</div>
-                  <div>
-                    <div class="info-card-title">{{ card.title }}</div>
-                    <div class="info-card-desc">{{ card.desc }}</div>
-                  </div>
-                </div>
-              </ng-container>
-              <!-- Optional tags -->
-              <div class="msg-tags" *ngIf="msg.tags">
-                <span
-                  class="msg-tag"
-                  *ngFor="let tag of msg.tags"
-                  [ngClass]="tag.color">
-                  {{ tag.label }}
-                </span>
-              </div>
+            <div class="msg-bubble ai" [class.error]="msg.isError">
+              <!-- Rendu avec sauts de ligne -->
+              <span [innerHTML]="formatMessage(msg.text)"></span>
             </div>
             <div class="msg-time">{{ msg.time }}</div>
           </div>
         </div>
 
-        <!-- User message -->
+        <!-- Message Utilisateur -->
         <div class="message-group user" *ngIf="msg.role === 'user'">
           <div class="msg-avatar user">{{ userInitials }}</div>
           <div class="msg-content">
@@ -103,7 +99,7 @@
 
     </div>
 
-    <!-- Input area -->
+    <!-- ─── INPUT AREA ─── -->
     <div class="input-area">
       <div class="input-wrapper" [class.focused]="inputFocused">
         <textarea
@@ -115,16 +111,22 @@
           (keydown)="handleKey($event)"
           (input)="autoResize($event)"
           (focus)="inputFocused = true"
-          (blur)="inputFocused = false">
+          (blur)="inputFocused = false"
+          [disabled]="isTyping">
         </textarea>
         <div class="input-actions">
-          <button class="input-btn attach" title="Joindre un fichier">📎</button>
-          <button class="input-btn send" (click)="sendMessage()" title="Envoyer">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="white"
-                 stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <button
+            class="input-btn send"
+            (click)="sendMessage()"
+            [disabled]="isTyping || !inputText.trim()"
+            title="Envoyer">
+            <svg *ngIf="!isTyping" width="17" height="17" viewBox="0 0 24 24"
+                 fill="none" stroke="white" stroke-width="2.5"
+                 stroke-linecap="round" stroke-linejoin="round">
               <line x1="22" y1="2" x2="11" y2="13"></line>
               <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
             </svg>
+            <div class="btn-spinner" *ngIf="isTyping"></div>
           </button>
         </div>
       </div>

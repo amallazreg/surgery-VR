@@ -6,6 +6,7 @@ const Stripe     = require('stripe');
 const stripe     = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const chatRoutes = require('./routes/chatbot/chat');
+const { initRAG } = require('././services/chatbot/ragService');
 
 
 const User       = require('./models/userModels');
@@ -278,6 +279,7 @@ app.use((err, req, res, next) => {
 
 
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`🚀 Serveur en cours d'exécution sur le port ${PORT}`);
+  await initRAG();
 });
