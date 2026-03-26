@@ -40,10 +40,10 @@ export class Chatbot implements OnInit, AfterViewChecked {
   @ViewChild('chatArea') chatAreaRef!: ElementRef<HTMLDivElement>;
   @ViewChild('chatInput') chatInputRef!: ElementRef<HTMLTextAreaElement>;
 
-  // ── User info ──
-  userId       = 'user123';
-  userName     = 'Dr. Clara Martin';
-  userInitials = 'DC';
+userId       = ''; 
+ userName: string = '';
+ userEmail : string = ''
+  userInitials: string = '';
 
   // ── State Chat ──
   inputText              = '';
@@ -78,52 +78,54 @@ export class Chatbot implements OnInit, AfterViewChecked {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    // FIX: Un seul forkJoin au lieu de 2 appels séquentiels indépendants.
-    // Les deux requêtes partent en parallèle, et on fait UN SEUL detectChanges
-    // quand les deux sont terminées → moitié moins de temps d'attente perçu.
-    this.isLoadingHistory = true;
-    this.isLoadingConversations = true;
+ ngOnInit(): void {
+  this.userId = localStorage.getItem('userId') ?? '';
+  const nom = localStorage.getItem('nom') || '';
+  const prenom = localStorage.getItem('prenom') || '';
 
-    forkJoin({
-      history: this.chatbotApi.getHistory(this.userId),
-      conversations: this.chatbotApi.getConversations(this.userId)
-    }).subscribe({
-      next: ({ history, conversations }) => {
-        // ── Traiter l'historique ──
-        if (history.messages && history.messages.length > 0) {
-          this.showWelcome = false;
-          this.showSuggestions = false;
-          this.currentConversationId = history.conversationId;
-          this.currentTitle = history.title;
-          this.messages = history.messages.map(msg => ({
-            role: msg.role === 'assistant' ? 'ai' : 'user',
-            text: msg.content,
-            time: this.formatDate(msg.createdAt)
-          }));
-          this.shouldScroll = true;
-        } else {
-          this.showWelcome = true;
-          this.showSuggestions = true;
-          this.addWelcomeMessage();
-        }
+  this.userName = `${prenom} ${nom}`.trim() || 'Utilisateur';
+  const parts = this.userName.split(' ').filter(p => p.length > 0);
+  this.userInitials = parts.map((p: string) => p[0].toUpperCase()).slice(0, 2).join('');
 
-        // ── Traiter les conversations ──
-        this.groupConversationsByDate(conversations.conversations);
+  this.isLoadingHistory = true;
+  this.isLoadingConversations = true;
 
-        // ── UN SEUL detectChanges pour tout ──
-        this.isLoadingHistory = false;
-        this.isLoadingConversations = false;
-        this.cdr.detectChanges();
-      },
-      error: () => {
-        this.isLoadingHistory = false;
-        this.isLoadingConversations = false;
+  forkJoin({
+    history: this.chatbotApi.getHistory(this.userId),
+    conversations: this.chatbotApi.getConversations(this.userId)
+  }).subscribe({
+    next: ({ history, conversations }) => {
+      if (history.messages && history.messages.length > 0) {
+        this.showWelcome = false;
+        this.showSuggestions = false;
+        this.currentConversationId = history.conversationId;
+        this.currentTitle = history.title;
+        this.messages = history.messages.map(msg => ({
+          role: msg.role === 'assistant' ? 'ai' : 'user',
+          text: msg.content,
+          time: this.formatDate(msg.createdAt)
+        }));
+        this.shouldScroll = true;
+      } else {
+        this.showWelcome = true;
+        this.showSuggestions = true;
         this.addWelcomeMessage();
-        this.cdr.detectChanges();
       }
-    });
-  }
+
+      this.groupConversationsByDate(conversations.conversations);
+
+      this.isLoadingHistory = false;
+      this.isLoadingConversations = false;
+      this.cdr.detectChanges();
+    },
+    error: () => {
+      this.isLoadingHistory = false;
+      this.isLoadingConversations = false;
+      this.addWelcomeMessage();
+      this.cdr.detectChanges();
+    }
+  });
+}
 
   ngAfterViewChecked(): void {
     if (this.shouldScroll) {
