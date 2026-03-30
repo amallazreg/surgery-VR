@@ -20,6 +20,7 @@ import { DashboardEtudiant } from './clients/Etudiants/dashboard-etudiant/dashbo
 import { MesExperiencesVR } from './clients/Etudiants/mes-experiences-vr/mes-experiences-vr';
 import { FormationManagement } from './clients/institution/formation-management/formation-management';
 import { ForfaitEtudiant } from './clients/Etudiants/forfait-etudiant/forfait-etudiant';
+import { MonCompte } from './clients/institution/mon-compte/mon-compte';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -45,7 +46,8 @@ export const routes: Routes = [
       {path : 'client/mesExperiences', component : MesExperiences}, 
       {path : 'client/chatbot', component: Chatbot} , 
       {path : 'client/formationManagement', component: FormationManagement},
-
+      {path : 'client/monCompte' , component : MonCompte},
+      
 
       {path : 'etudiant/dashborad' , component : DashboardEtudiant},
       {path : 'etudiant/mesExperiencesVR' , component : MesExperiencesVR },
@@ -53,10 +55,6 @@ export const routes: Routes = [
 
 
        { path: '**', redirectTo: '' }
-
-
-
-
 
 
 ];

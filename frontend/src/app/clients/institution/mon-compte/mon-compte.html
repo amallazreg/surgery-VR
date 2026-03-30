@@ -1,0 +1,194 @@
+<app-side-bar></app-side-bar>
+
+<main class="main">
+
+  <!-- Topbar -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>Mon Compte</h1>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-btn notif-btn">🔔<div class="notif-dot"></div></div>
+      <div class="topbar-btn">💬</div>
+      <button class="btn-primary">+ Nouvelle enquête</button>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="content">
+
+    <!-- ── HERO ── -->
+    <div class="profile-hero">
+      <div class="avatar-large">{{ initials }}</div>
+      <div class="profile-info">
+        <div class="profile-badge">● Compte actif</div>
+        <h2>{{ user.firstName }} {{ user.lastName }}</h2>
+        <div class="subtitle">
+          <span>🏢 {{ user.institution }}</span>
+          <span>📍 {{ user.location }}</span>
+          <span>📅 Membre depuis {{ user.memberSince }}</span>
+        </div>
+      </div>
+      <div class="profile-actions">
+        <button class="btn-edit" (click)="toggleEdit()">✏️ Modifier le profil</button>
+        <button class="btn-primary" (click)="exportData()">↓ Exporter mes données</button>
+      </div>
+    </div>
+
+    <!-- ── MAIN GRID : Infos | Forfait ── -->
+    <div class="main-grid">
+
+      <!-- Informations générales -->
+      <div class="section-card">
+        <div class="section-header">
+          <span class="section-title">Informations générales</span>
+          <a class="section-action" (click)="toggleEdit()">{{ editMode ? 'Annuler' : 'Modifier' }}</a>
+        </div>
+        <div class="form-body">
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Prénom</label>
+                <input class="form-input" type="text" formControlName="firstName">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nom</label>
+                <input class="form-input" type="text" formControlName="lastName">
+              </div>
+            </div>
+
+            <div class="form-row full">
+              <div class="form-group">
+                <label class="form-label">Adresse e-mail</label>
+                <input class="form-input" type="email" formControlName="email">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Téléphone</label>
+                <input class="form-input" type="tel" formControlName="phone">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Poste</label>
+                <input class="form-input" type="text" formControlName="jobTitle">
+              </div>
+            </div>
+
+            <div class="form-row full">
+              <div class="form-group">
+                <label class="form-label">Institution</label>
+                <input class="form-input" type="text" formControlName="institution" >
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label">Secteur</label>
+                <select class="form-select" formControlName="sector">
+                  <option value="public">Secteur public</option>
+                  <option value="private">Secteur privé</option>
+                  <option value="ngo">ONG</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Langue</label>
+                <select class="form-select" formControlName="language">
+                  <option value="fr">Français</option>
+                  <option value="ar">Arabe</option>
+                  <option value="en">Anglais</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-actions" *ngIf="editMode">
+              <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+              <button type="submit" class="btn-save">💾 Enregistrer</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+      <!-- Forfait actuel -->
+      <div class="forfait-card">
+        <div class="forfait-header">
+          <div class="forfait-name">Abonnement actuel</div>
+          <div class="forfait-plan">{{ plan.name }}</div>
+          <div class="forfait-expiry">Expire le {{ plan.expiryDate }} · Auto-renouvelé</div>
+        </div>
+        <div class="forfait-body">
+
+          <div class="usage-item" *ngFor="let u of plan.usages">
+            <div class="usage-header">
+              <div class="usage-label">
+                <div class="usage-icon">{{ u.icon }}</div>
+                {{ u.label }}
+              </div>
+              <div class="usage-count">{{ u.current }} / {{ u.max }}</div>
+            </div>
+            <div class="usage-bar">
+              <div class="usage-fill" [class.warn]="u.percent >= 65" [style.width.%]="u.percent"></div>
+            </div>
+          </div>
+
+          <div class="support-row">
+            <div class="usage-icon">🎧</div>
+            <span class="support-label">Support prioritaire</span>
+            <span class="support-badge">✓ Inclus</span>
+          </div>
+
+          <button class="upgrade-btn" (click)="upgradeToEnterprise()">⚡ Passer à Enterprise</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── FACTURATION ── -->
+    <div class="section-card billing-card">
+      <div class="section-header">
+        <span class="section-title">Historique de facturation</span>
+        <a class="section-action" href="#">Tout voir</a>
+      </div>
+      <div class="invoice-list">
+        <div class="invoice-item" *ngFor="let inv of invoices">
+          <div class="invoice-date">{{ inv.date }}</div>
+          <div class="invoice-desc">{{ inv.description }}</div>
+          <div class="invoice-amount">{{ inv.amount }} TND</div>
+          <div class="invoice-status"><span class="status-paid">{{ inv.status }}</span></div>
+          <button class="invoice-dl" (click)="downloadInvoice(inv)">↓</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DANGER ZONE ── -->
+    <div class="danger-section">
+      <div class="danger-header">
+        <div class="danger-title">⚠️ Zone sensible</div>
+      </div>
+      <div class="danger-item">
+        <div>
+          <div class="danger-label">Exporter toutes mes données</div>
+          <div class="danger-sub">Télécharger l'ensemble de vos enquêtes, résultats et données au format JSON</div>
+        </div>
+        <button class="btn-danger" (click)="exportData()">↓ Exporter</button>
+      </div>
+      <div class="danger-item">
+        <div>
+          <div class="danger-label">Résilier l'abonnement</div>
+          <div class="danger-sub">Annuler votre forfait à la fin de la période en cours ({{ plan.expiryDate }})</div>
+        </div>
+        <button class="btn-danger" (click)="cancelSubscription()">Résilier</button>
+      </div>
+      <div class="danger-item">
+        <div>
+          <div class="danger-label">Supprimer le compte</div>
+          <div class="danger-sub">Suppression définitive du compte et de toutes vos données. Action irréversible.</div>
+        </div>
+        <button class="btn-danger btn-danger-strong" (click)="deleteAccount()">Supprimer</button>
+      </div>
+    </div>
+
+  </div>
+</main>
