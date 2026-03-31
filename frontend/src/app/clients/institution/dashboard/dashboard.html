@@ -70,60 +70,22 @@
       
       <!-- Tâches récentes -->
       <div class="section-card">
-        <div class="section-header">
-          <span class="section-title">Activités récentes</span>
-          <a class="section-action" href="#">Tout voir</a>
+            <div class="section-card billing-card">
+      <div class="section-header">
+        <span class="section-title">Historique de facturation</span>
+        <a class="section-action" href="#">Tout voir</a>
+      </div>
+      <div class="invoice-list">
+        <div class="invoice-item" *ngFor="let inv of invoices">
+          <div class="invoice-date">{{ inv.date }}</div>
+          <div class="invoice-desc">{{ inv.description }}</div>
+          <div class="invoice-amount">{{ inv.amount }} TND</div>
+          <div class="invoice-status"><span class="status-paid">{{ inv.status }}</span></div>
+         <!-- <button class="invoice-dl" (click)="downloadInvoice(inv)">↓</button> -->
         </div>
-        <div class="task-list">
-          <div class="task-item">
-            <div class="task-status-dot status-progress"></div>
-            <div class="task-info">
-              <div class="task-name">Enquête Satisfaction Client — Magasin Tunis Centre</div>
-              <div class="task-meta">Mise à jour il y a 2h • 47 réponses collectées</div>
-            </div>
-            <span class="task-tag tag-vr">VR Live</span>
-          </div>
-          <div class="task-item">
-            <div class="task-status-dot status-review"></div>
-            <div class="task-info">
-              <div class="task-name">Demande de support — APK v2.3 crash Oculus</div>
-              <div class="task-meta">Soumis hier • En révision par l'équipe</div>
-            </div>
-            <span class="task-tag tag-support">Support</span>
-          </div>
-          <div class="task-item">
-            <div class="task-status-dot status-done"></div>
-            <div class="task-info">
-              <div class="task-name">Enquête Parcours Magasin — Sfax Point de Vente</div>
-              <div class="task-meta">Terminé le 17 Fév • 128 réponses</div>
-            </div>
-            <span class="task-tag tag-survey">Terminé</span>
-          </div>
-          <div class="task-item">
-            <div class="task-status-dot status-done"></div>
-            <div class="task-info">
-              <div class="task-name">APK SurveyVR v2.4.1 téléchargé</div>
-              <div class="task-meta">15 Fév • Compatible Oculus Quest 2 & 3</div>
-            </div>
-            <span class="task-tag tag-apk">APK</span>
-          </div>
-          <div class="task-item">
-            <div class="task-status-dot status-pending"></div>
-            <div class="task-info">
-              <div class="task-name">Enquête Test Produit — Campagne Ramadan</div>
-              <div class="task-meta">Créé le 10 Fév • En attente de lancement</div>
-            </div>
-            <span class="task-tag tag-survey">Brouillon</span>
-          </div>
-          <div class="task-item">
-            <div class="task-status-dot status-progress"></div>
-            <div class="task-info">
-              <div class="task-name">Renouvellement Forfait Pro — Mars 2026</div>
-              <div class="task-meta">Expire dans 8 jours • Renouvellement auto activé</div>
-            </div>
-            <span class="task-tag tag-vr">Forfait</span>
-          </div>
-        </div>
+      </div>
+    </div>
+        
       </div>
 
       <!-- Forfait -->

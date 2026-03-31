@@ -1,25 +1,29 @@
 const nodemailer = require('nodemailer');
 
-// ✅ OAuth2 - Fix Render IPv6
+// =============================================
+// Configuration Brevo SMTP (recommandé pour Render Free)
+// =============================================
 const creerTransporter = () => {
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
-    family: 4, 
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,                    // Important : false pour le port 587
     auth: {
-      type: 'OAuth2',
-      user: process.env.EMAIL_USER,
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-    }
+      user: process.env.BREVO_SMTP_USER,   // Ton email Brevo (ex: contact@surgery-vr.com)
+      pass: process.env.BREVO_SMTP_KEY     // La clé SMTP générée dans Brevo
+    },
+    // Options recommandées pour Render (évite les timeouts)
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000,
+    // Force IPv4 (utile sur Render)
+    family: 4
   });
 };
 
-// ===============================
-// Template HTML pour l'email de démo
-// ===============================
+// =============================================
+// Template HTML pour l'email de démo (inchangé)
+// =============================================
 const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
   const videosHTML = videos.map((video, index) => `
     <tr>
@@ -164,7 +168,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
                 L'équipe SurgeryVR
               </p>
               <p style="margin: 0 0 20px 0; color: #5A6B8C; font-size: 14px;">
-                ${process.env.EMAIL_USER} | www.SurgeryVR.com
+                ${process.env.BREVO_SMTP_USER} | www.SurgeryVR.com
               </p>
               <p style="margin: 20px 0 0 0; color: #5A6B8C; font-size: 12px;">
                 © 2024 SurgeryVR. Tous droits réservés.<br>
@@ -182,26 +186,26 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
   `;
 };
 
-// ===============================
+// =============================================
 // Envoyer l'email de démonstration
-// ===============================
+// =============================================
 const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
   try {
-    const transporter = creerTransporter(); // ✅ appel ici
+    const transporter = creerTransporter();
 
     const htmlContent = creerTemplateEmailDemo(demande, messageEmail, videos);
 
     const mailOptions = {
-      from: `"SurgeryVR - Formation Médicale" <${process.env.EMAIL_USER}>`,
+      from: `"SurgeryVR - Formation Médicale" <${process.env.BREVO_SMTP_USER}>`,
       to: demande.emailProfessionnel,
       subject: '✅ Vos vidéos de démonstration SurgeryVR',
       html: htmlContent,
-      replyTo: process.env.EMAIL_USER
+      replyTo: process.env.BREVO_SMTP_USER
     };
 
     const info = await transporter.sendMail(mailOptions);
 
-    console.log('✅ Email de démo envoyé:', {
+    console.log('✅ Email de démo envoyé via Brevo :', {
       messageId: info.messageId,
       destinataire: demande.emailProfessionnel,
       institution: demande.nomInstitution,
@@ -211,22 +215,22 @@ const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
     return info;
 
   } catch (error) {
-    console.error('❌ Erreur envoi email démo:', error);
+    console.error('❌ Erreur envoi email Brevo:', error);
     throw new Error(`Erreur envoi email: ${error.message}`);
   }
 };
 
-// ===============================
-// Tester la configuration
-// ===============================
+// =============================================
+// Tester la configuration Brevo
+// =============================================
 const testerConfigurationEmail = async () => {
   try {
-    const transporter = creerTransporter(); // ✅ appel ici aussi
+    const transporter = creerTransporter();
     await transporter.verify();
-    console.log('✅ Configuration OAuth2 valide');
+    console.log('✅ Configuration Brevo SMTP valide !');
     return true;
   } catch (error) {
-    console.error('❌ Configuration invalide:', error);
+    console.error('❌ Erreur configuration Brevo:', error.message);
     return false;
   }
 };
