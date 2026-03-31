@@ -1456,3 +1456,16 @@ tbody td.actions-cell {
   transform: translateY(-2px);
   box-shadow: 0 4px 15px rgba(0, 102, 255, 0.3);
 }
+
+.header-container {
+  display: flex;
+  justify-content: space-between; /* gauche / droite */
+  align-items: center; /* alignement vertical */
+  margin-bottom: 20px;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}

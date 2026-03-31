@@ -26,7 +26,15 @@
 
             "styles": [
               "src/styles.css"
-            ]
+            ],
+             "allowedCommonJsDependencies": [
+              "jspdf",
+              "html2canvas",
+              "canvg",
+              "raf",
+              "rgbcolor",
+              "core-js"
+          ]
           },
           "configurations": {
             "production": {

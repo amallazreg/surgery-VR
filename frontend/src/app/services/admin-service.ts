@@ -68,6 +68,11 @@ export class AdminService {
     contacterDemo(message : any,id: any) : Observable<any> {
       return this.http.patch(`${this.apiUrlDemo}/${id}/contacter`,message)
     }
+    
+    cloturerDemande(id: string): Observable<any> {
+    return this.http.patch(`${this.apiUrl}/demandes-demo/${id}/cloturer`, {});
+  }
+
 
 
 

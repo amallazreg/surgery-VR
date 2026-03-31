@@ -4,6 +4,8 @@ import { AdminService } from '../../services/admin-service';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SideBar } from '../side-bar/side-bar';
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 
 export interface IDemandeDemo  {
@@ -21,7 +23,6 @@ export interface IDemandeDemo  {
   statut: 'nouvelle' | 'contactee' | 'cloturee';
   dateCreation: Date;
   
-  // ✨ NOUVEAUX CHAMPS (optionnels pour ne pas casser l'existant)
   dateContact?: Date;
   dateCloture?: Date;
   videosEnvoyees?: Array<{
@@ -59,10 +60,7 @@ export type FilterType = 'tous' | 'nouvelle' | 'contactee' | 'cloturee';
   styleUrl: './demande-demo.css',
 })
 export class DemandeDemo implements OnInit, OnDestroy {
-  
-  // ========================================
-  // Propriétés de Données
-  // ========================================
+
   allDemandes: IDemandeDemo[] = [];
   filteredDemandes: IDemandeDemo[] = [];
   paginatedDemandes: IDemandeDemo[] = [];
@@ -77,43 +75,31 @@ export class DemandeDemo implements OnInit, OnDestroy {
     totalDemandes: 0
   };
   
-  // ========================================
-  // Filtres et Recherche
-  // ========================================
+
   currentFilter: FilterType = 'tous';
   searchQuery: string = '';
   
-  // ========================================
-  // Pagination
-  // ========================================
+
   currentPage: number = 1;
   itemsPerPage: number = 10;
   totalPages: number = 1;
   
-  // ========================================
-  // États UI
-  // ========================================
+  
   isLoading: boolean = false;
   showEmptyState: boolean = false;
   isSendingEmail: boolean = false; // ✨ Nouveau
   
-  // ========================================
-  // Modales
-  // ========================================
+
   showDetailsModal: boolean = false;
   showContactModal: boolean = false;
   showCloseModal: boolean = false;
   emailMessage: string = '';
   
-  // ========================================
-  // Sélection Multiple
-  // ========================================
+
   selectedDemandeIds: Set<string> = new Set();
   selectAll: boolean = false;
   
-  // ========================================
-  // RxJS
-  // ========================================
+  
   private searchSubject = new Subject<string>();
   private destroy$ = new Subject<void>();
   private autoRefreshInterval: any;
@@ -127,9 +113,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
 
   ) {}
 
-  // ========================================
-  // Lifecycle Hooks
-  // ========================================
+ 
   ngOnInit(): void {
     console.log('=== DemandesDemo ngOnInit ===');
     this.loadDemandes();
@@ -143,9 +127,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
     this.clearAutoRefresh();
   }
 
-  // ========================================
-  // Initialisation
-  // ========================================
+
   private setupSearchDebounce(): void {
     this.searchSubject
       .pipe(
@@ -177,9 +159,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
     }
   }
 
-  // ========================================
-  // Sélection Multiple
-  // ========================================
+  
   toggleSelectAll(): void {
     this.paginatedDemandes.forEach(demande => demande.selected = this.selectAll);
     this.updateSelectedDemandeIds();
@@ -205,9 +185,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
     return this.selectedDemandeIds.has(demandeId);
   }
 
-  // ========================================
-  // Chargement des Données
-  // ========================================
+
   loadDemandes(): void {
     this.isLoading = true;
     
@@ -234,9 +212,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
       });
   }
 
-  // ========================================
-  // Filtres
-  // ========================================
+
   setActiveFilter(filter: FilterType): void {
     this.currentFilter = filter;
     this.currentPage = 1;
@@ -278,9 +254,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
     this.showEmptyState = filtered.length === 0 && !this.isLoading;
   }
 
-  // ========================================
-  // Pagination
-  // ========================================
+
   updatePagination(): void {
     this.totalPages = Math.ceil(this.filteredDemandes.length / this.itemsPerPage);
     
@@ -327,9 +301,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
     return this.currentPage < this.totalPages;
   }
 
-  // ========================================
-  // Statistiques
-  // ========================================
+
   updateStats(): void {
     this.stats = {
       totalNouvelle: this.allDemandes.filter(d => d.statut === 'nouvelle').length,
@@ -348,9 +320,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
     };
   }
 
-  // ========================================
-  // Gestion des Modales
-  // ========================================
+ 
   viewDemandeDetails(demande: IDemandeDemo): void {
     this.selectedDemande = demande;
     this.showDetailsModal = true;
@@ -403,6 +373,7 @@ L'équipe SurveryVR
     }, 300);
   }
 
+
   openCloseModal(demande: IDemandeDemo): void {
     this.selectedDemande = demande;
     this.showCloseModal = true;
@@ -415,9 +386,7 @@ L'équipe SurveryVR
     }, 300);
   }
 
-  // ========================================
-  // Actions sur les Demandes
-  // ========================================
+ 
   contactDemande(): void {
     // Validation du message
     if (!this.emailMessage || this.emailMessage.trim().length < 50) {
@@ -491,49 +460,42 @@ L'équipe SurveryVR
     }, 300);
   }
 
-  closeDemande(): void {
-    if (!this.selectedDemande) return;
+ closeDemande(demande: any): void {
 
-    const demandeId = this.selectedDemande._id;
-    const institution = this.selectedDemande.nomInstitution;
+  const demandeId = demande._id;
+  const institution = demande.nomInstitution;
 
-    // Confirmation
-    if (isPlatformBrowser(this.platformId)) {
-      const confirmer = confirm(`Voulez-vous vraiment clôturer la demande de ${institution} ?\n\nCette action indique que le visiteur s'est authentifié et a souscrit à un forfait.`);
-      
-      if (!confirmer) {
-        return;
-      }
-    }
+  if (isPlatformBrowser(this.platformId)) {
+    const confirmer = confirm(
+      `Voulez-vous vraiment clôturer la demande de ${institution} ?\n\nCette action indique que le visiteur s'est authentifié et a souscrit à un forfait.`
+    );
 
- //   this.adminService.cloturerDemande(demandeId)
-   //   .pipe(takeUntil(this.destroy$))
-     // .subscribe({
-       // next: (response: any) => {
-         // console.log('✅ Demande clôturée avec succès');
-          
-     //     this.closeCloseModal();
-          
-          // Afficher l'alerte de succès
-       //   if (isPlatformBrowser(this.platformId)) {
-         //   alert(`✅ Demande clôturée avec succès!\n\nLa demande de ${institution} est maintenant marquée comme "Clôturée".`);
-     //     }
-          
-          // Recharger les données
-       //   this.loadDemandes();
-     //   },
-       // error: (error) => {
-         // console.error('❌ Erreur clôture:', error);
-          
-       //   if (isPlatformBrowser(this.platformId)) {
-         //   const errorMsg = error.error?.message || 'Erreur lors de la clôture';
-           // alert(`❌ Erreur: ${errorMsg}\n\nVeuillez réessayer.`);
-      //    }
-          
-        //  this.showToast('Erreur lors de la clôture', 'error');
-       // }
-     // });
+    if (!confirmer) return;
   }
+
+  this.adminService.cloturerDemande(demandeId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: () => {
+        console.log('✅ Demande clôturée avec succès');
+
+        demande.statut = 'cloturee'; // ✅ mise à jour directe
+
+        if (isPlatformBrowser(this.platformId)) {
+          alert(`✅ Demande clôturée avec succès!\n\n${institution} est maintenant "Clôturée".`);
+        }
+
+        this.loadDemandes();
+      },
+      error: (error) => {
+        console.error('❌ Erreur clôture:', error);
+
+        if (isPlatformBrowser(this.platformId)) {
+          alert(error.error?.message || 'Erreur lors de la clôture');
+        }
+      }
+    });
+}
 
   closeFromModal(demande: IDemandeDemo): void {
     this.closeDetailsModal();
@@ -551,46 +513,106 @@ L'équipe SurveryVR
     }
   }
 
-  // ========================================
-  // Export
-  // ========================================
-  exportToCSV(): void {
-    if (!isPlatformBrowser(this.platformId)) {
-      return;
-    }
 
-    const headers = ['Institution', 'Email', 'Téléphone', 'Type Établissement', 'Pays', 'Ville', 'Domaine', 'Statut', 'Date'];
-    const rows = this.filteredDemandes.map(demande => [
-      demande.nomInstitution,
-      demande.emailProfessionnel,
-      demande.telephone,
-      demande.typeEtablissement,
-      demande.pays,
-      demande.ville,
-      demande.domaineInteret,
-      this.getStatusLabel(demande.statut),
-      this.formatDateTime(demande.dateCreation)
-    ]);
-
-    let csvContent = headers.join(',') + '\n';
-    csvContent += rows.map(row => 
-      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
-
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-
-    link.href = url;
-    link.download = `demandes_demo_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-    this.showToast('Export CSV réussi !', 'success');
+exportToPDF(): void {
+  if (!isPlatformBrowser(this.platformId)) {
+    return;
   }
 
+  const doc = new jsPDF('landscape');
+
+  // 📌 Logo (à gauche)
+  const logo = new Image();
+  logo.src = 'assets/logo.png';
+
+  logo.onload = () => {
+
+    doc.addImage(logo, 'PNG', 12, 10, 32, 15);
+
+    // 📌 Header (Nom projet)
+    doc.setFontSize(16);
+    doc.setFont('helvetica', 'bold');
+    doc.text('Surgery VR', 50, 15);
+
+   
+
+    // 📌 Ligne séparation
+    doc.setLineWidth(0.5);
+    doc.line(10, 28, 280, 28);
+
+    // 📌 Titre
+    doc.setFontSize(14);
+    doc.text('Liste des demandes', 14, 35);
+
+    // 📌 Données
+    const headers = [[
+      'Institution',
+      'Email',
+      'Téléphone',
+      'Type',
+      'Pays',
+      'Ville',
+      'Domaine',
+      'Statut',
+      'Date'
+    ]];
+
+    const rows = this.filteredDemandes.map(d => [
+      d.nomInstitution || '',
+      d.emailProfessionnel || '',
+      d.telephone || '',
+      d.typeEtablissement || '',
+      d.pays || '',
+      d.ville || '',
+      d.domaineInteret || '',
+      this.getStatusLabel(d.statut),
+      this.formatDateTime(d.dateCreation)
+    ]);
+
+    // 📌 Tableau
+    autoTable(doc, {
+      head: headers,
+      body: rows,
+      startY: 40,
+      styles: {
+        fontSize: 8,
+        cellPadding: 3
+      },
+      headStyles: {
+        fillColor: [0, 102, 204],
+        textColor: 255,
+        halign: 'center'
+      },
+      alternateRowStyles: {
+        fillColor: [245, 245, 245]
+      },
+      didDrawPage: (data) => {
+
+        // 📌 Footer
+        const pageSize = doc.internal.pageSize.height;
+        doc.setFontSize(9);
+
+        doc.text(
+          `Page ${doc.getCurrentPageInfo().pageNumber}`,
+          data.settings.margin.left,
+          pageSize - 10
+        );
+
+        // 📌 Signature
+        doc.text(
+          'Signature / Cachet',
+          240,
+          pageSize - 10
+        );
+      }
+    });
+
+    // 📌 Télécharger
+    doc.save(`demandes_demos_${new Date().toISOString().split('T')[0]}.pdf`);
+
+    this.showToast('Export PDF professionnel réussi !', 'success');
+  };
+}
   // ========================================
   // Notifications Toast
   // ========================================

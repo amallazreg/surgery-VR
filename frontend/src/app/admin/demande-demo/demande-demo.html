@@ -12,10 +12,7 @@
           <p>Gérez et suivez les demandes de démonstration</p>
         </div>
         <div class="header-right">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Rechercher par institution, email, ville..." [(ngModel)]="searchQuery" (input)="onSearchInput(searchQuery)">
-          </div>
+       
           <div class="user-profile">
             <div class="avatar">AD</div>
             <div>
@@ -107,18 +104,29 @@
         </div>
 
         <div class="filter-actions">
-          <button class="btn btn-secondary" id="exportBtn" (click)="exportToCSV()">
-            📥 Exporter CSV
+          <button class="btn btn-secondary" id="exportBtn" (click)="exportToPDF()">
+            📥 Exporter PDF
           </button>
         </div>
       </div>
 
       <!-- Demandes Table -->
       <div class="section-card table-section">
+      <div class="header-container">
         <div class="table-header">
           <h3 class="section-title">Liste des Demandes</h3>
         </div>
 
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="text" 
+            id="searchInput" 
+            placeholder="Rechercher par institution, email, ville..." 
+            [(ngModel)]="searchQuery" 
+            (input)="onSearchInput(searchQuery)">
+        </div>
+      </div>
         <!-- Loading State -->
         <div class="loading-state" *ngIf="isLoading">
           <div class="spinner"></div>
@@ -198,7 +206,7 @@
                     </button>
                     <button class="action-btn btn-close" 
                             [disabled]="demande.statut === 'cloturee'" 
-                            (click)="openCloseModal(demande)"
+                            (click)="closeDemande(demande)"
                             title="Clôturer">
                       <span>✅</span>
                     </button>
@@ -481,7 +489,7 @@
         
         <div class="modal-actions">
           <button class="btn btn-secondary" (click)="closeCloseModal()">Annuler</button>
-          <button class="btn btn-close-large" (click)="closeDemande()">
+          <button class="btn btn-close-large" (click)="closeDemande(selectedDemande)">
             <span>✅</span> Confirmer la Clôture
           </button>
         </div>
