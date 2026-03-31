@@ -139,7 +139,8 @@ const contacterDemande = async (req, res) => {
     demande.videosEnvoyees = videosSelectionnees.map(v => ({
       id: v._id,
       titre: v.titre,
-      urlVideo: v.urlVideo
+      urlVideo: v.urlVideo,
+      dateEnvoi: new Date()
     }));
     
     await demande.save();

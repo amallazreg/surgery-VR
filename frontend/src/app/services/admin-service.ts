@@ -70,7 +70,7 @@ export class AdminService {
     }
     
     cloturerDemande(id: string): Observable<any> {
-    return this.http.patch(`${this.apiUrl}/demandes-demo/${id}/cloturer`, {});
+    return this.http.patch(`${this.apiUrlDemo}/admin/demandes-demo/${id}/cloturer`, {});
   }
 
 
