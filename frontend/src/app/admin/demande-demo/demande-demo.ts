@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { SideBar } from '../side-bar/side-bar';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import Swal from 'sweetalert2';
 
 
 export interface IDemandeDemo  {
@@ -495,6 +496,48 @@ L'équipe SurveryVR
         }
       }
     });
+}
+
+confirmClose(demande: any): void {
+  Swal.fire({
+    title: 'Êtes-vous sûr ?',
+    html: `Voulez-vous vraiment clôturer la demande de <b>${demande.nomInstitution}</b> ?`,
+    icon: 'warning',
+    showCancelButton: true,
+    confirmButtonText: '✅ Oui, clôturer',
+    cancelButtonText: '❌ Annuler',
+    reverseButtons: true,
+    focusCancel: true,
+    customClass: {
+      popup: 'swal2-popup-modern',
+      confirmButton: 'swal2-confirm-modern',
+      cancelButton: 'swal2-cancel-modern'
+    }
+  }).then((result) => {
+    if (result.isConfirmed) {
+      // Appel backend pour clôturer
+      this.adminService.cloturerDemande(demande._id).subscribe({
+        next: () => {
+          demande.statut = 'cloturee';
+          Swal.fire({
+            icon: 'success',
+            title: 'Clôturée !',
+            html: `La demande de <b>${demande.nomInstitution}</b> est maintenant clôturée.`,
+            timer: 2500,
+            showConfirmButton: false
+          });
+          this.loadDemandes(); // recharge si nécessaire
+        },
+        error: (err) => {
+          Swal.fire({
+            icon: 'error',
+            title: 'Erreur',
+            text: err.error?.message || 'Erreur lors de la clôture'
+          });
+        }
+      });
+    }
+  });
 }
 
   closeFromModal(demande: IDemandeDemo): void {

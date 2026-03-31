@@ -206,7 +206,7 @@
                     </button>
                     <button class="action-btn btn-close" 
                             [disabled]="demande.statut === 'cloturee'" 
-                            (click)="closeDemande(demande)"
+                            (click)="confirmClose(demande)"
                             title="Clôturer">
                       <span>✅</span>
                     </button>
