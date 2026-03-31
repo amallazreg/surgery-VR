@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 
+// ✅ OAuth2 - Fix Render IPv6
 const creerTransporter = () => {
   return nodemailer.createTransport({
     service: 'gmail',
@@ -12,6 +13,7 @@ const creerTransporter = () => {
     }
   });
 };
+
 // ===============================
 // Template HTML pour l'email de démo
 // ===============================
@@ -22,7 +24,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
             <td width="60" style="padding-right: 15px;">
-              <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0066FF, #00D9FF); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; font-weight: bold;">
+              <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0066FF, #00D9FF); border-radius: 10px; text-align: center; line-height: 50px; color: white; font-size: 20px; font-weight: bold;">
                 ${index + 1}
               </div>
             </td>
@@ -51,7 +53,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vos Démos SurveryVR</title>
+  <title>Vos Démos SurgeryVR</title>
 </head>
 <body style="margin: 0; padding: 0; font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background-color: #F8FAFF;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFF; padding: 40px 20px;">
@@ -63,7 +65,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
           <tr>
             <td style="background: linear-gradient(135deg, #0066FF, #00D9FF); padding: 40px 30px; text-align: center;">
               <h1 style="margin: 0; color: white; font-size: 32px; font-weight: 700;">
-                🎯 SurveryVR
+                🎯 SurgeryVR
               </h1>
               <p style="margin: 10px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 16px;">
                 Formation Médicale en Réalité Virtuelle
@@ -129,7 +131,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
               <table width="100%" cellpadding="0" cellspacing="0">
                 <tr>
                   <td width="50%" style="padding-right: 10px;">
-                    <div style="background: #F8FAFF; padding: 20px; border-radius: 12px; height: 100%;">
+                    <div style="background: #F8FAFF; padding: 20px; border-radius: 12px;">
                       <div style="font-size: 24px; margin-bottom: 10px;">📞</div>
                       <h4 style="margin: 0 0 10px 0; color: #1A2B5F; font-size: 16px;">Besoin d'aide ?</h4>
                       <p style="margin: 0; color: #5A6B8C; font-size: 14px;">
@@ -138,7 +140,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
                     </div>
                   </td>
                   <td width="50%" style="padding-left: 10px;">
-                    <div style="background: #F8FAFF; padding: 20px; border-radius: 12px; height: 100%;">
+                    <div style="background: #F8FAFF; padding: 20px; border-radius: 12px;">
                       <div style="font-size: 24px; margin-bottom: 10px;">💼</div>
                       <h4 style="margin: 0 0 10px 0; color: #1A2B5F; font-size: 16px;">Forfaits Pro</h4>
                       <p style="margin: 0; color: #5A6B8C; font-size: 14px;">
@@ -156,24 +158,13 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
             <td style="background: #F8FAFF; padding: 30px; text-align: center; border-top: 2px solid #E8EFF9;">
               <p style="margin: 0 0 10px 0; color: #1A2B5F; font-size: 16px; font-weight: 600;">
                 Cordialement,<br>
-                L'équipe SurveryVR
+                L'équipe SurgeryVR
               </p>
               <p style="margin: 0 0 20px 0; color: #5A6B8C; font-size: 14px;">
-                ${process.env.EMAIL_FROM || 'contact@SurveryVR.com'} | www.SurveryVR.com
+                ${process.env.EMAIL_USER} | www.SurgeryVR.com
               </p>
-              <div style="margin-top: 20px;">
-                <a href="#" style="display: inline-block; margin: 0 10px;">
-                  <img src="https://img.icons8.com/color/32/000000/linkedin.png" alt="LinkedIn" width="32" height="32">
-                </a>
-                <a href="#" style="display: inline-block; margin: 0 10px;">
-                  <img src="https://img.icons8.com/color/32/000000/twitter.png" alt="Twitter" width="32" height="32">
-                </a>
-                <a href="#" style="display: inline-block; margin: 0 10px;">
-                  <img src="https://img.icons8.com/color/32/000000/facebook.png" alt="Facebook" width="32" height="32">
-                </a>
-              </div>
               <p style="margin: 20px 0 0 0; color: #5A6B8C; font-size: 12px;">
-                © 2024 SurveryVR. Tous droits réservés.<br>
+                © 2024 SurgeryVR. Tous droits réservés.<br>
                 Vous recevez cet email car vous avez demandé une démonstration de notre plateforme.
               </p>
             </td>
@@ -193,18 +184,20 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
 // ===============================
 const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
   try {
+    const transporter = creerTransporter(); // ✅ appel ici
+
     const htmlContent = creerTemplateEmailDemo(demande, messageEmail, videos);
 
     const mailOptions = {
-      from: `"SurveryVR - Formation Médicale" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+      from: `"SurgeryVR - Formation Médicale" <${process.env.EMAIL_USER}>`,
       to: demande.emailProfessionnel,
-      subject: '✅ Demande Démo accepté ',
+      subject: '✅ Vos vidéos de démonstration SurgeryVR',
       html: htmlContent,
-      replyTo: process.env.EMAIL_REPLY_TO || process.env.EMAIL_FROM
+      replyTo: process.env.EMAIL_USER
     };
 
     const info = await transporter.sendMail(mailOptions);
-    
+
     console.log('✅ Email de démo envoyé:', {
       messageId: info.messageId,
       destinataire: demande.emailProfessionnel,
@@ -220,14 +213,17 @@ const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
   }
 };
 
-
+// ===============================
+// Tester la configuration
+// ===============================
 const testerConfigurationEmail = async () => {
   try {
+    const transporter = creerTransporter(); // ✅ appel ici aussi
     await transporter.verify();
-    console.log('✅ Configuration email valide');
+    console.log('✅ Configuration OAuth2 valide');
     return true;
   } catch (error) {
-    console.error('❌ Configuration email invalide:', error);
+    console.error('❌ Configuration invalide:', error);
     return false;
   }
 };
