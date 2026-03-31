@@ -2,15 +2,15 @@ const nodemailer = require('nodemailer');
 
 // Configuration du transporteur email
 const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: process.env.EMAIL_PORT || 587,
-  secure: false, // true pour 465, false pour les autres ports
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,       // ✅ true pour 465
+  family: 4,          // ✅ Force IPv4 (fix Render ENETUNREACH)
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
-});
-
+})
 // ===============================
 // Template HTML pour l'email de démo
 // ===============================
