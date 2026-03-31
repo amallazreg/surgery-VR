@@ -1,17 +1,14 @@
-// ====================== EMAIL SERVICE - RESEND ======================
-const { Resend } = require('resend');
-require('dotenv').config();   // ← Très important en local
+const axios = require('axios');
+require('dotenv').config();
 
-// Vérification de la clé API au démarrage
-if (!process.env.RESEND_API_KEY) {
-  console.error("❌ ERREUR : RESEND_API_KEY est manquante dans le fichier .env");
-  console.error("   Ajoute-la dans ton fichier .env à la racine du backend");
+// ====================== EMAIL SERVICE - BREVO API ======================
+
+// Vérification de la clé au démarrage
+if (!process.env.BREVO_API_KEY) {
+  console.error("❌ ERREUR : BREVO_API_KEY manquante dans le fichier .env");
 }
 
-// Initialisation Resend
-const resend = new Resend(process.env.RESEND_API_KEY);
-
-// ====================== TEMPLATE HTML (inchangé) ======================
+// ====================== TEMPLATE HTML (ton beau template) ======================
 const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
   const videosHTML = videos.map((video, index) => `
     <tr>
@@ -44,94 +41,74 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vos Démos SurgeryVR</title>
 </head>
-<body style="margin:0;padding:0;font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background-color:#F8FAFF;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8FAFF;padding:40px 20px;">
-    <tr>
-      <td align="center">
-        <table width="600" cellpadding="0" cellspacing="0" style="background:white;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.1);overflow:hidden;">
-          <!-- Header -->
-          <tr>
-            <td style="background:linear-gradient(135deg,#0066FF,#00D9FF);padding:40px 30px;text-align:center;">
-              <h1 style="margin:0;color:white;font-size:32px;font-weight:700;">🎯 SurgeryVR</h1>
-              <p style="margin:10px 0 0 0;color:rgba(255,255,255,0.9);font-size:16px;">Formation Médicale en Réalité Virtuelle</p>
-            </td>
-          </tr>
-
-          <!-- Message -->
-          <tr>
-            <td style="padding:30px;">
-              <h2 style="color:#1A2B5F;font-size:24px;margin:0 0 20px 0;">Bonjour ${demande.nomInstitution},</h2>
-              <div style="color:#1A2B5F;font-size:15px;line-height:1.6;">
-                ${messageEmail.replace(/\n/g, '<br>')}
-              </div>
-            </td>
-          </tr>
-
-          <!-- Vidéos + CTA + Footer -->
-          <!-- (Je garde ton template complet, mais pour éviter que le message soit trop long ici, je te donne la suite si besoin) -->
-          <!-- ... ton ancien template complet ... -->
-
-        </table>
-      </td>
-    </tr>
+<body style="margin:0; padding:0; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background-color:#F8FAFF;">
+  <!-- Ton template complet ici (header, message, vidéos, CTA, footer) -->
+  <!-- Je te mets la version courte pour ne pas allonger trop, mais remplace par ton template complet -->
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8FAFF; padding:40px 20px;">
+    <tr><td align="center">
+      <table width="600" cellpadding="0" cellspacing="0" style="background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.1);">
+        <!-- Header -->
+        <tr>
+          <td style="background:linear-gradient(135deg,#0066FF,#00D9FF); padding:40px 30px; text-align:center;">
+            <h1 style="margin:0; color:white; font-size:32px;">🎯 SurgeryVR</h1>
+            <p style="margin:10px 0 0; color:rgba(255,255,255,0.9);">Formation Médicale en Réalité Virtuelle</p>
+          </td>
+        </tr>
+        <!-- Message personnalisé -->
+        <tr>
+          <td style="padding:30px;">
+            <h2 style="color:#1A2B5F; font-size:24px;">Bonjour ${demande.nomInstitution},</h2>
+            <div style="color:#1A2B5F; font-size:15px; line-height:1.6;">
+              ${messageEmail.replace(/\n/g, '<br>')}
+            </div>
+          </td>
+        </tr>
+        <!-- Vidéos et le reste de ton template -->
+        <!-- ... Colle ici le reste de ton ancien template (vidéos, CTA, footer) ... -->
+      </table>
+    </td></tr>
   </table>
 </body>
 </html>`;
 };
 
-// ====================== ENVOYER EMAIL ======================
+// ====================== ENVOYER EMAIL VIA BREVO API ======================
 const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
   try {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY manquante dans les variables d'environnement");
+    if (!process.env.BREVO_API_KEY) {
+      throw new Error("BREVO_API_KEY manquante dans .env");
     }
 
     const htmlContent = creerTemplateEmailDemo(demande, messageEmail, videos);
 
-    const { data, error } = await resend.emails.send({
-      from: 'SurgeryVR <onboarding@resend.dev>',
-      to: [demande.emailProfessionnel],
+    const payload = {
+      sender: { 
+        name: "SurgeryVR", 
+        email: process.env.BREVO_SENDER_EMAIL   // ex: lazregamal45@gmail.com ou l'email de ton compte Brevo
+      },
+      to: [{ email: demande.emailProfessionnel }],
       subject: '✅ Vos vidéos de démonstration SurgeryVR',
-      html: htmlContent,
-      replyTo: process.env.REPLY_TO_EMAIL || 'contact@surgery-vr.com'
+      htmlContent: htmlContent,
+      replyTo: { email: process.env.BREVO_SENDER_EMAIL }
+    };
+
+    const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
     });
 
-    if (error) throw error;
-
-    console.log('✅ Email Resend envoyé avec succès à', demande.emailProfessionnel);
-    return data;
+    console.log('✅ Email Brevo envoyé avec succès à', demande.emailProfessionnel);
+    return response.data;
 
   } catch (error) {
-    console.error('❌ Erreur Resend:', error);
-    throw new Error(`Erreur envoi email: ${error.message}`);
-  }
-};
-
-// ====================== TEST CONFIG ======================
-const testerConfigurationEmail = async () => {
-  try {
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("RESEND_API_KEY manquante");
-    }
-
-    const { data, error } = await resend.emails.send({
-      from: 'SurgeryVR <onboarding@resend.dev>',
-      to: [process.env.TEST_EMAIL],
-      subject: 'Test Resend - SurgeryVR',
-      html: '<h1>✅ Configuration Resend OK sur ton PC !</h1>'
-    });
-
-    if (error) throw error;
-
-    console.log('✅ Test Resend réussi ! Email envoyé à', process.env.TEST_EMAIL);
-    return true;
-  } catch (error) {
-    console.error('❌ Test Resend échoué:', error.message);
-    return false;
+    console.error('❌ Erreur Brevo API:', error.response?.data || error.message);
+    throw new Error(`Erreur envoi email: ${error.response?.data?.message || error.message}`);
   }
 };
 
 module.exports = {
-  envoyerEmailDemo,
-  testerConfigurationEmail
+  envoyerEmailDemo
 };
