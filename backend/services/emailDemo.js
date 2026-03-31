@@ -1,28 +1,10 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+
+// Initialisation Resend
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // =============================================
-// Configuration Brevo SMTP (recommandé pour Render Free)
-// =============================================
-const creerTransporter = () => {
-  return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false,                    // Important : false pour le port 587
-    auth: {
-      user: process.env.BREVO_SMTP_USER,   // Ton email Brevo (ex: contact@surgery-vr.com)
-      pass: process.env.BREVO_SMTP_KEY     // La clé SMTP générée dans Brevo
-    },
-    // Options recommandées pour Render (évite les timeouts)
-    connectionTimeout: 15000,
-    greetingTimeout: 15000,
-    socketTimeout: 20000,
-    // Force IPv4 (utile sur Render)
-    family: 4
-  });
-};
-
-// =============================================
-// Template HTML pour l'email de démo (inchangé)
+// Template HTML (exactement le même que avant)
 // =============================================
 const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
   const videosHTML = videos.map((video, index) => `
@@ -132,7 +114,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
             </td>
           </tr>
 
-          <!-- Informations complémentaires -->
+          <!-- Informations complémentaires + Footer -->
           <tr>
             <td style="padding: 0 30px 30px 30px;">
               <table width="100%" cellpadding="0" cellspacing="0">
@@ -168,11 +150,11 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
                 L'équipe SurgeryVR
               </p>
               <p style="margin: 0 0 20px 0; color: #5A6B8C; font-size: 14px;">
-                ${process.env.BREVO_SMTP_USER} | www.SurgeryVR.com
+                surgeryvr@resend.dev | www.SurgeryVR.com
               </p>
               <p style="margin: 20px 0 0 0; color: #5A6B8C; font-size: 12px;">
-                © 2024 SurgeryVR. Tous droits réservés.<br>
-                Vous recevez cet email car vous avez demandé une démonstration de notre plateforme.
+                © 2026 SurgeryVR. Tous droits réservés.<br>
+                Vous recevez cet email car vous avez demandé une démonstration.
               </p>
             </td>
           </tr>
@@ -187,50 +169,59 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
 };
 
 // =============================================
-// Envoyer l'email de démonstration
+// Envoyer l'email via Resend API
 // =============================================
 const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
   try {
-    const transporter = creerTransporter();
-
     const htmlContent = creerTemplateEmailDemo(demande, messageEmail, videos);
 
-    const mailOptions = {
-      from: `"SurgeryVR - Formation Médicale" <${process.env.BREVO_SMTP_USER}>`,
-      to: demande.emailProfessionnel,
+    const { data, error } = await resend.emails.send({
+      from: 'SurgeryVR <noreply@surgery-vr.com>',   // Change en "SurgeryVR <onboarding@resend.dev>" si tu n'as pas encore vérifié ton domaine
+      to: [demande.emailProfessionnel],
       subject: '✅ Vos vidéos de démonstration SurgeryVR',
       html: htmlContent,
-      replyTo: process.env.BREVO_SMTP_USER
-    };
+      replyTo: process.env.REPLY_TO_EMAIL || 'contact@surgery-vr.com'
+    });
 
-    const info = await transporter.sendMail(mailOptions);
+    if (error) {
+      console.error('❌ Erreur Resend API:', error);
+      throw new Error(`Resend error: ${error.message}`);
+    }
 
-    console.log('✅ Email de démo envoyé via Brevo :', {
-      messageId: info.messageId,
+    console.log('✅ Email de démo envoyé via Resend :', {
+      messageId: data.id,
       destinataire: demande.emailProfessionnel,
       institution: demande.nomInstitution,
       nbVideos: videos.length
     });
 
-    return info;
+    return data;
 
   } catch (error) {
-    console.error('❌ Erreur envoi email Brevo:', error);
+    console.error('❌ Erreur envoi email Resend:', error);
     throw new Error(`Erreur envoi email: ${error.message}`);
   }
 };
 
 // =============================================
-// Tester la configuration Brevo
+// Tester la configuration Resend
 // =============================================
 const testerConfigurationEmail = async () => {
   try {
-    const transporter = creerTransporter();
-    await transporter.verify();
-    console.log('✅ Configuration Brevo SMTP valide !');
+    // Test simple
+    const { data, error } = await resend.emails.send({
+      from: 'SurgeryVR <noreply@surgery-vr.com>',
+      to: [process.env.TEST_EMAIL || process.env.BREVO_SMTP_USER], // ton propre email pour tester
+      subject: 'Test Resend - SurgeryVR',
+      html: '<h1>✅ Configuration Resend OK !</h1><p>L\'envoi d\'emails fonctionne sur Render.</p>'
+    });
+
+    if (error) throw error;
+
+    console.log('✅ Test Resend réussi !');
     return true;
   } catch (error) {
-    console.error('❌ Erreur configuration Brevo:', error.message);
+    console.error('❌ Erreur test Resend:', error);
     return false;
   }
 };
