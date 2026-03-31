@@ -276,7 +276,22 @@ app.use((err, req, res, next) => {
   });
 });
 
+const keepAlive = () => {
+  const url = process.env.RENDER_URL; 
+  if (url) {
+    setInterval(() => {
+      fetch(`${url}/health`)
+        .then(() => console.log('✅ Keep-alive ping'))
+        .catch(() => console.log('⚠️ Keep-alive failed'));
+    }, 10 * 60 * 1000); // toutes les 10 minutes
+  }
+};
 
+keepAlive();
+
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date() });
+});
 
 
 app.listen(PORT, async () => {

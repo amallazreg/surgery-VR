@@ -2,15 +2,13 @@ const nodemailer = require('nodemailer');
 
 // Configuration du transporteur email
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,       // ✅ true pour 465
-  family: 4,          // ✅ Force IPv4 (fix Render ENETUNREACH)
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
-})
+});
+
 // ===============================
 // Template HTML pour l'email de démo
 // ===============================
@@ -112,7 +110,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
                     <p style="margin: 0 0 20px 0; color: #1A2B5F; font-size: 15px;">
                       Créez votre compte et accédez à l'ensemble de notre plateforme de formation médicale en VR.
                     </p>
-                    <a href="${process.env.FRONTEND_URL || 'https://SurveryVR.com'}/inscription" 
+                    <a href="${process.env.FRONTEND_URL || 'https://surgery-vr.vercel.app'}/signup" 
                        style="display: inline-block; padding: 15px 40px; background: linear-gradient(135deg, #00C48C, #00FFA3); color: white; text-decoration: none; border-radius: 12px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 15px rgba(0, 196, 140, 0.3);">
                       🚀 Créer mon compte gratuit
                     </a>

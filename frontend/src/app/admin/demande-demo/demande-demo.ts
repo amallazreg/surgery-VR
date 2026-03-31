@@ -388,72 +388,43 @@ L'équipe SurveryVR
   }
 
  
-  contactDemande(): void {
-    // Validation du message
-    if (!this.emailMessage || this.emailMessage.trim().length < 50) {
-      if (isPlatformBrowser(this.platformId)) {
-        alert('⚠️ Le message doit contenir au moins 50 caractères');
-      }
-      return;
-    }
-
-    if (this.emailMessage.length > 2000) {
-      if (isPlatformBrowser(this.platformId)) {
-        alert('⚠️ Le message ne doit pas dépasser 2000 caractères');
-      }
-      return;
-    }
-
-    if (!this.selectedDemande) return;
-
-    const payload = {
-      messageEmail: this.emailMessage
-    };
-
-    const demandeId = this.selectedDemande._id;
-    const institution = this.selectedDemande.nomInstitution;
-
-    // Activer l'indicateur de chargement
-    this.isSendingEmail = true;
-
-    this.adminService.contacterDemo(payload, demandeId)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response: any) => {
-          console.log('✅ Email envoyé avec succès:', response);
-          
-          // Désactiver l'indicateur de chargement
-          this.isSendingEmail = false;
-          
-          // Fermer la modal de contact
-          this.closeContactModal();
-          
-          // Afficher l'alerte de succès
-          if (isPlatformBrowser(this.platformId)) {
-            const nbVideos = response.nbVideosEnvoyees || 5;
-            alert(`✅ Email envoyé avec succès à ${institution}!\n\n${nbVideos} vidéos de démonstration ont été envoyées.\n\nLe statut de la demande est maintenant "Contactée".`);
-          }
-          
-          // Recharger les données pour mettre à jour le statut
-          this.loadDemandes();
-        },
-        error: (error) => {
-          console.error('❌ Erreur envoi email:', error);
-          
-          // Désactiver l'indicateur de chargement
-          this.isSendingEmail = false;
-          
-          // Afficher l'alerte d'erreur
-          if (isPlatformBrowser(this.platformId)) {
-            const errorMsg = error.error?.message || 'Erreur lors de l\'envoi de l\'email';
-            alert(`❌ Erreur: ${errorMsg}\n\nVeuillez réessayer.`);
-          }
-          
-          this.showToast('Erreur lors de l\'envoi de l\'email', 'error');
-        }
-      });
+contactDemande(): void {
+  if (!this.emailMessage || this.emailMessage.trim().length < 50) {
+    alert('⚠️ Le message doit contenir au moins 50 caractères');
+    return;
   }
+  if (this.emailMessage.length > 2000) {
+    alert('⚠️ Le message ne doit pas dépasser 2000 caractères');
+    return;
+  }
+  if (!this.selectedDemande) return;
 
+  const payload = { messageEmail: this.emailMessage };
+  const demandeId = this.selectedDemande._id;
+  const institution = this.selectedDemande.nomInstitution;
+
+  this.isSendingEmail = true;
+
+  // ✅ Toast immédiat pour informer l'utilisateur
+  this.showToast('📧 Envoi en cours... Veuillez patienter', 'warning');
+
+  this.adminService.contacterDemo(payload, demandeId)
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (response: any) => {
+        this.isSendingEmail = false;
+        this.closeContactModal();
+        const nbVideos = response.nbVideosEnvoyees || 5;
+        this.showToast(`✅ Email envoyé à ${institution} ! (${nbVideos} vidéos)`, 'success');
+        this.loadDemandes();
+      },
+      error: (error) => {
+        this.isSendingEmail = false;
+        const errorMsg = error.error?.message || 'Erreur lors de l\'envoi';
+        this.showToast(`❌ ${errorMsg}`, 'error');
+      }
+    });
+}
   contactFromModal(demande: IDemandeDemo): void {
     this.closeDetailsModal();
     setTimeout(() => {

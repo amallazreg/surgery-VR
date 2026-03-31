@@ -3,15 +3,13 @@ const { genererRecapitulatifDevis } = require('./devisCalcul');
 
 // Configuration du transporteur email
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 465,
-  secure: true,       // ✅ true pour 465
-  family: 4,          // ✅ Force IPv4 (fix Render ENETUNREACH)
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
   }
-})
+});
+
 
 // ===============================
 // Template HTML pour l'email de devis

@@ -458,9 +458,14 @@
         
         <div class="modal-actions">
           <button class="btn btn-secondary" (click)="closeContactModal()">Annuler</button>
-          <button class="btn btn-contact-large" (click)="contactDemande()">
-            <span>📧</span> Envoyer l'Email
-          </button>
+         <button class="btn btn-contact-large" 
+                (click)="contactDemande()" 
+                [disabled]="isSendingEmail">
+          <span *ngIf="!isSendingEmail">📧 Envoyer l'Email</span>
+          <span *ngIf="isSendingEmail">
+            <span class="spinner-small"></span> Envoi en cours...
+          </span>
+        </button>
         </div>
       </div>
     </div>
