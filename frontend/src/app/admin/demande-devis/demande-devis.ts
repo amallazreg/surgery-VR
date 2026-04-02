@@ -4,7 +4,9 @@ import { AdminService } from '../../services/admin-service';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SideBar } from '../side-bar/side-bar';
-
+import jsPDF from 'jspdf';
+// @ts-ignore
+import autoTable from 'jspdf-autotable';
 
 export interface IDemandeDevis {
   _id: string;
@@ -467,47 +469,54 @@ export class DemandeDevis  implements OnInit, OnDestroy {
   }
 
 
-  exportToCSV(): void {
-    if (!isPlatformBrowser(this.platformId)) return;
+  exportToPDFFiltered(): void {
+  if (!isPlatformBrowser(this.platformId)) return;
 
-    const headers = [
-      'Établissement', 'Contact', 'Email', 'Téléphone', 
-      'Ville', 'Pays', 'Utilisateurs', 'Casques VR', 
-      'Statut', 'Montant TTC', 'Date'
-    ];
-    
-    const rows = this.filteredDemandes.map(d => [
-      d.nomEtablissement,
-      `${d.prenom} ${d.nom}`,
-      d.emailProfessionnel,
-      d.telephone,
-      d.ville,
-      d.pays,
-      d.nombreUtilisateurs,
-      d.nombreCasquesVR,
-      this.getStatusLabel(d.statut),
-      d.devisCalcule?.totalTTC ? this.formatCurrency(d.devisCalcule.totalTTC) : 'N/A',
-      this.formatDateTime(d.dateCreation)
-    ]);
+  // PDF paysage
+  const doc = new jsPDF({
+    orientation: 'landscape',
+    unit: 'mm',
+    format: 'a4'
+  });
 
-    let csvContent = headers.join(',') + '\n';
-    csvContent += rows.map(row => 
-      row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-    ).join('\n');
+  // Headers
+  const headers = [['Établissement', 'Contact', 'Email', 'Téléphone', 
+    'Ville', 'Pays', 'Utilisateurs', 'Casques VR', 
+    'Statut', 'Montant TTC', 'Date']];
 
-    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
+  // Contenu
+  const rows = this.filteredDemandes.map(d => [
+    d.nomEtablissement,
+    `${d.prenom} ${d.nom}`,
+    d.emailProfessionnel,
+    d.telephone,
+    d.ville,
+    d.pays,
+    d.nombreUtilisateurs,
+    d.nombreCasquesVR,
+    this.getStatusLabel(d.statut),
+    d.devisCalcule?.totalTTC ? this.formatCurrency(d.devisCalcule.totalTTC) : 'N/A',
+    this.formatDateTime(d.dateCreation)
+  ]);
 
-    link.href = url;
-    link.download = `demandes_devis_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  // Génération du tableau
+  autoTable(doc, {
+    head: headers,
+    body: rows,
+    startY: 20,
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+  });
 
-    URL.revokeObjectURL(url);
-    this.showToast('Export CSV réussi !', 'success');
-  }
+  // Titre
+  doc.text('Liste des Demandes de Devis', 14, 15);
+
+  // Sauvegarde
+  const fileName = `demandes_devis_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+
+  this.showToast('Export PDF réussi !', 'success');
+}
 
   // ========================================
   // Notifications Toast

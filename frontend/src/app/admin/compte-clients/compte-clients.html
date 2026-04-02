@@ -12,10 +12,7 @@
           <p>Gérez et validez les demandes d'inscription</p>
         </div>
         <div class="header-right">
-          <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="Rechercher par nom, email, établissement..." [(ngModel)]="searchQuery" (input)="onSearchInput(searchQuery)">
-          </div>
+         
           <div class="user-profile">
             <div class="avatar">AD</div>
             <div>
@@ -120,11 +117,15 @@
       <div class="section-card table-section">
         <div class="table-header">
           <h3 class="section-title">Liste des Comptes</h3>
-          <div class="table-actions">
-            <button class="btn btn-secondary" id="exportBtn" (click)="exportToCSV()">
-              📥 Exporter CSV
-            </button>
+         <div class="table-actions">
+          <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="Rechercher par nom, email, établissement..." [(ngModel)]="searchQuery" (input)="onSearchInput(searchQuery)">
           </div>
+            <button class="btn btn-secondary" id="exportBtn" (click)="exportToPDF()">
+            📥 Exporter PDF
+          </button>
+        </div>
         </div>
 
         <!-- Loading State -->

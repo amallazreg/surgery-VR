@@ -7,6 +7,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 
 
 export interface User {
@@ -544,13 +547,17 @@ getDocumentUrl(documentPath: string): string {
   // ========================================
   // Export
   // ========================================
-exportToCSV(): void {
+exportToPDF(): void {
+  if (!isPlatformBrowser(this.platformId)) return;
 
-  if (!isPlatformBrowser(this.platformId)) {
-    return; // SSR protection
-  }
+  // Crée le PDF en mode paysage
+  const doc = new jsPDF({
+    orientation: 'landscape', // <-- paysage
+    unit: 'mm',
+    format: 'a4'
+  });
 
-  const headers = ['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Établissement', 'Statut', 'Date d\'inscription'];
+  const headers = [['Prénom', 'Nom', 'Email', 'Téléphone', 'Rôle', 'Établissement', 'Statut', 'Date d\'inscription']];
   const rows = this.filteredUsers.map(user => [
     user.prenom,
     user.nom,
@@ -562,25 +569,23 @@ exportToCSV(): void {
     this.formatDateTime(user.createdAt)
   ]);
 
-  let csvContent = headers.join(',') + '\n';
-  csvContent += rows.map(row => 
-    row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')
-  ).join('\n');
+  autoTable(doc, {
+    head: headers,
+    body: rows,
+    startY: 20,
+    styles: { fontSize: 10 },
+    headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+  });
 
-  const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
-  const url = URL.createObjectURL(blob);
+  // Titre
+  doc.text('Liste des Comptes', 14, 15);
 
-  link.href = url;
-  link.download = `comptes_medvr_${new Date().toISOString().split('T')[0]}.csv`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
+  // Sauvegarde
+  const fileName = `comptes_medvr_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
 
-  URL.revokeObjectURL(url);
-  this.showToast('Export CSV réussi !', 'success');
+  this.showToast('Export PDF réussi !', 'success');
 }
-
   // ========================================
   // Notifications Toast
   // ========================================

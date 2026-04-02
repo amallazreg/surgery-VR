@@ -1492,3 +1492,14 @@ tbody td.actions-cell {
     text-align: center;
   }
 }
+.table-actions {
+  display: flex;
+  align-items: center; /* Aligne verticalement le bouton et la recherche */
+  gap: 10px;           /* Espace entre le bouton et la recherche */
+}
+
+
+
+.search-icon {
+  margin-right: 4px;
+}
