@@ -75,21 +75,26 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
 // ====================== ENVOYER EMAIL VIA BREVO API ======================
 const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
   try {
-    if (!process.env.BREVO_API_KEY) {
-      throw new Error("BREVO_API_KEY manquante dans .env");
+    if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
+      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant");
     }
 
     const htmlContent = creerTemplateEmailDemo(demande, messageEmail, videos);
 
     const payload = {
       sender: { 
-        name: "SurgeryVR", 
-        email: process.env.BREVO_SENDER_EMAIL   // ex: lazregamal45@gmail.com ou l'email de ton compte Brevo
+        name: "SurgeryVR - Formation VR", 
+        email: process.env.BREVO_SENDER_EMAIL 
       },
       to: [{ email: demande.emailProfessionnel }],
       subject: '✅ Vos vidéos de démonstration SurgeryVR',
       htmlContent: htmlContent,
-      replyTo: { email: process.env.BREVO_SENDER_EMAIL }
+      replyTo: { email: process.env.BREVO_SENDER_EMAIL },
+      // Ajoute ceci pour mieux suivre :
+      tags: ["demo-surgeryvr"],
+      headers: {
+        "X-Mailin-Tag": "demo-surgeryvr"
+      }
     };
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
@@ -100,12 +105,18 @@ const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
       }
     });
 
-    console.log('✅ Email Brevo envoyé avec succès à', demande.emailProfessionnel);
+    console.log(`✅ Brevo API accepté pour ${demande.emailProfessionnel} | Message ID: ${response.data.messageId || 'N/A'}`);
+
     return response.data;
 
   } catch (error) {
-    console.error('❌ Erreur Brevo API:', error.response?.data || error.message);
-    throw new Error(`Erreur envoi email: ${error.response?.data?.message || error.message}`);
+    const errData = error.response?.data || {};
+    console.error('❌ Erreur Brevo API:', {
+      status: error.response?.status,
+      message: errData.message || error.message,
+      details: errData
+    });
+    throw new Error(`Erreur envoi email: ${errData.message || error.message}`);
   }
 };
 
