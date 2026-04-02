@@ -15,42 +15,34 @@ export class Abonnements implements OnInit {
 
   userId = localStorage.getItem('userId') || '';
 
-  // ── Data ────────────────────────────────────────────────
   abonnementActif: any   = null;
   historique: any[]      = [];
   factures: any[]        = [];
   forfaitsUpgrade: any[] = [];
   forfaitActuel: any     = null;
 
-  // ── Droits & Fonctionnalités ────────────────────────────
   droits: any    = null;
   droitsLoading  = false;
 
-  // ── Formation ───────────────────────────────────────────
   formationModalOpen  = false;
   formationLoading    = false;
   formationError      = '';
 
-  // MODIFIÉ : formationResult stocke maintenant { codes: [{_id, code, statut, etudiant}] }
   formationResult: any = null;
 
-  // ── APK ─────────────────────────────────────────────────
   apkLoading  = false;
   apkMessage  = '';
   apkError    = '';
   apkSuccess  = false;
 
-  // ── Stats ───────────────────────────────────────────────
   totalDepense: number       = 0;
   expireBientotCount: number = 0;
 
-  // ── UI ──────────────────────────────────────────────────
   selectedFilter          = 'all';
   showPaymentSuccessPopup = false;
   isLoading               = true;
-  codeCopie: string       = ''; // feedback visuel copie
+  codeCopie: string       = ''; 
 
-  // ── Pay Modal ───────────────────────────────────────────
   payModalOpen    = false;
   payModalType: 'renouveler' | 'upgrade' | '' = '';
   selectedUpgradeForfait: any = null;
@@ -62,15 +54,15 @@ export class Abonnements implements OnInit {
   today          = new Date().toISOString();
   selectedMethod = 'card';
 
+  abonnementExpire: boolean = false;
+abonnementExpireDate: string = '';
+
   constructor(
     private route: ActivatedRoute,
     private abonnementService: AbonnementService,
     private cdr: ChangeDetectorRef
   ) {}
 
-  // ════════════════════════════════════════════════════════
-  // LIFECYCLE
-  // ════════════════════════════════════════════════════════
 
   ngOnInit(): void {
     this.route.queryParams.subscribe(params => {
@@ -135,10 +127,7 @@ export class Abonnements implements OnInit {
     });
   }
 
-  // ════════════════════════════════════════════════════════
-  // DROITS
-  // ════════════════════════════════════════════════════════
-
+ 
   loadDroits(): void {
     this.droitsLoading = true;
     this.abonnementService.getMesDroits(this.userId).subscribe({
@@ -154,10 +143,6 @@ export class Abonnements implements OnInit {
       }
     });
   }
-
-  // ════════════════════════════════════════════════════════
-  // APK
-  // ════════════════════════════════════════════════════════
 
   telechargerApk(): void {
     this.apkLoading = true;
@@ -187,10 +172,6 @@ export class Abonnements implements OnInit {
     });
   }
 
-  // ════════════════════════════════════════════════════════
-  // FORMATION
-  // ════════════════════════════════════════════════════════
-
     openFormationModal(): void {
     this.formationModalOpen      = true;
     this.formationResult         = null;
@@ -210,11 +191,9 @@ export class Abonnements implements OnInit {
 
     this.abonnementService.activerFormation(this.userId).subscribe({
       next: (res) => {
-        // res = { message, codes: [{_id, code, statut, dateExpiration}], ... }
         this.formationResult  = res;
         this.formationLoading = false;
 
-        // Mettre à jour les droits localement pour éviter un rechargement
         if (this.droits?.formation) {
           this.droits.formation.activee = true;
           this.droits.formation.codes   = res.codes ?? [];
@@ -230,9 +209,7 @@ export class Abonnements implements OnInit {
     });
   }
 
-  // MODIFIÉ : getter qui retourne toujours un tableau de strings propres
-  // Compatible avec formationResult (après activation) ET droits (déjà activée)
-// Retourne les objets complets { code, statut, etudiant }
+
 get codesAfficher(): any[] {
   const fromResult = this.formationResult?.codes;
   if (Array.isArray(fromResult) && fromResult.length > 0) {
@@ -260,10 +237,6 @@ copierCode(codeObj: any): void {
     this.cdr.detectChanges();
   });
 }
-
-  // ════════════════════════════════════════════════════════
-  // HELPERS
-  // ════════════════════════════════════════════════════════
 
   joursRestants(dateFin: string): number {
     if (!dateFin) return 0;
@@ -380,9 +353,6 @@ copierCode(codeObj: any): void {
     return 'fill-green';
   }
 
-  // ════════════════════════════════════════════════════════
-  // ACTIONS PAY MODAL
-  // ════════════════════════════════════════════════════════
 
   filterSubs(status: string): void {
     this.selectedFilter = status;

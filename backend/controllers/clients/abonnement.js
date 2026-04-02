@@ -23,6 +23,19 @@ const getMonAbonnement = async (req, res) => {
       return res.status(404).json({ message: 'Aucun abonnement actif trouvé' });
     }
 
+    // Vérification de l'expiration
+    const now = new Date();
+    if (abonnement.dateFin && new Date(abonnement.dateFin) < now) {
+      // Mettre à jour le statut en BDD
+      await Abonnement.findByIdAndUpdate(abonnement._id, { status: 'expired' });
+
+      return res.status(403).json({
+        message: 'Votre abonnement a expiré',
+        dateFin: abonnement.dateFin,
+        expired: true,
+      });
+    }
+
     res.json(abonnement);
   } catch (error) {
     res.status(500).json({ error: error.message });

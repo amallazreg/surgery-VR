@@ -68,6 +68,19 @@ const getMesExperiences = async (req, res) => {
       return res.status(404).json({ message: 'Aucun abonnement actif' });
     }
 
+    // Vérification de l'expiration
+    const now = new Date();
+    if (abonnement.dateFin && new Date(abonnement.dateFin) < now) {
+      // Mettre à jour le statut en BDD
+      await Abonnement.findByIdAndUpdate(abonnement._id, { status: 'expired' });
+
+      return res.status(403).json({
+        message: 'Votre abonnement a expiré, les expériences ne sont plus accessibles',
+        dateFin: abonnement.dateFin,
+        expired: true,
+      });
+    }
+
     // Filtre de base : expériences liées au forfait
     const filter = { forfaits: abonnement.forfait._id };
 
@@ -102,7 +115,6 @@ const getMesExperiences = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 const downloadExperienceApk = async (req, res) => {
   try {
     const { userId, experienceId } = req.params;

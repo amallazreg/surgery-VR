@@ -1,4 +1,3 @@
-<body>
 <app-side-bar></app-side-bar>
 
 <main class="main">
@@ -76,8 +75,6 @@
                 <div class="droits-sub">{{ droits.apkRestants }} / {{ droits.apkTotal }} restants ce mois</div>
               </div>
             </div>
-
-            <!-- Barre de progression APK -->
             <div class="progress-track" style="margin:12px 0">
               <div
                 class="progress-fill"
@@ -88,11 +85,8 @@
             <div style="font-size:11px;color:#aaa;margin-bottom:14px">
               {{ droits.apkTotal - droits.apkRestants }} APK téléchargés · {{ droits.apkRestants }} restants
             </div>
-
-            <!-- Message retour APK -->
             <div *ngIf="apkSuccess" class="apk-success-msg">✅ {{ apkMessage }}</div>
             <div *ngIf="apkError"   class="apk-error-msg">❌ {{ apkError }}</div>
-
             <button
               class="action-btn btn-upgrade"
               [disabled]="apkLoading || droits.apkRestants <= 0"
@@ -115,20 +109,16 @@
                 <div class="droits-sub" *ngIf="!droits.formation">Non incluse dans ce forfait</div>
               </div>
             </div>
-
             <ng-container *ngIf="droits.formation">
-              <!-- Déjà activée -->
-            <div *ngIf="droits.formation.activee" class="formation-activated">
-              <div class="fa-badge">✅ Formation activée</div>
-              <div style="font-size:12px;color:#888;margin:8px 0">
-                {{ codesAfficher.length }} codes générés · {{ codesUtilises }} utilisés
+              <div *ngIf="droits.formation.activee" class="formation-activated">
+                <div class="fa-badge">✅ Formation activée</div>
+                <div style="font-size:12px;color:#888;margin:8px 0">
+                  {{ codesAfficher.length }} codes générés · {{ codesUtilises }} utilisés
+                </div>
+                <button class="action-btn btn-invoice" (click)="openFormationModal()">
+                  👁 Voir les codes d'accès
+                </button>
               </div>
-              <button class="action-btn btn-invoice" (click)="openFormationModal()">
-                👁 Voir les codes d'accès
-              </button>
-            </div>
-
-              <!-- Pas encore activée -->
               <div *ngIf="!droits.formation.activee">
                 <div style="font-size:12px;color:#aaa;margin-bottom:14px">
                   Cliquez pour générer {{ droits.formation.maxEtudiants }} codes d'accès étudiants.
@@ -138,8 +128,6 @@
                 </button>
               </div>
             </ng-container>
-
-            <!-- Non incluse -->
             <ng-container *ngIf="!droits.formation">
               <div style="font-size:12px;color:#aaa;margin-bottom:14px">
                 Disponible à partir du forfait Pro.
@@ -161,11 +149,9 @@
                 </div>
               </div>
             </div>
-
             <div *ngIf="droits.simulationEsthetique" class="simulation-active">
               <div class="fa-badge" style="background:#f0fdf4;color:#166534">✅ Fonctionnalité active</div>
             </div>
-
             <div *ngIf="!droits.simulationEsthetique" style="margin-top:12px">
               <button class="action-btn" disabled style="opacity:0.4;cursor:not-allowed">
                 🔒 Non disponible
@@ -175,7 +161,31 @@
 
         </div>
       </ng-container>
-      <!-- fin section droits -->
+
+      <!-- ══════════════════════════════════════════════════
+           BANNER ABONNEMENT EXPIRÉ (affiché si expired=true)
+      ══════════════════════════════════════════════════ -->
+      <div *ngIf="abonnementExpire" class="expired-banner">
+        <div class="expired-banner-inner">
+          <div class="expired-banner-left">
+            <div class="expired-icon-wrap">
+              <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+                <circle cx="11" cy="11" r="9.5" stroke="#FF3B5C" stroke-width="1.8"/>
+                <path d="M11 6.5v5.2l3 1.8" stroke="#FF3B5C" stroke-width="1.8" stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="expired-banner-title">Votre abonnement a expiré</div>
+              <div class="expired-banner-sub">
+                Expiré le <strong>{{ formatDate(abonnementExpireDate) }}</strong> — Renouvelez pour retrouver l'accès complet.
+              </div>
+            </div>
+          </div>
+          <button class="expired-renew-btn" (click)="openRenouvelerModal()">
+            Renouveler maintenant →
+          </button>
+        </div>
+      </div>
 
       <!-- Section header abonnements -->
       <div class="section-title-row" style="margin-top:28px">
@@ -188,9 +198,73 @@
         </div>
       </div>
 
-      <!-- Empty state -->
-      <div *ngIf="abonnementsFiltered.length === 0" style="text-align:center;padding:60px;color:#888">
-        Aucun abonnement trouvé.
+      <!-- ══════════════════════════════════════════════════
+           EMPTY STATE — AUCUN ABONNEMENT ACTIF
+      ══════════════════════════════════════════════════ -->
+      <div *ngIf="abonnementsFiltered.length === 0" class="empty-state-wrap">
+        <div class="empty-state-card">
+          <div class="empty-state-top-bar"></div>
+
+          <div class="empty-icon-ring">
+            <div class="empty-pulse"></div>
+            <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+              <circle cx="18" cy="18" r="15" stroke="#FF3B5C" stroke-width="2"/>
+              <path d="M18 10v9l5 3" stroke="#FF3B5C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M11 26l-2 2M25 26l2 2" stroke="#FF3B5C" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+
+          <div class="empty-status-badge">
+            <div class="empty-badge-dot"></div>
+            Abonnement expiré ou inexistant
+          </div>
+
+          <h2 class="empty-title">Vos expériences VR sont suspendues</h2>
+          <p class="empty-sub">
+            Vous n'avez aucun abonnement actif. Souscrivez à un forfait pour débloquer toutes
+            les expériences VR, télécharger des APK et accéder aux formations.
+          </p>
+
+          <div class="empty-features-grid">
+            <div class="empty-feature">
+              <div class="ef-icon">📱</div>
+              <div class="ef-lbl">APK illimités</div>
+            </div>
+            <div class="empty-feature">
+              <div class="ef-icon">🥽</div>
+              <div class="ef-lbl">Expériences VR</div>
+            </div>
+            <div class="empty-feature">
+              <div class="ef-icon">🎓</div>
+              <div class="ef-lbl">Formation incluse</div>
+            </div>
+          </div>
+
+          <hr class="empty-divider">
+
+          <button class="empty-cta-primary" (click)="openRenouvelerModal()">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M2 8h12M8 2l6 6-6 6" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Choisir un forfait &amp; renouveler
+          </button>
+
+          <button class="empty-cta-secondary" (click)="filterSubs('expired')">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 5v3.5l2.5 1.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Voir mes anciens abonnements
+          </button>
+
+          <div class="empty-trust-row">
+            <div class="empty-trust-item">🔒 Paiement sécurisé</div>
+            <div class="empty-trust-sep">·</div>
+            <div class="empty-trust-item">⚡ Activation immédiate</div>
+            <div class="empty-trust-sep">·</div>
+            <div class="empty-trust-item">↩️ Annulable à tout moment</div>
+          </div>
+        </div>
       </div>
 
       <!-- Abonnements List -->
@@ -228,7 +302,6 @@
           <!-- Card Body -->
           <div class="sub-card-body">
             <div>
-              <!-- Timeline -->
               <div class="timeline-section">
                 <div class="tl-label-row">
                   <span class="tl-label">Progression de la période</span>
@@ -260,7 +333,6 @@
                 </div>
               </div>
 
-              <!-- Mini grid -->
               <div class="sub-mini-grid">
                 <div class="mini-info">
                   <div class="mini-info-label">Expériences restantes</div>
@@ -277,7 +349,6 @@
               </div>
             </div>
 
-            <!-- Actions -->
             <div class="sub-actions-col">
               <ng-container *ngIf="sub.status === 'active'">
                 <button
@@ -291,13 +362,11 @@
                   🔄 Renouveler maintenant
                 </button>
               </ng-container>
-
               <ng-container *ngIf="sub.status !== 'active'">
                 <button class="action-btn btn-reactivate" (click)="openRenouvelerModal()">
                   🔄 Réactiver cet abonnement
                 </button>
               </ng-container>
-
               <button class="action-btn btn-invoice" (click)="voirFacture(sub)">📄 Voir la facture</button>
             </div>
           </div>
@@ -407,8 +476,6 @@
 ═══════════════════════════════════════════════════ -->
 <div class="formation-overlay" [class.open]="formationModalOpen" (click)="onOverlayClick($event)">
   <div class="formation-modal">
-
-    <!-- Header -->
     <div class="formation-modal-head">
       <button class="pay-modal-close" (click)="closeFormationModal()">✕</button>
       <div class="formation-modal-icon">🎓</div>
@@ -421,10 +488,7 @@
       </div>
     </div>
 
-    <!-- Body -->
     <div class="formation-modal-body">
-
-      <!-- ── Avant activation ── -->
       <ng-container *ngIf="!formationResult && !droits?.formation?.activee">
         <p style="font-size:13px;color:#555;line-height:1.6;margin-bottom:20px">
           En activant la formation, vous allez générer
@@ -442,10 +506,7 @@
         </button>
       </ng-container>
 
-      <!-- ── Codes (après activation OU déjà activée) ── -->
-      <!-- Utilise le getter codesAfficher → toujours un string[] propre -->
       <ng-container *ngIf="formationResult || droits?.formation?.activee">
-
         <div class="codes-success-header">
           <div style="font-size:32px">🎉</div>
           <div class="codes-success-title">Formation activée !</div>
@@ -459,8 +520,7 @@
           </div>
         </div>
 
-        <!-- Grille des codes -->
-      <div class="codes-grid">
+        <div class="codes-grid">
           <div
             class="code-chip"
             *ngFor="let c of codesAfficher"
@@ -477,7 +537,6 @@
                 🎓 {{ c.etudiant?.prenom }} {{ c.etudiant?.nom }}
               </span>
             </ng-container>
-
             <ng-container *ngIf="c.statut !== 'utilise'">
               {{ codeCopie === c.code ? '✓ Copié !' : c.code }}
             </ng-container>
@@ -487,15 +546,10 @@
           Cliquez sur un code pour le copier dans le presse-papier
         </div>
       </ng-container>
-
     </div>
 
-    <!-- Footer -->
     <div class="formation-modal-footer">
       <button class="action-btn btn-invoice" (click)="closeFormationModal()">Fermer</button>
     </div>
-
   </div>
 </div>
-
-</body>
