@@ -107,7 +107,7 @@
         </div>
 
         <!-- CONTROLS -->
-        <div class="controls-row">
+        <div class="controls-row" *ngIf="totalExperiences > 0">
           <div class="filter-pills">
             <div *ngFor="let f of filters" class="filter-pill"
               [class.active]="activeFilter === f.key" (click)="setFilter(f.key)">
@@ -120,8 +120,63 @@
           </div>
         </div>
 
+        <!-- EMPTY STATE -->
+        <div *ngIf="totalExperiences === 0" class="empty-state-wrap">
+          <div class="empty-state-card">
+
+            <div class="empty-clock-icon">
+              <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+                <circle cx="22" cy="22" r="16" stroke="#FF3B5C" stroke-width="2"/>
+                <path d="M22 13v9.5l5.5 3.5" stroke="#FF3B5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+
+            <div class="empty-status-badge">
+              <div class="empty-badge-dot"></div>
+              Abonnement expiré ou inexistant
+            </div>
+
+            <h2 class="empty-title">Vos expériences VR sont suspendues</h2>
+            <p class="empty-sub">
+              Vous n'avez aucun abonnement actif. Souscrivez à un forfait pour débloquer
+              toutes les expériences VR, télécharger des APK et accéder aux formations.
+            </p>
+
+            <div class="empty-features-grid">
+              <div class="empty-feature">
+                <div class="ef-icon">📱</div>
+                <div class="ef-lbl">APK illimités</div>
+              </div>
+              <div class="empty-feature">
+                <div class="ef-icon">🥽</div>
+                <div class="ef-lbl">Expériences VR</div>
+              </div>
+              <div class="empty-feature">
+                <div class="ef-icon">🎓</div>
+                <div class="ef-lbl">Formation incluse</div>
+              </div>
+            </div>
+
+            <hr class="empty-divider">
+
+            <button class="empty-cta-primary" routerLink="/abonnements">
+              Choisir un forfait &amp; renouveler
+            </button>
+
+          
+            <div class="empty-trust-row">
+              <div class="empty-trust-item">🔒 Paiement sécurisé</div>
+              <div class="empty-trust-sep">·</div>
+              <div class="empty-trust-item">⚡ Activation immédiate</div>
+              <div class="empty-trust-sep">·</div>
+              <div class="empty-trust-item">↩️ Annulable à tout moment</div>
+            </div>
+
+          </div>
+        </div>
+
         <!-- EXPERIENCE CARDS -->
-        <div class="exp-grid">
+        <div class="exp-grid" *ngIf="totalExperiences > 0">
           <ng-container *ngFor="let exp of filteredExperiencesFlat()">
 
             <!-- Empty slot -->
@@ -250,7 +305,7 @@
 
 
 <!-- ════════════════════════════════════
-     MODAL VR — une seule fois !
+     MODAL VR
 ════════════════════════════════════ -->
 <div class="vr-overlay" [class.open]="isVrModalOpen" (click)="onVrOverlayClick($event)">
   <div class="vr-modal">
@@ -286,7 +341,6 @@
         </div>
       </div>
 
-      <!-- Lien à copier -->
       <div class="vr-link-box" *ngIf="selectedExpVr?.appLabUrl">
         <div class="vr-link-label">🔗 Lien à ouvrir depuis le casque :</div>
         <div class="vr-link-row">
@@ -297,12 +351,10 @@
         </div>
       </div>
 
-      <!-- Message si pas de lien -->
       <div class="vr-no-link" *ngIf="!selectedExpVr?.appLabUrl">
         ⚠️ Lien Meta App Lab non configuré pour cette expérience.
       </div>
 
-      <!-- Bouton lancer -->
       <button
         class="vr-launch-btn"
         [class.launched]="vrLaunchState === 'done'"
