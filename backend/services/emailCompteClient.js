@@ -1,20 +1,47 @@
-const nodemailer = require('nodemailer');
+const axios = require('axios');
+require('dotenv').config();
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
-});
+// ====================== BREVO API - EMAILS COMPTE ======================
 
-const envoyerEmailApprobation = async (client) => {
+// Fonction commune pour envoyer via Brevo
+const sendBrevoEmail = async (to, subject, htmlContent) => {
   try {
-    const info = await transporter.sendMail({
-      from: `"SurgeryVR" <${process.env.EMAIL_USER}>`,
-      to: client.email,
-      subject: '✅ Compte approuvé',
-      html: `
+    if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
+      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant");
+    }
+
+    const payload = {
+      sender: {
+        name: "SurgeryVR",
+        email: process.env.BREVO_SENDER_EMAIL
+      },
+      to: [{ email: to }],
+      subject: subject,
+      htmlContent: htmlContent,
+      replyTo: { email: process.env.BREVO_SENDER_EMAIL },
+      tags: ["surgeryvr-compte"]
+    };
+
+    const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
+      headers: {
+        'api-key': process.env.BREVO_API_KEY,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    console.log(`✅ Email Brevo envoyé : ${subject} → ${to}`);
+    return response.data;
+
+  } catch (error) {
+    const errData = error.response?.data || error;
+    console.error('❌ Erreur Brevo API:', errData);
+    throw new Error(`Erreur envoi email: ${errData.message || error.message}`);
+  }
+};
+
+// ====================== EMAIL APPROBATION ======================
+const envoyerEmailApprobation = async (client) => {
+  const htmlContent = `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -52,7 +79,7 @@ const envoyerEmailApprobation = async (client) => {
           <!-- Call to Action -->
           <tr>
             <td style="padding:0 30px 30px 30px; text-align:center;">
-              <a href="${process.env.FRONTEND_URL || 'https://surgeryvr.com'}/login" 
+              <a href="${process.env.FRONTEND_URL || 'https://surgery-vr.vercel.app'}/login" 
                  style="display:inline-block; padding:15px 40px; background:linear-gradient(135deg,#00C48C,#00FFA3); color:white; text-decoration:none; border-radius:12px; font-weight:700; font-size:16px; box-shadow:0 4px 15px rgba(0,196,140,0.3);">
                  🚀 Se connecter
               </a>
@@ -66,33 +93,23 @@ const envoyerEmailApprobation = async (client) => {
                 Cordialement,<br>L'équipe SurgeryVR
               </p>
               <p style="margin:0; color:#5A6B8C; font-size:14px;">
-                ${process.env.EMAIL_FROM || 'contact@surgeryvr.com'} | www.surgeryvr.com
+                ${process.env.BREVO_SENDER_EMAIL} | www.surgeryvr.com
               </p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-      `
-    });
+</html>`;
 
-    console.log('✅ Nodemailer info:', info);
-  } catch (error) {
-    console.error('❌ Erreur Nodemailer:', error);
-    throw error;
-  }
+  return await sendBrevoEmail(client.email, '✅ Compte approuvé - SurgeryVR', htmlContent);
 };
 
+// ====================== EMAIL REJET ======================
 const envoyerEmailRejet = async (client) => {
-  const mailOptions = {
-    from: `"SurgeryVR" <${process.env.EMAIL_USER}>`,
-    to: client.email,
-    subject: '❌ Compte refusé',
-    html: `
+  const htmlContent = `
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -130,7 +147,7 @@ const envoyerEmailRejet = async (client) => {
           <!-- Call to Action -->
           <tr>
             <td style="padding:0 30px 30px 30px; text-align:center;">
-              <a href="${process.env.FRONTEND_URL || 'https://surgeryvr.com'}/signup" 
+              <a href="${process.env.FRONTEND_URL || 'https://surgery-vr.vercel.app'}/signup" 
                  style="display:inline-block; padding:15px 40px; background:linear-gradient(135deg,#FF4B4B,#FF8C8C); color:white; text-decoration:none; border-radius:12px; font-weight:700; font-size:16px; box-shadow:0 4px 15px rgba(255,75,75,0.3);">
                  🔄 Soumettre à nouveau
               </a>
@@ -144,23 +161,19 @@ const envoyerEmailRejet = async (client) => {
                 Cordialement,<br>L'équipe SurgeryVR
               </p>
               <p style="margin:0; color:#5A6B8C; font-size:14px;">
-                ${process.env.EMAIL_FROM || 'contact@surgeryvr.com'} | www.surgeryvr.com
+                ${process.env.BREVO_SENDER_EMAIL} | www.surgeryvr.com
               </p>
             </td>
           </tr>
-
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-    `
-  };
+</html>`;
 
-  await transporter.sendMail(mailOptions);
+  return await sendBrevoEmail(client.email, '❌ Compte refusé - SurgeryVR', htmlContent);
 };
-
 
 module.exports = {
   envoyerEmailApprobation,
