@@ -83,7 +83,7 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
             <td style="padding:0 30px 40px 30px; text-align:center;">
               <p style="color:#64748B; font-size:15px;">Cliquez sur les boutons ci-dessus pour découvrir nos simulations immersives.</p>
               <p style="margin-top:25px;">
-                <a href="https://votre-site.com/contact" 
+                <a href="https://surgery-vr.vercel.app/signin" 
                    style="color:#0066FF; text-decoration:underline; font-weight:500;">
                   Je souhaite une démonstration personnalisée →
                 </a>

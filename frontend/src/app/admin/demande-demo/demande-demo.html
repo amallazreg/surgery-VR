@@ -358,9 +358,12 @@
         <div class="video-meta">
           <span>📅 Envoyée le {{formatDateTime(video.dateEnvoi)}}</span>
         </div>
-        <a [href]="video.urlVideo" target="_blank" class="btn-voir-video">
-          <span>▶️</span> Voir la vidéo
-        </a>
+        <a href="{{video.urlVideo}}" 
+   target="_blank" 
+   download="{{video.titre}}.mp4"
+   class="btn-voir-video">
+  ▶️ Voir / Télécharger
+</a>
       </div>
     </div>
   </div>

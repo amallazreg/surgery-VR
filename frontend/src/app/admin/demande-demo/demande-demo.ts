@@ -348,7 +348,7 @@ export class DemandeDemo implements OnInit, OnDestroy {
 
   // Nouvelle méthode helper
   genererMessageParDefaut(demande: IDemandeDemo): string {
-    return `Bonjour,
+    return `,
 
 Merci pour votre intérêt pour nos solutions de formation médicale en réalité virtuelle.
 

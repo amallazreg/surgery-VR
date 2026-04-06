@@ -180,9 +180,136 @@ const signin = async (req, res) => {
   }
 };
 
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    // Champs interdits à modifier directement
+    const champsInterdits = ['email', 'motDePasse', 'role', 'statut', 
+                             'documentProfessionnel', 'documentEtudiant',
+                             'numeroOrdreProfessionnel', 'numeroImmatriculation', 'numeroInscription'];
+    for (const champ of champsInterdits) {
+      if (req.body[champ] !== undefined) {
+        return res.status(400).json({ message: `Le champ "${champ}" ne peut pas être modifié ici` });
+      }
+    }
+
+    const utilisateur = await User.findById(userId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    // ========================
+    // Champs communs (tous rôles)
+    // ========================
+    const champsCommuns = ['prenom', 'nom', 'telephone'];
+    champsCommuns.forEach(champ => {
+      if (req.body[champ] !== undefined) utilisateur[champ] = req.body[champ];
+    });
+
+    // ========================
+    // Champs selon le rôle
+    // ========================
+    if (utilisateur.role === 'professionnel') {
+      const champsPro = [
+        'typeProfessionnel',
+        'fonctionResponsable',
+        'nomEtablissement',
+        'adresse'
+      ];
+      champsPro.forEach(champ => {
+        if (req.body[champ] !== undefined) utilisateur[champ] = req.body[champ];
+      });
+
+      // Empêcher qu'un professionnel envoie des champs étudiant
+      const champsEtudiant = ['universite', 'specialite', 'niveauEtude'];
+      for (const champ of champsEtudiant) {
+        if (req.body[champ] !== undefined) {
+          return res.status(400).json({ message: `Champ "${champ}" non autorisé pour un professionnel` });
+        }
+      }
+
+    } else if (utilisateur.role === 'etudiant') {
+      const champsEtu = [
+        'universite',
+        'specialite',
+        'niveauEtude'
+      ];
+      champsEtu.forEach(champ => {
+        if (req.body[champ] !== undefined) utilisateur[champ] = req.body[champ];
+      });
+
+      // Empêcher qu'un étudiant envoie des champs professionnel
+      const champsPro = ['typeProfessionnel', 'fonctionResponsable', 'nomEtablissement', 'adresse'];
+      for (const champ of champsPro) {
+        if (req.body[champ] !== undefined) {
+          return res.status(400).json({ message: `Champ "${champ}" non autorisé pour un étudiant` });
+        }
+      }
+    }
+
+    // Pas de hash mot de passe → utiliser save() directement sans déclencher le pre-save hook inutilement
+    utilisateur.markModified('prenom'); // force save même si rien n'a changé côté Mongoose
+    await utilisateur.save();
+
+    // Retourner sans le mot de passe
+    const { motDePasse, ...userSansMotDePasse } = utilisateur.toObject();
+
+    res.json({
+      message: "Profil mis à jour avec succès",
+      user: userSansMotDePasse
+    });
+
+  } catch (err) {
+    console.error("Erreur updateProfile:", err);
+    res.status(500).json({ message: "Erreur serveur lors de la mise à jour" });
+  }
+};
+
+// Changer le mot de passe
+const changePassword = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { ancienMotDePasse, nouveauMotDePasse, confirmNouveauMotDePasse } = req.body;
+
+    if (!ancienMotDePasse || !nouveauMotDePasse || !confirmNouveauMotDePasse) {
+      return res.status(400).json({ message: "Tous les champs sont obligatoires" });
+    }
+
+    if (nouveauMotDePasse !== confirmNouveauMotDePasse) {
+      return res.status(400).json({ message: "Les nouveaux mots de passe ne correspondent pas" });
+    }
+
+    if (nouveauMotDePasse.length < 6) {
+      return res.status(400).json({ message: "Le nouveau mot de passe doit faire au moins 6 caractères" });
+    }
+
+    const utilisateur = await User.findById(userId);
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+
+    const isValid = await utilisateur.comparePassword(ancienMotDePasse);
+    if (!isValid) {
+      return res.status(401).json({ message: "Ancien mot de passe incorrect" });
+    }
+
+    utilisateur.motDePasse = nouveauMotDePasse; // le hash se fait dans le model (pre-save hook)
+    await utilisateur.save();
+
+    res.json({ message: "Mot de passe changé avec succès" });
+
+  } catch (err) {
+    console.error("Erreur changePassword:", err);
+    res.status(500).json({ message: "Erreur serveur lors du changement de mot de passe" });
+  }
+};
+
 
 
 module.exports = {
   signup,
-  signin
+  signin,
+  updateProfile,
+  changePassword
 }
