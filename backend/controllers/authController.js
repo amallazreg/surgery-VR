@@ -266,6 +266,24 @@ const updateProfile = async (req, res) => {
   }
 };
 
+const getProfile = async (req, res) => {
+  try {
+    const userId = req.user.id; // vient du middleware JWT
+ 
+    const utilisateur = await User.findById(userId).select('-motDePasse');
+    if (!utilisateur) {
+      return res.status(404).json({ message: "Utilisateur introuvable" });
+    }
+ 
+    res.json(utilisateur);
+ 
+  } catch (err) {
+    console.error("Erreur getProfile:", err);
+    res.status(500).json({ message: "Erreur serveur" });
+  }
+};
+ 
+
 // Changer le mot de passe
 const changePassword = async (req, res) => {
   try {
@@ -311,5 +329,6 @@ module.exports = {
   signup,
   signin,
   updateProfile,
-  changePassword
+  changePassword,
+  getProfile
 }

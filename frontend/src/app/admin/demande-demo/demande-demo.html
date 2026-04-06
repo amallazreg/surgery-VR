@@ -358,13 +358,20 @@
         <div class="video-meta">
           <span>📅 Envoyée le {{formatDateTime(video.dateEnvoi)}}</span>
         </div>
-        <a href="{{video.urlVideo}}" 
-   target="_blank" 
-   download="{{video.titre}}.mp4"
-   class="btn-voir-video">
-  ▶️ Voir / Télécharger
-</a>
-      </div>
+        <!-- Lien pour voir la vidéo (lecture normale) -->
+        <a [href]="video.urlVideo" 
+          target="_blank" 
+          class="btn-voir-video">
+          ▶️ Voir la vidéo
+        </a>
+
+        <!-- Lien pour télécharger avec un nom correct (.mp4) -->
+        <a [href]="getDownloadUrl(video)" 
+          download="{{ getSafeFilename(video.titre) }}.mp4"
+          class="btn-download">
+          ⬇️ Télécharger ({{ getSafeFilename(video.titre) }}.mp4)
+        </a>
+ </div>
     </div>
   </div>
 </div>

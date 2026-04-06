@@ -744,4 +744,27 @@ exportToPDF(): void {
   trackByDemandeId(index: number, demande: IDemandeDemo): string {
     return demande._id;
   }
+
+  // Ajoute ces méthodes dans la classe DemandeDemo
+
+getDownloadUrl(video: any): string {
+  if (!video || !video.urlVideo) return '#';
+
+  // Force le téléchargement + nom personnalisé avec Cloudinary
+  const baseUrl = video.urlVideo.split('?')[0]; // enlève les paramètres existants
+  const safeName = this.getSafeFilename(video.titre || 'video');
+
+  return `${baseUrl}?fl_attachment:${safeName}.mp4`;
+}
+
+getSafeFilename(titre: string): string {
+  if (!titre) return 'demo-video';
+  
+  return titre
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')   // remplace les caractères spéciaux par -
+    .replace(/-+/g, '-')          // évite les ----- 
+    .replace(/^-|-$/g, '')        // enlève - au début/fin
+    || 'demo-video';
+}
 }

@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const upload = require('../middlewares/cloudinary');
-const {signup,signin, updateProfile, changePassword} = require('../controllers/authController');
+const {signup,signin, updateProfile, changePassword,getProfile} = require('../controllers/authController');
 
 const { protect } = require('../middlewares/auth'); 
 
@@ -13,7 +13,7 @@ router.post(
 );
 
 router.post('/login', signin);
-
+router.get('/profile',  protect, getProfile);
 router.put('/profile', protect, updateProfile);
 router.put('/password', protect, changePassword);
 
