@@ -96,10 +96,10 @@ export class MesExperiences implements OnInit {
     return this.subscriptionGroups[0];
   }
 
-  get totalExperiences(): number {
-    return this.activeSubscription.experiences.filter(e => !e.isEmpty).length;
-  }
-
+get totalExperiences(): number {
+  if (this.isSubscriptionExpired) return 0;
+  return this.activeSubscription.experiences.filter(e => !e.isEmpty).length;
+}
   get avgCompletionRate(): number {
     const exps = this.activeSubscription.experiences.filter(
       e => !e.isEmpty && e.respondents > 0
@@ -152,60 +152,85 @@ export class MesExperiences implements OnInit {
     this.loadMesExperiences();
   }
 
-  loadMesExperiences(): void {
-    this.isLoading    = true;
-    this.errorMessage = '';
+loadMesExperiences(): void {
+  this.isLoading = true;
+  this.errorMessage = '';
+  this.isSubscriptionExpired = false;
 
-    this.experienceService.getMesExperiences(this.userId).subscribe({
-      next: (data) => {
+  this.experienceService.getMesExperiences(this.userId).subscribe({
+    next: (data) => {
+      const sub = this.subscriptionGroups[0];
+
+      sub.planName    = `Forfait ${data.abonnement.forfaitName}`;
+      sub.planIcon    = this.getPlanIcon(data.abonnement.forfaitName);
+      sub.headerClass = this.getPlanHeaderClass(data.abonnement.forfaitName);
+      sub.apkRestants = data.abonnement.apkRestants;
+      sub.apkTotal    = data.abonnement.apkTotal;
+      sub.apkUsed     = data.abonnement.apkTotal - data.abonnement.apkRestants;
+      sub.expireLabel = data.abonnement.dateFin
+        ? new Date(data.abonnement.dateFin).toLocaleDateString('fr-FR')
+        : '';
+      sub.status      = 'active';
+
+      const mapped: Experience[] = data.experiences.map(
+        (e: ExperienceBackend) => this.mapBackendExp(e)
+      );
+
+      if (mapped.length < sub.maxSlots) {
+        mapped.push(this.emptySlot());
+      }
+
+      sub.experiences = mapped;
+      this.isLoading = false;
+      this.cdr.detectChanges();
+    },
+
+    error: (err) => {
+      this.isLoading = false;
+
+      // === CAS ABONNEMENT EXPIRÉ (le plus important) ===
+      if (err.status === 403 && err.error?.expired === true) {
+        this.isSubscriptionExpired = true;
+        this.errorMessage = '';   // ← Très important
+
         const sub = this.subscriptionGroups[0];
+        sub.planName    = 'Abonnement expiré';
+        sub.planIcon    = '⏳';
+        sub.headerClass = 'sgh-expired';
+        sub.status      = 'expired';
+        sub.expireLabel = err.error.dateFin 
+          ? new Date(err.error.dateFin).toLocaleDateString('fr-FR') 
+          : 'Date inconnue';
+        sub.apkRestants = 0;
+        sub.apkTotal    = err.error.apkTotal || 0;
+        sub.apkUsed     = 0;
+        sub.experiences = [];                    // on vide les expériences
+      } 
+      // === AUCUN ABONNEMENT DU TOUT ===
+      else if (err.status === 404) {
+        this.isSubscriptionExpired = true;
+        this.errorMessage = '';
 
-        sub.planName    = `Forfait ${data.abonnement.forfaitName}`;
-        sub.planIcon    = this.getPlanIcon(data.abonnement.forfaitName);
-        sub.headerClass = this.getPlanHeaderClass(data.abonnement.forfaitName);
-        sub.apkRestants = data.abonnement.apkRestants;
-        sub.apkTotal    = data.abonnement.apkTotal;
-        sub.apkUsed     = data.abonnement.apkTotal - data.abonnement.apkRestants;
-        sub.expireLabel = data.abonnement.dateFin
-          ? new Date(data.abonnement.dateFin).toLocaleDateString('fr-FR')
-          : '';
+        const sub = this.subscriptionGroups[0];
+        sub.planName    = 'Aucun abonnement';
+        sub.planIcon    = '⚠️';
+        sub.headerClass = 'sgh-expired';
+        sub.status      = 'expired';
+        sub.apkRestants = 0;
+        sub.apkTotal    = 0;
+        sub.apkUsed     = 0;
+        sub.experiences = [];
+      } 
+      // === AUTRES ERREURS ===
+      else {
+        this.errorMessage = err.error?.message 
+          || 'Impossible de charger vos expériences. Veuillez réessayer.';
+      }
 
-        const mapped: Experience[] = data.experiences.map(
-          (e: ExperienceBackend) => this.mapBackendExp(e)
-        );
-
-        if (mapped.length < sub.maxSlots) {
-          mapped.push(this.emptySlot());
-        }
-
-        sub.experiences      = mapped;
-        sub.totalExperiences = data.experiences.length;
-
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      },
-      error: (err) => {
-        // 404 = pas d'abonnement actif → afficher empty state proprement
-        if (err.status === 404) {
-          const sub = this.subscriptionGroups[0];
-          sub.planName         = 'Aucun abonnement';
-          sub.planIcon         = '❌';
-          sub.experiences      = [];
-          sub.totalExperiences = 0;
-          sub.apkRestants      = 0;
-          sub.apkTotal         = 0;
-          sub.apkUsed          = 0;
-          sub.status           = 'expired';
-          this.isSubscriptionExpired = true;
-          this.errorMessage    = ''; // ← Pas d'erreur affichée
-        } else {
-          this.errorMessage = err.error?.message || 'Impossible de charger vos expériences.';
-        }
-        this.isLoading = false;
-        this.cdr.detectChanges();
-      },
-    });
-  }
+      this.cdr.detectChanges();
+    },
+  });
+}
 
   private mapBackendExp(e: ExperienceBackend): Experience {
     return {

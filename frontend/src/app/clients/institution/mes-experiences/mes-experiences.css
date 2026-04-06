@@ -841,3 +841,23 @@ body {
 }
 .empty-trust-item { font-size: 11px; color: #5A6B8C; }
 .empty-trust-sep  { font-size: 11px; color: #C0C8D8; }
+
+/* Style spécifique pour abonnement expiré */
+.sub-banner.sgh-expired {
+  background: #0A1635;
+  border: 1px solid ;
+  opacity: 0.95;
+}
+
+.sub-banner.sgh-expired .sub-banner-name {
+  color:#cc0000;
+}
+
+.sub-banner.sgh-expired .sub-banner-ref {
+  color: linear-gradient(135deg, #ff4d4d, #cc0000);
+
+}
+
+.sub-banner.sgh-expired .sgb-expired {
+  color: white;
+}

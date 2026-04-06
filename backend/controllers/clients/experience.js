@@ -60,7 +60,11 @@ const getMesExperiences = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const abonnement = await Abonnement.findOne({ user: userId })
+    const abonnement = await Abonnement.findOne({ 
+      user: userId ,
+      status: 'active'
+    })
+    .sort({ createdAt: -1 })
       .populate('forfait')
       .populate('experiencesDebloquees', '_id');
 

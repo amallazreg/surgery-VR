@@ -38,41 +38,71 @@
       <ng-container *ngIf="!isLoading && !errorMessage">
 
         <!-- SUBSCRIPTION BANNER -->
-        <div class="sub-banner" [ngClass]="activeSubscription.headerClass">
-          <div class="sub-banner-glow"></div>
-          <div class="sub-banner-left">
-            <span class="sub-banner-icon">{{ activeSubscription.planIcon }}</span>
-            <div>
-              <div class="sub-banner-name">{{ activeSubscription.planName }}</div>
-              <div class="sub-banner-ref">{{ activeSubscription.expireLabel ? 'Expire le ' + activeSubscription.expireLabel : '' }}</div>
-            </div>
-          </div>
-          <div class="sub-banner-stats">
-            <div class="sbs-item">
-              <div class="sbs-val">{{ activeSubscription.totalExperiences }}/{{ activeSubscription.maxSlots }}</div>
-              <div class="sbs-lbl">Expériences</div>
-            </div>
-            <div class="sbs-sep"></div>
-            <div class="sbs-item sbs-apk-item">
-              <div class="sbs-val">
-                {{ activeSubscription.apkRestants }}<span style="font-size:11px;opacity:.5">/{{ activeSubscription.apkTotal }}</span>
-              </div>
-              <div class="sbs-lbl">APK restants</div>
-              <div class="apk-mini-bar">
-                <div class="apk-mini-fill" [style.width.%]="apkBarWidth()" [style.background]="apkBarColor()"></div>
-              </div>
-            </div>
-            <div class="sbs-sep"></div>
-            <div class="sbs-item">
-              <div class="sbs-val">{{ activeSubscription.totalRespondents }}</div>
-              <div class="sbs-lbl">Répondants</div>
-            </div>
-          </div>
-          <div class="sub-banner-badge" [ngClass]="getSubBadge(activeSubscription.status).cssClass">
-            <span class="sgb-dot"></span>
-            {{ getSubBadge(activeSubscription.status).label }}
-          </div>
+       <!-- SUBSCRIPTION BANNER -->
+<div class="sub-banner" [ngClass]="activeSubscription.headerClass">
+  <div class="sub-banner-glow"></div>
+  
+  <div class="sub-banner-left">
+    <span class="sub-banner-icon">{{ activeSubscription.planIcon }}</span>
+    <div>
+      <div class="sub-banner-name">{{ activeSubscription.planName }}</div>
+      <div class="sub-banner-ref">
+        {{ activeSubscription.expireLabel ? 'Expiré le ' + activeSubscription.expireLabel : 'Abonnement expiré' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats : on les cache quand l'abonnement est expiré -->
+  <div class="sub-banner-stats" *ngIf="!isSubscriptionExpired">
+    <div class="sbs-item">
+      <div class="sbs-val">{{ activeSubscription.totalExperiences }}/{{ activeSubscription.maxSlots }}</div>
+      <div class="sbs-lbl">Expériences</div>
+    </div>
+    <div class="sbs-sep"></div>
+    <div class="sbs-item sbs-apk-item">
+      <div class="sbs-val">
+        {{ activeSubscription.apkRestants }}<span style="font-size:11px;opacity:.5">/{{ activeSubscription.apkTotal }}</span>
+      </div>
+      <div class="sbs-lbl">APK restants</div>
+      <div class="apk-mini-bar">
+        <div class="apk-mini-fill" 
+             [style.width.%]="apkBarWidth()" 
+             [style.background]="apkBarColor()">
         </div>
+      </div>
+    </div>
+    <div class="sbs-sep"></div>
+    <div class="sbs-item">
+      <div class="sbs-val">{{ activeSubscription.totalRespondents || 0 }}</div>
+      <div class="sbs-lbl">Répondants</div>
+    </div>
+  </div>
+
+  <!-- Version stats simplifiée quand expiré -->
+  <div class="sub-banner-stats" *ngIf="isSubscriptionExpired">
+    <div class="sbs-item">
+      <div class="sbs-val">0/{{ activeSubscription.maxSlots }}</div>
+      <div class="sbs-lbl">Expériences</div>
+    </div>
+    <div class="sbs-sep"></div>
+    <div class="sbs-item sbs-apk-item">
+      <div class="sbs-val">
+        0<span style="font-size:11px;opacity:.5">/{{ activeSubscription.apkTotal || 0 }}</span>
+      </div>
+      <div class="sbs-lbl">APK restants</div>
+      <div class="apk-mini-bar">
+        <div class="apk-mini-fill" style="width: 0%; background: #FF3B5C;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Badge -->
+  <div class="sub-banner-badge" 
+       [ngClass]="getSubBadge(activeSubscription.status).cssClass">
+    <span class="sgb-dot"></span>
+    {{ getSubBadge(activeSubscription.status).label }}
+  </div>
+</div>
 
         <!-- STAT STRIP -->
         <div class="stat-strip">
@@ -121,8 +151,7 @@
         </div>
 
         <!-- EMPTY STATE -->
-<div *ngIf="isSubscriptionExpired || totalExperiences === 0" class="empty-state-wrap">
-  <div class="empty-state-card">
+<div *ngIf="isSubscriptionExpired || totalExperiences === 0" class="empty-state-wrap">  <div class="empty-state-card">
 
     <div class="empty-clock-icon">
       <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
@@ -177,8 +206,8 @@
 </div>
 
         <!-- EXPERIENCE CARDS -->
-        <div class="exp-grid" *ngIf="totalExperiences > 0">
-          <ng-container *ngFor="let exp of filteredExperiencesFlat()">
+  <div class="exp-grid" *ngIf="!isSubscriptionExpired && totalExperiences > 0">
+            <ng-container *ngFor="let exp of filteredExperiencesFlat()">
 
             <!-- Empty slot -->
             <div *ngIf="exp.isEmpty" class="exp-card exp-card-empty">
