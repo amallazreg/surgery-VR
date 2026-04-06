@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
-const { analyzeFace } = require('../../backend/services/aiService');
+const { analyzeFace } = require('../services/aiService');
 
 const upload = multer({ storage: multer.memoryStorage() });
 

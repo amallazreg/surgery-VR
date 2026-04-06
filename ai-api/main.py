@@ -1,9 +1,9 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
+from face_analyzer import analyze_face
 
 app = FastAPI(title="Surgery AI API", version="1.0.0")
 
-# CORS pour que ton Angular puisse appeler cette API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -15,11 +15,8 @@ app.add_middleware(
 def health_check():
     return {"status": "ok", "message": "Surgery AI API is running"}
 
-@app.post("/analyze")
-async def analyze(file: UploadFile = File(...)):
-    # Pour l'instant on retourne juste le nom du fichier reçu
-    return {
-        "status": "received",
-        "filename": file.filename,
-        "message": "Image reçue avec succès - analyse IA à venir"
-    }
+@app.post("/analyze-face")
+async def analyze_face_endpoint(file: UploadFile = File(...)):
+    image_bytes = await file.read()
+    result = analyze_face(image_bytes)
+    return result
