@@ -194,13 +194,19 @@ export class DemandeDemo implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (demandes: IDemandeDemo[]) => {
-          this.allDemandes = demandes.map(demande => ({ ...demande, selected: false }));
+          this.allDemandes = demandes.map(demande => ({ 
+            ...demande, 
+            selected: false 
+          }));
+
+          console.log('Demandes rechargées - Exemple première demande contactée :', 
+            this.allDemandes.find(d => d.statut === 'contactee'));
+
           this.currentPage = 1;
           this.applyFilters();
           this.updateStats();
           this.isLoading = false;
-                 this.cdr.detectChanges();
-
+          this.cdr.detectChanges();
         },
         error: (error) => {
           console.error('Erreur chargement demandes:', error);
@@ -390,11 +396,11 @@ L'équipe SurveryVR
  
 contactDemande(): void {
   if (!this.emailMessage || this.emailMessage.trim().length < 50) {
-    alert('⚠️ Le message doit contenir au moins 50 caractères');
+    this.showToast('⚠️ Le message doit contenir au moins 50 caractères', 'error');
     return;
   }
   if (this.emailMessage.length > 2000) {
-    alert('⚠️ Le message ne doit pas dépasser 2000 caractères');
+    this.showToast('⚠️ Le message ne doit pas dépasser 2000 caractères', 'error');
     return;
   }
   if (!this.selectedDemande) return;
@@ -404,9 +410,7 @@ contactDemande(): void {
   const institution = this.selectedDemande.nomInstitution;
 
   this.isSendingEmail = true;
-
-  // ✅ Toast immédiat pour informer l'utilisateur
-  this.showToast('📧 Envoi en cours... Veuillez patienter', 'warning');
+  this.showToast('📧 Envoi de l\'email en cours...', 'warning');
 
   this.adminService.contacterDemo(payload, demandeId)
     .pipe(takeUntil(this.destroy$))
@@ -414,13 +418,35 @@ contactDemande(): void {
       next: (response: any) => {
         this.isSendingEmail = false;
         this.closeContactModal();
+
+        // Mise à jour optimiste + réelle
+        if (this.selectedDemande && response.demande) {
+          this.selectedDemande.statut = 'contactee';
+          this.selectedDemande.dateContact = response.demande.dateContact || new Date();
+          this.selectedDemande.videosEnvoyees = response.demande.videosEnvoyees || [];
+
+          // Mise à jour dans la liste principale
+          const index = this.allDemandes.findIndex(d => d._id === this.selectedDemande!._id);
+          if (index !== -1) {
+            this.allDemandes[index] = { 
+              ...this.allDemandes[index], 
+              ...this.selectedDemande 
+            };
+          }
+        }
+
+        this.applyFilters();
+        this.updateStats();
+
         const nbVideos = response.nbVideosEnvoyees || 5;
-        this.showToast(`✅ Email envoyé à ${institution} ! (${nbVideos} vidéos)`, 'success');
-        this.loadDemandes();
+        this.showToast(`✅ Email envoyé avec succès à ${institution} ! (${nbVideos} vidéos)`, 'success');
+
+        // Recharge légère pour synchronisation
+        setTimeout(() => this.loadDemandes(), 800);
       },
       error: (error) => {
         this.isSendingEmail = false;
-        const errorMsg = error.error?.message || 'Erreur lors de l\'envoi';
+        const errorMsg = error.error?.message || 'Erreur lors de l\'envoi de l\'email';
         this.showToast(`❌ ${errorMsg}`, 'error');
       }
     });

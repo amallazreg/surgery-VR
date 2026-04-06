@@ -3,35 +3,38 @@ require('dotenv').config();
 
 // ====================== EMAIL SERVICE - BREVO API ======================
 
-// Vérification de la clé au démarrage
-if (!process.env.BREVO_API_KEY) {
-  console.error("❌ ERREUR : BREVO_API_KEY manquante dans le fichier .env");
+if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
+  console.error("❌ ERREUR : BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant dans le .env");
 }
 
-// ====================== TEMPLATE HTML (ton beau template) ======================
+// ====================== TEMPLATE HTML COMPLET ======================
 const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
+  
+  // Génération des 5 vidéos
   const videosHTML = videos.map((video, index) => `
     <tr>
       <td style="padding: 15px; background: #F8FAFF; border-radius: 10px;">
         <table width="100%" cellpadding="0" cellspacing="0">
           <tr>
-            <td width="60" style="padding-right: 15px;">
-              <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0066FF, #00D9FF); border-radius: 10px; text-align: center; line-height: 50px; color: white; font-size: 20px; font-weight: bold;">
+            <td width="60" style="padding-right: 15px; vertical-align: top;">
+              <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #0066FF, #00D9FF); border-radius: 10px; text-align: center; line-height: 50px; color: white; font-size: 22px; font-weight: bold;">
                 ${index + 1}
               </div>
             </td>
-            <td>
-              <h3 style="margin: 0 0 5px 0; color: #1A2B5F; font-size: 16px;">${video.titre}</h3>
-              <p style="margin: 0 0 10px 0; color: #5A6B8C; font-size: 14px;">${video.description}</p>
-              <a href="${video.urlVideo}" style="display: inline-block; padding: 8px 20px; background: linear-gradient(135deg, #0066FF, #00D9FF); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14px;">
-                ▶️ Regarder la vidéo (${video.duree}s)
+            <td style="vertical-align: top;">
+              <h3 style="margin: 0 0 6px 0; color: #1A2B5F; font-size: 17px;">${video.titre}</h3>
+              ${video.description ? `<p style="margin: 0 0 12px 0; color: #5A6B8C; font-size: 14px; line-height: 1.5;">${video.description}</p>` : ''}
+              <a href="${video.urlVideo}" 
+                 target="_blank"
+                 style="display: inline-block; padding: 10px 22px; background: linear-gradient(135deg, #0066FF, #00D9FF); color: white; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 14.5px;">
+                ▶️ Regarder la vidéo (${video.duree || '?'}s)
               </a>
             </td>
           </tr>
         </table>
       </td>
     </tr>
-    <tr><td height="15"></td></tr>
+    <tr><td height="12"></td></tr>
   `).join('');
 
   return `<!DOCTYPE html>
@@ -42,41 +45,74 @@ const creerTemplateEmailDemo = (demande, messageEmail, videos) => {
   <title>Vos Démos SurgeryVR</title>
 </head>
 <body style="margin:0; padding:0; font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background-color:#F8FAFF;">
-  <!-- Ton template complet ici (header, message, vidéos, CTA, footer) -->
-  <!-- Je te mets la version courte pour ne pas allonger trop, mais remplace par ton template complet -->
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#F8FAFF; padding:40px 20px;">
-    <tr><td align="center">
-      <table width="600" cellpadding="0" cellspacing="0" style="background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.1);">
-        <!-- Header -->
-        <tr>
-          <td style="background:linear-gradient(135deg,#0066FF,#00D9FF); padding:40px 30px; text-align:center;">
-            <h1 style="margin:0; color:white; font-size:32px;">🎯 SurgeryVR</h1>
-            <p style="margin:10px 0 0; color:rgba(255,255,255,0.9);">Formation Médicale en Réalité Virtuelle</p>
-          </td>
-        </tr>
-        <!-- Message personnalisé -->
-        <tr>
-          <td style="padding:30px;">
-            <h2 style="color:#1A2B5F; font-size:24px;">Bonjour ${demande.nomInstitution},</h2>
-            <div style="color:#1A2B5F; font-size:15px; line-height:1.6;">
-              ${messageEmail.replace(/\n/g, '<br>')}
-            </div>
-          </td>
-        </tr>
-        <!-- Vidéos et le reste de ton template -->
-        <!-- ... Colle ici le reste de ton ancien template (vidéos, CTA, footer) ... -->
-      </table>
-    </td></tr>
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="background:white; border-radius:20px; box-shadow:0 4px 20px rgba(0,0,0,0.1); overflow:hidden;">
+          
+          <!-- Header -->
+          <tr>
+            <td style="background:linear-gradient(135deg,#0066FF,#00D9FF); padding:40px 30px; text-align:center;">
+              <h1 style="margin:0; color:white; font-size:32px;">🎯 SurgeryVR</h1>
+              <p style="margin:10px 0 0; color:rgba(255,255,255,0.9); font-size:18px;">Formation Médicale en Réalité Virtuelle</p>
+            </td>
+          </tr>
+
+          <!-- Message personnalisé -->
+          <tr>
+            <td style="padding:35px 30px 20px 30px;">
+              <h2 style="color:#1A2B5F; margin:0 0 20px 0; font-size:24px;">Bonjour ${demande.nomInstitution || 'Cher contact'},</h2>
+              <div style="color:#334155; font-size:15.5px; line-height:1.65;">
+                ${messageEmail ? messageEmail.replace(/\n/g, '<br>') : 'Merci pour votre intérêt pour nos solutions de formation médicale en réalité virtuelle.'}
+              </div>
+            </td>
+          </tr>
+
+          <!-- Section Vidéos -->
+          <tr>
+            <td style="padding:0 30px 30px 30px;">
+              <h3 style="color:#1A2B5F; margin:0 0 20px 0; font-size:19px;">Voici les 5 vidéos de démonstration sélectionnées pour vous :</h3>
+              <table width="100%" cellpadding="0" cellspacing="0">
+                ${videosHTML}
+              </table>
+            </td>
+          </tr>
+
+          <!-- Call to Action -->
+          <tr>
+            <td style="padding:0 30px 40px 30px; text-align:center;">
+              <p style="color:#64748B; font-size:15px;">Cliquez sur les boutons ci-dessus pour découvrir nos simulations immersives.</p>
+              <p style="margin-top:25px;">
+                <a href="https://votre-site.com/contact" 
+                   style="color:#0066FF; text-decoration:underline; font-weight:500;">
+                  Je souhaite une démonstration personnalisée →
+                </a>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background:#F1F5F9; padding:25px 30px; text-align:center; font-size:13px; color:#64748B; border-top:1px solid #E2E8F0;">
+              Cordialement,<br>
+              <strong>L’équipe SurgeryVR</strong><br><br>
+              📧 ${demande.emailProfessionnel} | 📱 ${demande.telephone || ''}
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
   </table>
 </body>
 </html>`;
 };
 
-// ====================== ENVOYER EMAIL VIA BREVO API ======================
+// ====================== ENVOYER EMAIL VIA BREVO ======================
 const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
   try {
-    if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
-      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant");
+    if (!videos || videos.length === 0) {
+      throw new Error("Aucune vidéo fournie pour l'email");
     }
 
     const htmlContent = creerTemplateEmailDemo(demande, messageEmail, videos);
@@ -86,15 +122,11 @@ const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
         name: "SurgeryVR - Formation VR", 
         email: process.env.BREVO_SENDER_EMAIL 
       },
-      to: [{ email: demande.emailProfessionnel }],
-      subject: '✅ Vos vidéos de démonstration SurgeryVR',
+      to: [{ email: demande.emailProfessionnel, name: demande.nomInstitution || undefined }],
+      subject: `🎥 Vos 5 vidéos démo - ${demande.nomInstitution || 'SurgeryVR'}`,
       htmlContent: htmlContent,
       replyTo: { email: process.env.BREVO_SENDER_EMAIL },
-      // Ajoute ceci pour mieux suivre :
-      tags: ["demo-surgeryvr"],
-      headers: {
-        "X-Mailin-Tag": "demo-surgeryvr"
-      }
+      tags: ["demo-surgeryvr"]
     };
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
@@ -105,21 +137,19 @@ const envoyerEmailDemo = async ({ demande, messageEmail, videos }) => {
       }
     });
 
-    console.log(`✅ Brevo API accepté pour ${demande.emailProfessionnel} | Message ID: ${response.data.messageId || 'N/A'}`);
+    console.log(`✅ Email envoyé avec succès via Brevo → ${demande.emailProfessionnel} | ${videos.length} vidéos`);
 
     return response.data;
 
   } catch (error) {
-    const errData = error.response?.data || {};
+    const errData = error.response?.data || error.message;
     console.error('❌ Erreur Brevo API:', {
       status: error.response?.status,
-      message: errData.message || error.message,
+      message: errData.message || errData,
       details: errData
     });
-    throw new Error(`Erreur envoi email: ${errData.message || error.message}`);
+    throw new Error(`Erreur envoi email Brevo: ${errData.message || errData}`);
   }
 };
 
-module.exports = {
-  envoyerEmailDemo
-};
+module.exports = { envoyerEmailDemo };

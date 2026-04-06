@@ -120,20 +120,20 @@ const contacterDemande = async (req, res) => {
     // Sélectionner 5 vidéos aléatoires
     const videosSelectionnees = await selectionnerVideosAleatoires();
 
-    if (videosSelectionnees.length < 5) {
+    if (videosSelectionnees.length !== 5) {
       return res.status(500).json({ 
-        message: "Erreur: impossible de sélectionner 5 vidéos" 
+        message: `Impossible de sélectionner 5 vidéos (disponibles : ${videosSelectionnees.length})` 
       });
     }
 
-    // Envoyer l'email avec les vidéos
+    // Envoyer l'email
     await envoyerEmailDemo({
       demande,
       messageEmail,
       videos: videosSelectionnees
     });
 
-    // Mettre à jour le statut
+    // Mettre à jour la demande
     demande.statut = 'contactee';
     demande.dateContact = new Date();
     demande.videosEnvoyees = videosSelectionnees.map(v => ({
@@ -142,12 +142,13 @@ const contacterDemande = async (req, res) => {
       urlVideo: v.urlVideo,
       dateEnvoi: new Date()
     }));
-    
+
     await demande.save();
 
+    // Réponse claire avec la demande mise à jour
     res.json({ 
       message: "Email envoyé avec succès", 
-      demande,
+      demande: demande,                    // ← Important pour le frontend
       nbVideosEnvoyees: videosSelectionnees.length
     });
 
