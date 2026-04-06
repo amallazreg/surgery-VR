@@ -121,59 +121,60 @@
         </div>
 
         <!-- EMPTY STATE -->
-        <div *ngIf="totalExperiences === 0" class="empty-state-wrap">
-          <div class="empty-state-card">
+<div *ngIf="isSubscriptionExpired || totalExperiences === 0" class="empty-state-wrap">
+  <div class="empty-state-card">
 
-            <div class="empty-clock-icon">
-              <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
-                <circle cx="22" cy="22" r="16" stroke="#FF3B5C" stroke-width="2"/>
-                <path d="M22 13v9.5l5.5 3.5" stroke="#FF3B5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-              </svg>
-            </div>
+    <div class="empty-clock-icon">
+      <svg width="44" height="44" viewBox="0 0 44 44" fill="none">
+        <circle cx="22" cy="22" r="16" stroke="#FF3B5C" stroke-width="2"/>
+        <path d="M22 13v9.5l5.5 3.5" stroke="#FF3B5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </div>
 
-            <div class="empty-status-badge">
-              <div class="empty-badge-dot"></div>
-              Abonnement expiré ou inexistant
-            </div>
+    <div class="empty-status-badge">
+      <div class="empty-badge-dot"></div>
+      {{ isSubscriptionExpired ? 'Abonnement expiré' : 'Aucun abonnement actif' }}
+    </div>
 
-            <h2 class="empty-title">Vos expériences VR sont suspendues</h2>
-            <p class="empty-sub">
-              Vous n'avez aucun abonnement actif. Souscrivez à un forfait pour débloquer
-              toutes les expériences VR, télécharger des APK et accéder aux formations.
-            </p>
+    <h2 class="empty-title">Vos expériences VR sont suspendues</h2>
+    <p class="empty-sub">
+      {{ isSubscriptionExpired 
+        ? "Votre abonnement a expiré. Renouvelez-le pour retrouver l'accès à toutes les expériences VR."
+        : "Vous n'avez aucun abonnement actif. Souscrivez à un forfait pour débloquer toutes les expériences VR, télécharger des APK et accéder aux formations."
+      }}
+    </p>
 
-            <div class="empty-features-grid">
-              <div class="empty-feature">
-                <div class="ef-icon">📱</div>
-                <div class="ef-lbl">APK illimités</div>
-              </div>
-              <div class="empty-feature">
-                <div class="ef-icon">🥽</div>
-                <div class="ef-lbl">Expériences VR</div>
-              </div>
-              <div class="empty-feature">
-                <div class="ef-icon">🎓</div>
-                <div class="ef-lbl">Formation incluse</div>
-              </div>
-            </div>
+    <div class="empty-features-grid">
+      <div class="empty-feature">
+        <div class="ef-icon">📱</div>
+        <div class="ef-lbl">APK illimités</div>
+      </div>
+      <div class="empty-feature">
+        <div class="ef-icon">🥽</div>
+        <div class="ef-lbl">Expériences VR</div>
+      </div>
+      <div class="empty-feature">
+        <div class="ef-icon">🎓</div>
+        <div class="ef-lbl">Formation incluse</div>
+      </div>
+    </div>
 
-            <hr class="empty-divider">
+    <hr class="empty-divider">
 
-            <button class="empty-cta-primary" routerLink="/abonnements">
-              Choisir un forfait &amp; renouveler
-            </button>
+    <button class="empty-cta-primary" routerLink="/abonnements">
+      {{ isSubscriptionExpired ? 'Renouveler mon abonnement' : 'Choisir un forfait &amp; renouveler' }}
+    </button>
 
-          
-            <div class="empty-trust-row">
-              <div class="empty-trust-item">🔒 Paiement sécurisé</div>
-              <div class="empty-trust-sep">·</div>
-              <div class="empty-trust-item">⚡ Activation immédiate</div>
-              <div class="empty-trust-sep">·</div>
-              <div class="empty-trust-item">↩️ Annulable à tout moment</div>
-            </div>
+    <div class="empty-trust-row">
+      <div class="empty-trust-item">🔒 Paiement sécurisé</div>
+      <div class="empty-trust-sep">·</div>
+      <div class="empty-trust-item">⚡ Activation immédiate</div>
+      <div class="empty-trust-sep">·</div>
+      <div class="empty-trust-item">↩️ Annulable à tout moment</div>
+    </div>
 
-          </div>
-        </div>
+  </div>
+</div>
 
         <!-- EXPERIENCE CARDS -->
         <div class="exp-grid" *ngIf="totalExperiences > 0">

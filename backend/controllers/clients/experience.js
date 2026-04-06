@@ -60,26 +60,37 @@ const getMesExperiences = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    const abonnement = await Abonnement.findOne({ user: userId, status: 'active' })
+    const abonnement = await Abonnement.findOne({ user: userId })
       .populate('forfait')
       .populate('experiencesDebloquees', '_id');
 
+    // Cas 1 : Aucun abonnement n'existe du tout pour cet utilisateur
     if (!abonnement) {
-      return res.status(404).json({ message: 'Aucun abonnement actif' });
+      return res.status(404).json({ 
+        message: "Aucun abonnement trouvé pour cet utilisateur" 
+      });
     }
 
-    // Vérification de l'expiration
+    // Cas 2 : L'abonnement existe mais n'est pas actif ou est expiré
     const now = new Date();
-    if (abonnement.dateFin && new Date(abonnement.dateFin) < now) {
-      // Mettre à jour le statut en BDD
-      await Abonnement.findByIdAndUpdate(abonnement._id, { status: 'expired' });
+
+    if (abonnement.status !== 'active' || 
+        (abonnement.dateFin && new Date(abonnement.dateFin) < now)) {
+      
+      // Option recommandée : mettre à jour le statut en base si besoin
+      if (abonnement.status === 'active') {
+        await Abonnement.findByIdAndUpdate(abonnement._id, { status: 'expired' });
+      }
 
       return res.status(403).json({
         message: 'Votre abonnement a expiré, les expériences ne sont plus accessibles',
         dateFin: abonnement.dateFin,
         expired: true,
+        status: abonnement.status
       });
     }
+
+    // À ce stade, l'abonnement est bien actif → on continue
 
     // Filtre de base : expériences liées au forfait
     const filter = { forfaits: abonnement.forfait._id };
@@ -98,23 +109,25 @@ const getMesExperiences = async (req, res) => {
     const result = experiences.map(exp => ({
       ...exp.toObject(),
       apkInstalled: deblouqueesIds.includes(exp._id.toString()),
-      status:       deblouqueesIds.includes(exp._id.toString()) ? 'live' : 'new',
+      status: deblouqueesIds.includes(exp._id.toString()) ? 'live' : 'new',
     }));
 
     res.json({
       experiences: result,
       abonnement: {
         apkRestants: abonnement.apkRestants,
-        apkTotal:    abonnement.forfait.nbApk,
+        apkTotal: abonnement.forfait.nbApk,
         forfaitName: abonnement.forfait.name,
-        dateFin:     abonnement.dateFin,
+        dateFin: abonnement.dateFin,
       }
     });
 
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: error.message });
   }
 };
+
 const downloadExperienceApk = async (req, res) => {
   try {
     const { userId, experienceId } = req.params;

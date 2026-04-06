@@ -141,6 +141,8 @@ export class MesExperiences implements OnInit {
   apkQuotaMessage = '';
   apkQuotaError   = false;
 
+  isSubscriptionExpired = false;
+
   constructor(
     private experienceService: Experiences,
     private cdr: ChangeDetectorRef,
@@ -183,8 +185,23 @@ export class MesExperiences implements OnInit {
         this.cdr.detectChanges();
       },
       error: (err) => {
-        this.errorMessage = err.error?.message || 'Impossible de charger vos expériences.';
-        this.isLoading    = false;
+        // 404 = pas d'abonnement actif → afficher empty state proprement
+        if (err.status === 404) {
+          const sub = this.subscriptionGroups[0];
+          sub.planName         = 'Aucun abonnement';
+          sub.planIcon         = '❌';
+          sub.experiences      = [];
+          sub.totalExperiences = 0;
+          sub.apkRestants      = 0;
+          sub.apkTotal         = 0;
+          sub.apkUsed          = 0;
+          sub.status           = 'expired';
+          this.isSubscriptionExpired = true;
+          this.errorMessage    = ''; // ← Pas d'erreur affichée
+        } else {
+          this.errorMessage = err.error?.message || 'Impossible de charger vos expériences.';
+        }
+        this.isLoading = false;
         this.cdr.detectChanges();
       },
     });
@@ -208,7 +225,7 @@ export class MesExperiences implements OnInit {
       apkAndroid:      e.apkAndroid,
       apkVersion:      e.apkVersion,
       apkSize:         e.apkSize,
-      appLabUrl:       e.appLabUrl,       // ← lien Meta App Lab
+      appLabUrl:       e.appLabUrl,
     };
   }
 
@@ -390,7 +407,7 @@ export class MesExperiences implements OnInit {
   // ════════════════════════════════════════════════════════
   isVrModalOpen     = false;
   selectedExpForVr  = '';
-  selectedExpVr: Experience | null = null; // ← variable séparée !
+  selectedExpVr: Experience | null = null;
   vrLaunchState: 'idle' | 'loading' | 'done' = 'idle';
   linkCopied        = false;
 
