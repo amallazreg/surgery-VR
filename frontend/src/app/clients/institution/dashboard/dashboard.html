@@ -89,41 +89,68 @@
       </div>
 
       <!-- Forfait -->
-      <div class="forfait-card">
-        <div class="forfait-header">
-          <div class="forfait-name">Abonnement actuel</div>
-          <div class="forfait-plan">Forfait Pro</div>
-          <div class="forfait-expiry">Expire le 28 Mars 2026</div>
-        </div>
-        <div class="forfait-body">
-          <div class="forfait-feature">
-            <div class="feat-icon">🥽</div>
-            Enquêtes VR actives
-            <span class="feat-count">3 / 5</span>
-          </div>
-          <div class="forfait-feature">
-            <div class="feat-icon">👥</div>
-            Répondants / mois
-            <span class="feat-count">500</span>
-          </div>
-          <div class="forfait-feature">
-            <div class="feat-icon">📱</div>
-            APK inclus
-            <span class="feat-count">5</span>
-          </div>
-          <div class="forfait-feature">
-            <div class="feat-icon">☁️</div>
-            Stockage cloud
-            <span class="feat-count">5 Go</span>
-          </div>
-          <div class="forfait-feature">
-            <div class="feat-icon">🎧</div>
-            Support prioritaire
-            <span class="feat-count" style="color:var(--success)">✓</span>
-          </div>
-          <button class="upgrade-btn">⚡ Passer à Enterprise</button>
-        </div>
-      </div>
+     <div class="forfait-card" *ngIf="!loading && !error">
+  <div class="forfait-header">
+    <div class="forfait-name">Abonnement Actuel</div>
+    <div class="forfait-plan">{{ abonnement?.forfait || 'Aucun abonnement' }}</div>
+    <div class="forfait-expiry">
+      Expire le {{ abonnement?.dateFin | date:'dd MMMM yyyy' : '' : 'fr-FR' }}
+    </div>
+  </div>
+
+  <div class="forfait-body">
+    <!-- APK -->
+    <div class="forfait-feature">
+      <div class="feat-icon">📱</div>
+      APK inclus
+      <span class="feat-count">
+        {{ abonnement?.apkRestants }} / {{ abonnement?.apkTotal }}
+      </span>
+    </div>
+
+    <!-- Formation -->
+      <div *ngIf="abonnement?.formation" class="forfait-feature">
+        <div class="feat-icon">📚</div>
+        Formation incluse
+        <span class="feat-count" [style.color]="'var(--success)'">
+          {{ getFormationStatus() }}
+        </span>
+    </div>
+
+    <!-- Simulation Esthétique -->
+    <div *ngIf="abonnement?.simulationEsthetique" class="forfait-feature">
+      <div class="feat-icon">🥽</div>
+      Simulation Esthétique
+      <span class="feat-count" [style.color]="'var(--success)'">✓</span>
+    </div>
+
+    <!-- Autres features -->
+    <div class="forfait-feature">
+      <div class="feat-icon">👥</div>
+      Répondants / mois
+      <span class="feat-count">Illimité</span>
+    </div>
+
+    <div class="forfait-feature">
+      <div class="feat-icon">☁️</div>
+      Stockage cloud
+      <span class="feat-count">10 Go</span>
+    </div>
+
+    <button class="upgrade-btn">⚡ Passer à Enterprise</button>
+  </div>
+</div>
+
+<!-- Loading -->
+<div *ngIf="loading" class="forfait-card">
+  Chargement de l'abonnement...
+</div>
+
+<!-- Erreur -->
+<div *ngIf="error" class="forfait-card">
+  <p class="text-red-500">{{ error }}</p>
+  <button class="upgrade-btn mt-4">Souscrire maintenant</button>
+</div>
     </div>
 
     <!-- Bottom row -->

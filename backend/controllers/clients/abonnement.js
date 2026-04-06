@@ -301,6 +301,7 @@ const getMesDroits = async (req, res) => {
       abonnementId:   abonnement._id,
       apkTotal:       forfait.nbApk,
       apkRestants:    abonnement.apkRestants,
+      dateFin:        abonnement.dateFin,
       formation: forfait.formation?.incluse
         ? {
             dureeHeures:  forfait.formation.dureeHeures,
