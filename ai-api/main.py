@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from face_analyzer import analyze_face
+from features import calculate_features
+from mlp_model import predict_procedure
 
 app = FastAPI(title="Surgery AI API", version="1.0.0")
 
@@ -19,4 +21,9 @@ def health_check():
 async def analyze_face_endpoint(file: UploadFile = File(...)):
     image_bytes = await file.read()
     result = analyze_face(image_bytes)
+
+    if result.get("face_detected"):
+        result["features"] = calculate_features(result["landmarks"])
+        result["recommendation"] = predict_procedure(result["features"])
+
     return result

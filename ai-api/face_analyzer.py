@@ -39,5 +39,5 @@ def analyze_face(image_bytes: bytes) -> dict:
             "face_detected": True,
             "total_landmarks": len(landmarks),
             "image_size": {"width": width, "height": height},
-            "landmarks": landmarks[:10]
+            "landmarks": landmarks
         }
