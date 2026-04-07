@@ -43,25 +43,21 @@
         <div class="stat-icon-wrap">🥽</div>
         <div class="stat-value">8</div>
         <div class="stat-label">Enquêtes totales</div>
-        <div class="stat-trend trend-up">↑ +2 ce mois-ci</div>
       </div>
       <div class="stat-card cyan">
         <div class="stat-icon-wrap">👥</div>
         <div class="stat-value">342</div>
         <div class="stat-label">Répondants</div>
-        <div class="stat-trend trend-up">↑ +18% vs. mois dernier</div>
       </div>
       <div class="stat-card pink">
-        <div class="stat-icon-wrap">📋</div>
-        <div class="stat-value">2</div>
-        <div class="stat-label">Demandes en cours</div>
-        <div class="stat-trend trend-down">⏳ 1 en attente de réponse</div>
+        <div class="stat-icon-wrap">📦</div>
+        <div class="stat-value">{{ historique.length }}</div>
+        <div class="stat-label">Abonnements total</div>
       </div>
       <div class="stat-card green">
         <div class="stat-icon-wrap">📱</div>
-        <div class="stat-value">5</div>
+        <div class="stat-value">{{ abonnement?.apkTotal ?? '—' }}</div>
         <div class="stat-label">APK disponibles</div>
-        <div class="stat-trend trend-up">✓ Dernier: v2.4.1</div>
       </div>
     </div>
 
@@ -72,15 +68,16 @@
       <div class="section-card">
             <div class="section-card billing-card">
       <div class="section-header">
-        <span class="section-title">Historique de facturation</span>
-        <a class="section-action" href="#">Tout voir</a>
+        <span class="section-title">Historique des paiements</span>
+         <span style="font-size:12px;color:var(--text-gray)">{{ factures.length }} transactions</span>
+       <!-- <a class="section-action" href="#">Tout voir</a> -->
       </div>
       <div class="invoice-list">
-        <div class="invoice-item" *ngFor="let inv of invoices">
-          <div class="invoice-date">{{ inv.date }}</div>
-          <div class="invoice-desc">{{ inv.description }}</div>
-          <div class="invoice-amount">{{ inv.amount }} TND</div>
-          <div class="invoice-status"><span class="status-paid">{{ inv.status }}</span></div>
+        <div class="invoice-item" *ngFor="let f of factures">
+          <div class="invoice-date"> {{ formatDate(f.createdAt) }}</div>
+          <div class="invoice-desc"> {{ f.abonnement?.forfait?.name }} — Mensuel</div>
+          <div class="invoice-amount">{{ f.amount.toString().replace('.', '') }} TND</div>
+          <div class="invoice-status"><span class="status-paid">{{ f.status === 'paid' ? '✓ Payé' : '⏳ En attente' }}</span></div>
          <!-- <button class="invoice-dl" (click)="downloadInvoice(inv)">↓</button> -->
         </div>
       </div>
@@ -94,17 +91,17 @@
     <div class="forfait-name">Abonnement Actuel</div>
     <div class="forfait-plan">{{ abonnement?.forfait || 'Aucun abonnement' }}</div>
     <div class="forfait-expiry">
-      Expire le {{ abonnement?.dateFin | date:'dd MMMM yyyy' : '' : 'fr-FR' }}
+         Expire le {{ abonnement?.dateFin | date:'dd MMMM yyyy' }}
     </div>
   </div>
 
   <div class="forfait-body">
-    <!-- APK -->
+      <!-- APK -->
     <div class="forfait-feature">
       <div class="feat-icon">📱</div>
       APK inclus
       <span class="feat-count">
-        {{ abonnement?.apkRestants }} / {{ abonnement?.apkTotal }}
+        {{ abonnement?.apkRestants ?? '—' }} / {{ abonnement?.apkTotal ?? '—' }}
       </span>
     </div>
 
@@ -116,13 +113,23 @@
           {{ getFormationStatus() }}
         </span>
     </div>
+    <!-- Formation — nombre d'heures -->
+<div class="forfait-feature">
+  <div class="feat-icon">⏱️</div>
+  Durée de formation
+  <span class="feat-count">
+    {{ abonnement?.formation ? abonnement?.formation?.dureeHeures + 'h' : '—' }}
+  </span>
+</div>
 
-    <!-- Simulation Esthétique -->
-    <div *ngIf="abonnement?.simulationEsthetique" class="forfait-feature">
-      <div class="feat-icon">🥽</div>
-      Simulation Esthétique
-      <span class="feat-count" [style.color]="'var(--success)'">✓</span>
-    </div>
+<!-- Simulation Esthétique — true/false -->
+<div class="forfait-feature">
+  <div class="feat-icon">🥽</div>
+  Simulation Esthétique
+  <span class="feat-count" [style.color]="abonnement?.simulationEsthetique ? 'var(--success)' : 'var(--danger)'">
+    {{ abonnement?.simulationEsthetique ? '✓ Incluse' : '✗ Non incluse' }}
+  </span>
+</div>
 
     <!-- Autres features -->
     <div class="forfait-feature">
@@ -131,12 +138,7 @@
       <span class="feat-count">Illimité</span>
     </div>
 
-    <div class="forfait-feature">
-      <div class="feat-icon">☁️</div>
-      Stockage cloud
-      <span class="feat-count">10 Go</span>
-    </div>
-
+   
     <button class="upgrade-btn">⚡ Passer à Enterprise</button>
   </div>
 </div>

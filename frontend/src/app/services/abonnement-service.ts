@@ -2,6 +2,24 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
+export interface FormationDetails {
+  dureeHeures: number;
+  maxEtudiants: number;
+  detaillee: boolean;
+  activee: boolean;
+  codes: any[];
+}
+
+export interface AbonnementResponse {
+  forfait: string;
+  abonnementId: string;
+  apkTotal: number;
+  apkRestants: number;
+  dateFin?: string;
+  formation: FormationDetails | null;
+  simulationEsthetique: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
