@@ -1,8 +1,8 @@
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
-from face_analyzer import analyze_face
-from features import calculate_features
-from mlp_model import predict_procedure
+from core.face_analyzer import analyze_face
+from core.features import calculate_features
+from mlp.mlp_model import predict_procedure
 
 app = FastAPI(title="Surgery AI API", version="1.0.0")
 
