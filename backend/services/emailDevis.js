@@ -7,7 +7,7 @@ const fs = require('fs').promises;
 const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
   try {
     if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
-      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant dans .env");
+      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant");
     }
 
     const htmlContent = creerTemplateEmailDevis(demande, devis);
@@ -15,10 +15,9 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
 
     let attachments = [];
 
-    // ====================== PIÈCE JOINTE PDF ======================
     if (pdfPath) {
       try {
-        console.log(`📄 Lecture du PDF pour attachement : ${pdfPath}`);
+        console.log(`📄 Lecture du PDF : ${pdfPath}`);
 
         const fileBuffer = await fs.readFile(pdfPath);
         const base64Content = fileBuffer.toString('base64');
@@ -28,11 +27,11 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
         attachments = [{
           name: `Devis_SurveryVR_${(demande.nomEtablissement || "Client")
             .replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`,
-          content: base64Content          // ← Base64 brut (sans préfixe data:)
+          content: base64Content
         }];
 
       } catch (readErr) {
-        console.error('❌ Erreur lecture PDF :', readErr.message);
+        console.error('❌ Erreur lors de la lecture du PDF :', readErr.message);
       }
     }
 
@@ -43,16 +42,15 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
       },
       to: [{ email: demande.emailProfessionnel }],
       subject: `Votre devis personnalisé SurveryVR - ${demande.nomEtablissement}`,
-      htmlContent: htmlContent,
+      htmlContent,
       textContent: recapitulatif,
       replyTo: { email: process.env.BREVO_SENDER_EMAIL },
       tags: ["devis-surveryvr"]
     };
 
-    // Ajoute l'attachment uniquement s'il y en a un
     if (attachments.length > 0) {
       payload.attachment = attachments;
-      console.log(`📎 Pièce jointe PDF ajoutée au payload Brevo`);
+      console.log(`📎 Pièce jointe PDF ajoutée (base64)`);
     }
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
@@ -72,7 +70,6 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
     throw new Error(`Erreur envoi email devis: ${error.message}`);
   }
 };
-
 
 // ====================== TEMPLATE HTML (inchangé) ======================
 const creerTemplateEmailDevis = (demande, devis) => {

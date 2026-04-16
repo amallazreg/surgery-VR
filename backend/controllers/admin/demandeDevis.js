@@ -221,7 +221,7 @@ const calculerEtEnvoyerDevis = async (req, res) => {
     // 4. Supprimer le PDF temporaire
     setTimeout(() => {
       supprimerPDFTemp(pdfPath);
-    }, 5000); // Attendre 5 secondes pour être sûr que l'email est envoyé
+    }, 10000); // Attendre 5 secondes pour être sûr que l'email est envoyé
 
     // 5. Mettre à jour le statut final
     demande.statut = 'envoyee';
