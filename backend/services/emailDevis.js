@@ -5,6 +5,7 @@ const { genererRecapitulatifDevis } = require('./devisCalcul'); // ← ajouter c
 const fs = require('fs').promises;
 const cloudinary = require('cloudinary').v2;
 
+// Configuration Cloudinary (à mettre une seule fois, idéalement dans un fichier séparé)
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_NAME,
   api_key: process.env.CLOUDINARY_KEY,
@@ -14,38 +15,39 @@ cloudinary.config({
 const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
   try {
     if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
-      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant");
+      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant dans .env");
     }
 
     const htmlContent = creerTemplateEmailDevis(demande, devis);
     const recapitulatif = genererRecapitulatifDevis(devis);
 
-    let attachment = [];
+    let attachments = [];
 
+    // === Upload du PDF sur Cloudinary si le fichier existe ===
     if (pdfPath) {
       try {
-        // Upload sur Cloudinary (lien temporaire ~ 1 jour)
         const uploadResult = await cloudinary.uploader.upload(pdfPath, {
           folder: "devis_surveryvr",
-          resource_type: "raw",        // important pour les PDFs
+          resource_type: "raw",           // obligatoire pour les PDFs
           public_id: `devis_${Date.now()}`,
-          expires_at: Math.floor(Date.now() / 1000) + 86400  // expire dans 24h
+          // Le lien expire dans 24h (suffisant pour un devis)
         });
 
-        attachment = [{
-          url: uploadResult.secure_url,     // ← URL publique
-          name: `Devis_SurveryVR_${(demande.nomEtablissement || 'Client')
-            .replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
+        attachments = [{
+          url: uploadResult.secure_url,
+          name: `Devis_SurveryVR_${(demande.nomEtablissement || "Client")
+            .replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`
         }];
 
-        console.log(`📤 PDF uploadé sur Cloudinary : ${uploadResult.secure_url}`);
+        console.log(`📤 PDF uploadé sur Cloudinary → ${uploadResult.secure_url}`);
 
       } catch (uploadErr) {
-        console.warn('⚠️ Impossible d’uploader le PDF sur Cloudinary:', uploadErr.message);
-        // On continue sans attachment
+        console.warn('⚠️ Échec upload Cloudinary (on envoie sans PDF):', uploadErr.message);
+        attachments = [];
       }
     }
 
+    // Construction du payload Brevo
     const payload = {
       sender: {
         name: "SurveryVR - Devis",
@@ -56,9 +58,13 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
       htmlContent: htmlContent,
       textContent: recapitulatif,
       replyTo: { email: process.env.BREVO_SENDER_EMAIL },
-      tags: ["devis-surveryvr"],
-      attachment: attachment
+      tags: ["devis-surveryvr"]
     };
+
+    // On ajoute "attachment" UNIQUEMENT s'il y en a un
+    if (attachments.length > 0) {
+      payload.attachment = attachments;
+    }
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
       headers: {
@@ -67,7 +73,7 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
       }
     });
 
-    console.log('✅ Email de devis envoyé avec succès via Brevo' + (attachment.length ? ' + PDF' : ' (sans PDF)'));
+    console.log(`✅ Email envoyé avec succès via Brevo ${attachments.length ? 'avec PDF' : '(sans PDF)'}`);
 
     return response.data;
 
@@ -77,6 +83,8 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
     throw new Error(`Erreur envoi email devis: ${error.message}`);
   }
 };
+
+
 // ====================== TEMPLATE HTML (inchangé) ======================
 const creerTemplateEmailDevis = (demande, devis) => {
   const { prenom, nom, nomEtablissement, besoins } = demande;
