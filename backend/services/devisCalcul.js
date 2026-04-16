@@ -4,39 +4,39 @@ const TARIFS = {
   licence: {
     base: 50, // 50€/utilisateur/mois
     volume: {
-      '1-10': 50,
-      '11-50': 45,
-      '51-100': 40,
-      '101-200': 35,
+      '1-10': 25,
+      '11-50': 35,
+      '51-100': 20,
+      '101-200': 25,
       '200+': 30
     }
   },
 
   // Casques VR
   casquesVR: {
-    'Meta Quest 3': 550,
-    'Meta Quest Pro': 1100,
-    'HTC Vive Pro 2': 1400,
-    'Pico 4': 450,
-    'Autre': 600
+    'Meta Quest 3': 350,
+    'Meta Quest Pro': 800,
+    'HTC Vive Pro 2': 700,
+    'Pico 4': 250,
+    'Autre': 300
   },
 
   // Type de déploiement
   deploiement: {
     'Cloud': 0, // Inclus dans licence
-    'On-premise': 5000, // Installation serveur
-    'Hybride': 3000
+    'On-premise': 1000, // Installation serveur
+    'Hybride': 600
   },
 
   // Formation (par utilisateur)
   formation: {
     base: 100,
     volume: {
-      '1-10': 100,
-      '11-50': 80,
-      '51-100': 60,
-      '101-200': 50,
-      '200+': 40
+      '1-10': 20,
+      '11-50': 10,
+      '51-100': 6,
+      '101-200': 3,
+      '200+': 1
     }
   },
 

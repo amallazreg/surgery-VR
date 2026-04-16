@@ -1,5 +1,7 @@
 const axios = require('axios');
 require('dotenv').config();
+const { genererRecapitulatifDevis } = require('./devisCalcul'); // ← ajouter cette ligne
+
 
 // ====================== BREVO API - EMAIL DEVIS ======================
 
