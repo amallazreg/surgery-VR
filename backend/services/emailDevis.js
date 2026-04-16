@@ -2,17 +2,49 @@ const axios = require('axios');
 require('dotenv').config();
 const { genererRecapitulatifDevis } = require('./devisCalcul'); // ← ajouter cette ligne
 
+const fs = require('fs').promises;
+const cloudinary = require('cloudinary').v2;
 
-// ====================== BREVO API - EMAIL DEVIS ======================
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_NAME,
+  api_key: process.env.CLOUDINARY_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET
+});
 
-const envoyerEmailDevis = async ({ demande, devis }) => {
+const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
   try {
     if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
-      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant dans .env");
+      throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant");
     }
 
     const htmlContent = creerTemplateEmailDevis(demande, devis);
     const recapitulatif = genererRecapitulatifDevis(devis);
+
+    let attachment = [];
+
+    if (pdfPath) {
+      try {
+        // Upload sur Cloudinary (lien temporaire ~ 1 jour)
+        const uploadResult = await cloudinary.uploader.upload(pdfPath, {
+          folder: "devis_surveryvr",
+          resource_type: "raw",        // important pour les PDFs
+          public_id: `devis_${Date.now()}`,
+          expires_at: Math.floor(Date.now() / 1000) + 86400  // expire dans 24h
+        });
+
+        attachment = [{
+          url: uploadResult.secure_url,     // ← URL publique
+          name: `Devis_SurveryVR_${(demande.nomEtablissement || 'Client')
+            .replace(/[^a-zA-Z0-9]/g, '_')}.pdf`
+        }];
+
+        console.log(`📤 PDF uploadé sur Cloudinary : ${uploadResult.secure_url}`);
+
+      } catch (uploadErr) {
+        console.warn('⚠️ Impossible d’uploader le PDF sur Cloudinary:', uploadErr.message);
+        // On continue sans attachment
+      }
+    }
 
     const payload = {
       sender: {
@@ -24,8 +56,8 @@ const envoyerEmailDevis = async ({ demande, devis }) => {
       htmlContent: htmlContent,
       textContent: recapitulatif,
       replyTo: { email: process.env.BREVO_SENDER_EMAIL },
-      tags: ["devis-surveryvr"]
-      // Pas d'attachment pour le moment → ça va marcher
+      tags: ["devis-surveryvr"],
+      attachment: attachment
     };
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
@@ -35,7 +67,7 @@ const envoyerEmailDevis = async ({ demande, devis }) => {
       }
     });
 
-    console.log('✅ Email de devis envoyé avec succès via Brevo (sans PDF)');
+    console.log('✅ Email de devis envoyé avec succès via Brevo' + (attachment.length ? ' + PDF' : ' (sans PDF)'));
 
     return response.data;
 
