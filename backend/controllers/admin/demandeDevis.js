@@ -215,9 +215,7 @@ const calculerEtEnvoyerDevis = async (req, res) => {
     // 3. Envoyer l'email avec le PDF
     const emailInfo = await envoyerEmailDevis({
       demande,
-      devis: devisCalcule,
-      messagePersonnalise,
-      pdfPath
+      devis: devisCalcule
     });
 
     // 4. Supprimer le PDF temporaire

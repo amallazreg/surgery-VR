@@ -5,7 +5,7 @@ const { genererRecapitulatifDevis } = require('./devisCalcul'); // ← ajouter c
 
 // ====================== BREVO API - EMAIL DEVIS ======================
 
-const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
+const envoyerEmailDevis = async ({ demande, devis }) => {
   try {
     if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
       throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant dans .env");
@@ -22,45 +22,29 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
       to: [{ email: demande.emailProfessionnel }],
       subject: `Votre devis personnalisé SurveryVR - ${demande.nomEtablissement}`,
       htmlContent: htmlContent,
-      textContent: recapitulatif,                    // Version texte
+      textContent: recapitulatif,
       replyTo: { email: process.env.BREVO_SENDER_EMAIL },
-      tags: ["devis-surveryvr"],
-      // Pièce jointe PDF (si elle existe)
-      attachment: pdfPath ? [{
-        name: `Devis_SurveryVR_${demande.nomEtablissement.replace(/\s+/g, '_')}.pdf`,
-        content: pdfPath,                    // On enverra le contenu plus bas si besoin
-        type: "application/pdf"
-      }] : []
+      tags: ["devis-surveryvr"]
+      // Pas d'attachment pour le moment → ça va marcher
     };
-
-    // Si tu as un fichier PDF physique (buffer ou chemin), il faut le convertir en base64
-    // Pour l'instant on garde simple. Si tu as un buffer, on l'ajustera.
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
       headers: {
         'api-key': process.env.BREVO_API_KEY,
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
+        'Content-Type': 'application/json'
       }
     });
 
-    console.log('✅ Email de devis envoyé via Brevo :', {
-      destinataire: demande.emailProfessionnel,
-      etablissement: demande.nomEtablissement,
-      montantTTC: devis.totalTTC,
-      pdfAttache: !!pdfPath,
-      messageId: response.data.messageId
-    });
+    console.log('✅ Email de devis envoyé avec succès via Brevo (sans PDF)');
 
     return response.data;
 
   } catch (error) {
-    const errData = error.response?.data || error;
-    console.error('❌ Erreur Brevo API (Devis):', errData);
-    throw new Error(`Erreur envoi email devis: ${errData.message || error.message}`);
+    const errData = error.response?.data || error.message || error;
+    console.error('❌ Erreur Brevo API (Devis):', JSON.stringify(errData, null, 2));
+    throw new Error(`Erreur envoi email devis: ${error.message}`);
   }
 };
-
 // ====================== TEMPLATE HTML (inchangé) ======================
 const creerTemplateEmailDevis = (demande, devis) => {
   const { prenom, nom, nomEtablissement, besoins } = demande;
