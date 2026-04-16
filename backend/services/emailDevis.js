@@ -3,14 +3,6 @@ require('dotenv').config();
 const { genererRecapitulatifDevis } = require('./devisCalcul'); // ← ajouter cette ligne
 
 const fs = require('fs').promises;
-const cloudinary = require('cloudinary').v2;
-
-// Configuration Cloudinary (à mettre une seule fois, idéalement dans un fichier séparé)
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_NAME,
-  api_key: process.env.CLOUDINARY_KEY,
-  api_secret: process.env.CLOUDINARY_SECRET
-});
 
 const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
   try {
@@ -23,31 +15,27 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
 
     let attachments = [];
 
-    // === Upload du PDF sur Cloudinary si le fichier existe ===
+    // ====================== PIÈCE JOINTE PDF ======================
     if (pdfPath) {
       try {
-        const uploadResult = await cloudinary.uploader.upload(pdfPath, {
-          folder: "devis_surveryvr",
-          resource_type: "raw",           // obligatoire pour les PDFs
-          public_id: `devis_${Date.now()}`,
-          // Le lien expire dans 24h (suffisant pour un devis)
-        });
+        console.log(`📄 Lecture du PDF pour attachement : ${pdfPath}`);
+
+        const fileBuffer = await fs.readFile(pdfPath);
+        const base64Content = fileBuffer.toString('base64');
+
+        console.log(`✅ PDF lu avec succès - Taille : ${(fileBuffer.length / 1024).toFixed(1)} Ko`);
 
         attachments = [{
-          url: uploadResult.secure_url,
           name: `Devis_SurveryVR_${(demande.nomEtablissement || "Client")
-            .replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`
+            .replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`,
+          content: base64Content          // ← Base64 brut (sans préfixe data:)
         }];
 
-        console.log(`📤 PDF uploadé sur Cloudinary → ${uploadResult.secure_url}`);
-
-      } catch (uploadErr) {
-        console.warn('⚠️ Échec upload Cloudinary (on envoie sans PDF):', uploadErr.message);
-        attachments = [];
+      } catch (readErr) {
+        console.error('❌ Erreur lecture PDF :', readErr.message);
       }
     }
 
-    // Construction du payload Brevo
     const payload = {
       sender: {
         name: "SurveryVR - Devis",
@@ -61,9 +49,10 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
       tags: ["devis-surveryvr"]
     };
 
-    // On ajoute "attachment" UNIQUEMENT s'il y en a un
+    // Ajoute l'attachment uniquement s'il y en a un
     if (attachments.length > 0) {
       payload.attachment = attachments;
+      console.log(`📎 Pièce jointe PDF ajoutée au payload Brevo`);
     }
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
@@ -73,13 +62,13 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
       }
     });
 
-    console.log(`✅ Email envoyé avec succès via Brevo ${attachments.length ? 'avec PDF' : '(sans PDF)'}`);
+    console.log(`✅ Email envoyé avec succès ${attachments.length ? 'AVEC PIÈCE JOINTE PDF' : 'sans PDF'}`);
 
     return response.data;
 
   } catch (error) {
     const errData = error.response?.data || error.message || error;
-    console.error('❌ Erreur Brevo API (Devis):', JSON.stringify(errData, null, 2));
+    console.error('❌ Erreur Brevo API :', JSON.stringify(errData, null, 2));
     throw new Error(`Erreur envoi email devis: ${error.message}`);
   }
 };
