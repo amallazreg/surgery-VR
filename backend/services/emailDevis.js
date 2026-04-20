@@ -1,10 +1,8 @@
 const axios = require('axios');
 require('dotenv').config();
-const { genererRecapitulatifDevis } = require('./devisCalcul'); // ← ajouter cette ligne
+const { genererRecapitulatifDevis } = require('./devisCalcul');
 
-const fs = require('fs').promises;
-
-const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
+const envoyerEmailDevis = async ({ demande, devis, pdfBuffer }) => {
   try {
     if (!process.env.BREVO_API_KEY || !process.env.BREVO_SENDER_EMAIL) {
       throw new Error("BREVO_API_KEY ou BREVO_SENDER_EMAIL manquant");
@@ -15,24 +13,19 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
 
     let attachments = [];
 
-    if (pdfPath) {
-      try {
-        console.log(`📄 Lecture du PDF : ${pdfPath}`);
+    // ====================== PIÈCE JOINTE DEPUIS BUFFER ======================
+    if (pdfBuffer && pdfBuffer.length > 0) {
+      const nomEtablissement = (demande.nomEtablissement || "Client")
+        .replace(/[^a-zA-Z0-9._-]/g, '_');
 
-        const fileBuffer = await fs.readFile(pdfPath);
-        const base64Content = fileBuffer.toString('base64');
+      attachments = [{
+        name: `Devis_SurveryVR_${nomEtablissement}.pdf`,
+        content: pdfBuffer.toString('base64')
+      }];
 
-        console.log(`✅ PDF lu avec succès - Taille : ${(fileBuffer.length / 1024).toFixed(1)} Ko`);
-
-        attachments = [{
-          name: `Devis_SurveryVR_${(demande.nomEtablissement || "Client")
-            .replace(/[^a-zA-Z0-9._-]/g, '_')}.pdf`,
-          content: base64Content
-        }];
-
-      } catch (readErr) {
-        console.error('❌ Erreur lors de la lecture du PDF :', readErr.message);
-      }
+      console.log(`📎 PDF prêt - ${(pdfBuffer.length / 1024).toFixed(1)} Ko`);
+    } else {
+      console.warn(`⚠️ Aucun pdfBuffer fourni, email envoyé sans pièce jointe`);
     }
 
     const payload = {
@@ -50,7 +43,9 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
 
     if (attachments.length > 0) {
       payload.attachment = attachments;
-      console.log(`📎 Pièce jointe PDF ajoutée (base64)`);
+      console.log(`🚀 Envoi email AVEC pièce jointe PDF...`);
+    } else {
+      console.log(`🚀 Envoi email sans pièce jointe...`);
     }
 
     const response = await axios.post('https://api.brevo.com/v3/smtp/email', payload, {
@@ -60,8 +55,7 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
       }
     });
 
-    console.log(`✅ Email envoyé avec succès ${attachments.length ? 'AVEC PIÈCE JOINTE PDF' : 'sans PDF'}`);
-
+    console.log(`✅ Email envoyé ${attachments.length ? 'AVEC PDF ✓' : 'sans PDF ✗'}`);
     return response.data;
 
   } catch (error) {
@@ -71,7 +65,7 @@ const envoyerEmailDevis = async ({ demande, devis, pdfPath }) => {
   }
 };
 
-// ====================== TEMPLATE HTML (inchangé) ======================
+// ====================== TEMPLATE HTML ======================
 const creerTemplateEmailDevis = (demande, devis) => {
   const { prenom, nom, nomEtablissement, besoins } = demande;
   const idDemande = demande._id ? demande._id.toString() : 'XXXXX';
@@ -88,33 +82,27 @@ const creerTemplateEmailDevis = (demande, devis) => {
   <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #F8FAFF; padding: 40px 20px;">
     <tr>
       <td align="center">
-        <table width="650" cellpadding="0" cellspacing="0" style="background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); overflow: hidden;">
-          
+        <table width="650" cellpadding="0" cellspacing="0" style="background: white; border-radius: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); overflow: hidden;">
+
           <!-- Header -->
           <tr>
             <td style="background: linear-gradient(135deg, #0066FF, #00D9FF); padding: 40px 30px; text-align: center;">
-              <h1 style="margin: 0; color: white; font-size: 32px; font-weight: 700;">
-                💼 SurveryVR
-              </h1>
-              <p style="margin: 10px 0 0 0; color: rgba(255, 255, 255, 0.9); font-size: 16px;">
-                Formation Médicale en Réalité Virtuelle
-              </p>
+              <h1 style="margin: 0; color: white; font-size: 32px; font-weight: 700;">💼 SurveryVR</h1>
+              <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 16px;">Formation Médicale en Réalité Virtuelle</p>
             </td>
           </tr>
 
           <!-- Titre -->
           <tr>
-            <td style="padding: 30px; text-align: center; background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(0, 217, 255, 0.05));">
-              <h2 style="margin: 0; color: #1A2B5F; font-size: 28px; font-weight: 700;">
-                Votre Devis Personnalisé
-              </h2>
+            <td style="padding: 30px; text-align: center; background: linear-gradient(135deg, rgba(0,102,255,0.05), rgba(0,217,255,0.05));">
+              <h2 style="margin: 0; color: #1A2B5F; font-size: 28px; font-weight: 700;">Votre Devis Personnalisé</h2>
               <p style="margin: 10px 0 0 0; color: #5A6B8C; font-size: 16px;">
                 Valable 30 jours - Référence: DEV-${new Date().getFullYear()}-${idDemande.slice(-6).toUpperCase()}
               </p>
             </td>
           </tr>
 
-          <!-- Message personnalisé -->
+          <!-- Message -->
           <tr>
             <td style="padding: 30px;">
               <p style="margin: 0 0 15px 0; color: #1A2B5F; font-size: 16px; line-height: 1.6;">
@@ -123,16 +111,17 @@ const creerTemplateEmailDevis = (demande, devis) => {
               <p style="margin: 0 0 15px 0; color: #1A2B5F; font-size: 16px; line-height: 1.6;">
                 Merci pour votre intérêt pour <strong>${nomEtablissement}</strong>. Nous avons le plaisir de vous présenter notre offre personnalisée pour vos besoins en formation médicale par réalité virtuelle.
               </p>
+              <p style="margin: 0; color: #5A6B8C; font-size: 14px; line-height: 1.6;">
+                📎 Veuillez trouver ci-joint votre devis détaillé en PDF.
+              </p>
             </td>
           </tr>
 
           <!-- Besoins identifiés -->
           <tr>
             <td style="padding: 0 30px 20px 30px;">
-              <div style="background: linear-gradient(135deg, rgba(0, 196, 140, 0.05), rgba(0, 255, 163, 0.05)); padding: 20px; border-radius: 15px; border-left: 4px solid #00C48C;">
-                <h3 style="margin: 0 0 15px 0; color: #00C48C; font-size: 18px; font-weight: 700;">
-                  ✓ Vos Besoins Identifiés
-                </h3>
+              <div style="background: linear-gradient(135deg, rgba(0,196,140,0.05), rgba(0,255,163,0.05)); padding: 20px; border-radius: 15px; border-left: 4px solid #00C48C;">
+                <h3 style="margin: 0 0 15px 0; color: #00C48C; font-size: 18px; font-weight: 700;">✓ Vos Besoins Identifiés</h3>
                 <ul style="margin: 0; padding-left: 20px; color: #1A2B5F;">
                   ${besoins.map(besoin => `<li style="margin-bottom: 8px;">${besoin}</li>`).join('')}
                 </ul>
@@ -140,21 +129,38 @@ const creerTemplateEmailDevis = (demande, devis) => {
             </td>
           </tr>
 
-          <!-- Le reste de ton template (devis détaillé, total, CTA, footer) reste IDENTIQUE -->
-          <!-- Je l'ai gardé tel quel pour ne rien casser -->
+          <!-- Récapitulatif Montant -->
+          <tr>
+            <td style="padding: 0 30px 30px 30px;">
+              <div style="background: linear-gradient(135deg, #0066FF, #00D9FF); padding: 25px; border-radius: 15px; text-align: center;">
+                <p style="margin: 0 0 5px 0; color: rgba(255,255,255,0.8); font-size: 14px;">MONTANT TOTAL TTC</p>
+                <p style="margin: 0; color: white; font-size: 36px; font-weight: 700;">
+                  ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(devis.totalTTC)}
+                </p>
+                <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.8); font-size: 13px;">
+                  HT : ${new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(devis.totalHT)} 
+                  (TVA ${devis.tauxTVA}%)
+                </p>
+              </div>
+            </td>
+          </tr>
 
-          ${/* Ton code complet du devis détaillé, sous-total, remise, total TTC, CTA, etc. */''}
-          <!-- Colle ici tout le reste de ton ancien template à partir de la ligne du détail du devis -->
+          <!-- Footer -->
+          <tr>
+            <td style="padding: 20px 30px; background: #F8FAFF; text-align: center;">
+              <p style="margin: 0; color: #5A6B8C; font-size: 12px;">
+                Ce devis est valable 30 jours. Pour toute question, contactez-nous à
+                <a href="mailto:${process.env.BREVO_SENDER_EMAIL}" style="color: #0066FF;">${process.env.BREVO_SENDER_EMAIL}</a>
+              </p>
+            </td>
+          </tr>
 
         </table>
       </td>
     </tr>
   </table>
 </body>
-</html>
-  `;
+</html>`;
 };
 
-module.exports = {
-  envoyerEmailDevis
-};
+module.exports = { envoyerEmailDevis };

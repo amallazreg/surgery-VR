@@ -2,14 +2,9 @@ const DemandeDevis = require('../../models/demandeDevis');
 const { calculerDevis } = require('../../services/devisCalcul');
 const { envoyerEmailDevis } = require('../../services/emailDevis');
 
-// ===============================
-// Lister toutes les demandes de devis
-// ===============================
 const listerToutesDemandesDevis = async (req, res) => {
   try {
-    const demandes = await DemandeDevis.find()
-      .sort({ dateCreation: -1 });
-
+    const demandes = await DemandeDevis.find().sort({ dateCreation: -1 });
     res.json(demandes);
   } catch (err) {
     console.error('Erreur récupération demandes devis:', err);
@@ -17,20 +12,13 @@ const listerToutesDemandesDevis = async (req, res) => {
   }
 };
 
-// ===============================
-// Lister demandes par statut
-// ===============================
 const listerDemandesParStatut = async (req, res) => {
   try {
     const { statut } = req.params;
-
     if (!['nouvelle', 'en_cours', 'envoyee'].includes(statut)) {
       return res.status(400).json({ message: "Statut invalide" });
     }
-
-    const demandes = await DemandeDevis.find({ statut })
-      .sort({ dateCreation: -1 });
-
+    const demandes = await DemandeDevis.find({ statut }).sort({ dateCreation: -1 });
     res.json(demandes);
   } catch (err) {
     console.error('Erreur filtrage demandes:', err);
@@ -38,9 +26,6 @@ const listerDemandesParStatut = async (req, res) => {
   }
 };
 
-// ===============================
-// Obtenir les statistiques
-// ===============================
 const obtenirStatistiques = async (req, res) => {
   try {
     const [totalNouvelle, totalEnCours, totalEnvoyee, totalDemandes] = await Promise.all([
@@ -50,15 +35,11 @@ const obtenirStatistiques = async (req, res) => {
       DemandeDevis.countDocuments()
     ]);
 
-    // Calculer le montant total des devis envoyés
     const devisEnvoyes = await DemandeDevis.find({ statut: 'envoyee', 'devisCalcule.totalTTC': { $exists: true } });
     const montantTotal = devisEnvoyes.reduce((sum, d) => sum + (d.devisCalcule.totalTTC || 0), 0);
 
     res.json({
-      totalNouvelle,
-      totalEnCours,
-      totalEnvoyee,
-      totalDemandes,
+      totalNouvelle, totalEnCours, totalEnvoyee, totalDemandes,
       montantTotal: Math.round(montantTotal * 100) / 100
     });
   } catch (err) {
@@ -67,76 +48,50 @@ const obtenirStatistiques = async (req, res) => {
   }
 };
 
-// ===============================
-// Calculer le devis (sans l'envoyer)
-// ===============================
 const calculerDevisEstime = async (req, res) => {
   try {
     const { id } = req.params;
-
     const demande = await DemandeDevis.findById(id);
-    if (!demande) {
-      return res.status(404).json({ message: "Demande introuvable" });
-    }
+    if (!demande) return res.status(404).json({ message: "Demande introuvable" });
 
-    // Calculer le devis
     const devisCalcule = calculerDevis(demande);
-
-    // Mettre à jour la demande avec le devis calculé
     demande.devisCalcule = devisCalcule;
     demande.statut = 'en_cours';
     demande.dateTraitement = new Date();
     await demande.save();
 
-    res.json({
-      message: "Devis calculé avec succès",
-      demande,
-      devis: devisCalcule
-    });
-
+    res.json({ message: "Devis calculé avec succès", demande, devis: devisCalcule });
   } catch (err) {
     console.error('Erreur calcul devis:', err);
-    res.status(500).json({ 
-      message: "Erreur lors du calcul du devis",
-      error: err.message 
-    });
+    res.status(500).json({ message: "Erreur lors du calcul du devis", error: err.message });
   }
 };
 
-// ===============================
-// Envoyer le devis par email
-// ===============================
 const envoyerDevis = async (req, res) => {
   try {
     const { id } = req.params;
     const { messagePersonnalise } = req.body;
 
     const demande = await DemandeDevis.findById(id);
-    if (!demande) {
-      return res.status(404).json({ message: "Demande introuvable" });
-    }
+    if (!demande) return res.status(404).json({ message: "Demande introuvable" });
 
-    // Vérifier qu'un devis a été calculé
     if (!demande.devisCalcule || !demande.devisCalcule.totalTTC) {
-      return res.status(400).json({ 
-        message: "Veuillez d'abord calculer le devis avant de l'envoyer" 
-      });
+      return res.status(400).json({ message: "Veuillez d'abord calculer le devis avant de l'envoyer" });
     }
-
     if (demande.statut === 'envoyee') {
-      return res.status(400).json({ 
-        message: "Le devis a déjà été envoyé" 
-      });
+      return res.status(400).json({ message: "Le devis a déjà été envoyé" });
     }
 
-    // Envoyer l'email avec le devis
+    const { genererPDFBuffer } = require('../../services/pdfDevis');
+    const pdfBuffer = await genererPDFBuffer(demande, demande.devisCalcule);
+
     const emailInfo = await envoyerEmailDevis({
       demande,
       devis: demande.devisCalcule,
-      messagePersonnalise
+      messagePersonnalise,
+      pdfBuffer
     });
 
-    // Mettre à jour le statut
     demande.statut = 'envoyee';
     demande.dateEnvoi = new Date();
     demande.historiqueEmails.push({
@@ -145,60 +100,31 @@ const envoyerDevis = async (req, res) => {
       devisAttache: true,
       statut: 'envoye'
     });
-
     await demande.save();
 
-    res.json({ 
-      message: "Devis envoyé avec succès", 
+    res.json({
+      message: "Devis envoyé avec succès",
       demande,
-      emailInfo: {
-        messageId: emailInfo.messageId,
-        destinataire: demande.emailProfessionnel
-      }
+      emailInfo: { messageId: emailInfo.messageId, destinataire: demande.emailProfessionnel }
     });
-
   } catch (err) {
     console.error('Erreur envoi devis:', err);
-    
-    // Logger l'erreur dans l'historique
-    try {
-      const demande = await DemandeDevis.findById(req.params.id);
-      if (demande) {
-        demande.historiqueEmails.push({
-          dateEnvoi: new Date(),
-          devisAttache: true,
-          statut: 'erreur'
-        });
-        await demande.save();
-      }
-    } catch (logErr) {
-      console.error('Erreur log:', logErr);
-    }
-
-    res.status(500).json({ 
-      message: "Erreur lors de l'envoi du devis",
-      error: err.message 
-    });
+    res.status(500).json({ message: "Erreur lors de l'envoi du devis", error: err.message });
   }
 };
 
 // ===============================
-// Calculer ET envoyer le devis (action combinée)
+// Calculer ET envoyer (action combinée) — MODIFIÉE
 // ===============================
 const calculerEtEnvoyerDevis = async (req, res) => {
   try {
     const { id } = req.params;
-    const { messagePersonnalise } = req.body;
 
     const demande = await DemandeDevis.findById(id);
-    if (!demande) {
-      return res.status(404).json({ message: "Demande introuvable" });
-    }
+    if (!demande) return res.status(404).json({ message: "Demande introuvable" });
 
     if (demande.statut === 'envoyee') {
-      return res.status(400).json({ 
-        message: "Le devis a déjà été envoyé" 
-      });
+      return res.status(400).json({ message: "Le devis a déjà été envoyé" });
     }
 
     // 1. Calculer le devis
@@ -208,22 +134,19 @@ const calculerEtEnvoyerDevis = async (req, res) => {
     demande.dateTraitement = new Date();
     await demande.save();
 
-    // 2. Générer le PDF
-    const { genererPDFDevis, supprimerPDFTemp } = require('../../services/pdfDevis');
-    const { filePath: pdfPath, fileName: pdfFileName } = await genererPDFDevis(demande, devisCalcule);
+    // 2. Générer le PDF en mémoire (Buffer) — plus de fichier temporaire
+    const { genererPDFBuffer } = require('../../services/pdfDevis');
+    const pdfBuffer = await genererPDFBuffer(demande, devisCalcule);
+    console.log(`📄 Buffer PDF prêt : ${(pdfBuffer.length / 1024).toFixed(1)} Ko`);
 
-    // 3. Envoyer l'email avec le PDF
+    // 3. Envoyer l'email avec le buffer directement
     const emailInfo = await envoyerEmailDevis({
       demande,
-      devis: devisCalcule
+      devis: devisCalcule,
+      pdfBuffer  // ← buffer en mémoire, pas de fichier temporaire
     });
 
-    // 4. Supprimer le PDF temporaire
-    setTimeout(() => {
-      supprimerPDFTemp(pdfPath);
-    }, 10000); // Attendre 5 secondes pour être sûr que l'email est envoyé
-
-    // 5. Mettre à jour le statut final
+    // 4. Mettre à jour le statut
     demande.statut = 'envoyee';
     demande.dateEnvoi = new Date();
     demande.historiqueEmails.push({
@@ -232,77 +155,49 @@ const calculerEtEnvoyerDevis = async (req, res) => {
       devisAttache: true,
       statut: 'envoye'
     });
-
     await demande.save();
 
-    res.json({ 
-      message: "Devis calculé et envoyé avec succès", 
+    res.json({
+      message: "Devis calculé et envoyé avec succès",
       demande,
       devis: devisCalcule,
       emailInfo: {
         messageId: emailInfo.messageId,
         destinataire: demande.emailProfessionnel,
         montantTTC: devisCalcule.totalTTC,
-        pdfAttache: true,
-        pdfFileName
+        pdfAttache: true
       }
     });
 
   } catch (err) {
     console.error('Erreur calcul et envoi devis:', err);
-    res.status(500).json({ 
-      message: "Erreur lors du traitement du devis",
-      error: err.message 
-    });
+    res.status(500).json({ message: "Erreur lors du traitement du devis", error: err.message });
   }
 };
 
-// ===============================
-// Mettre à jour les notes admin
-// ===============================
 const mettreAJourNotes = async (req, res) => {
   try {
     const { id } = req.params;
     const { notesAdmin } = req.body;
 
     const demande = await DemandeDevis.findByIdAndUpdate(
-      id,
-      { notesAdmin },
-      { new: true, runValidators: true }
+      id, { notesAdmin }, { new: true, runValidators: true }
     );
+    if (!demande) return res.status(404).json({ message: "Demande introuvable" });
 
-    if (!demande) {
-      return res.status(404).json({ message: "Demande introuvable" });
-    }
-
-    res.json({ 
-      message: "Notes mises à jour avec succès", 
-      demande 
-    });
-
+    res.json({ message: "Notes mises à jour avec succès", demande });
   } catch (err) {
     console.error('Erreur MAJ notes:', err);
     res.status(500).json({ message: "Erreur mise à jour notes" });
   }
 };
 
-// ===============================
-// Supprimer une demande
-// ===============================
 const supprimerDemande = async (req, res) => {
   try {
     const { id } = req.params;
-
     const demande = await DemandeDevis.findByIdAndDelete(id);
-
-    if (!demande) {
-      return res.status(404).json({ message: "Demande introuvable" });
-    }
-
-    res.json({ 
-      message: "Demande supprimée avec succès" 
-    });
-
+    if (!demande) return res.status(404).json({ message: "Demande introuvable" });
+    res.json({ message: "Demande supprimée avec succès" });
   } catch (err) {
     console.error('Erreur suppression:', err);
     res.status(500).json({ message: "Erreur suppression demande" });

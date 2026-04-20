@@ -1,22 +1,15 @@
 const PDFDocument = require('pdfkit');
-const fs = require('fs');
-const path = require('path');
 
 // ===============================
-// SERVICE DE GÉNÉRATION DE PDF DEVIS
+// GÉNÉRATION PDF EN MÉMOIRE (Buffer)
 // ===============================
-
-/**
- * Générer un PDF de devis détaillé
- */
-const genererPDFDevis = async (demande, devis) => {
+const genererPDFBuffer = async (demande, devis) => {
   return new Promise((resolve, reject) => {
     try {
-
-      // ✅ Convertir _id en string
       const idDemande = demande._id ? demande._id.toString() : 'XXXXX';
+      const reference = `DEV-${new Date().getFullYear()}-${idDemande.slice(-6).toUpperCase()}`;
+      const dateDevis = new Date().toLocaleDateString('fr-FR');
 
-      // Créer le document PDF
       const doc = new PDFDocument({
         size: 'A4',
         margin: 50,
@@ -27,19 +20,15 @@ const genererPDFDevis = async (demande, devis) => {
         }
       });
 
-      // ✅ Utiliser idDemande ici
-      const fileName = `devis_${idDemande}_${Date.now()}.pdf`;
-      const filePath = path.join(__dirname, '../temp', fileName);
-
-
-      // Créer le dossier temp s'il n'existe pas
-      if (!fs.existsSync(path.join(__dirname, '../temp'))) {
-        fs.mkdirSync(path.join(__dirname, '../temp'), { recursive: true });
-      }
-
-      // Stream vers le fichier
-      const stream = fs.createWriteStream(filePath);
-      doc.pipe(stream);
+      // Collecter les chunks en mémoire
+      const chunks = [];
+      doc.on('data', chunk => chunks.push(chunk));
+      doc.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        console.log(`✅ PDF généré en mémoire - ${(buffer.length / 1024).toFixed(1)} Ko`);
+        resolve(buffer);
+      });
+      doc.on('error', reject);
 
       // ===========================
       // EN-TÊTE
@@ -52,10 +41,6 @@ const genererPDFDevis = async (demande, devis) => {
         .fillColor('#5A6B8C')
         .text('Formation Médicale en Réalité Virtuelle', 50, 85);
 
-      // Date et référence
-      const dateDevis = new Date().toLocaleDateString('fr-FR');
-      const reference = `DEV-${new Date().getFullYear()}-${idDemande.slice(-6).toUpperCase()}`;
-      
       doc
         .fontSize(10)
         .fillColor('#1A2B5F')
@@ -63,7 +48,6 @@ const genererPDFDevis = async (demande, devis) => {
         .text(`Référence : ${reference}`, 400, 65)
         .text(`Valable 30 jours`, 400, 80);
 
-      // Ligne de séparation
       doc
         .strokeColor('#E8EFF9')
         .lineWidth(2)
@@ -86,7 +70,7 @@ const genererPDFDevis = async (demande, devis) => {
       doc
         .fontSize(11)
         .fillColor('#1A2B5F')
-        .text(demande.nomEtablissement, 50, yPos, { bold: true })
+        .text(demande.nomEtablissement, 50, yPos)
         .text(`${demande.prenom} ${demande.nom}`, 50, yPos + 15)
         .text(demande.emailProfessionnel, 50, yPos + 30)
         .text(`${demande.ville}, ${demande.pays}`, 50, yPos + 45);
@@ -123,7 +107,6 @@ const genererPDFDevis = async (demande, devis) => {
 
       yPos += 25;
 
-      // Fonction helper pour les lignes de détail
       const addDetailLine = (label, montant, yPosition) => {
         doc
           .fontSize(10)
@@ -132,11 +115,10 @@ const genererPDFDevis = async (demande, devis) => {
           .text(formatEuros(montant), 450, yPosition, { align: 'right', width: 95 });
       };
 
-      // Licences
       const nbUsers = devis.parametresCalcul.nombreUtilisateurs;
       const tranche = devis.parametresCalcul.tranche;
       const prixLicence = Math.round(devis.coutLicences / (nbUsers * 12));
-      
+
       addDetailLine(
         `Licences (${nbUsers} utilisateurs × ${prixLicence}€/mois × 12 mois)`,
         devis.coutLicences,
@@ -144,10 +126,9 @@ const genererPDFDevis = async (demande, devis) => {
       );
       yPos += 20;
 
-      // Casques VR
       const nbCasques = devis.parametresCalcul.nombreCasquesVR;
       const prixCasque = Math.round(devis.coutCasquesVR / nbCasques);
-      
+
       addDetailLine(
         `Casques VR (${nbCasques} × ${prixCasque}€)`,
         devis.coutCasquesVR,
@@ -155,7 +136,6 @@ const genererPDFDevis = async (demande, devis) => {
       );
       yPos += 20;
 
-      // Déploiement
       addDetailLine(
         `Déploiement ${devis.parametresCalcul.typeDeploiement}`,
         devis.coutDeploiement,
@@ -163,7 +143,6 @@ const genererPDFDevis = async (demande, devis) => {
       );
       yPos += 20;
 
-      // Formation
       const prixFormation = Math.round(devis.coutFormation / nbUsers);
       addDetailLine(
         `Formation (${nbUsers} × ${prixFormation}€)`,
@@ -172,15 +151,9 @@ const genererPDFDevis = async (demande, devis) => {
       );
       yPos += 20;
 
-      // Support
-      addDetailLine(
-        `Support annuel (10%)`,
-        devis.coutSupport,
-        yPos
-      );
+      addDetailLine(`Support annuel (10%)`, devis.coutSupport, yPos);
       yPos += 20;
 
-      // Ligne de séparation
       doc
         .strokeColor('#E8EFF9')
         .lineWidth(1)
@@ -201,7 +174,7 @@ const genererPDFDevis = async (demande, devis) => {
 
       yPos += 25;
 
-      // Remise (si applicable)
+      // Remise
       if (devis.remisePourcentage > 0) {
         doc
           .fontSize(11)
@@ -210,10 +183,9 @@ const genererPDFDevis = async (demande, devis) => {
           .text(`Remise volume (${devis.remisePourcentage}%)`, 50, yPos)
           .text(`- ${formatEuros(devis.montantRemise)}`, 450, yPos, { align: 'right', width: 95 })
           .font('Helvetica');
-        
+
         yPos += 25;
 
-        // Ligne après remise
         doc
           .strokeColor('#E8EFF9')
           .lineWidth(1)
@@ -244,7 +216,6 @@ const genererPDFDevis = async (demande, devis) => {
 
       yPos += 20;
 
-      // Ligne finale
       doc
         .strokeColor('#0066FF')
         .lineWidth(3)
@@ -280,18 +251,14 @@ const genererPDFDevis = async (demande, devis) => {
         .fillColor('#1A2B5F')
         .text(
           `• Les licences utilisateurs sont facturées mensuellement avec un tarif dégressif selon le volume (${tranche}).`,
-          50,
-          yPos,
-          { width: 495, align: 'justify' }
+          50, yPos, { width: 495, align: 'justify' }
         );
 
       yPos += 25;
 
       doc.text(
         `• Le support technique Standard (10% du sous-total) est inclus : mises à jour, assistance technique et formation continue.`,
-        50,
-        yPos,
-        { width: 495, align: 'justify' }
+        50, yPos, { width: 495, align: 'justify' }
       );
 
       yPos += 25;
@@ -299,24 +266,20 @@ const genererPDFDevis = async (demande, devis) => {
       if (devis.remisePourcentage > 0) {
         doc.text(
           `• Une remise de ${devis.remisePourcentage}% a été appliquée automatiquement grâce au volume de votre commande.`,
-          50,
-          yPos,
-          { width: 495, align: 'justify' }
+          50, yPos, { width: 495, align: 'justify' }
         );
         yPos += 25;
       }
 
       doc.text(
         `• La TVA de ${devis.tauxTVA}% est calculée selon la législation en vigueur dans votre pays (${devis.parametresCalcul.pays}).`,
-        50,
-        yPos,
-        { width: 495, align: 'justify' }
+        50, yPos, { width: 495, align: 'justify' }
       );
 
       // ===========================
       // CONDITIONS
       // ===========================
-      yPos = 650; // Position fixe pour le footer
+      yPos = 650;
 
       doc
         .fontSize(10)
@@ -346,33 +309,11 @@ const genererPDFDevis = async (demande, devis) => {
       doc
         .fontSize(8)
         .fillColor('#5A6B8C')
-        .text(
-          'SurveryVR - Formation Médicale en Réalité Virtuelle',
-          50,
-          yPos + 10,
-          { align: 'center', width: 495 }
-        )
-        .text(
-          'contact@surveyvr.com | www.surveyvr.com',
-          50,
-          yPos + 22,
-          { align: 'center', width: 495 }
-        );
+        .text('SurveryVR - Formation Médicale en Réalité Virtuelle', 50, yPos + 10, { align: 'center', width: 495 })
+        .text('contact@surveyvr.com | www.surveyvr.com', 50, yPos + 22, { align: 'center', width: 495 });
 
-      // Finaliser le PDF
+      // Finaliser → déclenche l'événement 'end'
       doc.end();
-
-      // Attendre que le stream soit terminé
-      stream.on('finish', () => {
-        resolve({
-          filePath,
-          fileName
-        });
-      });
-
-      stream.on('error', (error) => {
-        reject(error);
-      });
 
     } catch (error) {
       reject(error);
@@ -380,9 +321,6 @@ const genererPDFDevis = async (demande, devis) => {
   });
 };
 
-/**
- * Helper pour formater les montants en euros
- */
 const formatEuros = (montant) => {
   return new Intl.NumberFormat('fr-FR', {
     style: 'currency',
@@ -390,21 +328,4 @@ const formatEuros = (montant) => {
   }).format(montant);
 };
 
-/**
- * Supprimer un fichier PDF temporaire
- */
-const supprimerPDFTemp = (filePath) => {
-  try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-      console.log('✅ PDF temporaire supprimé:', filePath);
-    }
-  } catch (error) {
-    console.error('⚠️ Erreur suppression PDF:', error);
-  }
-};
-
-module.exports = {
-  genererPDFDevis,
-  supprimerPDFTemp
-};
+module.exports = { genererPDFBuffer };
