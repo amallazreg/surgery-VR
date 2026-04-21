@@ -22,6 +22,9 @@ import { FormationManagement } from './clients/institution/formation-management/
 import { ForfaitEtudiant } from './clients/Etudiants/forfait-etudiant/forfait-etudiant';
 import { MonCompte } from './clients/institution/mon-compte/mon-compte';
 
+import { authGuard } from './guards/auth-guard';
+import { roleGuard } from './guards/role-guard';
+
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
       { path: '', redirectTo: 'landingPage', pathMatch: 'full' },
@@ -29,29 +32,47 @@ export const routes: Routes = [
       { path: 'signup', component: Singup },
       { path: 'test', component : Test },
       { path: 'demanderDemo', component : Demo },
-      {path: 'admin/dashboard', component: AdminDashboard},
       { path: 'demanderDevis', component : Devis },
 
-      { path: 'admin/clients', component : CompteClients },
-      {path : 'admin/demande-demo' , component : DemandeDemo} ,
-      {path : 'admin/demande-devis' , component : DemandeDevis},
-      {path : 'admin/forfaitManagement' , component : ForfaitManagment},
-      {path : 'admin/experienceManagement' , component : ExperienceManagement},
+
+      {
+      path: 'admin',
+      canActivate: [authGuard, roleGuard],
+      data: { roles: ['admin'] },
+      children: [
+      { path: 'dashboard',             component: AdminDashboard },
+      { path: 'clients',               component: CompteClients },
+      { path: 'demande-demo',          component: DemandeDemo },
+      { path: 'demande-devis',         component: DemandeDevis },
+      { path: 'forfaitManagement',     component: ForfaitManagment },
+      { path: 'experienceManagement',  component: ExperienceManagement },
+      ]
+      },
 
 
+      {
+      path: 'client',
+      canActivate: [authGuard],
+      children: [
+      { path: 'dashborad',           component: Dashboard },
+      { path: 'forfaits',            component: Forfaits },
+      { path: 'abonnements',         component: Abonnements },
+      { path: 'mesExperiences',      component: MesExperiences },
+      { path: 'chatbot',             component: Chatbot },
+      { path: 'formationManagement', component: FormationManagement },
+      { path: 'monCompte',           component: MonCompte },
+      ]
+      },
 
-      {path : 'client/dashborad' , component : Dashboard},
-      { path: 'client/forfaits', component: Forfaits },
-      {path : 'client/abonnements', component : Abonnements},
-      {path : 'client/mesExperiences', component : MesExperiences}, 
-      {path : 'client/chatbot', component: Chatbot} , 
-      {path : 'client/formationManagement', component: FormationManagement},
-      {path : 'client/monCompte' , component : MonCompte},
-      
-
-      {path : 'etudiant/dashborad' , component : DashboardEtudiant},
-      {path : 'etudiant/mesExperiencesVR' , component : MesExperiencesVR },
-      { path: 'etudiant/forfaits', component: ForfaitEtudiant },
+      {
+      path: 'etudiant',
+      canActivate: [authGuard],
+      children: [
+      { path: 'dashborad',        component: DashboardEtudiant },
+      { path: 'mesExperiencesVR', component: MesExperiencesVR },
+      { path: 'forfaits',         component: ForfaitEtudiant },
+      ]
+      },
 
 
        { path: '**', redirectTo: '' }

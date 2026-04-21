@@ -1,13 +1,44 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter }                          from '@angular/router';
 import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
+import { provideHttpClient, withInterceptors, withFetch } from '@angular/common/http';
+import { inject, PLATFORM_ID }                   from '@angular/core';
+import { isPlatformBrowser }                     from '@angular/common';
+import { HttpInterceptorFn, HttpErrorResponse }  from '@angular/common/http';
+import { catchError, throwError }                from 'rxjs';
+import { Router }                                from '@angular/router';
+import { routes }                                from './app.routes';
 
-import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
-import { HTTP_INTERCEPTORS } from '@angular/common/http';
+// ✅ Intercepteur fonctionnel inline (compatible SSR + standalone)
+const authInterceptorFn: HttpInterceptorFn = (req, next) => {
+  const platformId = inject(PLATFORM_ID);
+  const router     = inject(Router);
 
-import { routes } from './app.routes';
-import { AuthInterceptor } from './interceptors/auth.interceptor';
+  let clonedReq = req;
 
+  if (isPlatformBrowser(platformId)) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      clonedReq = req.clone({
+        setHeaders: { Authorization: `Bearer ${token}` }
+      });
+    }
+  }
+
+  return next(clonedReq).pipe(
+    catchError((err: HttpErrorResponse) => {
+      if (err.status === 401 && isPlatformBrowser(platformId)) {
+        console.warn('Session expirée, déconnexion...');
+        localStorage.clear();
+        router.navigate(['/login']);
+      }
+      if (err.status === 403) {
+        console.warn('Accès refusé (403)');
+      }
+      return throwError(() => err);
+    })
+  );
+};
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -15,13 +46,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideClientHydration(withEventReplay()),
 
-    // ✅ Activation HttpClient + Interceptors
-    provideHttpClient(withInterceptorsFromDi()),
-
-    {
-      provide: HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
-      multi: true
-    }
+    // ✅ withFetch() requis pour SSR + withInterceptors fonctionnel
+    provideHttpClient(
+      withFetch(),
+      withInterceptors([authInterceptorFn])
+    ),
   ]
 };

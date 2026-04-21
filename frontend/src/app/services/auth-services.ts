@@ -8,15 +8,16 @@ import { Router } from '@angular/router';
 })
 export class AuthServiceService {
 
+  private apiUrl = 'https://surgery-vr.onrender.com';
 
-  private apiUrl = 'https://surgery-vr.onrender.com'
+  constructor(private http: HttpClient, private router: Router) {}
 
-  constructor(private http: HttpClient,) {}
+
 
   register(userData: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/signup`, userData);
   }
-  // 🔹 Connexion user
+
   signinUser(credentials: { email: string; password: string }): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/login`, credentials).pipe(
       tap((res: any) => {
@@ -25,82 +26,117 @@ export class AuthServiceService {
           localStorage.setItem('role', res.role);
           localStorage.setItem('email', res.email);
 
-            // ✅ Sauvegarder le profileStatus
           if (res.profileStatus) {
             localStorage.setItem('profileStatus', res.profileStatus);
           }
-          console.log('Connexion user réussie ✅');
+          console.log('Connexion réussie ✅');
         }
       })
     );
   }
 
 
-    // Méthode pour décoder le token sans bibliothèque externe
+
   private decodeToken(token: string): any {
-    const payload = token.split('.')[1]; // Prendre la partie payload du token
-    const decodedPayload = atob(payload); // Décoder en base64
-    return JSON.parse(decodedPayload); // Retourner l'objet JSON
+    try {
+      const payload = token.split('.')[1];
+      const decodedPayload = atob(payload);
+      return JSON.parse(decodedPayload);
+    } catch {
+      return null;
+    }
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  getDecodedToken(): any | null {
+    const token = this.getToken();
+    if (!token) return null;
+    return this.decodeToken(token);
   }
 
 
-isAuthenticated(): boolean {
-  return !!localStorage.getItem('token');
-}
-  // ✅ Récupérer le profileStatus
-  getProfileStatus(): string | null {
-    return localStorage.getItem('profileStatus');
-  }
-getUserName(): string {
-  // user
-  if (localStorage.getItem('userName')) {
-    return localStorage.getItem('userName')!;
-  }
 
-  // company
-  if (localStorage.getItem('companyName')) {
-    return localStorage.getItem('companyName')!;
-  }
+  // Vérifie token présent ET non expiré
+  isLoggedIn(): boolean {
+    const token = this.getToken();
+    if (!token) return false;
 
-  return '';
-}
-
- // Dans ton AuthServiceService
-
-// Récupérer l'ID de l'utilisateur connecté
-getUserId(): string | null {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-
-  try {
     const decoded = this.decodeToken(token);
-    // Selon comment tu as créé le token, l'ID peut être dans 'id' ou '_id'
-    return decoded.id || decoded._id || null;
-  } catch (error) {
-    console.error('Erreur lors du décodage du token :', error);
-    return null;
-  }
-}
+    if (!decoded || !decoded.exp) return false;
 
-
-logout() {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
-  localStorage.removeItem('userName');
-  localStorage.removeItem('companyName');
-  localStorage.removeItem('sector');
-  localStorage.removeItem('profileStatus');
-
-}
-
-  saveToken(token: string) {
-    localStorage.setItem('token', token);
+    // exp est en secondes, Date.now() en millisecondes
+    return decoded.exp * 1000 > Date.now();
   }
 
-  saveRole(role: string) {
+  isAuthenticated(): boolean {
+    return this.isLoggedIn();
+  }
+
+
+
+  getRole(): string | null {
+    return localStorage.getItem('role');
+  }
+
+  hasRole(...roles: string[]): boolean {
+    const role = this.getRole();
+    if (!role) return false;
+    return roles.includes(role);
+  }
+
+  saveRole(role: string): void {
     localStorage.setItem('role', role);
   }
 
+
+  getUserId(): string | null {
+    const decoded = this.getDecodedToken();
+    if (!decoded) return null;
+    return decoded.id || decoded._id || null;
+  }
+
+  getUserName(): string {
+    return localStorage.getItem('userName')
+      ?? localStorage.getItem('companyName')
+      ?? '';
+  }
+
+  getEmail(): string | null {
+    return localStorage.getItem('email');
+  }
+
+  getProfileStatus(): string | null {
+    return localStorage.getItem('profileStatus');
+  }
+
+
+
+  isTokenExpired(): boolean {
+    const decoded = this.getDecodedToken();
+    if (!decoded || !decoded.exp) return true;
+    return decoded.exp * 1000 <= Date.now();
+  }
+
+
+
+  saveToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('email');
+    localStorage.removeItem('userName');
+    localStorage.removeItem('companyName');
+    localStorage.removeItem('sector');
+    localStorage.removeItem('profileStatus');
+
+    this.router.navigate(['/login']);
+  }
 }
-
-
