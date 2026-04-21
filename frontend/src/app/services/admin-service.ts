@@ -1,6 +1,7 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+
 export interface User {
   _id: string;
   prenom: string;
@@ -9,19 +10,13 @@ export interface User {
   phone?: string;
   role: 'medecin' | 'etudiant';
   statut: 'en_attente' | 'approuve' | 'rejete';
-  
-  // Champs Médecin
   specialite?: string;
   etablissement?: string;
   ville?: string;
   numeroOrdre?: string;
-  
-  // Champs Étudiant
   universite?: string;
   anneeEtude?: string;
   encadrant?: string;
-  
-  // Commun
   objectif?: string;
   documentVerification?: string;
   motifRefus?: string;
@@ -32,84 +27,91 @@ export interface User {
   providedIn: 'root',
 })
 export class AdminService {
-  
 
-    private apiUrl = 'https://surgery-vr.onrender.com/admin'
-   private apiUrlDemo = 'https://surgery-vr.onrender.com/adminDemoRoute'
-  private apiUrlDevis = 'https://surgery-vr.onrender.com/adminDevisRoute'
+  private base  = 'https://surgery-vr.onrender.com';
+  private admin = `${this.base}/admin`;
+  private demo  = `${this.base}/adminDemoRoute`;
+  private devis = `${this.base}/adminDevisRoute`;
 
+  constructor(private http: HttpClient) {}
 
-
-  constructor(private http: HttpClient,) {}
-
-    tousclients(): Observable<any> {
-      return this.http.get(`${this.apiUrl}/Tousclients`);
-    }
-
-      listerParStatut(statut: string): Observable<User[]> {
-    return this.http.get<User[]>(`${this.apiUrl}/clients/statut/${statut}`);
+  // ═══════════════════════════════════════════════════════════
+  // HELPER — headers avec token (utilisé dans toutes les requêtes)
+  // ═══════════════════════════════════════════════════════════
+  private get authHeaders(): { headers: HttpHeaders } {
+    const token = localStorage.getItem('token');
+    return {
+      headers: new HttpHeaders({
+        Authorization: `Bearer ${token}`
+      })
+    };
   }
 
-    approuverCompte(userId: string): Observable<any> {
-      return this.http.put(`${this.apiUrl}/clients/${userId}/approuver`,{});
-    }
+  // ═══════════════════════════════════════════════════════════
+  // CLIENTS
+  // ═══════════════════════════════════════════════════════════
 
-     rejeterCompte(userId: string,motifRefus?: string): Observable<any> {
-      return this.http.put(`${this.apiUrl}/clients/${userId}/rejeter`,{ motifRefus });
-    }
-
-
-
-
-    tousDemandeDemo() : Observable<any>{
-      return this.http.get(`${this.apiUrl}/demande/getToutes-demande-demo`)
-    }
-
-    contacterDemo(message : any,id: any) : Observable<any> {
-      return this.http.patch(`${this.apiUrlDemo}/${id}/contacter`,message)
-    }
-    
-    cloturerDemande(id: string): Observable<any> {
-    return this.http.patch(`${this.apiUrlDemo}/admin/demandes-demo/${id}/cloturer`, {});
+  tousclients(): Observable<any> {
+    return this.http.get(`${this.admin}/Tousclients`, this.authHeaders);
   }
 
+  listerParStatut(statut: string): Observable<User[]> {
+    return this.http.get<User[]>(`${this.admin}/clients/statut/${statut}`, this.authHeaders);
+  }
 
+  approuverCompte(userId: string): Observable<any> {
+    return this.http.put(`${this.admin}/clients/${userId}/approuver`, {}, this.authHeaders);
+  }
 
+  rejeterCompte(userId: string, motifRefus?: string): Observable<any> {
+    return this.http.put(`${this.admin}/clients/${userId}/rejeter`, { motifRefus }, this.authHeaders);
+  }
 
+  // ═══════════════════════════════════════════════════════════
+  // DEMANDES DEMO
+  // ═══════════════════════════════════════════════════════════
 
-    toutesDemandesDevis(): Observable<any> {
-      return this.http.get(`${this.apiUrl}/demande/getToutes-demande-devis` );
-   }
+  tousDemandeDemo(): Observable<any> {
+    return this.http.get(`${this.admin}/demande/getToutes-demande-demo`, this.authHeaders);
+  }
 
+  contacterDemo(message: any, id: any): Observable<any> {
+    return this.http.patch(`${this.demo}/${id}/contacter`, message, this.authHeaders);
+  }
 
-   calculerDevis(demandeId: string): Observable<any> {
-      return this.http.post( `${this.apiUrlDevis}/demandes-devis/${demandeId}/calculer`,{},);
-   }
+  cloturerDemande(id: string): Observable<any> {
+    return this.http.patch(`${this.demo}/${id}/cloturer`, {}, this.authHeaders);
+  }
 
-    envoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
-        return this.http.post( `${this.apiUrlDevis}/demandes-devis/${demandeId}/envoyer`, { messagePersonnalise } );
-    }
+  // ═══════════════════════════════════════════════════════════
+  // DEMANDES DEVIS
+  // ═══════════════════════════════════════════════════════════
 
-    calculerEtEnvoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
-      return this.http.post( `${this.apiUrlDevis}/demandes-devis/${demandeId}/calculer-et-envoyer`, { messagePersonnalise }, );
-    }
+  toutesDemandesDevis(): Observable<any> {
+    return this.http.get(`${this.admin}/demande/getToutes-demande-devis`, this.authHeaders);
+  }
 
+  calculerDevis(demandeId: string): Observable<any> {
+    return this.http.post(`${this.devis}/${demandeId}/calculer`, {}, this.authHeaders);
+  }
 
+  envoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
+    return this.http.post(`${this.devis}/${demandeId}/envoyer`, { messagePersonnalise }, this.authHeaders);
+  }
 
-    demandesDevisParStatut(statut: 'nouvelle' | 'en_cours' | 'envoyee'): Observable<any> {
-     return this.http.get(`${this.apiUrlDevis}/statut/${statut}`);
-   }
+  calculerEtEnvoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
+    return this.http.post(`${this.devis}/${demandeId}/calculer-et-envoyer`, { messagePersonnalise }, this.authHeaders);
+  }
+
+  demandesDevisParStatut(statut: 'nouvelle' | 'en_cours' | 'envoyee'): Observable<any> {
+    return this.http.get(`${this.devis}/statut/${statut}`, this.authHeaders);
+  }
 
   statistiquesDevis(): Observable<any> {
-     return this.http.get(`${this.apiUrlDevis}/admin/demandes-devis/statistiques`);
+    return this.http.get(`${this.devis}/statistiques`, this.authHeaders);
   }
 
-
-supprimerDemandeDevis(demandeId: string): Observable<any> {
-  return this.http.delete(
-    `${this.apiUrlDevis}/admin/demandes-devis/${demandeId}`,
-  
-  );
-}
-
+  supprimerDemandeDevis(demandeId: string): Observable<any> {
+    return this.http.delete(`${this.devis}/${demandeId}`, this.authHeaders);
+  }
 }

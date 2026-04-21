@@ -14,12 +14,19 @@ export class Payement {
 
    constructor(private http: HttpClient) {}
 
+  private get authHeaders() {
+    const token = localStorage.getItem('token');
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
+
   createCheckoutSession(userId: string, forfaitId: string) {
     return this.http.post<{ url: string }>(`${this.apiUrl}/create-checkout-session`,
       {
         userId,
         forfaitId
-      }
+      },
+      this.authHeaders
     );
   }
 

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -30,28 +30,33 @@ export class AbonnementService {
 
   constructor(private http: HttpClient) {}
 
+  private get authHeaders() {
+    const token = localStorage.getItem('token');
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
   getMonAbonnement(userId: string) {
-    return this.http.get<any>(`${this.apiUrl}/mon-abonnement/${userId}`);
+    return this.http.get<any>(`${this.apiUrl}/mon-abonnement/${userId}`,this.authHeaders);
   }
 
   getHistoriqueAbonnements(userId: string) {
-    return this.http.get<any[]>(`${this.apiUrl}/historique/${userId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/historique/${userId}`,this.authHeaders);
   }
 
   getMesFactures(userId: string) {
-    return this.http.get<any[]>(`${this.apiUrl}/factures/${userId}`);
+    return this.http.get<any[]>(`${this.apiUrl}/factures/${userId}`,this.authHeaders);
   }
 
   getForfaitsUpgrade(userId: string) {
-    return this.http.get<any>(`${this.apiUrl}/upgrade/disponibles/${userId}`);
+    return this.http.get<any>(`${this.apiUrl}/upgrade/disponibles/${userId}`,this.authHeaders);
   }
 
   renouvelerAbonnement(userId: string, abonnementId: string) {
-    return this.http.post<{ url: string }>(`${this.apiUrl}/renouveler`, { userId, abonnementId });
+    return this.http.post<{ url: string }>(`${this.apiUrl}/renouveler`, { userId, abonnementId },this.authHeaders);
   }
 
   upgradeAbonnement(userId: string, nouveauForfaitId: string) {
-    return this.http.post<{ url: string }>(`${this.apiUrl}/upgrade`, { userId, nouveauForfaitId });
+    return this.http.post<{ url: string }>(`${this.apiUrl}/upgrade`, { userId, nouveauForfaitId },this.authHeaders);
   }
 
   telechargerFacture(paiementId: string): void {
@@ -62,16 +67,16 @@ export class AbonnementService {
 // ─── Droits complets de l'abonnement actif ──────────────
   // Retourne : apkTotal, apkRestants, formation, simulationEsthetique
   getMesDroits(userId: string): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/droits/${userId}`);
+    return this.http.get<any>(`${this.apiUrl}/droits/${userId}`,this.authHeaders);
   }
 
   // ─── Télécharger un APK (décrémente le compteur) ────────
   telechargerApk(userId: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/telechargerApk/${userId}`, {});
+    return this.http.post<any>(`${this.apiUrl}/telechargerApk/${userId}`, {},this.authHeaders);
   }
 
   // ─── Activer la formation + générer les codes d'accès ───
   activerFormation(userId: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/formation/${userId}`, {});
+    return this.http.post<any>(`${this.apiUrl}/formation/${userId}`, {},this.authHeaders);
   }
 }

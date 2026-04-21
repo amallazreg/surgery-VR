@@ -12,6 +12,8 @@ export class FormationAccessService {
 
   constructor(private http: HttpClient) {}
 
+
+
     private getHeaders(): HttpHeaders {
     const token = localStorage.getItem('token') || '';
     return new HttpHeaders({ Authorization: `Bearer ${token}` });
@@ -50,7 +52,7 @@ export class FormationAccessService {
   const headers = new HttpHeaders({ Authorization: `Bearer ${token}` });
   return this.http.get<any>(
     `${this.apiUrl}/client/etudiant/experiences-forfait/${userId}`,
-    { headers }
+    { headers:this.getHeaders() }
   );
 }
  

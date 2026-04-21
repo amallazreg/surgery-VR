@@ -44,7 +44,7 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
-    provideClientHydration(withEventReplay()),
+  //  provideClientHydration(withEventReplay()),
 
     // ✅ withFetch() requis pour SSR + withInterceptors fonctionnel
     provideHttpClient(

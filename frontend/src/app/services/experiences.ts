@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -45,48 +45,54 @@ export class Experiences {
 
   constructor(private http: HttpClient) {}
 
+  private get authHeaders() {
+    const token = localStorage.getItem('token');
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
 
   //CLIENT
   getMesExperiences(userId: string): Observable<any> {
     return this.http.get<any>(
-      `${this.api}/mes-experiences/${userId}`
+      `${this.api}/mes-experiences/${userId}`,
+       this.authHeaders
     );
   }
   downloadExperienceApk(userId: string, experienceId: string): Observable<any> {
     return this.http.post<any>(
       `${this.api}/download/${userId}/${experienceId}`,
-      {}
+      {},
+      this.authHeaders
     );
   }
 
 
 //ADMIN
   getAllExperiences(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}`);
+    return this.http.get<any[]>(`${this.apiUrl}`,this.authHeaders);
   }
 
   createExperience(data: any): Observable<any> {
-    return this.http.post(`${this.apiUrl}`, data);
+    return this.http.post(`${this.apiUrl}`, data,this.authHeaders);
   }
 
   deleteExperience(id: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/${id}`);
+    return this.http.delete(`${this.apiUrl}/${id}`,this.authHeaders);
   }
 
   getExperiencesByForfait(forfaitId: string): Observable<any> {
-    return this.http.get(`${this.api}/by-forfait/${forfaitId}`);                      
+    return this.http.get(`${this.api}/by-forfait/${forfaitId}`,this.authHeaders);                      
   }
 
   updateExperience(id: string, data: any): Observable<any> {
-    return this.http.put(`${this.apiUrl}/${id}`, data);
+    return this.http.put(`${this.apiUrl}/${id}`, data,this.authHeaders);
   }
 
   getExperiencesForEtudiant(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/etudiants`);
+    return this.http.get(`${this.apiUrl}/etudiants`,this.authHeaders);
   }
 
   getExperiencesForProfessionnel(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/professionnels`);
+    return this.http.get(`${this.apiUrl}/professionnels`,this.authHeaders);
   }
   
 }

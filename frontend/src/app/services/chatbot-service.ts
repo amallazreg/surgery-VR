@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -66,13 +66,18 @@ export class ChatbotService {
 
   constructor(private http: HttpClient) {}
 
+    private get authHeaders() {
+    const token = localStorage.getItem('token');
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
   // ── POST /chatbot/message ──
   sendMessage(userId: string, message: string, conversationId?: string): Observable<SendMessageResponse> {
     return this.http.post<SendMessageResponse>(`${this.apiUrl}/message`, {
       userId,
       message,
       conversationId
-    });
+    },this.authHeaders);
   }
 
   // ── GET /chatbot/history/:userId ──
@@ -80,24 +85,25 @@ export class ChatbotService {
     const url = conversationId
       ? `${this.apiUrl}/history/${userId}?conversationId=${conversationId}`
       : `${this.apiUrl}/history/${userId}`;
-    return this.http.get<HistoryResponse>(url);
+    return this.http.get<HistoryResponse>(url,this.authHeaders);
   }
 
   // ── GET /chatbot/conversations/:userId ──
   getConversations(userId: string): Observable<ConversationsResponse> {
-    return this.http.get<ConversationsResponse>(`${this.apiUrl}/conversations/${userId}`);
+    return this.http.get<ConversationsResponse>(`${this.apiUrl}/conversations/${userId}`,this.authHeaders);
   }
 
   // ── POST /chatbot/new ──
   createConversation(userId: string): Observable<NewConversationResponse> {
-    return this.http.post<NewConversationResponse>(`${this.apiUrl}/new`, { userId });
+    return this.http.post<NewConversationResponse>(`${this.apiUrl}/new`, { userId },this.authHeaders);
   }
 
   // ── PUT /chatbot/switch/:conversationId ──
   switchConversation(conversationId: string, userId: string): Observable<SwitchConversationResponse> {
     return this.http.put<SwitchConversationResponse>(
       `${this.apiUrl}/switch/${conversationId}`,
-      { userId }
+      { userId },
+      this.authHeaders
     );
   }
 
@@ -106,6 +112,6 @@ export class ChatbotService {
     const url = conversationId
       ? `${this.apiUrl}/clear/${userId}?conversationId=${conversationId}`
       : `${this.apiUrl}/clear/${userId}`;
-    return this.http.delete<ClearResponse>(url);
+    return this.http.delete<ClearResponse>(url,this.authHeaders);
   }
 }
