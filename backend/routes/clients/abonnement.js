@@ -13,6 +13,10 @@ const {
   activerFormation
 } = require('../../controllers/clients/abonnement');
 
+const { protect } = require('../../middlewares/auth'); 
+
+router.use(protect);
+
 router.get('/mon-abonnement/:userId',getMonAbonnement);
 router.get('/historique/:userId',getHistoriqueAbonnements);
 router.get('/factures/:userId', getMesFactures);

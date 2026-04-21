@@ -11,6 +11,11 @@ const {
   supprimerDemande
 } = require('../../controllers/admin/demandeDevis');
 
+const { protect, authorize } = require('../../middlewares/auth'); 
+
+
+router.use(protect, authorize('admin'));
+
 
 
 

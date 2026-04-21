@@ -1,6 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const {listerTous,listerParStatut,approuverCompte,rejeterCompte} = require('../controllers/admin/CompteClient');
+const { protect, authorize } = require('../middlewares/auth'); 
+
+
+router.use(protect, authorize('admin'));
 
 // 📋 Tous les comptes
 router.get('/Tousclients', listerTous);

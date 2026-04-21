@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const paymentController = require('../../controllers/clients/paiement'); // <- module complet
+const {createCheckoutSession} = require('../../controllers/clients/paiement'); 
+const { protect } = require('../../middlewares/auth'); 
 
-router.post('/create-checkout-session', paymentController.createCheckoutSession); // ✅ sans parenthèses
+router.use(protect);
+router.post('/create-checkout-session', createCheckoutSession);
 
 module.exports = router;

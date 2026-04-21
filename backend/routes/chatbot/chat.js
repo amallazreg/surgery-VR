@@ -11,14 +11,18 @@ const {
   switchConversation
 } = require('../../controllers/chatbot/chat');
 
+const { protect } = require('../../middlewares/auth'); 
+
+router.use(protect);
+
 // ── Conversations ──
-router.post('/new',                        createConversation);  // Nouvelle conversation
-router.get('/conversations/:userId',       getConversations);    // Liste conversations
-router.put('/switch/:conversationId',      switchConversation);  // Switcher conversation
+router.post('/new',  createConversation);  
+router.get('/conversations/:userId',getConversations);    
+router.put('/switch/:conversationId' ,switchConversation); 
 
 // ── Messages ──   
-router.post('/message',                    sendMessage);         // Envoyer message
-router.get('/history/:userId',             getHistory);          // Historique actif
-router.delete('/clear/:userId',            clearHistory);        // Supprimer conversation
+router.post('/message',                 sendMessage);        
+router.get('/history/:userId',         getHistory);          
+router.delete('/clear/:userId',      clearHistory);        
 
 module.exports = router;

@@ -12,42 +12,40 @@ const {
   supprimerEchantillon,
   toggleActiverEchantillon
 } = require('../../controllers/admin/Demandesdemo');
+const { protect, authorize } = require('../../middlewares/auth'); 
 
 
-// ===============================
-// ROUTES DEMANDES DE DÉMO
-// ===============================
+router.use(protect, authorize('admin'));
 
 
-// GET - Récupérer les demandes par statut
+
+//  Récupérer les demandes par statut
 router.get('/admin/demandes-demo/statut/:statut', listerDemandesParStatut);
 
-// GET - Obtenir les statistiques
+//  Obtenir les statistiques
 router.get('/admin/demandes-demo/statistiques', obtenirStatistiques);
 
-// PATCH - Contacter une demande (envoyer email avec 5 vidéos aléatoires)
+//  Contacter une demande (envoyer email avec 5 vidéos aléatoires)
 router.patch('/:id/contacter', contacterDemande);
 
-// PATCH - Clôturer une demande
+//  Clôturer une demande
 router.patch('/admin/demandes-demo/:id/cloturer', cloturerDemande);
 
-// ===============================
-// ROUTES ÉCHANTILLONS VIDÉO
-// ===============================
 
-// GET - Lister tous les échantillons
+
+//  Lister tous les échantillons
 router.get('/admin/echantillons-video', listerEchantillons);
 
-// POST - Ajouter un échantillon
+//  Ajouter un échantillon
 router.post('/admin/echantillons-video', ajouterEchantillon);
 
-// PATCH - Modifier un échantillon
+// Modifier un échantillon
 router.patch('/admin/echantillons-video/:id', modifierEchantillon);
 
-// DELETE - Supprimer un échantillon
+//  Supprimer un échantillon
 router.delete('/admin/echantillons-video/:id', supprimerEchantillon);
 
-// PATCH - Activer/Désactiver un échantillon
+//  Activer/Désactiver un échantillon
 router.patch('/admin/echantillons-video/:id/toggle', toggleActiverEchantillon);
 
 module.exports = router;
