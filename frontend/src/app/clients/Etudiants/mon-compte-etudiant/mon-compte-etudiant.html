@@ -1,0 +1,443 @@
+<!-- mon-compte-etudiant.html -->
+<app-side-bar-etudiant></app-side-bar-etudiant>
+
+<main class="main">
+  <div class="content">
+
+    <!-- ── HERO ── -->
+    <div class="profile-hero">
+      <div class="hero-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+      <div class="hero-inner">
+        <div class="avatar-wrap">
+          <div class="avatar-large">{{ userInitials }}</div>
+          <div class="avatar-ring"></div>
+          <div class="avatar-level">Niv.{{ niveauBadge }}</div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-badge">
+            <span class="badge-dot"></span> Compte actif
+          </div>
+          <h2>{{ userName }}</h2>
+          <p class="hero-sub">{{ userEmail }}</p>
+          <div class="hero-meta">
+            <span *ngIf="profileData?.specialite">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+              {{ profileData?.specialite }}
+            </span>
+            <span *ngIf="profileData?.universite">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              {{ profileData?.universite }}
+            </span>
+            <span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              Membre depuis {{ memberSince }}
+            </span>
+          </div>
+        </div>
+
+        <!-- XP Bar dans le héro -->
+        <div class="hero-xp">
+          <div class="xp-label">
+            <span>Progression du profil</span>
+            <span>{{ profileCompletion }}%</span>
+          </div>
+          <div class="xp-bar">
+            <div class="xp-fill" [style.width.%]="profileCompletion"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TABS ── -->
+    <div class="tabs-nav">
+      <button class="tab-btn" [class.active]="activeTab === 'profile'" (click)="activeTab = 'profile'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+        Informations du profil
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'password'" (click)="activeTab = 'password'">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Sécurité & Mot de passe
+      </button>
+    </div>
+
+    <!-- ══════════════════════════════════
+         TAB 1 — PROFIL ÉTUDIANT
+    ══════════════════════════════════ -->
+    <div class="tab-panel" *ngIf="activeTab === 'profile'" [@fadeSlide]>
+
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <div class="cards-grid">
+
+          <!-- COLONNE GAUCHE -->
+          <div class="col-main">
+
+            <!-- Identité -->
+            <div class="card">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <div class="card-icon c-blue">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                  </div>
+                  <span class="card-title">Identité</span>
+                </div>
+                <button type="button" class="btn-toggle-edit" (click)="toggleEdit()">
+                  <ng-container *ngIf="!editMode">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    Modifier
+                  </ng-container>
+                  <ng-container *ngIf="editMode">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    Annuler
+                  </ng-container>
+                </button>
+              </div>
+              <div class="card-body">
+                <div class="form-row form-row-gap">
+                  <div class="form-group">
+                    <label class="form-label">Prénom</label>
+                    <input class="form-input" type="text" formControlName="prenom" placeholder="Votre prénom">
+                    <span class="field-err" *ngIf="profileForm.get('prenom')?.invalid && profileForm.get('prenom')?.touched">Champ requis</span>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Nom</label>
+                    <input class="form-input" type="text" formControlName="nom" placeholder="Votre nom">
+                    <span class="field-err" *ngIf="profileForm.get('nom')?.invalid && profileForm.get('nom')?.touched">Champ requis</span>
+                  </div>
+                </div>
+                <div class="form-row form-row-gap">
+                  <div class="form-group">
+                    <label class="form-label">Téléphone</label>
+                    <div class="input-icon-wrap">
+                      <svg class="input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 13a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.62 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 9.91a16 16 0 0 0 6.1 6.1l.91-.91a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                      <input class="form-input with-icon" type="tel" formControlName="telephone" placeholder="+216 xx xxx xxx">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">E-mail <span class="label-locked">🔒 non modifiable</span></label>
+                    <input class="form-input" type="email" formControlName="email" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Informations académiques -->
+            <div class="card">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <div class="card-icon c-purple">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+                  </div>
+                  <span class="card-title">Informations académiques</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="form-row form-row-gap">
+                  <div class="form-group">
+                    <label class="form-label">Université / École</label>
+                    <div class="input-icon-wrap">
+                      <svg class="input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+                      <input class="form-input with-icon" type="text" formControlName="universite" placeholder="Ex: Université de Tunis">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Spécialité</label>
+                    <div class="input-icon-wrap">
+                      <svg class="input-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                      <input class="form-input with-icon" type="text" formControlName="specialite" placeholder="Ex: Médecine, Pharmacie…">
+                    </div>
+                  </div>
+                </div>
+                <div class="form-row form-row-gap">
+                  <div class="form-group">
+                    <label class="form-label">Niveau d'étude</label>
+                    <select class="form-select" formControlName="niveauEtude">
+                      <option value="">-- Sélectionner --</option>
+                      <option value="L1">Licence 1 (L1)</option>
+                      <option value="L2">Licence 2 (L2)</option>
+                      <option value="L3">Licence 3 (L3)</option>
+                      <option value="M1">Master 1 (M1)</option>
+                      <option value="M2">Master 2 (M2)</option>
+                      <option value="Doctorat">Doctorat</option>
+                      <option value="Internat">Internat</option>
+                      <option value="Résidanat">Résidanat</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">N° Inscription <span class="label-locked">🔒 admin</span></label>
+                    <input class="form-input" type="text" [value]="profileData?.numeroInscription || '—'" readonly>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- COLONNE DROITE -->
+          <div class="col-side">
+
+            <!-- Document étudiant (verrouillé) -->
+            <div class="card card-locked">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <div class="card-icon c-gray">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  </div>
+                  <span class="card-title">Données vérifiées</span>
+                </div>
+                <span class="lock-badge">Admin uniquement</span>
+              </div>
+              <div class="card-body">
+                <div class="locked-field">
+                  <label class="form-label">N° Inscription</label>
+                  <div class="locked-value">{{ profileData?.numeroInscription || '—' }}</div>
+                </div>
+                <div class="locked-field">
+                  <label class="form-label">Document étudiant</label>
+                  <div class="locked-value doc-value">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                    <span>{{ profileData?.documentEtudiant ? 'Document fourni' : 'Aucun document' }}</span>
+                  </div>
+                </div>
+                <div class="locked-note">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  Ces informations ne peuvent être modifiées que par un administrateur.
+                </div>
+              </div>
+            </div>
+
+            <!-- Statut du compte -->
+            <div class="card card-status">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <div class="card-icon c-green">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                  </div>
+                  <span class="card-title">Statut du compte</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="status-pill" [ngClass]="'status-' + (profileData?.statut || 'en_attente')">
+                  <span class="status-dot"></span>
+                  {{ getStatutLabel(profileData?.statut) }}
+                </div>
+                <div class="status-info">
+                  <div class="info-row">
+                    <span class="info-key">Rôle</span>
+                    <span class="info-val">Étudiant</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-key">Niveau</span>
+                    <span class="info-val">{{ profileData?.niveauEtude || '—' }}</span>
+                  </div>
+                  <div class="info-row">
+                    <span class="info-key">Inscrit le</span>
+                    <span class="info-val">{{ memberSince }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Complétion du profil -->
+            <div class="card card-completion">
+              <div class="card-head">
+                <div class="card-head-left">
+                  <div class="card-icon c-amber">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  </div>
+                  <span class="card-title">Complétion du profil</span>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="completion-ring-wrap">
+                  <svg class="completion-ring" viewBox="0 0 80 80">
+                    <circle cx="40" cy="40" r="32" fill="none" stroke="#E8EFF9" stroke-width="8"/>
+                    <circle cx="40" cy="40" r="32" fill="none"
+                      stroke="url(#grad)"
+                      stroke-width="8"
+                      stroke-linecap="round"
+                      stroke-dasharray="201"
+                      [attr.stroke-dashoffset]="201 - (201 * profileCompletion / 100)"
+                      transform="rotate(-90 40 40)"/>
+                    <defs>
+                      <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#0066FF"/>
+                        <stop offset="100%" stop-color="#00D9FF"/>
+                      </linearGradient>
+                    </defs>
+                    <text x="40" y="44" text-anchor="middle" class="ring-text">{{ profileCompletion }}%</text>
+                  </svg>
+                </div>
+                <div class="completion-items">
+                  <div class="comp-item" [class.done]="profileData?.prenom">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Identité complète
+                  </div>
+                  <div class="comp-item" [class.done]="profileData?.universite">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Université renseignée
+                  </div>
+                  <div class="comp-item" [class.done]="profileData?.specialite">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Spécialité renseignée
+                  </div>
+                  <div class="comp-item" [class.done]="profileData?.niveauEtude">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Niveau d'étude
+                  </div>
+                  <div class="comp-item" [class.done]="profileData?.documentEtudiant">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Document fourni
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Actions de sauvegarde -->
+        <div class="form-actions-bar" *ngIf="editMode">
+          <div class="save-hint">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            Les modifications seront appliquées immédiatement.
+          </div>
+          <div class="save-btns">
+            <button type="button" class="btn-cancel" (click)="cancelEdit()">Annuler</button>
+            <button type="submit" class="btn-save" [disabled]="profileForm.invalid || saveLoading">
+              <span *ngIf="!saveLoading">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                Enregistrer
+              </span>
+              <span *ngIf="saveLoading" class="spinner"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="toast toast-success" *ngIf="saveSuccess">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          Profil mis à jour avec succès !
+        </div>
+        <div class="toast toast-error" *ngIf="saveError">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {{ saveError }}
+        </div>
+
+      </form>
+    </div>
+
+    <!-- ══════════════════════════════════
+         TAB 2 — MOT DE PASSE
+    ══════════════════════════════════ -->
+    <div class="tab-panel" *ngIf="activeTab === 'password'" [@fadeSlide]>
+
+      <div class="pw-layout">
+
+        <div class="card pw-card">
+          <div class="card-head">
+            <div class="card-head-left">
+              <div class="card-icon c-coral">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </div>
+              <span class="card-title">Changer le mot de passe</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+
+              <div class="form-group mb-16">
+                <label class="form-label">Mot de passe actuel</label>
+                <div class="pw-input-wrap">
+                  <input class="form-input" [type]="showOld ? 'text' : 'password'" formControlName="ancienMotDePasse" placeholder="Votre mot de passe actuel">
+                  <button type="button" class="pw-eye" (click)="showOld = !showOld">
+                    <svg *ngIf="!showOld" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg *ngIf="showOld" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
+                </div>
+                <span class="field-err" *ngIf="passwordForm.get('ancienMotDePasse')?.invalid && passwordForm.get('ancienMotDePasse')?.touched">Champ requis</span>
+              </div>
+
+              <div class="pw-divider"><span>Nouveau mot de passe</span></div>
+
+              <div class="form-group mb-16">
+                <label class="form-label">Nouveau mot de passe</label>
+                <div class="pw-input-wrap">
+                  <input class="form-input" [type]="showNew ? 'text' : 'password'" formControlName="nouveauMotDePasse" placeholder="Minimum 6 caractères">
+                  <button type="button" class="pw-eye" (click)="showNew = !showNew">
+                    <svg *ngIf="!showNew" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg *ngIf="showNew" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
+                </div>
+                <div class="pw-strength" *ngIf="passwordForm.get('nouveauMotDePasse')?.value">
+                  <div class="strength-bars">
+                    <div class="strength-bar" [class.active]="pwStrength >= 1" [class.s1]="pwStrength === 1" [class.s2]="pwStrength === 2" [class.s3]="pwStrength >= 3"></div>
+                    <div class="strength-bar" [class.active]="pwStrength >= 2" [class.s2]="pwStrength === 2" [class.s3]="pwStrength >= 3"></div>
+                    <div class="strength-bar" [class.active]="pwStrength >= 3" [class.s3]="pwStrength >= 3"></div>
+                  </div>
+                  <span class="strength-label" [ngClass]="'sl-' + pwStrength">{{ pwStrengthLabel }}</span>
+                </div>
+              </div>
+
+              <div class="form-group mb-24">
+                <label class="form-label">Confirmer le nouveau mot de passe</label>
+                <div class="pw-input-wrap">
+                  <input class="form-input" [type]="showConfirm ? 'text' : 'password'" formControlName="confirmNouveauMotDePasse" placeholder="Répétez le nouveau mot de passe">
+                  <button type="button" class="pw-eye" (click)="showConfirm = !showConfirm">
+                    <svg *ngIf="!showConfirm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg *ngIf="showConfirm" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  </button>
+                </div>
+                <span class="field-err" *ngIf="passwordForm.errors?.['mismatch'] && passwordForm.get('confirmNouveauMotDePasse')?.touched">Les mots de passe ne correspondent pas</span>
+              </div>
+
+              <button type="submit" class="btn-pw-submit" [disabled]="passwordForm.invalid || pwLoading">
+                <span *ngIf="!pwLoading">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                  Mettre à jour le mot de passe
+                </span>
+                <span *ngIf="pwLoading" class="spinner"></span>
+              </button>
+
+            </form>
+
+            <div class="toast toast-success mt-16" *ngIf="pwSuccess">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Mot de passe mis à jour avec succès !
+            </div>
+            <div class="toast toast-error mt-16" *ngIf="pwError">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              {{ pwError }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Conseils de sécurité -->
+        <div class="pw-tips">
+          <div class="card tips-card">
+            <div class="card-head">
+              <div class="card-head-left">
+                <div class="card-icon c-amber">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                </div>
+                <span class="card-title">Conseils de sécurité</span>
+              </div>
+            </div>
+            <div class="card-body">
+              <ul class="tips-list">
+                <li><div class="tip-icon">①</div><span>Utilisez au moins <strong>8 caractères</strong> avec des lettres, chiffres et symboles.</span></li>
+                <li><div class="tip-icon">②</div><span>N'utilisez pas le même mot de passe sur plusieurs services.</span></li>
+                <li><div class="tip-icon">③</div><span>Évitez les informations personnelles (nom, date de naissance).</span></li>
+                <li><div class="tip-icon">④</div><span>Changez votre mot de passe régulièrement, au moins tous les 6 mois.</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</main>

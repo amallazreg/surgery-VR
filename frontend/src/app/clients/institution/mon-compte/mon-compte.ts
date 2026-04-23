@@ -37,7 +37,7 @@ function passwordsMatch(group: AbstractControl): ValidationErrors | null {
 })
 export class MonCompte implements OnInit {
 
-  private readonly API = 'http://localhost:3000'; // ← adapter selon votre URL
+  private readonly API = 'http://localhost:3000'; 
 
   // ── Navigation ────────────────────────────────
   activeTab: 'profile' | 'password' = 'profile';
