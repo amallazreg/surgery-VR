@@ -26,25 +26,214 @@ const listerDemandesParStatut = async (req, res) => {
   }
 };
 
+// controllers/admin/demandesDevisController.js
+
 const obtenirStatistiques = async (req, res) => {
   try {
-    const [totalNouvelle, totalEnCours, totalEnvoyee, totalDemandes] = await Promise.all([
+    const maintenant = new Date();
+    const il_y_a_30_jours = new Date(maintenant - 30 * 24 * 60 * 60 * 1000);
+    const il_y_a_60_jours = new Date(maintenant - 60 * 24 * 60 * 60 * 1000);
+
+    // ── Totaux globaux ──────────────────────────────────────────────
+    const [
+      totalNouvelle,
+      totalEnCours,
+      totalEnvoyee,
+      totalDemandes,
+    ] = await Promise.all([
       DemandeDevis.countDocuments({ statut: 'nouvelle' }),
       DemandeDevis.countDocuments({ statut: 'en_cours' }),
       DemandeDevis.countDocuments({ statut: 'envoyee' }),
-      DemandeDevis.countDocuments()
+      DemandeDevis.countDocuments(),
     ]);
 
-    const devisEnvoyes = await DemandeDevis.find({ statut: 'envoyee', 'devisCalcule.totalTTC': { $exists: true } });
-    const montantTotal = devisEnvoyes.reduce((sum, d) => sum + (d.devisCalcule.totalTTC || 0), 0);
+    // ── Totaux 30j et 30-60j ────────────────────────────────────────
+    const [total30j, total30_60j] = await Promise.all([
+      DemandeDevis.countDocuments({ dateCreation: { $gte: il_y_a_30_jours } }),
+      DemandeDevis.countDocuments({
+        dateCreation: { $gte: il_y_a_60_jours, $lt: il_y_a_30_jours },
+      }),
+    ]);
+
+    const variationTotal =
+      total30_60j === 0
+        ? null
+        : Math.round(((total30j - total30_60j) / total30_60j) * 100);
+
+    // ── Montants financiers (pour KPI chiffre d'affaires) ──────────
+    const statsFinancieres = await DemandeDevis.aggregate([
+      { $match: { statut: 'envoyee', 'devisCalcule.totalTTC': { $exists: true } } },
+      {
+        $group: {
+          _id: null,
+          montantTotal:    { $sum: '$devisCalcule.totalTTC' },
+          montantMoyen:    { $avg: '$devisCalcule.totalTTC' },
+          montantMin:      { $min: '$devisCalcule.totalTTC' },
+          montantMax:      { $max: '$devisCalcule.totalTTC' },
+          nbDevisEnvoyes:  { $sum: 1 },
+        },
+      },
+    ]);
+
+    const finances = statsFinancieres[0] || {
+      montantTotal: 0, montantMoyen: 0,
+      montantMin: 0,   montantMax: 0, nbDevisEnvoyes: 0,
+    };
+
+    // Montants sur 30 derniers jours
+    const [stats30j] = await DemandeDevis.aggregate([
+      {
+        $match: {
+          statut: 'envoyee',
+          dateEnvoi: { $gte: il_y_a_30_jours },
+          'devisCalcule.totalTTC': { $exists: true },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          montant30j: { $sum: '$devisCalcule.totalTTC' },
+          nb30j:      { $sum: 1 },
+        },
+      },
+    ]) || [{ montant30j: 0, nb30j: 0 }];
+
+    // ── Délai moyen de traitement ───────────────────────────────────
+    const devisEnvoyes = await DemandeDevis.find(
+      { statut: 'envoyee', dateEnvoi: { $exists: true } },
+      { dateCreation: 1, dateEnvoi: 1 }
+    ).lean();
+
+    let delaiMoyenEnvoiH = null;
+    if (devisEnvoyes.length > 0) {
+      const total = devisEnvoyes.reduce(
+        (acc, d) => acc + (new Date(d.dateEnvoi) - new Date(d.dateCreation)), 0
+      );
+      delaiMoyenEnvoiH = Math.round(total / devisEnvoyes.length / 1000 / 3600);
+    }
+
+    // ── Taux de conversion ──────────────────────────────────────────
+    const tauxEnvoi =
+      totalDemandes === 0
+        ? 0
+        : Math.round(totalEnvoyee / totalDemandes * 100);
+
+    // ── Courbe journalière 30j ──────────────────────────────────────
+    const parJour = await DemandeDevis.aggregate([
+      { $match: { dateCreation: { $gte: il_y_a_30_jours } } },
+      {
+        $group: {
+          _id: {
+            annee: { $year: '$dateCreation' },
+            mois:  { $month: '$dateCreation' },
+            jour:  { $dayOfMonth: '$dateCreation' },
+          },
+          total:    { $sum: 1 },
+          envoyees: { $sum: { $cond: [{ $eq: ['$statut', 'envoyee']  }, 1, 0] } },
+          enCours:  { $sum: { $cond: [{ $eq: ['$statut', 'en_cours'] }, 1, 0] } },
+          // Montant cumulé envoyé ce jour
+          montantJour: {
+            $sum: {
+              $cond: [
+                { $eq: ['$statut', 'envoyee'] },
+                '$devisCalcule.totalTTC',
+                0,
+              ],
+            },
+          },
+        },
+      },
+      { $sort: { '_id.annee': 1, '_id.mois': 1, '_id.jour': 1 } },
+      {
+        $project: {
+          _id: 0,
+          date: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: {
+                $dateFromParts: {
+                  year: '$_id.annee', month: '$_id.mois', day: '$_id.jour',
+                },
+              },
+            },
+          },
+          total: 1, envoyees: 1, enCours: 1, montantJour: 1,
+        },
+      },
+    ]);
+
+    // ── Répartition par mois ────────────────────────────────────────
+    const parMois = await DemandeDevis.aggregate([
+      {
+        $group: {
+          _id: { annee: { $year: '$dateCreation' }, mois: { $month: '$dateCreation' } },
+          total:       { $sum: 1 },
+          montantMois: {
+            $sum: {
+              $cond: [
+                { $and: [
+                    { $eq: ['$statut', 'envoyee'] },
+                    { $ifNull: ['$devisCalcule.totalTTC', false] },
+                ]},
+                '$devisCalcule.totalTTC',
+                0,
+              ],
+            },
+          },
+        },
+      },
+      { $sort: { '_id.annee': 1, '_id.mois': 1 } },
+      {
+        $project: {
+          _id: 0,
+          periode: {
+            $concat: [
+              { $toString: '$_id.annee' }, '-',
+              { $cond: [{ $lt: ['$_id.mois', 10] }, '0', ''] },
+              { $toString: '$_id.mois' },
+            ],
+          },
+          total: 1, montantMois: 1,
+        },
+      },
+    ]);
 
     res.json({
-      totalNouvelle, totalEnCours, totalEnvoyee, totalDemandes,
-      montantTotal: Math.round(montantTotal * 100) / 100
+      totaux: {
+        all:      totalDemandes,
+        nouvelle: totalNouvelle,
+        enCours:  totalEnCours,
+        envoyee:  totalEnvoyee,
+      },
+
+      periode30j: {
+        total:     total30j,
+        montant:   Math.round((stats30j?.montant30j || 0) * 100) / 100,
+        nbEnvoyes: stats30j?.nb30j || 0,
+        variation: variationTotal,
+      },
+
+      finances: {
+        montantTotal:   Math.round(finances.montantTotal   * 100) / 100,
+        montantMoyen:   Math.round(finances.montantMoyen   * 100) / 100,
+        montantMin:     Math.round(finances.montantMin     * 100) / 100,
+        montantMax:     Math.round(finances.montantMax     * 100) / 100,
+        nbDevisEnvoyes: finances.nbDevisEnvoyes,
+      },
+
+      taux: {
+        envoi:          tauxEnvoi,           // % demandes → devis envoyé
+        delaiMoyenH:    delaiMoyenEnvoiH,    // délai moyen création → envoi
+      },
+
+      courbes: {
+        parJour,   // [{date, total, envoyees, enCours, montantJour}, ...]
+        parMois,   // [{periode, total, montantMois}, ...]
+      },
     });
   } catch (err) {
-    console.error('Erreur statistiques:', err);
-    res.status(500).json({ message: "Erreur calcul statistiques" });
+    console.error('Erreur statistiques devis:', err);
+    res.status(500).json({ message: 'Erreur calcul statistiques' });
   }
 };
 

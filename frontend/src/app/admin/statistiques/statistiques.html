@@ -1,0 +1,544 @@
+<app-side-bar></app-side-bar>
+
+<!-- stats-dashboard.component.html -->
+<div class="dashboard" [class.loaded]="loaded">
+
+  <!-- Animated background -->
+  <div class="bg-animated">
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+    <div class="bg-circle"></div>
+  </div>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="dash-header">
+    <div class="header-brand">
+      <div class="brand-dot"></div>
+      <div>
+        <h1>Tableau de bord Admin</h1>
+        <p>Statistiques en temps réel · Mis à jour à l'instant</p>
+      </div>
+    </div>
+    <div class="header-meta">
+      <div class="live-badge">
+        <span class="pulse-dot"></span>
+        LIVE
+      </div>
+      <div class="date-chip">{{ today | date:'dd MMM yyyy' }}</div>
+      <!-- Bouton Rafraîchir -->
+      <button class="refresh-btn" (click)="chargerToutesStatistiques()" [disabled]="loading" title="Rafraîchir">
+        <span [class.spinning]="loading">↻</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ── État : Chargement ──────────────────────────────────────────────── -->
+  <div class="loading-overlay" *ngIf="loading">
+    <div class="loading-spinner"></div>
+    <p class="loading-text">Chargement des statistiques…</p>
+  </div>
+
+  <!-- ── État : Erreur ─────────────────────────────────────────────────── -->
+  <div class="error-banner" *ngIf="errorMessage && !loading">
+    <span class="error-icon">⚠️</span>
+    <span>{{ errorMessage }}</span>
+    <button class="retry-btn" (click)="chargerToutesStatistiques()">Réessayer</button>
+  </div>
+
+  <!-- ── Contenu principal (masqué pendant le chargement) ──────────────── -->
+  <ng-container *ngIf="!loading && !errorMessage">
+
+    <!-- ── Tab Navigation ───────────────────────────────────────────────── -->
+    <nav class="tab-nav">
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'comptes'"
+        (click)="setTab('comptes')">
+        <span class="tab-icon">👤</span>
+        <span>Comptes clients</span>
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'devis'"
+        (click)="setTab('devis')">
+        <span class="tab-icon">📋</span>
+        <span>Demandes de devis</span>
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="activeTab === 'demo'"
+        (click)="setTab('demo')">
+        <span class="tab-icon">🎯</span>
+        <span>Demandes de démo</span>
+      </button>
+      <div class="tab-slider" [class]="'tab-' + activeTab"></div>
+    </nav>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         TAB : COMPTES CLIENTS
+    ════════════════════════════════════════════════════════════════════════ -->
+    <section class="tab-content" *ngIf="activeTab === 'comptes'">
+
+      <!-- KPI Cards -->
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-1" style="--delay: 0s">
+          <div class="kpi-icon">👥</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ comptes.totaux.all | number }}</span>
+            <span class="kpi-label">Total comptes</span>
+            <span class="kpi-sub variation" [class]="variationClass(comptes.periode30j.variation)">
+              {{ formatVariation(comptes.periode30j.variation) }} vs mois précédent
+            </span>
+          </div>
+          <div class="kpi-sparkle"></div>
+        </div>
+
+        <div class="kpi-card kpi-2" style="--delay: 0.1s">
+          <div class="kpi-icon">⏳</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ comptes.totaux.enAttente | number }}</span>
+            <span class="kpi-label">En attente</span>
+            <span class="kpi-sub">{{ comptes.taux.enAttenteRatio }}% du total</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-3" style="--delay: 0.2s">
+          <div class="kpi-icon">✅</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ comptes.taux.approbation }}%</span>
+            <span class="kpi-label">Taux d'approbation</span>
+            <span class="kpi-sub">{{ comptes.totaux.approuve | number }} approuvés</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-4" style="--delay: 0.3s">
+          <div class="kpi-icon">⚡</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ comptes.taux.delaiMoyenApprobH ?? '—' }}<small>h</small></span>
+            <span class="kpi-label">Délai moyen approbation</span>
+            <span class="kpi-sub">{{ comptes.periode30j.inscriptions }} inscriptions ce mois</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts row -->
+      <div class="charts-row">
+        <div class="chart-card large" style="--delay: 0.4s">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Inscriptions journalières</h3>
+              <p class="chart-sub">30 derniers jours — par statut</p>
+            </div>
+            <div class="chart-badge blue">Ligne</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas #chartCompteJour></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card" style="--delay: 0.5s">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Répartition par mois</h3>
+              <p class="chart-sub">Historique mensuel</p>
+            </div>
+            <div class="chart-badge pink">Barres</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas #chartCompteMois></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gauges row -->
+      <div class="gauges-row">
+        <div class="gauge-card" style="--delay: 0.6s">
+          <h4>Taux d'approbation</h4>
+          <canvas class="donut-canvas"
+            #approubDonut
+            (appAfterViewInit)="drawDonut(approubDonut, comptes.taux.approbation, '#00C48C')">
+          </canvas>
+          <p class="gauge-label">{{ comptes.taux.approbation }}% approuvés parmi traités</p>
+        </div>
+
+        <div class="breakdown-card" style="--delay: 0.7s">
+          <h4>Répartition des statuts</h4>
+          <div class="breakdown-bars">
+            <div class="breakdown-row">
+              <span class="breakdown-label">Approuvés</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill green"
+                  [style.width.%]="comptes.totaux.all > 0 ? (comptes.totaux.approuve / comptes.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ comptes.totaux.approuve | number }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">En attente</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill orange"
+                  [style.width.%]="comptes.totaux.all > 0 ? (comptes.totaux.enAttente / comptes.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ comptes.totaux.enAttente | number }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Rejetés</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill red"
+                  [style.width.%]="comptes.totaux.all > 0 ? (comptes.totaux.rejete / comptes.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ comptes.totaux.rejete | number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="insight-card" style="--delay: 0.8s">
+          <div class="insight-icon">💡</div>
+          <h4>Insights clés</h4>
+          <ul class="insight-list">
+            <li>
+              <span class="i-dot blue"></span>
+              <strong>{{ comptes.periode30j.inscriptions }}</strong> nouvelles inscriptions ce mois
+            </li>
+            <li>
+              <span class="i-dot green"></span>
+              Délai moyen d'approbation : <strong>{{ comptes.taux.delaiMoyenApprobH ?? '—' }}h</strong>
+            </li>
+            <li>
+              <span class="i-dot orange"></span>
+              <strong>{{ comptes.totaux.enAttente }}</strong> comptes nécessitent une action
+            </li>
+            <li>
+              <span class="i-dot red"></span>
+              Taux de rejet :
+              <strong>
+                {{ comptes.totaux.all > 0 ? (comptes.totaux.rejete / comptes.totaux.all * 100).toFixed(1) : '0.0' }}%
+              </strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         TAB : DEMANDES DE DEVIS
+    ════════════════════════════════════════════════════════════════════════ -->
+    <section class="tab-content" *ngIf="activeTab === 'devis'">
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-1" style="--delay: 0s">
+          <div class="kpi-icon">📋</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ devis.totaux.all | number }}</span>
+            <span class="kpi-label">Total demandes</span>
+            <span class="kpi-sub variation" [class]="variationClass(devis.periode30j.variation)">
+              {{ formatVariation(devis.periode30j.variation) }} vs mois précédent
+            </span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-2" style="--delay: 0.1s">
+          <div class="kpi-icon">💰</div>
+          <div class="kpi-body">
+            <span class="kpi-value kpi-small">{{ formatCurrency(devis.finances.montantTotal) }}</span>
+            <span class="kpi-label">Chiffre d'affaires total</span>
+            <span class="kpi-sub">Moy. {{ formatCurrency(devis.finances.montantMoyen) }} / devis</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-3" style="--delay: 0.2s">
+          <div class="kpi-icon">📤</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ devis.taux.envoi }}%</span>
+            <span class="kpi-label">Taux d'envoi</span>
+            <span class="kpi-sub">{{ devis.totaux.envoyee | number }} devis envoyés</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-4" style="--delay: 0.3s">
+          <div class="kpi-icon">⏱️</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ devis.taux.delaiMoyenH ?? '—' }}<small>h</small></span>
+            <span class="kpi-label">Délai moyen traitement</span>
+            <span class="kpi-sub">{{ devis.periode30j.montant | currency:'TND':'symbol':'1.0-0' }} ce mois</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card large" style="--delay: 0.4s">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Volume journalier des demandes</h3>
+              <p class="chart-sub">30 derniers jours — avec zone de remplissage</p>
+            </div>
+            <div class="chart-badge green">Aire</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas #chartDevisJour></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card" style="--delay: 0.5s">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">CA mensuel</h3>
+              <p class="chart-sub">Montants TTC envoyés</p>
+            </div>
+            <div class="chart-badge pink">Barres</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas #chartDevisMontant></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Finance breakdown -->
+      <div class="gauges-row">
+        <div class="finance-card" style="--delay: 0.6s">
+          <h4>Analyse financière</h4>
+          <div class="finance-stats">
+            <div class="finance-stat">
+              <span class="fs-label">Montant total</span>
+              <span class="fs-val blue">{{ formatCurrency(devis.finances.montantTotal) }}</span>
+            </div>
+            <div class="finance-stat">
+              <span class="fs-label">Montant moyen</span>
+              <span class="fs-val green">{{ formatCurrency(devis.finances.montantMoyen) }}</span>
+            </div>
+            <div class="finance-stat">
+              <span class="fs-label">Plus petit devis</span>
+              <span class="fs-val orange">{{ formatCurrency(devis.finances.montantMin) }}</span>
+            </div>
+            <div class="finance-stat">
+              <span class="fs-label">Plus grand devis</span>
+              <span class="fs-val pink">{{ formatCurrency(devis.finances.montantMax) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="breakdown-card" style="--delay: 0.7s">
+          <h4>Statuts des demandes</h4>
+          <div class="breakdown-bars">
+            <div class="breakdown-row">
+              <span class="breakdown-label">Envoyées</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill green"
+                  [style.width.%]="devis.totaux.all > 0 ? (devis.totaux.envoyee / devis.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ devis.totaux.envoyee }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">En cours</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill blue"
+                  [style.width.%]="devis.totaux.all > 0 ? (devis.totaux.enCours / devis.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ devis.totaux.enCours }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Nouvelles</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill orange"
+                  [style.width.%]="devis.totaux.all > 0 ? (devis.totaux.nouvelle / devis.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ devis.totaux.nouvelle }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="insight-card" style="--delay: 0.8s">
+          <div class="insight-icon">📊</div>
+          <h4>Performance ce mois</h4>
+          <ul class="insight-list">
+            <li>
+              <span class="i-dot blue"></span>
+              <strong>{{ devis.periode30j.total }}</strong> nouvelles demandes reçues
+            </li>
+            <li>
+              <span class="i-dot green"></span>
+              <strong>{{ devis.periode30j.nbEnvoyes }}</strong> devis envoyés
+            </li>
+            <li>
+              <span class="i-dot pink"></span>
+              <strong>{{ formatCurrency(devis.periode30j.montant) }}</strong> générés
+            </li>
+            <li>
+              <span class="i-dot orange"></span>
+              Délai moyen : <strong>{{ devis.taux.delaiMoyenH ?? '—' }}h</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         TAB : DEMANDES DE DÉMO
+    ════════════════════════════════════════════════════════════════════════ -->
+    <section class="tab-content" *ngIf="activeTab === 'demo'">
+
+      <div class="kpi-grid">
+        <div class="kpi-card kpi-1" style="--delay: 0s">
+          <div class="kpi-icon">🎯</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ demo.totaux.all | number }}</span>
+            <span class="kpi-label">Total demandes</span>
+            <span class="kpi-sub variation" [class]="variationClass(demo.periode30j.variation)">
+              {{ formatVariation(demo.periode30j.variation) }} vs mois précédent
+            </span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-2" style="--delay: 0.1s">
+          <div class="kpi-icon">📞</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ demo.taux.contactage }}%</span>
+            <span class="kpi-label">Taux de contactage</span>
+            <span class="kpi-sub">{{ demo.totaux.contactee }} contactées</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-3" style="--delay: 0.2s">
+          <div class="kpi-icon">🏁</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ demo.taux.cloture }}%</span>
+            <span class="kpi-label">Taux de clôture</span>
+            <span class="kpi-sub">{{ demo.totaux.cloturee }} clôturées</span>
+          </div>
+        </div>
+
+        <div class="kpi-card kpi-4" style="--delay: 0.3s">
+          <div class="kpi-icon">⚡</div>
+          <div class="kpi-body">
+            <span class="kpi-value">{{ demo.delaiMoyenContactH ?? '—' }}<small>h</small></span>
+            <span class="kpi-label">Délai moyen contact</span>
+            <span class="kpi-sub">{{ demo.periode30j.total }} demandes ce mois</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="charts-row">
+        <div class="chart-card large" style="--delay: 0.4s">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Évolution journalière</h3>
+              <p class="chart-sub">30 derniers jours — par statut de traitement</p>
+            </div>
+            <div class="chart-badge purple">Ligne</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas #chartDemoJour></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card" style="--delay: 0.5s">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Entonnoir de conversion</h3>
+              <p class="chart-sub">Pipeline complet</p>
+            </div>
+            <div class="chart-badge green">Funnel</div>
+          </div>
+          <div class="chart-wrap">
+            <canvas #chartDemoFunnel></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="gauges-row">
+        <div class="conversion-card" style="--delay: 0.6s">
+          <h4>Pipeline de conversion</h4>
+          <div class="pipeline">
+            <div class="pipeline-step">
+              <div class="ps-bar" [style.height.%]="100" style="background: #0066FF">
+                <span>{{ demo.totaux.all }}</span>
+              </div>
+              <small>Reçues</small>
+            </div>
+            <div class="ps-arrow">→</div>
+            <div class="pipeline-step">
+              <div class="ps-bar"
+                [style.height.%]="demo.totaux.all > 0 ? ((demo.totaux.contactee + demo.totaux.cloturee) / demo.totaux.all) * 100 : 0"
+                style="background: #9D00FF">
+                <span>{{ demo.totaux.contactee + demo.totaux.cloturee }}</span>
+              </div>
+              <small>Contactées</small>
+            </div>
+            <div class="ps-arrow">→</div>
+            <div class="pipeline-step">
+              <div class="ps-bar"
+                [style.height.%]="demo.totaux.all > 0 ? (demo.totaux.cloturee / demo.totaux.all) * 100 : 0"
+                style="background: #00C48C">
+                <span>{{ demo.totaux.cloturee }}</span>
+              </div>
+              <small>Clôturées</small>
+            </div>
+          </div>
+        </div>
+
+        <div class="breakdown-card" style="--delay: 0.7s">
+          <h4>Statuts globaux</h4>
+          <div class="breakdown-bars">
+            <div class="breakdown-row">
+              <span class="breakdown-label">Clôturées</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill green"
+                  [style.width.%]="demo.totaux.all > 0 ? (demo.totaux.cloturee / demo.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ demo.totaux.cloturee }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Contactées</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill purple"
+                  [style.width.%]="demo.totaux.all > 0 ? (demo.totaux.contactee / demo.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ demo.totaux.contactee }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-label">Nouvelles</span>
+              <div class="breakdown-track">
+                <div class="breakdown-fill orange"
+                  [style.width.%]="demo.totaux.all > 0 ? (demo.totaux.nouvelle / demo.totaux.all) * 100 : 0">
+                </div>
+              </div>
+              <span class="breakdown-val">{{ demo.totaux.nouvelle }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="insight-card" style="--delay: 0.8s">
+          <div class="insight-icon">🎯</div>
+          <h4>Performance ce mois</h4>
+          <ul class="insight-list">
+            <li>
+              <span class="i-dot blue"></span>
+              <strong>{{ demo.periode30j.total }}</strong> nouvelles demandes
+            </li>
+            <li>
+              <span class="i-dot purple"></span>
+              <strong>{{ demo.periode30j.contactee }}</strong> contactées ce mois
+            </li>
+            <li>
+              <span class="i-dot green"></span>
+              <strong>{{ demo.periode30j.cloturee }}</strong> clôturées ce mois
+            </li>
+            <li>
+              <span class="i-dot orange"></span>
+              Réponse en <strong>{{ demo.delaiMoyenContactH ?? '—' }}h</strong> en moyenne
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </ng-container><!-- fin ng-container principal -->
+
+</div>

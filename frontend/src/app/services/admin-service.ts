@@ -67,6 +67,11 @@ export class AdminService {
     return this.http.put(`${this.admin}/clients/${userId}/rejeter`, { motifRefus }, this.authHeaders);
   }
 
+  statistiquesCompte(): Observable<any> {
+    return this.http.get(`${this.admin}/compteClient/statistiques`, this.authHeaders);
+  }
+
+
   // ═══════════════════════════════════════════════════════════
   // DEMANDES DEMO
   // ═══════════════════════════════════════════════════════════
@@ -81,6 +86,10 @@ export class AdminService {
 
   cloturerDemande(id: string): Observable<any> {
     return this.http.patch(`${this.demo}/${id}/cloturer`, {}, this.authHeaders);
+  }
+
+  statistiquesDemo(): Observable<any> {
+    return this.http.get(`${this.demo}/admin/demandes-demo/statistiques`, this.authHeaders);
   }
 
   // ═══════════════════════════════════════════════════════════
@@ -108,7 +117,7 @@ export class AdminService {
   }
 
   statistiquesDevis(): Observable<any> {
-    return this.http.get(`${this.devis}/statistiques`, this.authHeaders);
+    return this.http.get(`${this.devis}/demandes-devis/statistiques`, this.authHeaders);
   }
 
   supprimerDemandeDevis(demandeId: string): Observable<any> {

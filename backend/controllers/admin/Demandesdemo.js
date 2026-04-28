@@ -41,24 +41,181 @@ const listerDemandesParStatut = async (req, res) => {
 // ===============================
 // Obtenir les statistiques
 // ===============================
+
 const obtenirStatistiques = async (req, res) => {
   try {
-    const [totalNouvelle, totalContactee, totalCloturee, totalDemandes] = await Promise.all([
-      DemandeDemo.countDocuments({ statut: 'nouvelle' }),
-      DemandeDemo.countDocuments({ statut: 'contactee' }),
-      DemandeDemo.countDocuments({ statut: 'cloturee' }),
-      DemandeDemo.countDocuments()
-    ]);
+    const maintenant = new Date();
+    const il_y_a_30_jours = new Date(maintenant - 30 * 24 * 60 * 60 * 1000);
+    const il_y_a_60_jours = new Date(maintenant - 60 * 24 * 60 * 60 * 1000);
 
-    res.json({
+    // ── Totaux globaux ──────────────────────────────────────────────
+    const [
       totalNouvelle,
       totalContactee,
       totalCloturee,
-      totalDemandes
+      totalDemandes,
+    ] = await Promise.all([
+      DemandeDemo.countDocuments({ statut: 'nouvelle' }),
+      DemandeDemo.countDocuments({ statut: 'contactee' }),
+      DemandeDemo.countDocuments({ statut: 'cloturee' }),
+      DemandeDemo.countDocuments(),
+    ]);
+
+    // ── Totaux sur les 30 derniers jours (pour comparaison période) ─
+    const [
+      nouvelles30j,
+      contactees30j,
+      cloturees30j,
+      total30j,
+    ] = await Promise.all([
+      DemandeDemo.countDocuments({ statut: 'nouvelle',   dateCreation: { $gte: il_y_a_30_jours } }),
+      DemandeDemo.countDocuments({ statut: 'contactee',  dateContact:  { $gte: il_y_a_30_jours } }),
+      DemandeDemo.countDocuments({ statut: 'cloturee',   dateCloture:  { $gte: il_y_a_30_jours } }),
+      DemandeDemo.countDocuments({                       dateCreation: { $gte: il_y_a_30_jours } }),
+    ]);
+
+    // ── Totaux sur les 30-60 jours (période précédente pour variation) ─
+    const [total30_60j] = await Promise.all([
+      DemandeDemo.countDocuments({
+        dateCreation: { $gte: il_y_a_60_jours, $lt: il_y_a_30_jours },
+      }),
+    ]);
+
+    // Variation en % : +12% ou -5% par rapport à la période précédente
+    const variationTotal =
+      total30_60j === 0
+        ? null
+        : Math.round(((total30j - total30_60j) / total30_60j) * 100);
+
+    // ── Taux de conversion ──────────────────────────────────────────
+    // Parmi toutes les demandes traitées (contactée + clôturée), combien sont clôturées ?
+    const tauxContactage =
+      totalDemandes === 0
+        ? 0
+        : Math.round((totalContactee + totalCloturee) / totalDemandes * 100);
+
+    const tauxCloture =
+      (totalContactee + totalCloturee) === 0
+        ? 0
+        : Math.round(totalCloturee / (totalContactee + totalCloturee) * 100);
+
+    // ── Délai moyen de traitement (nouvelle → contactée) ───────────
+    const demandesContactees = await DemandeDemo.find(
+      { statut: { $in: ['contactee', 'cloturee'] }, dateContact: { $exists: true } },
+      { dateCreation: 1, dateContact: 1 }
+    ).lean();
+
+    let delaiMoyenContactH = null;
+    if (demandesContactees.length > 0) {
+      const total = demandesContactees.reduce((acc, d) => {
+        return acc + (new Date(d.dateContact) - new Date(d.dateCreation));
+      }, 0);
+      delaiMoyenContactH = Math.round(total / demandesContactees.length / 1000 / 3600);
+    }
+
+    // ── Courbe journalière sur 30 jours (pour graphique en ligne) ──
+    const parJour = await DemandeDemo.aggregate([
+      { $match: { dateCreation: { $gte: il_y_a_30_jours } } },
+      {
+        $group: {
+          _id: {
+            annee:  { $year:  '$dateCreation' },
+            mois:   { $month: '$dateCreation' },
+            jour:   { $dayOfMonth: '$dateCreation' },
+          },
+          total:      { $sum: 1 },
+          nouvelles:  { $sum: { $cond: [{ $eq: ['$statut', 'nouvelle']  }, 1, 0] } },
+          contactees: { $sum: { $cond: [{ $eq: ['$statut', 'contactee'] }, 1, 0] } },
+          cloturees:  { $sum: { $cond: [{ $eq: ['$statut', 'cloturee']  }, 1, 0] } },
+        },
+      },
+      { $sort: { '_id.annee': 1, '_id.mois': 1, '_id.jour': 1 } },
+      {
+        $project: {
+          _id: 0,
+          date: {
+            $dateToString: {
+              format: '%Y-%m-%d',
+              date: {
+                $dateFromParts: {
+                  year: '$_id.annee',
+                  month: '$_id.mois',
+                  day: '$_id.jour',
+                },
+              },
+            },
+          },
+          total:      1,
+          nouvelles:  1,
+          contactees: 1,
+          cloturees:  1,
+        },
+      },
+    ]);
+
+    // ── Répartition par mois (pour graphique en barres) ────────────
+    const parMois = await DemandeDemo.aggregate([
+      {
+        $group: {
+          _id: {
+            annee: { $year: '$dateCreation' },
+            mois:  { $month: '$dateCreation' },
+          },
+          total: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.annee': 1, '_id.mois': 1 } },
+      {
+        $project: {
+          _id: 0,
+          periode: {
+            $concat: [
+              { $toString: '$_id.annee' }, '-',
+              { $cond: [{ $lt: ['$_id.mois', 10] }, '0', ''] },
+              { $toString: '$_id.mois' },
+            ],
+          },
+          total: 1,
+        },
+      },
+    ]);
+
+    res.json({
+      // Totaux globaux (pour les KPI cards)
+      totaux: {
+        all:       totalDemandes,
+        nouvelle:  totalNouvelle,
+        contactee: totalContactee,
+        cloturee:  totalCloturee,
+      },
+
+      // Période courante 30j (pour tendances)
+      periode30j: {
+        total:      total30j,
+        nouvelle:   nouvelles30j,
+        contactee:  contactees30j,
+        cloturee:   cloturees30j,
+        variation:  variationTotal, // ex: +12 ou -5 (en %)
+      },
+
+      // Taux de conversion (pour jauges / donut)
+      taux: {
+        contactage: tauxContactage, 
+        cloture:    tauxCloture,    
+      },
+
+      // Délai moyen en heures (pour KPI)
+      delaiMoyenContactH,
+
+      // Séries temporelles (pour recharts LineChart / BarChart)
+      courbes: {
+        parJour,  
+        parMois,  
+      },
     });
   } catch (err) {
-    console.error('Erreur statistiques:', err);
-    res.status(500).json({ message: "Erreur calcul statistiques" });
+    console.error('Erreur statistiques démo:', err);
+    res.status(500).json({ message: 'Erreur calcul statistiques' });
   }
 };
 

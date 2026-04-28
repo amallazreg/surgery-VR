@@ -25,6 +25,7 @@ import { MonCompte } from './clients/institution/mon-compte/mon-compte';
 import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 import { MonCompteEtudiant } from './clients/Etudiants/mon-compte-etudiant/mon-compte-etudiant';
+import { Statistiques } from './admin/statistiques/statistiques';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -47,6 +48,8 @@ export const routes: Routes = [
       { path: 'demande-devis',         component: DemandeDevis },
       { path: 'forfaitManagement',     component: ForfaitManagment },
       { path: 'experienceManagement',  component: ExperienceManagement },
+      { path: 'statistiques',  component: Statistiques },
+
       ]
       },
 
