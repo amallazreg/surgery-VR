@@ -76,4 +76,34 @@ userSchema.methods.comparePassword = function (motDePassePlain) {
   return bcrypt.compare(motDePassePlain, this.motDePasse);
 };
 
+
+const deleteAbonnementsOnUserRemove = async function (next) {
+  try {
+    const Abonnement    = require('./abonnement');
+    const CodeFormation = require('./codeFormation');
+
+    // Trouver les abonnements liés à ce user
+    const abonnements   = await Abonnement.find({ user: this._id }, '_id');
+    const abonnementIds = abonnements.map(a => a._id);
+
+    // Supprimer les codes de formation associés
+    if (abonnementIds.length > 0) {
+      await CodeFormation.deleteMany({ abonnement: { $in: abonnementIds } });
+    }
+
+    // Supprimer les abonnements
+    await Abonnement.deleteMany({ user: this._id });
+
+    console.log(`🗑️ User ${this._id} supprimé → ${abonnementIds.length} abonnement(s) nettoyé(s)`);
+    next();
+  } catch (err) {
+    console.error('Erreur suppression abonnements du user:', err);
+    next(err);
+  }
+};
+
+userSchema.pre('deleteOne', { document: true, query: false }, deleteAbonnementsOnUserRemove);
+
+userSchema.pre('remove', deleteAbonnementsOnUserRemove);
+
 module.exports = mongoose.model('Utilisateur', userSchema);

@@ -253,8 +253,10 @@ processPayment(): void {
       this.isProcessing = false;
 
       if (err.status === 409) {
-        this.errorMessage = err.error?.message || 'Vous avez déjà un abonnement actif.';
-        this.currentStep = 1; // Ramener à l'étape 1 pour afficher l'erreur
+        // err.error peut être une string ou un objet selon le responseType
+        const body = typeof err.error === 'string' ? JSON.parse(err.error) : err.error;
+        this.errorMessage = body?.message || 'Vous avez déjà un abonnement actif.';
+        this.currentStep = 1;
       } else {
         this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
       }
