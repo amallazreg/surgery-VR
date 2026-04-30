@@ -15,14 +15,13 @@ const {
 
 const { protect } = require('../../middlewares/auth'); 
 
-router.use(protect);
 
-router.get('/mon-abonnement/:userId',getMonAbonnement);
-router.get('/historique/:userId',getHistoriqueAbonnements);
+router.get('/mon-abonnement/:userId',protect,getMonAbonnement);
+router.get('/historique/:userId',protect,getHistoriqueAbonnements);
 router.get('/factures/:userId', getMesFactures);
-router.get('/upgrade/disponibles/:userId', getForfaitsUpgrade);
-router.post('/renouveler',renouvelerAbonnement);
-router.post('/upgrade',upgradeAbonnement);
+router.get('/upgrade/disponibles/:userId',protect, getForfaitsUpgrade);
+router.post('/renouveler',protect,renouvelerAbonnement);
+router.post('/upgrade',protect,upgradeAbonnement);
 router.get('/facture/:paiementId', telechargerFacture);
 router.get('/droits/:userId',getMesDroits);  
 router.post('/telechargerApk/:userId',telechargerApk);       
