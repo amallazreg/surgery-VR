@@ -92,6 +92,8 @@ export class Forfaits  implements OnInit {
   cardCvv = '';
   cardName = '';
 
+  errorMessage: string = '';
+
   get currentPrice(): string {
     if (!this.selectedPlan) return '';
     return this.isYearly ? this.selectedPlan.priceYearly : this.selectedPlan.price;
@@ -235,35 +237,32 @@ getHeaderBg(name: string): string {
   }
 
 processPayment(): void {
-
   if (!this.selectedPlan) return;
 
   this.isProcessing = true;
+  this.errorMessage = '';
 
-  const userId = localStorage.getItem('userId'); 
-  const forfaitId = this.selectedPlan._id; 
+  const userId = localStorage.getItem('userId');
+  const forfaitId = this.selectedPlan._id;
 
-  console.log("Selected Plan:", this.selectedPlan);
-    console.log("Selected user :", userId);
-
-console.log("Forfait ID envoyé:", this.selectedPlan._id);
-
-  this.paymentService.createCheckoutSession(
-    userId!,
-    forfaitId
-  ).subscribe({
-    
+  this.paymentService.createCheckoutSession(userId!, forfaitId).subscribe({
     next: (res) => {
-      
       window.location.href = res.url;
     },
     error: (err) => {
-      console.error(err);
       this.isProcessing = false;
+
+      if (err.status === 409) {
+        this.errorMessage = err.error?.message || 'Vous avez déjà un abonnement actif.';
+        this.currentStep = 1; // Ramener à l'étape 1 pour afficher l'erreur
+      } else {
+        this.errorMessage = 'Une erreur est survenue. Veuillez réessayer.';
+      }
+
+      this.cdr.detectChanges();
     }
   });
 }
-
   // ── Card formatting ──────────────────────────────────────
   formatCard(event: Event): void {
     const input = event.target as HTMLInputElement;

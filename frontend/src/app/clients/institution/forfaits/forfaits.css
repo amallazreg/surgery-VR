@@ -996,3 +996,13 @@ body {
 .faq-chevron { transition: transform 0.2s; color: #0066FF; }
 
 
+.error-banner {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  font-weight: 500;
+}

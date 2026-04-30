@@ -187,6 +187,10 @@
     <!-- Modal Body -->
     <div class="modal-body">
 
+       <div class="error-banner" *ngIf="errorMessage">
+    ⚠ {{ errorMessage }}
+  </div>
+
       <!-- SUCCESS screen -->
       <div class="success-screen" *ngIf="isSuccess">
         <div class="success-anim">🎉</div>
