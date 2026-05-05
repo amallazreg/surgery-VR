@@ -158,9 +158,9 @@ export class FormationEtudiant implements OnInit, OnDestroy {
     }
   }
 
-private downloadPDF(url: string): void {
+private downloadPDF(operationId: string): void {
   const token = localStorage.getItem('token');
-  const fullUrl = `https://surgery-vr.onrender.com${url}`;
+  const fullUrl = `https://surgery-vr.onrender.com${operationId}`;
   
   fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } })
     .then((res) => {

@@ -29,6 +29,9 @@ const accesEtudiantRoutes = require('./routes/etudiant/accesEtudiant') ;
 const paiementEtudiantRoutes = require('./routes/etudiant/Paiementetudiant') ; 
 const abonnementEtudiantRoutes = require('./routes/etudiant/Abonnementetudiant') ; 
 const formationEtudiantRoutes = require('./routes/etudiant/formation')
+
+const pdfRoutes = require("./services/pdfFormations"); // ou le bon chemin
+
 const aiRoutes = require('./routes/ai');
 
 
@@ -270,6 +273,7 @@ app.use('/client/etudiant/paiement', paiementEtudiantRoutes);
 app.use('/client/etudiant', abonnementEtudiantRoutes);
 app.use('/client/etudiant/formation',formationEtudiantRoutes);
 
+app.use("/api/pdf", pdfRoutes);
 app.use('/api/ai', aiRoutes);
 
 
