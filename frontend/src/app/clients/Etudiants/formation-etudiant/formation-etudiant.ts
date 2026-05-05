@@ -2,13 +2,14 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core'; // ✅
 import { Subject, takeUntil } from 'rxjs';
 import { Formation, ScenarioSummary, FormationEtudiantService } from '../../../services/formation-etudiant-service';
+import { SideBarEtudiant } from '../side-bar-etudiant/side-bar-etudiant';
 
 type TabType = 'scenarios' | 'certifications';
 
 @Component({
   selector: 'app-formation-etudiant',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, SideBarEtudiant],
   templateUrl: './formation-etudiant.html',
   styleUrl: './formation-etudiant.css',
 })
