@@ -11,7 +11,7 @@ import { Formation, FormationEtudiantService } from '../../../services/formation
   templateUrl: './certificat-etudiant.html',
   styleUrl: './certificat-etudiant.css',
 })
-export class CertificatEtudiant implements OnChanges, OnDestroy { 
+export class CertificatEtudiant implements OnChanges, OnDestroy,OnInit { 
   @Input() userId: string = '';
 
   private destroy$ = new Subject<void>();
@@ -25,6 +25,23 @@ export class CertificatEtudiant implements OnChanges, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
+  ngOnInit(): void {
+  // Si userId n'est pas passé en Input (cas page standalone)
+  if (!this.userId) {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.userId = payload.id || payload._id || payload.userId;
+      } catch {
+        return;
+      }
+    }
+  }
+  if (this.userId) {
+    this.loadCertifications();
+  }
+}
   // ✅ Se déclenche quand userId est transmis par le parent
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['userId'] && this.userId) {
@@ -111,4 +128,17 @@ export class CertificatEtudiant implements OnChanges, OnDestroy {
       day: '2-digit', month: 'long', year: 'numeric',
     });
   }
+
+  // Ajoute ces 2 getters dans la classe CertificatEtudiant
+get bestScore(): number {
+  if (!this.certifications.length) return 0;
+  return Math.max(...this.certifications.map(c => c.performanceMetrics?.totalScore || 0));
 }
+
+get avgScore(): number {
+  if (!this.certifications.length) return 0;
+  const sum = this.certifications.reduce((acc, c) => acc + (c.performanceMetrics?.totalScore || 0), 0);
+  return Math.round(sum / this.certifications.length);
+}
+}
+

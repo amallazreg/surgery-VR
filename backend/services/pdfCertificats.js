@@ -4,6 +4,8 @@
 // Ajouter cette route dans votre fichier pdf.routes.js
 // ═════════════════════════════════════════════════════════════
 
+const Formation = require("../models/formation");
+
 const router = require("./pdfFormations");
 
 router.get("/certificate/:operationId", async (req, res) => {
