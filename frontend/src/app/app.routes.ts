@@ -26,6 +26,7 @@ import { authGuard } from './guards/auth-guard';
 import { roleGuard } from './guards/role-guard';
 import { MonCompteEtudiant } from './clients/Etudiants/mon-compte-etudiant/mon-compte-etudiant';
 import { Statistiques } from './admin/statistiques/statistiques';
+import { FormationEtudiant } from './clients/Etudiants/formation-etudiant/formation-etudiant';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -76,6 +77,8 @@ export const routes: Routes = [
       { path: 'mesExperiencesVR', component: MesExperiencesVR },
       { path: 'forfaits',         component: ForfaitEtudiant },
       { path: 'monCompte',         component: MonCompteEtudiant },
+      { path: 'mesFormation',         component: FormationEtudiant },
+
 
       ]
       },
