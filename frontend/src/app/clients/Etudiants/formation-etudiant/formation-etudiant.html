@@ -2,12 +2,12 @@
 
 <div class="formations-page">
 
-  <!-- ── HERO HEADER ─────────────────────────────────────── -->
+  <!-- ── HERO ─────────────────────────────────────────────── -->
   <div class="page-hero">
-    <div class="hero-bg-shapes">
-      <div class="shape shape-1"></div>
-      <div class="shape shape-2"></div>
-      <div class="shape shape-3"></div>
+    <div class="hero-bg">
+      <div class="hero-orb orb-1"></div>
+      <div class="hero-orb orb-2"></div>
+      <div class="hero-orb orb-3"></div>
     </div>
     <div class="hero-content">
       <div class="hero-label">
@@ -18,7 +18,6 @@
       <p class="hero-subtitle">Suivez votre progression et téléchargez vos rapports chirurgicaux</p>
     </div>
 
-    <!-- Stats bar -->
     <div class="stats-bar" *ngIf="!loading">
       <div class="stat-item">
         <span class="stat-value">{{ totalSessions }}</span>
@@ -36,32 +35,40 @@
       </div>
       <div class="stat-divider"></div>
       <div class="stat-item">
-        <span class="stat-value" [style.color]="getScoreGradient(avgScore)">{{ avgScore }}<small>/100</small></span>
+        <span class="stat-value">{{ avgScore }}<small>/100</small></span>
         <span class="stat-label">Score moyen</span>
       </div>
     </div>
   </div>
 
-  <!-- ── TABS ────────────────────────────────────────────── -->
+  <!-- ── TABS ──────────────────────────────────────────────── -->
   <div class="tabs-wrapper">
     <div class="tabs">
       <button class="tab-btn" [class.active]="activeTab === 'scenarios'" (click)="setTab('scenarios')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+        </svg>
         Mes scénarios
         <span class="tab-badge">{{ summaries.length }}</span>
       </button>
       <button class="tab-btn" [class.active]="activeTab === 'certifications'" (click)="setTab('certifications')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="6"/>
+          <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+        </svg>
         Certifications
         <span class="tab-badge cert">{{ certifications.length }}</span>
       </button>
     </div>
     <button class="refresh-btn" (click)="loadData()" title="Rafraîchir">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
     </button>
   </div>
 
-  <!-- ── MAIN CONTENT ────────────────────────────────────── -->
+  <!-- ── CONTENT ────────────────────────────────────────────── -->
   <div class="content-area">
 
     <!-- Loading -->
@@ -77,19 +84,20 @@
       <button (click)="loadData()">Réessayer</button>
     </div>
 
-    <!-- ── TAB : SCÉNARIOS ─────────────────────────────── -->
+    <!-- ── TAB SCÉNARIOS ──────────────────────────────────── -->
     <div class="tab-content" *ngIf="!loading && !error && activeTab === 'scenarios'">
 
-      <!-- Empty -->
       <div class="empty-state" *ngIf="summaries.length === 0">
         <div class="empty-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5M2 12l10 5 10-5"/>
+          </svg>
         </div>
         <h3>Aucune formation pour l'instant</h3>
         <p>Lancez votre première expérience VR pour commencer</p>
       </div>
 
-      <!-- Scenario Cards -->
       <div class="scenarios-grid" *ngIf="summaries.length > 0">
         <div
           class="scenario-card"
@@ -100,18 +108,28 @@
           <!-- Card Header -->
           <div class="card-header" (click)="toggleScenario(scenario._id)">
             <div class="card-header-left">
-              <div class="scenario-icon" [style.background]="scenario.isValidated ? 'var(--gradient-3)' : 'var(--gradient-1)'">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+              <div class="scenario-icon"
+                [style.background]="scenario.isValidated ? 'linear-gradient(135deg,#00C48C,#00FFB2)' : 'linear-gradient(135deg,#FF006E,#FF6B35)'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                  <polyline points="9 22 9 12 15 12 15 22"/>
+                </svg>
               </div>
               <div class="scenario-info">
                 <h3 class="scenario-name">{{ scenario._id }}</h3>
                 <div class="scenario-meta">
                   <span class="meta-chip">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                    </svg>
                     {{ scenario.totalAttempts }} tentative{{ scenario.totalAttempts > 1 ? 's' : '' }}
                   </span>
                   <span class="meta-chip">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="3" y="4" width="18" height="18" rx="2"/>
+                      <line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/>
+                      <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
                     {{ formatDate(scenario.lastAttemptDate) }}
                   </span>
                 </div>
@@ -122,12 +140,12 @@
               <!-- Score ring -->
               <div class="score-ring" [ngClass]="getScoreClass(scenario.bestScore)">
                 <svg width="56" height="56" viewBox="0 0 56 56">
-                  <circle cx="28" cy="28" r="23" fill="none" stroke="rgba(0,0,0,0.06)" stroke-width="4"/>
+                  <circle cx="28" cy="28" r="23" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="4"/>
                   <circle cx="28" cy="28" r="23" fill="none"
                     [attr.stroke]="scenario.bestScore >= 80 ? '#00C48C' : scenario.bestScore >= 70 ? '#FF8C00' : '#FF006E'"
                     stroke-width="4"
                     stroke-linecap="round"
-                    [attr.stroke-dasharray]="'144.5'"
+                    stroke-dasharray="144.5"
                     [attr.stroke-dashoffset]="144.5 - (scenario.bestScore / 100) * 144.5"
                     transform="rotate(-90 28 28)"/>
                 </svg>
@@ -138,25 +156,34 @@
               <div class="cert-badge" [class.validated]="scenario.isValidated" [class.not-validated]="!scenario.isValidated">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                   <ng-container *ngIf="scenario.isValidated"><polyline points="20 6 9 17 4 12"/></ng-container>
-                  <ng-container *ngIf="!scenario.isValidated"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></ng-container>
+                  <ng-container *ngIf="!scenario.isValidated">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  </ng-container>
                 </svg>
                 {{ scenario.isValidated ? 'Certifié' : 'Non validé' }}
               </div>
 
               <!-- PDF résumé -->
-              <button class="btn-icon-pdf" (click)="downloadSummaryPDF(scenario, $event)" title="Télécharger le résumé">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+              <button class="btn-icon-pdf" (click)="downloadSummaryPDF(scenario, $event)" title="Télécharger le résumé PDF">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                  <polyline points="14 2 14 8 20 8"/>
+                  <line x1="12" y1="18" x2="12" y2="12"/>
+                  <polyline points="9 15 12 18 15 15"/>
+                </svg>
                 PDF
               </button>
 
               <!-- Chevron -->
               <div class="chevron" [class.open]="isExpanded(scenario._id)">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"/>
+                </svg>
               </div>
             </div>
           </div>
 
-          <!-- Sessions list (expanded) -->
+          <!-- Sessions list -->
           <div class="sessions-list" [class.open]="isExpanded(scenario._id)">
             <div class="sessions-inner">
               <div class="sessions-header">
@@ -167,11 +194,7 @@
                 <span>Statut</span>
                 <span>Actions</span>
               </div>
-
-              <div
-                class="session-row"
-                *ngFor="let session of scenario.sessions"
-              >
+              <div class="session-row" *ngFor="let session of scenario.sessions">
                 <span class="attempt-badge">#{{ session.attemptNumber }}</span>
                 <span class="session-date">{{ formatDate(session.dateStart) }}</span>
                 <span class="session-duration">{{ formatDuration(session.durationSeconds) }}</span>
@@ -179,12 +202,16 @@
                   <span class="score-dot"></span>
                   {{ session.totalScore }}/100
                 </span>
-                <span class="session-status" [class.validated]="session.isValidated" [class.failed]="!session.isValidated">
+                <span class="session-status"
+                  [class.validated]="session.isValidated"
+                  [class.failed]="!session.isValidated">
                   {{ session.isValidated ? '✓ Validé' : '✗ Échoué' }}
                 </span>
                 <div class="session-actions">
                   <button class="btn-detail" (click)="openSessionDetail(session.operationId)">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
                     Détails
                   </button>
                 </div>
@@ -195,51 +222,18 @@
       </div>
     </div>
 
-    <!-- ── TAB : CERTIFICATIONS ────────────────────────── -->
+    <!-- ── TAB CERTIFICATIONS → composant séparé ──────────── -->
     <div class="tab-content" *ngIf="!loading && !error && activeTab === 'certifications'">
-
-      <div class="empty-state" *ngIf="certifications.length === 0">
-        <div class="empty-icon">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-        </div>
-        <h3>Aucune certification obtenue</h3>
-        <p>Atteignez 70/100 dans un scénario pour obtenir votre première certification</p>
-      </div>
-
-      <div class="certs-grid" *ngIf="certifications.length > 0">
-        <div class="cert-card" *ngFor="let cert of certifications">
-          <div class="cert-glow"></div>
-          <div class="cert-header">
-            <div class="cert-medal">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></svg>
-            </div>
-            <div class="cert-score-badge">{{ cert.performanceMetrics.totalScore }}/100</div>
-          </div>
-          <div class="cert-body">
-            <h3 class="cert-name">{{ cert.certification.certificationName }}</h3>
-            <p class="cert-scenario">{{ cert.scenarioName }}</p>
-            <div class="cert-date">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              Obtenu le {{ formatDate(cert.certification.issuedAt || '') }}
-            </div>
-          </div>
-          <div class="cert-footer">
-            <div class="cert-verified">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-              Certifié Surgery VR
-            </div>
-          </div>
-        </div>
-      </div>
+      <app-certificat-etudiant [userId]="userId"></app-certificat-etudiant>
     </div>
+
   </div>
 </div>
 
-<!-- ── SESSION DETAIL MODAL ──────────────────────────────── -->
+<!-- ── MODAL SESSION ──────────────────────────────────────── -->
 <div class="modal-overlay" [class.open]="showSessionModal" (click)="closeModal()">
   <div class="modal" (click)="$event.stopPropagation()">
 
-    <!-- Loading -->
     <div class="modal-loading" *ngIf="loadingSession">
       <div class="loader-ring"></div>
       <p>Chargement de la session…</p>
@@ -260,31 +254,47 @@
         </div>
         <div class="modal-actions">
           <button class="btn-pdf-modal" (click)="downloadCurrentSessionPDF()">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="12" y1="18" x2="12" y2="12"/>
+              <polyline points="9 15 12 18 15 15"/>
+            </svg>
             Télécharger PDF
           </button>
           <button class="modal-close" (click)="closeModal()">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
       </div>
 
       <div class="modal-body">
-        <!-- Score global + certification -->
+        <!-- Score + Cert -->
         <div class="modal-score-row">
           <div class="modal-score-main" [ngClass]="getScoreClass(selectedSession.performanceMetrics.totalScore)">
             <div class="modal-score-num">{{ selectedSession.performanceMetrics.totalScore }}</div>
             <div class="modal-score-label">Score global</div>
           </div>
           <div class="modal-cert-status" [class.validated]="selectedSession.certification.isValidated">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <ng-container *ngIf="selectedSession.certification.isValidated"><polyline points="20 6 9 17 4 12"/></ng-container>
-              <ng-container *ngIf="!selectedSession.certification.isValidated"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/></ng-container>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <ng-container *ngIf="selectedSession.certification.isValidated">
+                <polyline points="20 6 9 17 4 12"/>
+              </ng-container>
+              <ng-container *ngIf="!selectedSession.certification.isValidated">
+                <circle cx="12" cy="8" r="6"/>
+                <path d="M15.477 12.89L17 22l-5-3-5 3 1.523-9.11"/>
+              </ng-container>
             </svg>
             <div>
               <div class="cert-status-title">{{ selectedSession.certification.isValidated ? 'Certifié !' : 'Non validé' }}</div>
-              <div class="cert-status-sub" *ngIf="selectedSession.certification.certificationName">{{ selectedSession.certification.certificationName }}</div>
-              <div class="cert-status-sub" *ngIf="!selectedSession.certification.isValidated">Score minimum requis : 70/100</div>
+              <div class="cert-status-sub" *ngIf="selectedSession.certification.certificationName">
+                {{ selectedSession.certification.certificationName }}
+              </div>
+              <div class="cert-status-sub" *ngIf="!selectedSession.certification.isValidated">
+                Score minimum requis : 70/100
+              </div>
             </div>
           </div>
         </div>
@@ -294,10 +304,10 @@
           <h4 class="modal-section-title">Scores détaillés</h4>
           <div class="scores-grid">
             <div class="score-item" *ngFor="let s of [
-              {label:'Précision', val: selectedSession.performanceMetrics.precisionScore},
-              {label:'Temps', val: selectedSession.performanceMetrics.timeScore},
-              {label:'Sécurité', val: selectedSession.performanceMetrics.safetyScore},
-              {label:'Instruments', val: selectedSession.performanceMetrics.instrumentHandlingScore},
+              {label:'Précision',     val: selectedSession.performanceMetrics.precisionScore},
+              {label:'Temps',         val: selectedSession.performanceMetrics.timeScore},
+              {label:'Sécurité',      val: selectedSession.performanceMetrics.safetyScore},
+              {label:'Instruments',   val: selectedSession.performanceMetrics.instrumentHandlingScore},
               {label:'Collaboration', val: selectedSession.performanceMetrics.collaborationScore}
             ]">
               <div class="score-item-label">{{ s.label }}</div>
@@ -329,11 +339,15 @@
         <!-- Feedback -->
         <div class="modal-section" *ngIf="selectedSession.feedback">
           <h4 class="modal-section-title">Feedback du superviseur</h4>
-          <p class="feedback-comment" *ngIf="selectedSession.feedback.globalComment">{{ selectedSession.feedback.globalComment }}</p>
+          <p class="feedback-comment" *ngIf="selectedSession.feedback.globalComment">
+            {{ selectedSession.feedback.globalComment }}
+          </p>
           <div class="feedback-cols">
             <div class="feedback-col positive">
               <div class="feedback-col-title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="20 6 9 17 4 12"/>
+                </svg>
                 Points positifs
               </div>
               <ul>
@@ -342,7 +356,9 @@
             </div>
             <div class="feedback-col improve">
               <div class="feedback-col-title">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                </svg>
                 À améliorer
               </div>
               <ul>

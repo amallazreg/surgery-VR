@@ -1,15 +1,16 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, OnDestroy, OnInit } from '@angular/core'; // ✅
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core'; // ✅
 import { Subject, takeUntil } from 'rxjs';
 import { Formation, ScenarioSummary, FormationEtudiantService } from '../../../services/formation-etudiant-service';
 import { SideBarEtudiant } from '../side-bar-etudiant/side-bar-etudiant';
+import { CertificatEtudiant } from '../certificat-etudiant/certificat-etudiant';
 
 type TabType = 'scenarios' | 'certifications';
 
 @Component({
   selector: 'app-formation-etudiant',
   standalone: true,
-  imports: [CommonModule, SideBarEtudiant],
+  imports: [CommonModule, SideBarEtudiant,CertificatEtudiant],
   templateUrl: './formation-etudiant.html',
   styleUrl: './formation-etudiant.css',
 })
@@ -32,7 +33,7 @@ export class FormationEtudiant implements OnInit, OnDestroy {
   validatedCount = 0;
   avgScore = 0;
 
-  private userId: string = '';
+  @Input()  userId: string = '';
 
   constructor(
     private formationService: FormationEtudiantService,
@@ -157,19 +158,37 @@ export class FormationEtudiant implements OnInit, OnDestroy {
     }
   }
 
-  private downloadPDF(url: string): void {
-    const token = localStorage.getItem('token');
-    const fullUrl = `https://surgery-vr.onrender.com${url}`; // ✅ accolade parasite supprimée
-    fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } })
-      .then((res) => res.blob())
-      .then((blob) => {
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = `rapport_${Date.now()}.pdf`;
-        a.click();
-        URL.revokeObjectURL(a.href);
-      });
-  }
+private downloadPDF(url: string): void {
+  const token = localStorage.getItem('token');
+  const fullUrl = `https://surgery-vr.onrender.com${url}`;
+  
+  fetch(fullUrl, { headers: { Authorization: `Bearer ${token}` } })
+    .then((res) => {
+      // ✅ Vérification du statut HTTP
+      if (!res.ok) {
+        throw new Error(`Erreur HTTP ${res.status}`);
+      }
+      
+      // ✅ Vérification du Content-Type
+      const contentType = res.headers.get('content-type');
+      if (!contentType?.includes('application/pdf')) {
+        throw new Error('Réponse invalide du serveur');
+      }
+      
+      return res.blob();
+    })
+    .then((blob) => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `rapport_${Date.now()}.pdf`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    })
+    .catch((e) => {
+      console.error('Erreur téléchargement PDF:', e);
+      alert('Erreur lors du téléchargement du PDF');
+    });
+}
 
   getScoreClass(score: number): string {
     if (score >= 80) return 'score-high';
