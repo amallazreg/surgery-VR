@@ -7,11 +7,11 @@ import { Formation, FormationEtudiantService } from '../../../services/formation
 @Component({
   selector: 'app-certificat-etudiant',
   standalone: true,
-  imports: [SideBarEtudiant,CommonModule],
+  imports: [SideBarEtudiant, CommonModule],
   templateUrl: './certificat-etudiant.html',
   styleUrl: './certificat-etudiant.css',
 })
-export class CertificatEtudiant implements OnChanges, OnDestroy,OnInit { 
+export class CertificatEtudiant implements OnChanges, OnDestroy, OnInit {
   @Input() userId: string = '';
 
   private destroy$ = new Subject<void>();
@@ -26,23 +26,22 @@ export class CertificatEtudiant implements OnChanges, OnDestroy,OnInit {
   ) {}
 
   ngOnInit(): void {
-  // Si userId n'est pas passé en Input (cas page standalone)
-  if (!this.userId) {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        this.userId = payload.id || payload._id || payload.userId;
-      } catch {
-        return;
+    if (!this.userId) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          this.userId = payload.id || payload._id || payload.userId;
+        } catch {
+          return;
+        }
       }
     }
+    if (this.userId) {
+      this.loadCertifications();
+    }
   }
-  if (this.userId) {
-    this.loadCertifications();
-  }
-}
-  // ✅ Se déclenche quand userId est transmis par le parent
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['userId'] && this.userId) {
       this.loadCertifications();
@@ -63,6 +62,7 @@ export class CertificatEtudiant implements OnChanges, OnDestroy,OnInit {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
+          console.log('Certifications reçues:', JSON.stringify(data[0]));
           this.certifications = data;
           this.loading = false;
           this.cdr.markForCheck();
@@ -74,18 +74,24 @@ export class CertificatEtudiant implements OnChanges, OnDestroy,OnInit {
       });
   }
 
+  // ✅ Retourne l'identifiant disponible : operationId ou _id
+  private getCertId(cert: Formation): string | null {
+    return cert?.operationId || (cert as any)?._id || null;
+  }
+
   async downloadCertificate(cert: Formation): Promise<void> {
-    // ✅ Vérification que operationId existe
-    if (!cert?.operationId) {
+    const id = this.getCertId(cert);
+
+    if (!id) {
       alert('Identifiant de session introuvable');
       return;
     }
 
-    this.downloadingId = cert.operationId;
+    this.downloadingId = id;
     this.cdr.markForCheck();
 
     const token = localStorage.getItem('token');
-    const url = `https://surgery-vr.onrender.com/api/pdf/certificate/${cert.operationId}`;
+    const url = `https://surgery-vr.onrender.com/api/pdf/certificate/${id}`;
 
     try {
       const res = await fetch(url, {
@@ -122,6 +128,11 @@ export class CertificatEtudiant implements OnChanges, OnDestroy,OnInit {
     }
   }
 
+  // ✅ Utilisé dans le template pour les comparaisons [disabled] et [class.downloading]
+  getCertIdPublic(cert: Formation): string | null {
+    return this.getCertId(cert);
+  }
+
   formatDate(dateStr: string): string {
     if (!dateStr) return '—';
     return new Date(dateStr).toLocaleDateString('fr-FR', {
@@ -129,16 +140,14 @@ export class CertificatEtudiant implements OnChanges, OnDestroy,OnInit {
     });
   }
 
-  // Ajoute ces 2 getters dans la classe CertificatEtudiant
-get bestScore(): number {
-  if (!this.certifications.length) return 0;
-  return Math.max(...this.certifications.map(c => c.performanceMetrics?.totalScore || 0));
-}
+  get bestScore(): number {
+    if (!this.certifications.length) return 0;
+    return Math.max(...this.certifications.map(c => c.performanceMetrics?.totalScore || 0));
+  }
 
-get avgScore(): number {
-  if (!this.certifications.length) return 0;
-  const sum = this.certifications.reduce((acc, c) => acc + (c.performanceMetrics?.totalScore || 0), 0);
-  return Math.round(sum / this.certifications.length);
+  get avgScore(): number {
+    if (!this.certifications.length) return 0;
+    const sum = this.certifications.reduce((acc, c) => acc + (c.performanceMetrics?.totalScore || 0), 0);
+    return Math.round(sum / this.certifications.length);
+  }
 }
-}
-
