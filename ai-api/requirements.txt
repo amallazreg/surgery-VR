@@ -4,5 +4,5 @@ python-multipart==0.0.9
 mediapipe==0.10.35
 opencv-python-headless==4.10.0.84
 numpy==1.26.4
-scikit-learn==1.4.2
+scikit-learn==1.8.0
 Pillow==10.3.0
