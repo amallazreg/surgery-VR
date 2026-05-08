@@ -1,43 +1,56 @@
-import cv2
+import mediapipe as mp
+from mediapipe.tasks import python
+from mediapipe.tasks.python import vision
 import numpy as np
+import urllib.request
+import os
+
+MODEL_PATH = "/tmp/face_landmarker.task"
+MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+
+def download_model():
+    if not os.path.exists(MODEL_PATH):
+        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
 
 def analyze_face(image_bytes: bytes) -> dict:
-
-    np_array = np.frombuffer(image_bytes, np.uint8)
-    image = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
-
-    if image is None:
-        return {"error": "Image invalide ou non lisible"}
-
-    height, width = image.shape[:2]
-
-    import mediapipe as mp
-    mp_face_mesh = mp.solutions.face_mesh
-
-    with mp_face_mesh.FaceMesh(
-        static_image_mode=True,
-        max_num_faces=1,
-        refine_landmarks=True,
-        min_detection_confidence=0.5
-    ) as face_mesh:
-
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        results = face_mesh.process(image_rgb)
-
-        if not results.multi_face_landmarks:
-            return {"face_detected": False, "landmarks": []}
-
-        landmarks = []
-        for point in results.multi_face_landmarks[0].landmark:
-            landmarks.append({
-                "x": round(point.x * width, 2),
-                "y": round(point.y * height, 2),
-                "z": round(point.z, 4)
-            })
-
-        return {
-            "face_detected": True,
-            "total_landmarks": len(landmarks),
-            "image_size": {"width": width, "height": height},
-            "landmarks": landmarks
-        }
+    download_model()
+    
+    import cv2
+    nparr = np.frombuffer(image_bytes, np.uint8)
+    frame = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    
+    if frame is None:
+        return {"face_detected": False, "error": "Image invalide"}
+    
+    h, w = frame.shape[:2]
+    
+    rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    mp_image = mp.Image(
+        image_format=mp.ImageFormat.SRGB,
+        data=rgb
+    )
+    
+    base_options = python.BaseOptions(model_asset_path=MODEL_PATH)
+    options = vision.FaceLandmarkerOptions(
+        base_options=base_options,
+        num_faces=1
+    )
+    
+    detector = vision.FaceLandmarker.create_from_options(options)
+    result = detector.detect(mp_image)
+    
+    if not result.face_landmarks:
+        return {"face_detected": False, "total_landmarks": 0,
+                "image_size": {"width": w, "height": h}}
+    
+    landmarks = [
+        {"x": lm.x * w, "y": lm.y * h, "z": lm.z}
+        for lm in result.face_landmarks[0]
+    ]
+    
+    return {
+        "face_detected": True,
+        "total_landmarks": len(landmarks),
+        "image_size": {"width": w, "height": h},
+        "landmarks": landmarks
+    }
