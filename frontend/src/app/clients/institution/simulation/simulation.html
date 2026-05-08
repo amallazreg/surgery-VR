@@ -1,0 +1,322 @@
+<app-side-bar></app-side-bar>
+
+<div class="simulation-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <div class="header-badge">
+      <span class="badge-dot"></span>
+      Simulation IA
+    </div>
+    <h1 class="page-title">
+      Simulation Esthétique
+      <span class="title-gradient">Médicale</span>
+    </h1>
+    <p class="page-subtitle">
+      Analyse faciale intelligente par intelligence artificielle
+    </p>
+  </div>
+
+  <!-- STEPPER -->
+  <div class="stepper">
+    <div class="step-item" [class.active]="step === 'upload'" [class.done]="step !== 'upload'">
+      <div class="step-circle">
+        <span *ngIf="step === 'upload'">1</span>
+        <span *ngIf="step !== 'upload'">✓</span>
+      </div>
+      <span class="step-label">Upload</span>
+    </div>
+    <div class="step-line" [class.active]="step !== 'upload'"></div>
+    <div class="step-item" [class.active]="step === 'analyzing'" [class.done]="step === 'results'">
+      <div class="step-circle">
+        <span *ngIf="step !== 'results'">2</span>
+        <span *ngIf="step === 'results'">✓</span>
+      </div>
+      <span class="step-label">Analyse</span>
+    </div>
+    <div class="step-line" [class.active]="step === 'results'"></div>
+    <div class="step-item" [class.active]="step === 'results'">
+      <div class="step-circle">3</div>
+      <span class="step-label">Résultats</span>
+    </div>
+  </div>
+
+  <!-- ÉTAPE 1 : UPLOAD -->
+  <div class="step-content" *ngIf="step === 'upload'">
+    <div class="upload-card">
+
+      <!-- Zone de drop -->
+      <div class="drop-zone"
+           [class.dragging]="isDragging"
+           [class.has-file]="previewUrl"
+           (dragover)="onDragOver($event)"
+           (dragleave)="onDragLeave()"
+           (drop)="onDrop($event)"
+           (click)="fileInput.click()">
+
+        <input #fileInput type="file" accept="image/*"
+               (change)="onFileSelect($event)" hidden>
+
+        <ng-container *ngIf="!previewUrl">
+          <div class="drop-icon">
+            <div class="icon-ring">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none">
+                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"
+                      stroke="url(#grad1)" stroke-width="2"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+                <defs>
+                  <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#0066FF"/>
+                    <stop offset="100%" stop-color="#00D9FF"/>
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+          </div>
+          <h3 class="drop-title">Déposez votre photo ici</h3>
+          <p class="drop-sub">ou <span class="drop-link">parcourir vos fichiers</span></p>
+          <div class="drop-info">
+            <span>JPG, PNG • Max 10 Mo • Photo de face recommandée</span>
+          </div>
+        </ng-container>
+
+        <ng-container *ngIf="previewUrl">
+          <div class="preview-container">
+            <img [src]="previewUrl" alt="Aperçu" class="preview-img"/>
+            <div class="preview-overlay">
+              <span>Changer la photo</span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Erreur -->
+      <div class="error-msg" *ngIf="error">
+        <span>⚠️ {{ error }}</span>
+      </div>
+
+      <!-- Infos fichier -->
+      <div class="file-info" *ngIf="selectedFile">
+        <div class="file-info-inner">
+          <div class="file-icon">🖼️</div>
+          <div class="file-details">
+            <span class="file-name">{{ selectedFile.name }}</span>
+            <span class="file-size">{{ (selectedFile.size / 1024).toFixed(0) }} Ko</span>
+          </div>
+          <div class="file-check">✓</div>
+        </div>
+      </div>
+
+      <!-- RGPD -->
+      <div class="rgpd-notice">
+        <span class="rgpd-icon">🔒</span>
+        <span>Vos données sont chiffrées et supprimées après analyse. Conformité RGPD garantie.</span>
+      </div>
+
+      <!-- Bouton analyser -->
+      <button class="btn-analyze"
+              [disabled]="!selectedFile"
+              (click)="analyze()">
+        <span class="btn-text">Lancer l'analyse IA</span>
+        <span class="btn-arrow">→</span>
+      </button>
+
+    </div>
+  </div>
+
+  <!-- ÉTAPE 2 : ANALYSE EN COURS -->
+  <div class="step-content" *ngIf="step === 'analyzing'">
+    <div class="analyzing-card">
+
+      <div class="analyzing-visual">
+        <div class="scan-container">
+          <img [src]="previewUrl" alt="Analyse" class="scan-img"/>
+          <div class="scan-line"></div>
+          <div class="scan-overlay"></div>
+        </div>
+      </div>
+
+      <div class="analyzing-info">
+        <div class="analyzing-dots">
+          <span></span><span></span><span></span>
+        </div>
+        <h3 class="analyzing-title">Analyse en cours...</h3>
+
+        <div class="progress-bar">
+          <div class="progress-fill"
+               [style.width.%]="analysisProgress">
+          </div>
+        </div>
+        <span class="progress-label">{{ analysisProgress.toFixed(0) }}%</span>
+
+        <div class="analyzing-steps">
+          <div class="a-step" [class.active]="analysisProgress > 10">
+            <span class="a-icon">🎯</span>
+            <span>Détection des landmarks faciaux</span>
+          </div>
+          <div class="a-step" [class.active]="analysisProgress > 40">
+            <span class="a-icon">📐</span>
+            <span>Calcul des ratios et symétrie</span>
+          </div>
+          <div class="a-step" [class.active]="analysisProgress > 70">
+            <span class="a-icon">🧠</span>
+            <span>Recommandation par IA (MLP)</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ÉTAPE 3 : RÉSULTATS -->
+  <div class="step-content" *ngIf="step === 'results' && result">
+    <div class="results-grid">
+
+      <!-- Photo + recommandation principale -->
+      <div class="result-main-card">
+        <div class="result-photo-section">
+          <img [src]="previewUrl" alt="Patient" class="result-photo"/>
+          <div class="photo-badge">
+            <span>{{ result.total_landmarks }} landmarks</span>
+          </div>
+        </div>
+
+        <div class="recommendation-section">
+          <div class="rec-header">
+            <span class="rec-icon">{{ getProcedureIcon(result.recommendation.procedure) }}</span>
+            <div>
+              <p class="rec-label">Recommandation IA</p>
+              <h2 class="rec-title">
+                {{ getProcedureLabel(result.recommendation.procedure) }}
+              </h2>
+            </div>
+          </div>
+
+          <div class="confidence-bar">
+            <div class="confidence-header">
+              <span>Confiance du modèle</span>
+              <span class="confidence-value">{{ getConfidencePercent() }}%</span>
+            </div>
+            <div class="conf-track">
+              <div class="conf-fill"
+                   [style.width.%]="getConfidencePercent()">
+              </div>
+            </div>
+          </div>
+
+          <div class="rec-reason">
+            <span class="reason-icon">💡</span>
+            <span>{{ result.recommendation.reason }}</span>
+          </div>
+
+          <!-- Alternatives -->
+          <div class="alternatives" *ngIf="result.recommendation.alternatives.length > 0">
+            <p class="alt-title">Alternatives possibles</p>
+            <div class="alt-list">
+              <div class="alt-item"
+                   *ngFor="let alt of result.recommendation.alternatives">
+                <span>{{ getProcedureIcon(alt.procedure) }}</span>
+                <span>{{ getProcedureLabel(alt.procedure) }}</span>
+                <span class="alt-conf">{{ (alt.confidence * 100).toFixed(0) }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Métriques -->
+      <div class="metrics-card">
+        <h3 class="metrics-title">Analyse faciale</h3>
+
+        <!-- Scores -->
+        <div class="score-grid">
+          <div class="score-item">
+            <div class="score-circle"
+                 [style.--score-color]="getScoreColor(result.features.scores.symmetry_score)">
+              <svg viewBox="0 0 36 36">
+                <path class="circle-bg" d="M18 2a16 16 0 010 32 16 16 0 010-32"/>
+                <path class="circle-fill"
+                      [style.strokeDasharray]="getSymmetryPercent() + ' 100'"
+                      [style.stroke]="getScoreColor(result.features.scores.symmetry_score)"
+                      d="M18 2a16 16 0 010 32 16 16 0 010-32"/>
+              </svg>
+              <span class="score-val">{{ getSymmetryPercent() }}%</span>
+            </div>
+            <p class="score-label">Symétrie</p>
+          </div>
+
+          <div class="score-item">
+            <div class="score-circle"
+                 [style.--score-color]="getScoreColor(result.features.scores.golden_ratio_score)">
+              <svg viewBox="0 0 36 36">
+                <path class="circle-bg" d="M18 2a16 16 0 010 32 16 16 0 010-32"/>
+                <path class="circle-fill"
+                      [style.strokeDasharray]="getGoldenRatioPercent() + ' 100'"
+                      [style.stroke]="getScoreColor(result.features.scores.golden_ratio_score)"
+                      d="M18 2a16 16 0 010 32 16 16 0 010-32"/>
+              </svg>
+              <span class="score-val">{{ getGoldenRatioPercent() }}%</span>
+            </div>
+            <p class="score-label">Ratio d'or</p>
+          </div>
+        </div>
+
+        <!-- Ratios -->
+        <div class="ratios-list">
+          <div class="ratio-item"
+               *ngFor="let item of [
+                 {label: 'Ratio nez/visage', value: result.features.ratios.nose_face_ratio},
+                 {label: 'Ratio bouche/visage', value: result.features.ratios.mouth_face_ratio},
+                 {label: 'Symétrie oculaire', value: result.features.ratios.eye_symmetry},
+                 {label: 'Ratio facial', value: result.features.ratios.face_ratio}
+               ]">
+            <div class="ratio-header">
+              <span class="ratio-label">{{ item.label }}</span>
+              <span class="ratio-value">{{ item.value.toFixed(3) }}</span>
+            </div>
+            <div class="ratio-track">
+              <div class="ratio-fill"
+                   [style.width.%]="item.value * 100">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Distances -->
+      <div class="distances-card">
+        <h3 class="metrics-title">Mesures faciales</h3>
+        <div class="dist-grid">
+          <div class="dist-item"
+               *ngFor="let item of [
+                 {label: 'Largeur visage', value: result.features.distances.face_width, unit: 'px'},
+                 {label: 'Hauteur visage', value: result.features.distances.face_height, unit: 'px'},
+                 {label: 'Distance oculaire', value: result.features.distances.eye_distance, unit: 'px'},
+                 {label: 'Largeur bouche', value: result.features.distances.mouth_width, unit: 'px'},
+                 {label: 'Largeur nez', value: result.features.distances.nose_width, unit: 'px'}
+               ]">
+            <div class="dist-icon">📏</div>
+            <div class="dist-info">
+              <span class="dist-label">{{ item.label }}</span>
+              <span class="dist-val">{{ item.value.toFixed(1) }} <small>{{ item.unit }}</small></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Actions -->
+    <div class="result-actions">
+      <button class="btn-reset" (click)="reset()">
+        ← Nouvelle analyse
+      </button>
+      <button class="btn-simulate" disabled>
+        🎨 Simulation avant/après
+        <span class="coming-soon">Bientôt disponible</span>
+      </button>
+    </div>
+
+  </div>
+
+</div>

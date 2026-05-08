@@ -28,6 +28,7 @@ import { MonCompteEtudiant } from './clients/Etudiants/mon-compte-etudiant/mon-c
 import { Statistiques } from './admin/statistiques/statistiques';
 import { FormationEtudiant } from './clients/Etudiants/formation-etudiant/formation-etudiant';
 import { CertificatEtudiant } from './clients/Etudiants/certificat-etudiant/certificat-etudiant';
+import { Simulation } from './clients/institution/simulation/simulation';
 
 export const routes: Routes = [
       { path: 'landingPage', component: LandingPage },
@@ -67,6 +68,8 @@ export const routes: Routes = [
       { path: 'chatbot',             component: Chatbot },
       { path: 'formationManagement', component: FormationManagement },
       { path: 'monCompte',           component: MonCompte },
+      { path: 'simulationAI',           component: Simulation },
+
       ]
       },
 
