@@ -5,12 +5,17 @@ import numpy as np
 import urllib.request
 import os
 
-MODEL_PATH = "/tmp/face_landmarker.task"
+import os
+
+# Chemin compatible Windows et Linux
+MODEL_PATH = os.path.join(os.path.dirname(__file__), "face_landmarker.task")
 MODEL_URL = "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
 
 def download_model():
     if not os.path.exists(MODEL_PATH):
+        print("📥 Téléchargement du modèle face_landmarker...")
         urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+        print("✅ Modèle téléchargé")
 
 def analyze_face(image_bytes: bytes) -> dict:
     download_model()
