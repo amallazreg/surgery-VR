@@ -1,0 +1,15 @@
+*.pyc
+*.pyc
+*.pyc
+*.pyc
+*.py
+*.txt
+*.pyi
+*.h
+*.pyd
+*.xml
+*.typed
+*.mplstyle
+*.png
+*.dat
+/ai-api/venv
