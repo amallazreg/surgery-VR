@@ -39,6 +39,16 @@ export interface AnalysisResult {
   features: FaceFeatures;
   recommendation: Recommendation;
 }
+export interface SimulationResult {
+  success:    boolean;
+  available:  boolean;
+  procedure:  string;
+  label:      string;
+  before_b64?: string;
+  after_b64?:  string;
+  message?:    string;
+  error?:      string;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -56,5 +66,14 @@ export class SimulationAIService {
       `${this.apiUrl}/api/ai/analyze`, formData
     );
   }
+
+  generateSimulation(file: File, procedure: string): Observable<SimulationResult> {
+  const formData = new FormData();
+  formData.append('photo', file);
+  formData.append('procedure', procedure);
+  return this.http.post<SimulationResult>(
+    `${this.apiUrl}/api/ai/simulate`, formData
+  );
+}
   
 }

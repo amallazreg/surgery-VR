@@ -311,11 +311,53 @@
       <button class="btn-reset" (click)="reset()">
         ← Nouvelle analyse
       </button>
-      <button class="btn-simulate" disabled>
+    <button class="btn-simulate"
+            [class.available]="isSimulationAvailable()"
+            [disabled]="!isSimulationAvailable() || isSimulating"
+            (click)="simulate()">
+      <span *ngIf="!isSimulating">
         🎨 Simulation avant/après
-        <span class="coming-soon">Bientôt disponible</span>
-      </button>
+        <span class="coming-soon" *ngIf="!isSimulationAvailable()">
+          Bientôt disponible
+        </span>
+      </span>
+      <span *ngIf="isSimulating">
+        ⏳ Génération en cours...
+      </span>
+    </button>
     </div>
+
+    <!-- Résultat simulation -->
+<div class="simulation-result" *ngIf="simulationResult">
+
+  <div class="sim-success" *ngIf="simulationResult.success">
+    <h3 class="sim-title">
+      Simulation — {{ simulationResult.label }}
+    </h3>
+    <div class="sim-images">
+      <div class="sim-img-wrap">
+        <img [src]="'data:image/jpeg;base64,' + simulationResult.before_b64"
+             alt="Avant" class="sim-img"/>
+        <span class="sim-label">Avant</span>
+      </div>
+      <div class="sim-arrow">→</div>
+      <div class="sim-img-wrap">
+        <img [src]="'data:image/jpeg;base64,' + simulationResult.after_b64"
+             alt="Après" class="sim-img"/>
+        <span class="sim-label">Après simulé</span>
+      </div>
+    </div>
+    <p class="sim-disclaimer">
+      ⚠️ Cette simulation est générée par IA à titre indicatif uniquement.
+      Elle ne constitue pas un avis médical.
+    </p>
+  </div>
+
+  <div class="sim-unavailable" *ngIf="!simulationResult.success">
+    <span>ℹ️ {{ simulationResult.message }}</span>
+  </div>
+
+</div>
 
   </div>
 

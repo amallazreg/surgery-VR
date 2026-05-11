@@ -9,7 +9,8 @@ import {
 
 import {
   AnalysisResult,
-  SimulationAIService
+  SimulationAIService,
+  SimulationResult
 } from '../../../services/simulation-aiservice';
 
 import { SideBar } from "../side-bar/side-bar";
@@ -34,6 +35,9 @@ export class Simulation {
   error: string | null = null;
   isDragging = false;
   analysisProgress = 0;
+
+  simulationResult: SimulationResult | null = null;
+  isSimulating = false;
 
   procedureLabels: Record<string, string> = {
     rhinoplastie: 'Rhinoplastie',
@@ -204,4 +208,30 @@ export class Simulation {
 
     return '#FF006E';
   }
+
+  simulate() {
+  if (!this.selectedFile || !this.result) return;
+  this.isSimulating = true;
+  this.simulationResult = null;
+  
+
+  const procedure = this.result.recommendation.procedure;
+
+  this.simulationService
+    .generateSimulation(this.selectedFile, procedure)
+    .subscribe({
+      next: (res) => {
+        this.simulationResult = res;
+        this.isSimulating = false;
+      },
+      error: () => {
+        this.isSimulating = false;
+      }
+    });
+}
+
+isSimulationAvailable(): boolean {
+  const proc = this.result?.recommendation.procedure;
+  return proc === 'rhinoplastie' || proc === 'blepharoplastie';
+}
 }

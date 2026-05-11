@@ -2,18 +2,3 @@ config/surgery-vr-firebase-adminsdk-fbsvc-27df1497ff.json
 node_modules
 face_landmarker.task
 
-# Virtual environment
-venv/
-env/
-.venv/
-
-# Python cache
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-
-# Distribution / packaging
-*.egg-info/
-dist/
-build/
