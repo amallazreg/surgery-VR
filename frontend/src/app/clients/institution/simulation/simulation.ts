@@ -209,11 +209,10 @@ export class Simulation {
     return '#FF006E';
   }
 
-  simulate() {
+simulate() {
   if (!this.selectedFile || !this.result) return;
   this.isSimulating = true;
   this.simulationResult = null;
-  
 
   const procedure = this.result.recommendation.procedure;
 
@@ -221,11 +220,15 @@ export class Simulation {
     .generateSimulation(this.selectedFile, procedure)
     .subscribe({
       next: (res) => {
+        console.log('simulation result:', res); // ← ajoute ça
         this.simulationResult = res;
         this.isSimulating = false;
+        this.cdr.detectChanges();
       },
-      error: () => {
+      error: (err) => {
+        console.error('simulation error:', err); // ← et ça
         this.isSimulating = false;
+        this.cdr.detectChanges();
       }
     });
 }

@@ -8,23 +8,20 @@ import os
 from huggingface_hub import hf_hub_download
 
 DEVICE = torch.device("cpu")
-
 HF_REPO_ID = "amallazreg/surgery-vr-models"
 
+
+# ============================================================
 # Architecture UNet
+# ============================================================
 class UNetBlock(nn.Module):
-    def __init__(self, in_ch, out_ch, down=True,
-                 use_bn=True, dropout=False):
+    def __init__(self, in_ch, out_ch, down=True, use_bn=True, dropout=False):
         super().__init__()
         layers = []
         if down:
-            layers.append(
-                nn.Conv2d(in_ch, out_ch, 4, 2, 1, bias=False)
-            )
+            layers.append(nn.Conv2d(in_ch, out_ch, 4, 2, 1, bias=False))
         else:
-            layers.append(
-                nn.ConvTranspose2d(in_ch, out_ch, 4, 2, 1, bias=False)
-            )
+            layers.append(nn.ConvTranspose2d(in_ch, out_ch, 4, 2, 1, bias=False))
         if use_bn:
             layers.append(nn.BatchNorm2d(out_ch))
         if dropout:
@@ -84,13 +81,13 @@ class Generator(nn.Module):
 # ============================================================
 PROCEDURE_CONFIG = {
     "rhinoplastie": {
-        "model_file": "unet_nose_ep30.pth",      # ← epoch 30
+        "model_file": "unet_nose_ep30.pth",
         "available":  True,
         "label":      "Rhinoplastie"
     },
     "blepharoplastie": {
-        "model_file": "unet_eyebrow_ep30.pth",   # ← à uploader
-        "available":  False,                      # ← False jusqu'à upload
+        "model_file": "unet_Eyebrow_ep30.pth",  # ← casse corrigée
+        "available":  True,                      # ← activé
         "label":      "Blépharoplastie"
     },
     "lifting": {
@@ -110,43 +107,52 @@ PROCEDURE_CONFIG = {
     },
 }
 
-# Cache des modèles en mémoire
-_models_cache: dict = {}
 CACHE_DIR = os.path.join(os.path.dirname(__file__), "models_cache")
 
 
+# ============================================================
+# Téléchargement depuis HuggingFace
+# ============================================================
 def get_model_path(filename: str) -> str:
     os.makedirs(CACHE_DIR, exist_ok=True)
     local_path = os.path.join(CACHE_DIR, filename)
 
     if os.path.exists(local_path):
-        print(f"Modèle en cache : {filename}")
+        print(f"[CACHE] Modèle trouvé localement : {filename}")
         return local_path
 
-    print(f"Téléchargement depuis HuggingFace : {filename}")
+    print(f"[HF] Téléchargement : {filename}")
     hf_hub_download(
         repo_id=HF_REPO_ID,
         filename=filename,
         local_dir=CACHE_DIR,
         token=os.getenv("HF_TOKEN")
     )
+    print(f"[HF] Téléchargement terminé : {filename}")
     return local_path
 
 
+# ============================================================
+# Chargement du modèle (sans cache persistant pour économiser RAM)
+# ============================================================
 def load_model(model_path: str) -> Generator:
-    if model_path in _models_cache:
-        return _models_cache[model_path]
-
-    print(f"Chargement du modèle : {model_path}")
+    print(f"[MODEL] Chargement : {model_path}")
     model = Generator().to(DEVICE)
-    state_dict = torch.load(model_path, map_location=DEVICE)
+
+    state_dict = torch.load(
+        model_path,
+        map_location="cpu",
+        weights_only=True  # économise la mémoire
+    )
     model.load_state_dict(state_dict)
     model.eval()
-    _models_cache[model_path] = model
-    print("Modèle chargé !")
+    print("[MODEL] Chargé avec succès")
     return model
 
 
+# ============================================================
+# Pre/post processing
+# ============================================================
 def preprocess_image(image_bytes: bytes) -> torch.Tensor:
     img    = Image.open(io.BytesIO(image_bytes)).convert("RGB")
     img    = img.resize((256, 256))
@@ -172,6 +178,9 @@ def image_to_base64(image_bytes: bytes) -> str:
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
 
+# ============================================================
+# Fonction principale
+# ============================================================
 def generate_simulation(image_bytes: bytes, procedure: str) -> dict:
     config = PROCEDURE_CONFIG.get(procedure)
 
@@ -191,23 +200,44 @@ def generate_simulation(image_bytes: bytes, procedure: str) -> dict:
         }
 
     try:
+        # 1. Télécharger / récupérer le modèle
         model_path = get_model_path(config["model_file"])
-        model      = load_model(model_path)
-        tensor     = preprocess_image(image_bytes)
 
+        # 2. Charger le modèle
+        model = load_model(model_path)
+
+        # 3. Préparer l'image
+        tensor = preprocess_image(image_bytes)
+
+        # 4. Inférence
         with torch.no_grad():
             output = model(tensor)
+
+        # 5. Encoder les résultats
+        before_b64 = image_to_base64(image_bytes)
+        after_b64  = tensor_to_base64(output)
+
+        # 6. Libérer la mémoire immédiatement
+        del model, tensor, output
+        torch.cuda.empty_cache()
 
         return {
             "success":    True,
             "available":  True,
             "procedure":  procedure,
             "label":      config["label"],
-            "before_b64": image_to_base64(image_bytes),
-            "after_b64":  tensor_to_base64(output),
+            "before_b64": before_b64,
+            "after_b64":  after_b64,
+        }
+
+    except MemoryError:
+        return {
+            "success": False,
+            "error":   "Mémoire insuffisante pour générer la simulation. Réessayez dans quelques instants."
         }
 
     except Exception as e:
+        print(f"[ERROR] generate_simulation : {e}")
         return {
             "success": False,
             "error":   str(e)
