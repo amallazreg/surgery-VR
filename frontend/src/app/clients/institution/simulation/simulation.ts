@@ -232,6 +232,10 @@ export class Simulation {
 
 isSimulationAvailable(): boolean {
   const proc = this.result?.recommendation.procedure;
+  console.log('proc value:', proc); // <-- regarde dans la console
   return proc === 'rhinoplastie' || proc === 'blepharoplastie';
 }
+
+
+
 }
