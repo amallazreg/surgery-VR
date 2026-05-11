@@ -16,7 +16,6 @@ const analyzeFace = async (imageBuffer, filename) => {
     );
     return response.data;
 };
-
 const generateSimulation = async (imageBuffer, filename, procedure) => {
     const formData = new FormData();
     formData.append('file', imageBuffer, {
@@ -30,7 +29,7 @@ const generateSimulation = async (imageBuffer, filename, procedure) => {
         formData,
         {
             headers: formData.getHeaders(),
-            timeout: 60000  // 60s car génération prend du temps
+            timeout: 120000
         }
     );
     return response.data;

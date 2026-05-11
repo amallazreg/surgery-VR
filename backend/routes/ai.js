@@ -36,8 +36,8 @@ router.post('/simulate', upload.single('photo'), async (req, res) => {
         );
         res.json(result);
     } catch (error) {
+        console.error('Simulate error:', error);
         res.status(500).json({ error: error.message });
     }
 });
-
 module.exports = router;
