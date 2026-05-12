@@ -7,7 +7,9 @@ numpy==1.26.4
 scikit-learn==1.8.0
 Pillow==10.3.0
 huggingface_hub
-
---extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.3.0+cpu
-torchvision==0.18.0+cpu
+torch==2.3.0
+torchvision==0.18.0
+diffusers==0.21.4
+transformers==4.40.0
+accelerate==0.29.3
+regex

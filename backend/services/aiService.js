@@ -29,7 +29,7 @@ const generateSimulation = async (imageBuffer, filename, procedure) => {
         formData,
         {
             headers: formData.getHeaders(),
-            timeout: 120000
+            timeout: 600000  // 10 minutes
         }
     );
     return response.data;

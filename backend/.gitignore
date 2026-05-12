@@ -2,3 +2,5 @@ config/surgery-vr-firebase-adminsdk-fbsvc-27df1497ff.json
 node_modules
 face_landmarker.task
 
+ai-api/gan/models_cache/
+*.pth
