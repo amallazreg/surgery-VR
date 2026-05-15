@@ -220,13 +220,13 @@ simulate() {
     .generateSimulation(this.selectedFile, procedure)
     .subscribe({
       next: (res) => {
-        console.log('simulation result:', res); // ← ajoute ça
+        console.log('simulation result:', res);
         this.simulationResult = res;
         this.isSimulating = false;
         this.cdr.detectChanges();
       },
       error: (err) => {
-        console.error('simulation error:', err); // ← et ça
+        console.error('simulation error:', err); 
         this.isSimulating = false;
         this.cdr.detectChanges();
       }
@@ -235,7 +235,7 @@ simulate() {
 
 isSimulationAvailable(): boolean {
   const proc = this.result?.recommendation.procedure;
-  console.log('proc value:', proc); // <-- regarde dans la console
+  console.log('proc value:', proc); 
   return proc === 'rhinoplastie' || proc === 'blepharoplastie';
 }
 

@@ -45,7 +45,9 @@ const PORT = process.env.PORT || 3000;
 
 const allowedOrigins = [
   'http://localhost:4200',
-  'https://surgery-vr.vercel.app'
+  'https://surgery-vr.vercel.app',
+  'https://surgery-vr.onrender.com'  
+
 ];
 
 app.use(cors({
@@ -287,6 +289,8 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500).json({
     message: err.message || 'Erreur interne serveur'
   });
+    res.setTimeout(600000); // 10 minutes
+
 });
 
 const keepAlive = () => {

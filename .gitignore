@@ -13,3 +13,6 @@
 *.png
 *.dat
 /ai-api/venv
+
+ai-api/gan/models_cache/
+*.pth

@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore")
 print("Chargement du dataset...")
 data = pd.read_csv("dataset.csv")
 
-X = data.drop("procedure", axis=1)
+X = data.drop("procedure", axis=1) # 9 colonne numérique (features)
 y = data["procedure"]
 
 print(f"Features : {list(X.columns)}")
