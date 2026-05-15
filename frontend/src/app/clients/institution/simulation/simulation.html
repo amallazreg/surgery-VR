@@ -268,7 +268,9 @@
                  {label: 'Ratio nez/visage', value: result.features.ratios.nose_face_ratio},
                  {label: 'Ratio bouche/visage', value: result.features.ratios.mouth_face_ratio},
                  {label: 'Symétrie oculaire', value: result.features.ratios.eye_symmetry},
-                 {label: 'Ratio facial', value: result.features.ratios.face_ratio}
+                 {label: 'Ratio facial', value: result.features.ratios.face_ratio},
+                 {label: 'Ratio oculaire/visage', value: result.features.ratios.eye_face_ratio}
+
                ]">
             <div class="ratio-header">
               <span class="ratio-label">{{ item.label }}</span>
@@ -306,28 +308,56 @@
 
     </div>
 
-    <!-- Actions -->
-    <div class="result-actions">
-      <button class="btn-reset" (click)="reset()">
-        ← Nouvelle analyse
-      </button>
-    <button class="btn-simulate"
-            [class.available]="isSimulationAvailable()"
-            [disabled]="!isSimulationAvailable() || isSimulating"
-            (click)="simulate()">
-      <span *ngIf="!isSimulating">
-        🎨 Simulation avant/après
-        <span class="coming-soon" *ngIf="!isSimulationAvailable()">
-          Bientôt disponible
-        </span>
-      </span>
-      <span *ngIf="isSimulating">
-        ⏳ Génération en cours...
-      </span>
-    </button>
-    </div>
+<!-- Actions -->
+<div class="result-actions">
+  <button class="btn-reset" (click)="reset()">
+    ← Nouvelle analyse
+  </button>
 
-    <!-- Résultat simulation -->
+  <!-- ✅ Bouton rapport -->
+  <button class="btn-report" (click)="downloadReport()">
+    📄 Télécharger le rapport PDF
+  </button>
+
+</div>
+
+<!-- ✅ SÉLECTEUR DE PROCÉDURE -->
+<div class="procedure-selector" *ngIf="isSimulationAvailable()">
+  <h3 class="selector-title">🎨 Choisissez votre simulation</h3>
+  <p class="selector-subtitle">Sélectionnez la procédure que vous souhaitez visualiser</p>
+
+  <div class="procedure-choices">
+    <div class="procedure-choice"
+         *ngFor="let proc of getAvailableProcedures()"
+         [class.selected]="selectedProcedure === proc"
+         (click)="selectProcedure(proc)">
+      <span class="choice-icon">{{ getProcedureIcon(proc) }}</span>
+      <div class="choice-info">
+        <span class="choice-label">{{ getProcedureLabel(proc) }}</span>
+        <span class="choice-tag" *ngIf="proc === result.recommendation.procedure">
+          ✨ Recommandée
+        </span>
+        <span class="choice-tag alt" *ngIf="proc !== result.recommendation.procedure">
+          Alternative
+        </span>
+      </div>
+      <div class="choice-check" *ngIf="selectedProcedure === proc">✓</div>
+    </div>
+  </div>
+
+  <button class="btn-simulate"
+          [disabled]="!selectedProcedure || isSimulating"
+          (click)="simulate()">
+    <span *ngIf="!isSimulating">
+      🎨 Lancer la simulation
+    </span>
+    <span *ngIf="isSimulating">
+      ⏳ Génération en cours... (2-5 min)
+    </span>
+  </button>
+</div>
+
+<!-- Résultat simulation -->
 <div class="simulation-result" *ngIf="simulationResult">
 
   <div class="sim-success" *ngIf="simulationResult.success">
@@ -347,6 +377,27 @@
         <span class="sim-label">Après simulé</span>
       </div>
     </div>
+
+    <!-- ✅ Bouton pour tester l'autre procédure -->
+    <div class="sim-other">
+      <p>Voulez-vous voir la simulation pour une autre procédure ?</p>
+      <div class="procedure-choices small">
+        <div class="procedure-choice"
+             *ngFor="let proc of getAvailableProcedures()"
+             [class.selected]="selectedProcedure === proc"
+             (click)="selectProcedure(proc)">
+          <span class="choice-icon">{{ getProcedureIcon(proc) }}</span>
+          <span class="choice-label">{{ getProcedureLabel(proc) }}</span>
+        </div>
+      </div>
+      <button class="btn-simulate small"
+              [disabled]="isSimulating"
+              (click)="simulate()">
+        <span *ngIf="!isSimulating">🔄 Simuler cette procédure</span>
+        <span *ngIf="isSimulating">⏳ Génération...</span>
+      </button>
+    </div>
+
     <p class="sim-disclaimer">
       ⚠️ Cette simulation est générée par IA à titre indicatif uniquement.
       Elle ne constitue pas un avis médical.
@@ -359,6 +410,7 @@
 
 </div>
 
+</div>
+
   </div>
 
-</div>

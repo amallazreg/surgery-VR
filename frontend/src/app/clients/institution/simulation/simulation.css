@@ -839,3 +839,139 @@
   color: #5A6B8C;
   text-align: center;
 }
+
+/* ===== SÉLECTEUR DE PROCÉDURE ===== */
+.procedure-selector {
+  margin-top: 2rem;
+  background: var(--card-bg, #fff);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.selector-title {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.selector-subtitle {
+  font-size: 0.9rem;
+  color: var(--text-secondary, #666);
+  margin-bottom: 1.5rem;
+}
+
+.procedure-choices {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.procedure-choice {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border: 2px solid #e8e8f0;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 200px;
+  position: relative;
+}
+
+.procedure-choice:hover {
+  border-color: #0066FF;
+  background: #f0f5ff;
+}
+
+.procedure-choice.selected {
+  border-color: #0066FF;
+  background: linear-gradient(135deg, #f0f5ff, #e8f0fe);
+  box-shadow: 0 4px 12px rgba(0,102,255,0.15);
+}
+
+.choice-icon { font-size: 2rem; }
+
+.choice-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.choice-label {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--text-primary, #1a1a2e);
+}
+
+.choice-tag {
+  font-size: 0.75rem;
+  background: #0066FF;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 20px;
+  width: fit-content;
+}
+
+.choice-tag.alt {
+  background: #FF6B00;
+}
+
+.choice-check {
+  position: absolute;
+  right: 1rem;
+  color: #0066FF;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* Small variant pour le bas */
+.procedure-choices.small .procedure-choice {
+  min-width: 150px;
+  padding: 0.75rem 1rem;
+  flex: none;
+}
+
+.btn-simulate.small {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.9rem;
+}
+
+.sim-other {
+  margin: 1.5rem 0;
+  padding: 1.5rem;
+  background: #f8f9ff;
+  border-radius: 12px;
+  text-align: center;
+}
+
+.sim-other p {
+  margin-bottom: 1rem;
+  color: var(--text-secondary, #666);
+  font-size: 0.95rem;
+}
+.btn-report {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.75rem;
+  background: linear-gradient(135deg, #00C48C, #00A878);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(0, 196, 140, 0.3);
+}
+
+.btn-report:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 196, 140, 0.4);
+}
