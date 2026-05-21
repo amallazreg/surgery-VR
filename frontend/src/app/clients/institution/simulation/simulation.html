@@ -1,6 +1,83 @@
 <app-side-bar></app-side-bar>
 
-<div class="simulation-page">
+<!-- ══ CHARGEMENT ══ -->
+<div class="access-loading" *ngIf="isLoadingDroits">
+  <div class="loading-spinner"></div>
+  <p>Vérification de votre abonnement...</p>
+</div>
+
+<!-- ══ ACCÈS REFUSÉ — pas Business ══ -->
+<!-- ══ TITRE EN HAUT ══ -->
+<div class="page-header" *ngIf="!isLoadingDroits && !hasAccess">
+  <div class="header-badge">
+    <span class="badge-dot"></span>
+    Simulation IA
+  </div>
+  <h1 class="page-title">
+    Simulation Esthétique
+    <span class="title-gradient">Médicale</span>
+  </h1>
+  <p class="page-subtitle">Analyse faciale intelligente par intelligence artificielle</p>
+</div>
+
+<!-- ══ ACCÈS REFUSÉ ══ -->
+<div class="access-denied" *ngIf="!isLoadingDroits && !hasAccess">
+  <div class="denied-card">
+    <div class="denied-hero">
+      <div class="denied-badge"><span class="denied-badge-dot"></span> Business</div>
+      <div class="denied-lock-ring">🔒</div>
+      <h2 class="denied-title">Fonctionnalité réservée</h2>
+      <p class="denied-subtitle">
+        La simulation esthétique médicale par IA est disponible
+        exclusivement avec l'abonnement <strong>Business</strong>.
+      </p>
+    </div>
+    <div class="denied-body">
+      <p class="denied-features-label">Ce que vous débloquez</p>
+      <div class="denied-features">
+        <div class="denied-feature">
+          <div class="denied-feature-icon">🎯</div>
+          <div class="denied-feature-text">
+            <span class="denied-feature-title">Analyse faciale MediaPipe</span>
+            <span class="denied-feature-desc">478 landmarks de précision</span>
+          </div>
+          <span class="denied-feature-check">✓</span>
+        </div>
+        <div class="denied-feature">
+          <div class="denied-feature-icon">🧠</div>
+          <div class="denied-feature-text">
+            <span class="denied-feature-title">Recommandation par IA</span>
+            <span class="denied-feature-desc">Modèle MLP personnalisé</span>
+          </div>
+          <span class="denied-feature-check">✓</span>
+        </div>
+        <div class="denied-feature">
+          <div class="denied-feature-icon">🎨</div>
+          <div class="denied-feature-text">
+            <span class="denied-feature-title">Simulation avant / après</span>
+            <span class="denied-feature-desc">Génération par GAN Pix2Pix</span>
+          </div>
+          <span class="denied-feature-check">✓</span>
+        </div>
+        <div class="denied-feature">
+          <div class="denied-feature-icon">📄</div>
+          <div class="denied-feature-text">
+            <span class="denied-feature-title">Rapport PDF téléchargeable</span>
+            <span class="denied-feature-desc">Compte-rendu complet de l'analyse</span>
+          </div>
+          <span class="denied-feature-check">✓</span>
+        </div>
+      </div>
+      <div class="denied-divider"></div>
+      <button class="btn-upgrade" [routerLink]="['/client/forfaits']">
+        ⭐ Passer à Business →
+      </button>
+      <p class="denied-footer">Accès immédiat après souscription</p>
+    </div>
+  </div>
+</div>
+
+<div class="simulation-page" *ngIf="!isLoadingDroits && hasAccess">
 
   <!-- HEADER -->
   <div class="page-header">

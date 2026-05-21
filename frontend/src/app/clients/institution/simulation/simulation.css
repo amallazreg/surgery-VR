@@ -27,6 +27,7 @@
 .page-header {
   text-align: center;
   margin-bottom: 2.5rem;
+  margin-left: 220px;
 }
 
 .header-badge {
@@ -974,4 +975,203 @@
 .btn-report:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(0, 196, 140, 0.4);
+}
+
+/* ── Accès refusé ── */
+.access-denied {
+  display: flex;
+  justify-content: center;   /* ← était flex-end, maintenant centré */
+  padding: 0 0 4rem 0;
+  margin-left: 220px;
+}
+
+.denied-card {
+  background: white;
+  border-radius: 20px;
+  max-width: 520px;
+  width: 100%;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 102, 255, 0.12);
+}
+
+/* Hero bleu en haut */
+.denied-hero {
+  background: linear-gradient(135deg, #0066FF 0%, #0C447C 100%);
+  padding: 2.5rem 2rem;
+  text-align: center;
+}
+
+.denied-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  padding: 4px 14px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #fff;
+  margin-bottom: 1.25rem;
+}
+
+.denied-badge-dot {
+  width: 7px; height: 7px;
+  background: #00C48C;
+  border-radius: 50%;
+}
+
+.denied-lock-ring {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1.5px solid rgba(255, 255, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+  font-size: 2rem;
+}
+
+.denied-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+.denied-subtitle {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.denied-subtitle strong { color: #fff; }
+
+/* Corps */
+.denied-body { padding: 1.75rem 2rem; }
+
+.denied-features-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8A9BBE;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 1rem;
+}
+
+.denied-features {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1.75rem;
+}
+
+.denied-feature {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #F8FAFF;
+  border-radius: 10px;
+  border: 1px solid #E8EEFF;
+}
+
+.denied-feature-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  background: rgba(0, 102, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.denied-feature-text { flex: 1; }
+
+.denied-feature-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A2B5F;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.denied-feature-desc {
+  font-size: 12px;
+  color: #8A9BBE;
+}
+
+.denied-feature-check {
+  color: #00C48C;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.denied-divider {
+  height: 1px;
+  background: #E8EEFF;
+  margin-bottom: 1.5rem;
+}
+
+.btn-upgrade {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #0066FF 0%, #00D9FF 100%);
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 102, 255, 0.3);
+}
+
+.btn-upgrade:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 102, 255, 0.4);
+}
+
+.denied-footer {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 12px;
+  color: #8A9BBE;
+}
+
+.denied-feature-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.denied-feature-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1A2B5F;
+}
+
+.denied-feature-desc {
+  font-size: 12px;
+  color: #8A9BBE;
+}
+
+.denied-footer {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 12px;
+  color: #8A9BBE;
+}
+
+.denied-divider {
+  height: 1px;
+  background: #E8EEFF;
+  margin-bottom: 1.4rem;
 }

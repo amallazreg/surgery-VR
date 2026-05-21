@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -55,9 +55,21 @@ export interface SimulationResult {
 })
 export class SimulationAIService {
 
+  private apiUrl2 = 'https://surgery-vr.onrender.com/client/abonnements';
+
   private apiUrl = 'http://localhost:3000';
 
   constructor(private http: HttpClient) {}
+
+    private get authHeaders() {
+    const token = localStorage.getItem('token');
+    return { headers: new HttpHeaders({ Authorization: `Bearer ${token}` }) };
+  }
+
+
+    getMesDroits(userId: string): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl2}/droits/${userId}`,this.authHeaders);
+  }
 
   analyzeFace(file: File): Observable<AnalysisResult> {
     const formData = new FormData();

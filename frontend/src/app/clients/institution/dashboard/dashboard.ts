@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { timeout } from 'rxjs/operators';
 import { TimeoutError } from 'rxjs';
 import { AbonnementService, AbonnementResponse, FormationDetails } from '../../../services/abonnement-service';
+import { RouterModule } from '@angular/router';
 
 export interface Invoice {
   date: string;
@@ -18,7 +19,7 @@ export interface Invoice {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [SideBar, CommonModule],
+  imports: [SideBar, CommonModule,RouterModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })

@@ -12,6 +12,8 @@ import {
   SimulationAIService,
   SimulationResult
 } from '../../../services/simulation-aiservice';
+import { RouterModule } from '@angular/router';
+
 
 import { SideBar } from "../side-bar/side-bar";
 import { RapportSimulation } from '../../../services/rapport-simulation';
@@ -21,7 +23,7 @@ type Step = 'upload' | 'analyzing' | 'results';
 @Component({
   selector: 'app-simulation',
   standalone: true,
-  imports: [CommonModule, HttpClientModule, SideBar],
+  imports: [CommonModule, HttpClientModule, SideBar,RouterModule],
   templateUrl: './simulation.html',
   styleUrl: './simulation.css',
 })
@@ -42,6 +44,12 @@ export class Simulation {
 
   // ✅ Procédure choisie par le patient
   selectedProcedure: string | null = null;
+
+  // ── Accès abonnement ──
+  userId          = localStorage.getItem('userId') || '';
+  droits: any     = null;
+  isLoadingDroits = true;
+  hasAccess       = false;   // ← true seulement si Business
 
   procedureLabels: Record<string, string> = {
     rhinoplastie:        'Rhinoplastie',
@@ -64,6 +72,32 @@ export class Simulation {
     private cdr: ChangeDetectorRef,
     private raportService : RapportSimulation
   ) {}
+
+    ngOnInit(): void {
+    this.verifierAcces();
+  }
+
+  // ── Vérification abonnement Business ──
+  verifierAcces(): void {
+    this.isLoadingDroits = true;
+
+    this.simulationService.getMesDroits(this.userId).subscribe({
+      next: (data) => {
+        this.droits          = data;
+        // ✅ Accès autorisé seulement si type === 'Business'
+        this.hasAccess       = data?.typeAbonnement === 'Business'
+                            || data?.plan === 'Business'
+                            || data?.simulation?.activee === true;
+        this.isLoadingDroits = false;
+        this.cdr.detectChanges();
+      },
+      error: () => {
+        this.hasAccess       = false;
+        this.isLoadingDroits = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   onDragOver(e: DragEvent) {
     e.preventDefault();
