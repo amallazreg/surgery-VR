@@ -1,339 +1,253 @@
-<div class="student-layout">
-<app-side-bar-etudiant></app-side-bar-etudiant>
-    <!-- Main Content -->
+<div class="etudiant-layout">
+  <app-side-bar-etudiant></app-side-bar-etudiant>
+
   <main class="main-content">
 
-    <!-- Header -->
-    <header class="header">
-      <div class="header-left">
-        <h2>Bonjour   {{userName}}</h2>
-        <p>Voici votre progression sur SurgeryVR — continuez comme ça !</p>
+    <!-- ══ TOPBAR ══ -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <div class="welcome-pill">
+          <span class="pulse-dot"></span>
+          Session active
+        </div>
+        <h1 class="topbar-title">Bonjour, <span class="name-accent">{{ userName }}</span> 👋</h1>
+        <p class="topbar-sub">{{ today }} · Continuez sur votre lancée !</p>
       </div>
-      <div class="header-right">
-      
-        <button class="notification-btn">
-          🔔
-          <div class="notif-dot"></div>
+      <div class="topbar-right">
+        <div class="access-badge" *ngIf="accessMode === 'abonnement'">
+          <span class="ab-dot"></span> Abonnement actif
+        </div>
+        <div class="access-badge code-mode" *ngIf="accessMode === 'code'">
+          <span class="ab-dot"></span> Code formation
+        </div>
+        <button class="icon-btn notif">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/>
+          </svg>
+          <span class="notif-badge" *ngIf="nbNotifs > 0">{{ nbNotifs }}</span>
         </button>
       </div>
     </header>
 
-    <!-- Stats Grid -->
-    <div class="stats-grid">
+    <div class="page-body">
 
-      <div class="stat-card" style="animation-delay: 0.1s;">
-        <div class="stat-header">
-          <div class="stat-icon si-1">🥽</div>
-          <div class="stat-change positive">↗ +3 ce mois</div>
-        </div>
-        <div class="stat-value">12</div>
-        <div class="stat-label">Simulations complétées</div>
-        <div class="stat-progress">
-          <div class="stat-progress-fill" style="width: 60%; background: var(--gradient-1);"></div>
-        </div>
-      </div>
+      <!-- ══ KPI ROW ══ -->
+      <div class="kpi-row">
 
-      <div class="stat-card" style="animation-delay: 0.2s;">
-        <div class="stat-header">
-          <div class="stat-icon si-2">⭐</div>
-          <div class="stat-change positive">↗ +0.4</div>
-        </div>
-        <div class="stat-value">87<span class="stat-value-sub">/100</span></div>
-        <div class="stat-label">Score moyen global</div>
-        <div class="stat-progress">
-          <div class="stat-progress-fill" style="width: 87%; background: var(--gradient-2);"></div>
-        </div>
-      </div>
-
-      <div class="stat-card" style="animation-delay: 0.3s;">
-        <div class="stat-header">
-          <div class="stat-icon si-3">⏱️</div>
-          <div class="stat-change neutral">Ce mois</div>
-        </div>
-        <div class="stat-value">34<span class="stat-value-sub">h</span></div>
-        <div class="stat-label">Heures de pratique</div>
-        <div class="stat-progress">
-          <div class="stat-progress-fill" style="width: 76%; background: var(--gradient-3);"></div>
-        </div>
-      </div>
-
-      <div class="stat-card" style="animation-delay: 0.4s;">
-        <div class="stat-header">
-          <div class="stat-icon si-4">🏅</div>
-          <div class="stat-change positive">↗ Top 10%</div>
-        </div>
-        <div class="stat-value">#8</div>
-        <div class="stat-label">Classement promo</div>
-        <div class="stat-progress">
-          <div class="stat-progress-fill" style="width: 90%; background: var(--gradient-4);"></div>
-        </div>
-      </div>
-
-    </div>
-
-    <!-- Content Grid -->
-    <div class="content-grid">
-
-      <!-- Modules VR -->
-      <div class="section-card">
-        <div class="section-header">
-          <h3 class="section-title">Mes Modules VR</h3>
-          <button class="btn btn-secondary">Voir tout</button>
-        </div>
-        <div class="module-list">
-
-          <div class="module-item">
-            <div class="module-thumb m-green">🫀</div>
-            <div class="module-info">
-              <div class="module-name">Chirurgie Cardiaque — Module 1</div>
-              <div class="module-meta">12 exercices · Niveau Avancé</div>
-              <div class="module-bar">
-                <div class="module-fill" style="width: 100%;"></div>
-              </div>
-            </div>
-            <div class="module-pct">100%</div>
-            <span class="status-chip chip-done">Terminé</span>
+        <div class="kpi-card kpi-blue">
+          <div class="kpi-icon">🥽</div>
+          <div class="kpi-body">
+            <div class="kpi-val">{{ stats.totalSessions }}</div>
+            <div class="kpi-label">Sessions VR</div>
           </div>
-
-          <div class="module-item">
-            <div class="module-thumb m-blue">🧠</div>
-            <div class="module-info">
-              <div class="module-name">Neurochirurgie — Bases</div>
-              <div class="module-meta">8 exercices · Niveau Intermédiaire</div>
-              <div class="module-bar">
-                <div class="module-fill" style="width: 72%;"></div>
-              </div>
-            </div>
-            <div class="module-pct">72%</div>
-            <span class="status-chip chip-ongoing">En cours</span>
+          <div class="kpi-sparkline">
+            <div class="spark-bar" style="height:40%"></div>
+            <div class="spark-bar" style="height:65%"></div>
+            <div class="spark-bar" style="height:50%"></div>
+            <div class="spark-bar" style="height:80%"></div>
+            <div class="spark-bar" style="height:100%"></div>
           </div>
-
-          <div class="module-item">
-            <div class="module-thumb m-pink">🦴</div>
-            <div class="module-info">
-              <div class="module-name">Orthopédie — Prothèse hanche</div>
-              <div class="module-meta">10 exercices · Niveau Intermédiaire</div>
-              <div class="module-bar">
-                <div class="module-fill" style="width: 45%;"></div>
-              </div>
-            </div>
-            <div class="module-pct">45%</div>
-            <span class="status-chip chip-ongoing">En cours</span>
-          </div>
-
-          <div class="module-item">
-            <div class="module-thumb m-purple">👁️</div>
-            <div class="module-info">
-              <div class="module-name">Ophtalmologie — Cataracte</div>
-              <div class="module-meta">6 exercices · Niveau Débutant</div>
-              <div class="module-bar">
-                <div class="module-fill" style="width: 0%;"></div>
-              </div>
-            </div>
-            <div class="module-pct locked-pct">0%</div>
-            <span class="status-chip chip-locked">🔒 Verrouillé</span>
-          </div>
-
-          <div class="module-item">
-            <div class="module-thumb m-orange">🩺</div>
-            <div class="module-info">
-              <div class="module-name">Urgences — Trauma sévère</div>
-              <div class="module-meta">15 exercices · Niveau Expert</div>
-              <div class="module-bar">
-                <div class="module-fill" style="width: 0%;"></div>
-              </div>
-            </div>
-            <div class="module-pct locked-pct">0%</div>
-            <span class="status-chip chip-locked">🔒 Verrouillé</span>
-          </div>
-
         </div>
-      </div>
 
-      <!-- Right Column -->
-      <div class="right-column">
-
-        <!-- Upcoming Sessions -->
-        <div class="section-card">
-          <div class="section-header">
-            <h3 class="section-title">Séances à venir</h3>
+        <div class="kpi-card kpi-green">
+          <div class="kpi-icon">⭐</div>
+          <div class="kpi-body">
+            <div class="kpi-val">{{ stats.scoreMoyen }}<span class="kpi-unit">/100</span></div>
+            <div class="kpi-label">Score moyen</div>
           </div>
-          <div class="session-list">
-
-            <div class="session-item urgent">
-              <div class="session-date date-blue">
-                <span class="day">05</span>
-                <span class="month">MAR</span>
-              </div>
-              <div class="session-body">
-                <div class="session-title">Simulation Cardiaque — Éval.</div>
-                <div class="session-sub">14h00 · Prof. Lenoir</div>
-              </div>
-            </div>
-
-            <div class="session-item soon">
-              <div class="session-date date-orange">
-                <span class="day">09</span>
-                <span class="month">MAR</span>
-              </div>
-              <div class="session-body">
-                <div class="session-title">Atelier Neurochirurgie</div>
-                <div class="session-sub">10h00 · Prof. Marchand</div>
-              </div>
-            </div>
-
-            <div class="session-item later">
-              <div class="session-date date-green">
-                <span class="day">15</span>
-                <span class="month">MAR</span>
-              </div>
-              <div class="session-body">
-                <div class="session-title">Certification Orthopédie</div>
-                <div class="session-sub">09h30 · En ligne</div>
-              </div>
-            </div>
-
+          <div class="kpi-ring">
+            <svg viewBox="0 0 36 36">
+              <path class="ring-bg" d="M18 2a16 16 0 010 32 16 16 0 010-32"/>
+              <path class="ring-fill green-ring"
+                    [style.strokeDasharray]="stats.scoreMoyen + ' 100'"
+                    d="M18 2a16 16 0 010 32 16 16 0 010-32"/>
+            </svg>
           </div>
+        </div>
+
+        <div class="kpi-card kpi-amber">
+          <div class="kpi-icon">🏅</div>
+          <div class="kpi-body">
+            <div class="kpi-val">{{ stats.certifications }}</div>
+            <div class="kpi-label">Certifications</div>
+          </div>
+          <div class="kpi-tag">{{ stats.dernieresCertif }}</div>
+        </div>
+
+        <div class="kpi-card kpi-purple">
+          <div class="kpi-icon">⏱️</div>
+          <div class="kpi-body">
+            <div class="kpi-val">{{ stats.heuresPratique }}<span class="kpi-unit">h</span></div>
+            <div class="kpi-label">Pratique totale</div>
+          </div>
+          <div class="kpi-tag">Ce mois</div>
         </div>
 
       </div>
-    </div>
 
-    <!-- Achievements + Leaderboard -->
-    <div class="content-grid">
+      <!-- ══ GRILLE PRINCIPALE ══ -->
+      <div class="main-grid">
 
-      <!-- Achievements -->
-      <div class="section-card">
-        <div class="section-header">
-          <h3 class="section-title">Badges & Récompenses</h3>
-          <span class="badge-count">5 / 12 obtenus</span>
+        <!-- ── Formations / Scénarios ── -->
+        <div class="card formations-card">
+          <div class="card-head">
+            <div class="card-title">
+              <span class="card-icon">🧬</span>
+              Mes Formations
+            </div>
+            <div class="card-actions">
+              <button class="chip-btn active-chip">Toutes</button>
+              <button class="chip-btn">En cours</button>
+              <button class="chip-btn">Terminées</button>
+            </div>
+          </div>
+
+          <div class="loading-state" *ngIf="isLoading">
+            <div class="skeleton" *ngFor="let i of [1,2,3]">
+              <div class="skel-icon"></div>
+              <div class="skel-lines">
+                <div class="skel-line wide"></div>
+                <div class="skel-line short"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="empty-state" *ngIf="!isLoading && formations.length === 0">
+            <span class="empty-icon">🔬</span>
+            <p>Aucune formation disponible pour le moment.</p>
+            <span *ngIf="accessMode === 'code'">Votre code de formation donne accès aux scénarios assignés par votre institution.</span>
+          </div>
+
+          <div class="formation-list" *ngIf="!isLoading && formations.length > 0">
+            <div class="formation-item" *ngFor="let f of formations">
+              <div class="formation-thumb" [class]="'thumb-' + f.color">
+                {{ f.emoji }}
+              </div>
+              <div class="formation-info">
+                <div class="formation-name">{{ f._id }}</div>
+                <div class="formation-meta">
+                  {{ f.totalAttempts }} tentative(s) ·
+                  <span [class]="f.isValidated ? 'val-ok' : 'val-no'">
+                    {{ f.isValidated ? '✓ Certifié' : 'Non certifié' }}
+                  </span>
+                </div>
+                <div class="prog-track">
+                  <div class="prog-fill" [style.width.%]="getScorePercent(f.bestScore)"
+                       [class]="'fill-' + f.color"></div>
+                </div>
+              </div>
+              <div class="formation-score" [class]="getScoreClass(f.bestScore)">
+                {{ f.bestScore }}
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="achievements-grid">
 
-          <div class="achievement-card">
-            <span class="achievement-icon">🥇</span>
-            <div class="achievement-name">Premier Scalpel</div>
-            <div class="achievement-desc">1ère simulation</div>
+        <!-- ── Colonne droite ── -->
+        <div class="right-col">
+
+          <!-- Accès actuel -->
+          <div class="card access-card">
+            <div class="access-header" [class]="accessMode === 'abonnement' ? 'header-blue' : 'header-teal'">
+              <div class="access-icon">
+                {{ accessMode === 'abonnement' ? '💎' : '🎓' }}
+              </div>
+              <div>
+                <div class="access-type">{{ accessMode === 'abonnement' ? 'Abonnement' : 'Code Formation' }}</div>
+                <div class="access-name">{{ accessLabel }}</div>
+              </div>
+            </div>
+            <div class="access-body">
+              <div class="access-row">
+                <span class="ar-label">Expiration</span>
+                <span class="ar-val">{{ accessExpiry || '—' }}</span>
+              </div>
+              <div class="access-row" *ngIf="accessMode === 'abonnement'">
+                <span class="ar-label">Simulation esthétique</span>
+                <span class="ar-val" [class]="simulationIncluse ? 'ok' : 'ko'">
+                  {{ simulationIncluse ? '✓ Incluse' : '✗ Non incluse' }}
+                </span>
+              </div>
+              <div class="access-row" *ngIf="accessMode === 'code'">
+                <span class="ar-label">Institution</span>
+                <span class="ar-val">{{ institution || '—' }}</span>
+              </div>
+              <div class="access-row">
+                <span class="ar-label">Scénarios accessibles</span>
+                <span class="ar-val accent">{{ stats.totalSessions }}</span>
+              </div>
+            </div>
           </div>
 
-          <div class="achievement-card">
-            <span class="achievement-icon">🎯</span>
-            <div class="achievement-name">Précision Max</div>
-            <div class="achievement-desc">Score parfait 100</div>
-          </div>
+          <!-- Certifications récentes -->
+          <div class="card certif-card">
+            <div class="card-head">
+              <div class="card-title">
+                <span class="card-icon">🏆</span>
+                Certifications
+              </div>
+              <span class="count-pill">{{ certifications.length }}</span>
+            </div>
 
-          <div class="achievement-card">
-            <span class="achievement-icon">⚡</span>
-            <div class="achievement-name">Speed Run</div>
-            <div class="achievement-desc">Module en &lt; 10 min</div>
-          </div>
+            <div class="empty-state small" *ngIf="certifications.length === 0">
+              <span>Aucune certification obtenue.</span>
+            </div>
 
-          <div class="achievement-card">
-            <span class="achievement-icon">🔥</span>
-            <div class="achievement-name">Streak 7 jours</div>
-            <div class="achievement-desc">7 jours consécutifs</div>
-          </div>
-
-          <div class="achievement-card">
-            <span class="achievement-icon">🫀</span>
-            <div class="achievement-name">Cardio Expert</div>
-            <div class="achievement-desc">Module cardiaque fini</div>
-          </div>
-
-          <div class="achievement-card locked">
-            <span class="achievement-icon">🧠</span>
-            <div class="achievement-name">Neuro Master</div>
-            <div class="achievement-desc">Finir Neurochirurgie</div>
-          </div>
-
-          <div class="achievement-card locked">
-            <span class="achievement-icon">🏆</span>
-            <div class="achievement-name">Top 3 Promo</div>
-            <div class="achievement-desc">Atteindre rang #3</div>
-          </div>
-
-          <div class="achievement-card locked">
-            <span class="achievement-icon">💎</span>
-            <div class="achievement-name">Chirurgien Élite</div>
-            <div class="achievement-desc">Tous modules complétés</div>
+            <div class="certif-list" *ngIf="certifications.length > 0">
+              <div class="certif-item" *ngFor="let c of certifications">
+                <div class="certif-badge">🎖️</div>
+                <div class="certif-info">
+                  <div class="certif-name">{{ c.scenarioName }}</div>
+                  <div class="certif-date">{{ formatDate(c.certification.issuedAt) }}</div>
+                </div>
+                <div class="certif-score">{{ c.performanceMetrics.totalScore }}%</div>
+              </div>
+            </div>
           </div>
 
         </div>
       </div>
 
-      <!-- Leaderboard -->
-      <div class="section-card">
-        <div class="section-header">
-          <h3 class="section-title">Classement Promo</h3>
-          <button class="btn btn-secondary">Voir tout</button>
+      <!-- ══ HISTORIQUE SESSIONS ══ -->
+      <div class="card sessions-card">
+        <div class="card-head">
+          <div class="card-title">
+            <span class="card-icon">📋</span>
+            Historique des sessions
+          </div>
+          <span class="count-pill">{{ sessions.length }} sessions</span>
         </div>
-        <div class="leaderboard">
 
-          <div class="lb-item">
-            <span class="lb-rank gold">1</span>
-            <div class="lb-avatar av-blue">CL</div>
-            <div class="lb-info">
-              <div class="lb-name">Clara Laurent</div>
-              <div class="lb-score">12 modules · 98% moy.</div>
-            </div>
-            <div class="lb-pts">4 820 XP</div>
+        <div class="empty-state" *ngIf="sessions.length === 0 && !isLoading">
+          <span class="empty-icon">📂</span>
+          <p>Aucune session enregistrée pour le moment.</p>
+        </div>
+
+        <div class="sessions-table" *ngIf="sessions.length > 0">
+          <div class="st-head">
+            <span>Scénario</span>
+            <span>Date</span>
+            <span>Durée</span>
+            <span>Score</span>
+            <span>Statut</span>
           </div>
-
-          <div class="lb-item">
-            <span class="lb-rank silver">2</span>
-            <div class="lb-avatar av-green">TM</div>
-            <div class="lb-info">
-              <div class="lb-name">Thomas Moreau</div>
-              <div class="lb-score">11 modules · 95% moy.</div>
+          <div class="st-row" *ngFor="let s of sessions.slice(0, 8)">
+            <div class="st-scenario">
+              <span class="st-dot"></span>
+              {{ s.scenarioName }}
             </div>
-            <div class="lb-pts">4 310 XP</div>
+            <span class="st-date">{{ formatDate(s.dateStart) }}</span>
+            <span class="st-dur">{{ formatDuration(s.durationSeconds) }}</span>
+            <span class="st-score" [class]="getScoreClass(s.performanceMetrics.totalScore)">
+              {{ s.performanceMetrics.totalScore }}
+            </span>
+            <span class="st-status" [class]="s.certification.isValidated ? 'chip-ok' : 'chip-pending'">
+              {{ s.certification.isValidated ? 'Certifié' : 'Non certifié' }}
+            </span>
           </div>
-
-          <div class="lb-item">
-            <span class="lb-rank bronze">3</span>
-            <div class="lb-avatar av-pink">SC</div>
-            <div class="lb-info">
-              <div class="lb-name">Sophie Carlier</div>
-              <div class="lb-score">11 modules · 93% moy.</div>
-            </div>
-            <div class="lb-pts">4 150 XP</div>
-          </div>
-
-          <div class="lb-item">
-            <span class="lb-rank other">4</span>
-            <div class="lb-avatar av-purple">JB</div>
-            <div class="lb-info">
-              <div class="lb-name">Jean Bouchard</div>
-              <div class="lb-score">10 modules · 91% moy.</div>
-            </div>
-            <div class="lb-pts">3 890 XP</div>
-          </div>
-
-          <div class="lb-item me">
-            <span class="lb-rank me-rank">8</span>
-            <div class="lb-avatar av-blue">AM</div>
-            <div class="lb-info">
-              <div class="lb-name">Adam Morel <span class="me-tag">(vous)</span></div>
-              <div class="lb-score">12 modules · 87% moy.</div>
-            </div>
-            <div class="lb-pts">2 450 XP</div>
-          </div>
-
         </div>
       </div>
 
     </div>
-
   </main>
-
-  <!-- Animated Background -->
-  <div class="bg-animated">
-    <div class="bg-circle"></div>
-    <div class="bg-circle"></div>
-    <div class="bg-circle"></div>
-  </div>
-
 </div>
-
-
-     

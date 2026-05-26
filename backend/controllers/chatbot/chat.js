@@ -1,8 +1,7 @@
 const Conversation = require('../../models/chatbot/conversation');
 const { getChatResponse } = require('../../services/chatbot/groqService');
 
-// ── Générer un titre depuis le 1er message ──
-// On prend les 50 premiers caractères du message
+// Generer un titre depuis le 1er message
 const generateTitle = (message) => {
   const clean = message.trim();
   return clean.length > 50

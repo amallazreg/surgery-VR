@@ -74,7 +74,9 @@ export class Simulation {
   ) {}
 
     ngOnInit(): void {
-    this.verifierAcces();
+   this.verifierAcces();
+      this.cdr.detectChanges();
+
   }
 
   // ── Vérification abonnement Business ──
@@ -86,7 +88,7 @@ export class Simulation {
         this.droits          = data;
         // ✅ Accès autorisé seulement si type === 'Business'
         this.hasAccess       = data?.typeAbonnement === 'Business'
-                            || data?.plan === 'Business'
+                            || data?.forfait === 'Business'
                             || data?.simulation?.activee === true;
         this.isLoadingDroits = false;
         this.cdr.detectChanges();

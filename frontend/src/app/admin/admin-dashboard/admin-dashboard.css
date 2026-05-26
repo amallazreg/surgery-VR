@@ -684,3 +684,29 @@ tbody td:last-child {
 .activity-feed::-webkit-scrollbar-thumb:hover {
   background: #0066FF;
 }
+.loading-bar {
+  height: 4px;
+  background: #E8EEFF;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+.loading-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(135deg, #0066FF, #00D9FF);
+  border-radius: 4px;
+  animation: loading-slide 1.2s ease-in-out infinite;
+}
+@keyframes loading-slide {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(350%); }
+}
+.error-banner {
+  background: rgba(255,0,110,0.08);
+  border: 1px solid rgba(255,0,110,0.2);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: #FF006E;
+  margin-bottom: 1.5rem;
+}

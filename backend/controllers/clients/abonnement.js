@@ -298,6 +298,7 @@ const getMesDroits = async (req, res) => {
 
     res.json({
       forfait:        forfait.name,
+      typeAbonnement:       forfait.name,
       abonnementId:   abonnement._id,
       apkTotal:       forfait.nbApk,
       apkRestants:    abonnement.apkRestants,

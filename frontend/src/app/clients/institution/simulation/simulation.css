@@ -980,9 +980,12 @@
 /* ── Accès refusé ── */
 .access-denied {
   display: flex;
-  justify-content: center;   /* ← était flex-end, maintenant centré */
-  padding: 0 0 4rem 0;
-  margin-left: 220px;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3rem 2rem;
+  margin-left: 280px;  /* ← même valeur que .simulation-page pour s'aligner avec la sidebar */
+  min-height: 100vh;
+  background: linear-gradient(180deg, #FFFFFF 0%, #F0F6FF 100%);
 }
 
 .denied-card {

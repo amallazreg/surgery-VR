@@ -14,8 +14,8 @@ const VectorChunkSchema = new mongoose.Schema({
 
   // Métadonnées pour savoir d'où vient ce chunk
   metadata: {
-    source: String,   // ex: "module-01-appendicectomie.md"
-    module: String    // ex: "module-01-appendicectomie"
+    source: String,   
+    module: String   
   }
 
 }, {

@@ -2,15 +2,18 @@ const axios    = require('axios');
 const FormData = require('form-data');
 
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8000';
+const PYTHON_GAN_URL = process.env.PYTHON_GAN_URL || process.env.PYTHON_API_URL;
+
 
 const analyzeFace = async (imageBuffer, filename) => {
     const formData = new FormData();
     formData.append('file', imageBuffer, {
-        filename:    filename,
+        filename,
         contentType: 'image/jpeg'
     });
+
     const response = await axios.post(
-        `${PYTHON_API_URL}/analyze-face`,
+        `${PYTHON_API_URL}/analyze-face`,  // ← localhost PC
         formData,
         { headers: formData.getHeaders() }
     );
@@ -19,18 +22,15 @@ const analyzeFace = async (imageBuffer, filename) => {
 const generateSimulation = async (imageBuffer, filename, procedure) => {
     const formData = new FormData();
     formData.append('file', imageBuffer, {
-        filename:    filename,
+        filename,
         contentType: 'image/jpeg'
     });
     formData.append('procedure', procedure);
 
     const response = await axios.post(
-        `${PYTHON_API_URL}/generate-simulation`,
+        `${PYTHON_GAN_URL}/generate-simulation`,  // ← Colab GPU
         formData,
-        {
-            headers: formData.getHeaders(),
-            timeout: 600000  // 10 minutes
-        }
+        { headers: formData.getHeaders(), timeout: 600000 }
     );
     return response.data;
 };
