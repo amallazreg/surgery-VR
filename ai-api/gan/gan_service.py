@@ -11,12 +11,12 @@ import gc
 
 torch.set_num_threads(2)
 
-# ============================================================
 # CONFIG
-# ============================================================
 DEVICE     = "cuda" if torch.cuda.is_available() else "cpu"
 HF_REPO_ID = "amallazreg/surgery-vr-models"
 CACHE_DIR  = os.path.join(os.path.dirname(__file__), "models_cache")
+
+print(f"[CONFIG] Device : {DEVICE}")
 
 PROCEDURE_CONFIG = {
     "rhinoplastie": {
@@ -46,9 +46,7 @@ PROCEDURE_CONFIG = {
 
 _pipe_cache = {}
 
-# ============================================================
-# TÉLÉCHARGEMENT MODÈLE UNET UNIQUEMENT
-# ============================================================
+# TÉLÉCHARGEMENT MODÈLE UNET
 def get_model_path(filename: str) -> str:
     os.makedirs(CACHE_DIR, exist_ok=True)
     local_path = os.path.join(CACHE_DIR, filename)
@@ -64,36 +62,36 @@ def get_model_path(filename: str) -> str:
         local_dir=CACHE_DIR,
         token=os.getenv("HF_TOKEN"),
     )
+    print(f"[HF] Téléchargement terminé : {filename}")
     return local_path
 
-# ============================================================
 # CHARGEMENT PIPELINE
-# Le modèle de base instruct-pix2pix est téléchargé
-# une seule fois et mis en cache local HuggingFace
-# ============================================================
 def get_pipe(unet_path: str):
     if unet_path in _pipe_cache:
         print("[CACHE] Pipeline déjà en mémoire")
         return _pipe_cache[unet_path]
 
-    print("[MODEL] Chargement pipeline instruct-pix2pix...")
-    print("[MODEL] Premier lancement : téléchargement ~3 Go (une seule fois)")
+    print(f"[MODEL] Chargement pipeline instruct-pix2pix sur {DEVICE}...")
 
     pipe = StableDiffusionInstructPix2PixPipeline.from_pretrained(
         "timbrooks/instruct-pix2pix",
-        torch_dtype    = torch.float32,
-        safety_checker = None,
+        torch_dtype       = torch.float16 if DEVICE == "cuda" else torch.float32,
+        safety_checker    = None,
         low_cpu_mem_usage = True,
     )
 
     pipe.enable_attention_slicing(slice_size=1)
     if hasattr(pipe, 'enable_vae_slicing'):
         pipe.enable_vae_slicing()
+    elif hasattr(pipe, 'vae') and hasattr(pipe.vae, 'enable_slicing'):
+        pipe.vae.enable_slicing()
     pipe.set_progress_bar_config(disable=True)
-    pipe = pipe.to("cpu")
+
+    # ✅ GPU sur Colab, CPU en local
+    pipe = pipe.to(DEVICE)
 
     print("[MODEL] Chargement UNet fine-tuné...")
-    state_dict = torch.load(unet_path, map_location="cpu", weights_only=True)
+    state_dict = torch.load(unet_path, map_location=DEVICE, weights_only=True)
     pipe.unet.load_state_dict(state_dict)
     pipe.unet.eval()
 
@@ -101,12 +99,10 @@ def get_pipe(unet_path: str):
         param.requires_grad = False
 
     _pipe_cache[unet_path] = pipe
-    print("[MODEL] Pipeline prêt !")
+    print(f"[MODEL] Pipeline prêt sur {DEVICE} !")
     return pipe
 
-# ============================================================
-# MASQUES FACIAUX
-# ============================================================
+# MASQUE NASAL
 def apply_nose_mask(before: Image.Image, generated: Image.Image, strength=0.7) -> Image.Image:
     before_np    = np.array(before).astype(np.float32) / 255.0
     generated_np = np.array(generated).astype(np.float32) / 255.0
@@ -134,7 +130,7 @@ def apply_nose_mask(before: Image.Image, generated: Image.Image, strength=0.7) -
     result   = np.clip((before_np + (generated_np - before_np) * mask_3ch * strength) * 255, 0, 255).astype(np.uint8)
     return Image.fromarray(result)
 
-
+# MASQUE SOURCILS
 def apply_eyebrow_mask(before: Image.Image, generated: Image.Image, strength=0.7) -> Image.Image:
     before_np    = np.array(before).astype(np.float32) / 255.0
     generated_np = np.array(generated).astype(np.float32) / 255.0
@@ -165,7 +161,7 @@ def apply_eyebrow_mask(before: Image.Image, generated: Image.Image, strength=0.7
     result   = np.clip((before_np + (generated_np - before_np) * mask_3ch * strength) * 255, 0, 255).astype(np.uint8)
     return Image.fromarray(result)
 
-
+# DISPATCH MASQUE
 def apply_mask(procedure: str, before: Image.Image, generated: Image.Image) -> Image.Image:
     if procedure == "rhinoplastie":
         return apply_nose_mask(before, generated)
@@ -173,17 +169,13 @@ def apply_mask(procedure: str, before: Image.Image, generated: Image.Image) -> I
         return apply_eyebrow_mask(before, generated)
     return generated
 
-# ============================================================
 # IMAGE → BASE64
-# ============================================================
 def image_to_base64(img: Image.Image) -> str:
     buf = io.BytesIO()
     img.save(buf, format="JPEG", quality=90)
     return base64.b64encode(buf.getvalue()).decode("utf-8")
 
-# ============================================================
-# GÉNÉRATION — fonction unique et propre
-# ============================================================
+# GÉNÉRATION
 def generate_simulation(image_bytes: bytes, procedure: str) -> dict:
 
     config = PROCEDURE_CONFIG.get(procedure)
@@ -205,24 +197,35 @@ def generate_simulation(image_bytes: bytes, procedure: str) -> dict:
         model_path = get_model_path(config["model_file"])
         pipe       = get_pipe(model_path)
 
-        # 2. Préparer l'image — 128x128 pour économiser RAM
+        # 2. Préparer l'image
         input_img = (
             Image.open(io.BytesIO(image_bytes))
             .convert("RGB")
-            .resize((128, 128))
+            .resize((256, 256))  # ✅ 256 sur GPU, assez de RAM
         )
 
-        print(f"[GEN] {procedure} — génération en cours...")
+        print(f"[GEN] {procedure} sur {DEVICE} — génération en cours...")
 
         # 3. Inférence
+        torch.manual_seed(42)
         with torch.inference_mode():
-            generated = pipe(
-                prompt               = config["prompt"],
-                image                = input_img,
-                num_inference_steps  = 15,
-                image_guidance_scale = 1.5,
-                guidance_scale       = 7.5,
-            ).images[0]
+            if DEVICE == "cuda":
+                with torch.autocast("cuda"):
+                    generated = pipe(
+                        prompt               = config["prompt"],
+                        image                = input_img,
+                        num_inference_steps  = 20,
+                        image_guidance_scale = 1.5,
+                        guidance_scale       = 7.5,
+                    ).images[0]
+            else:
+                generated = pipe(
+                    prompt               = config["prompt"],
+                    image                = input_img,
+                    num_inference_steps  = 10,
+                    image_guidance_scale = 1.5,
+                    guidance_scale       = 7.5,
+                ).images[0]
 
         print("[GEN] Terminé !")
 
@@ -236,6 +239,8 @@ def generate_simulation(image_bytes: bytes, procedure: str) -> dict:
         # 6. Libérer mémoire
         del generated, result
         gc.collect()
+        if DEVICE == "cuda":
+            torch.cuda.empty_cache()
 
         return {
             "success":    True,
