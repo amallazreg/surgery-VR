@@ -9,10 +9,8 @@ const generateTitle = (message) => {
     : clean;
 };
 
-// ──────────────────────────────────────────
 // POST /chatbot/new
 // Créer une nouvelle conversation vide
-// ──────────────────────────────────────────
 const createConversation = async (req, res) => {
   try {
     const { userId } = req.body;
@@ -53,10 +51,8 @@ const createConversation = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // POST /chatbot/message
 // Envoyer un message dans la conversation active
-// ──────────────────────────────────────────
 const sendMessage = async (req, res) => {
   try {
     const { userId, message, conversationId } = req.body;
@@ -139,10 +135,8 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // GET /chatbot/conversations/:userId
 // Récupérer toutes les conversations d'un utilisateur
-// ──────────────────────────────────────────
 const getConversations = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -179,10 +173,8 @@ const getConversations = async (req, res) => {
   }
 };
 
-// ──────────────────────────────────────────
 // GET /chatbot/history/:userId
 // Récupérer les messages de la conversation active
-// ──────────────────────────────────────────
 const getHistory = async (req, res) => {
   try {
     const { userId } = req.params;

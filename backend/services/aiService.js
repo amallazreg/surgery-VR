@@ -13,7 +13,7 @@ const analyzeFace = async (imageBuffer, filename) => {
     });
 
     const response = await axios.post(
-        `${PYTHON_API_URL}/analyze-face`,  // ← localhost PC
+        `${PYTHON_API_URL}/analyze-face`, 
         formData,
         { headers: formData.getHeaders() }
     );
