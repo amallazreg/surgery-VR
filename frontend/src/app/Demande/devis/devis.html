@@ -374,8 +374,10 @@
             <div class="success-icon">✓</div>
             <h2>Demande de Devis Envoyée !</h2>
             <p>Merci pour votre confiance. Notre équipe commerciale analysera votre demande et vous enverra un devis personnalisé détaillé sous 48-72 heures. Vous recevrez également un appel de notre expert pour affiner votre projet.</p>
-            <a routerLink="/landingPage" class="btn btn-primary">Retour à l'accueil</a>
-        </div>
+            <a [routerLink]="['/landingPage']" class="btn btn-primary">
+            Retour à l'accueil
+            </a>      
+      </div>
     </div>
 </section>
 

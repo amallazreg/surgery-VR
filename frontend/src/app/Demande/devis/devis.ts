@@ -3,11 +3,12 @@ import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Navbar } from "../../layout/navbar/navbar";
 import { DemandesService } from '../../services/demandes-service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-devis',
   standalone : true , 
-  imports: [CommonModule, FormsModule, Navbar],
+  imports: [CommonModule, FormsModule, Navbar,RouterModule],
   templateUrl: './devis.html',
   styleUrl: './devis.css',
 })

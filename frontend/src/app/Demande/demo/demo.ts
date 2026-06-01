@@ -2,7 +2,7 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Navbar } from "../../layout/navbar/navbar";
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { DemandesService } from '../../services/demandes-service';
 
 interface WizardStep {
@@ -16,7 +16,7 @@ interface WizardStep {
 @Component({
   selector: 'app-demo',
   standalone: true,
-  imports: [Navbar, FormsModule, CommonModule],
+  imports: [Navbar, FormsModule, CommonModule,RouterModule],
   templateUrl: './demo.html',
   styleUrls: ['./demo.css'],
 })
