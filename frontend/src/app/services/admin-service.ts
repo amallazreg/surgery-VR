@@ -35,9 +35,6 @@ export class AdminService {
 
   constructor(private http: HttpClient) {}
 
-  // ═══════════════════════════════════════════════════════════
-  // HELPER — headers avec token (utilisé dans toutes les requêtes)
-  // ═══════════════════════════════════════════════════════════
   private get authHeaders(): { headers: HttpHeaders } {
     const token = localStorage.getItem('token');
     return {
@@ -71,7 +68,6 @@ export class AdminService {
     return this.http.get(`${this.admin}/compteClient/statistiques`, this.authHeaders);
   }
 
-
   // ═══════════════════════════════════════════════════════════
   // DEMANDES DEMO
   // ═══════════════════════════════════════════════════════════
@@ -97,15 +93,15 @@ export class AdminService {
   // ═══════════════════════════════════════════════════════════
 
   toutesDemandesDevis(): Observable<any> {
-    return this.http.get(`${this.admin}/demande/getToutes-demande-devis`, this.authHeaders);
+    return this.http.get(`${this.devis}/demandes-devis`, this.authHeaders);
   }
 
   calculerDevis(demandeId: string): Observable<any> {
-    return this.http.post(`${this.devis}/${demandeId}/calculer`, {}, this.authHeaders);
+    return this.http.post(`${this.devis}/demandes-devis/${demandeId}/calculer`, {}, this.authHeaders);
   }
 
   envoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
-    return this.http.post(`${this.devis}/${demandeId}/envoyer`, { messagePersonnalise }, this.authHeaders);
+    return this.http.post(`${this.devis}/demandes-devis/${demandeId}/envoyer`, { messagePersonnalise }, this.authHeaders);
   }
 
   calculerEtEnvoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
@@ -113,7 +109,7 @@ export class AdminService {
   }
 
   demandesDevisParStatut(statut: 'nouvelle' | 'en_cours' | 'envoyee'): Observable<any> {
-    return this.http.get(`${this.devis}/statut/${statut}`, this.authHeaders);
+    return this.http.get(`${this.devis}/demandes-devis/statut/${statut}`, this.authHeaders);
   }
 
   statistiquesDevis(): Observable<any> {
@@ -121,6 +117,6 @@ export class AdminService {
   }
 
   supprimerDemandeDevis(demandeId: string): Observable<any> {
-    return this.http.delete(`${this.devis}/${demandeId}`, this.authHeaders);
+    return this.http.delete(`${this.devis}/demandes-devis/${demandeId}`, this.authHeaders);
   }
 }
