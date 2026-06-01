@@ -109,7 +109,7 @@ export class AdminService {
   }
 
   calculerEtEnvoyerDevis(demandeId: string, messagePersonnalise?: string): Observable<any> {
-    return this.http.post(`${this.devis}/${demandeId}/calculer-et-envoyer`, { messagePersonnalise }, this.authHeaders);
+    return this.http.post(`${this.devis}/demandes-devis/${demandeId}/calculer-et-envoyer`, { messagePersonnalise }, this.authHeaders);
   }
 
   demandesDevisParStatut(statut: 'nouvelle' | 'en_cours' | 'envoyee'): Observable<any> {
