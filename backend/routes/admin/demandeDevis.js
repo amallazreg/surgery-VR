@@ -35,7 +35,7 @@ router.post('/demandes-devis/:id/calculer', calculerDevisEstime);
 router.post('/demandes-devis/:id/envoyer', envoyerDevis);
 
 // POST - Calculer ET envoyer le devis (action combinée)
-router.post('/demandes-devis/:id/calculer-et-envoyer', calculerEtEnvoyerDevis);
+router.post('/demandes-deviss/:id/calculer-et-envoyer', calculerEtEnvoyerDevis);
 
 // PATCH - Mettre à jour les notes admin
 router.patch('/demandes-devis/:id/notes', mettreAJourNotes);
