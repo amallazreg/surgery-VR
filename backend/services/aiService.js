@@ -1,5 +1,6 @@
 const axios    = require('axios');
 const FormData = require('form-data');
+const https = require('https');
 
 const PYTHON_API_URL = process.env.PYTHON_API_URL || 'http://localhost:8000';
 const PYTHON_GAN_URL = process.env.PYTHON_GAN_URL || process.env.PYTHON_API_URL;
@@ -28,11 +29,14 @@ const generateSimulation = async (imageBuffer, filename, procedure) => {
     formData.append('procedure', procedure);
 
     const response = await axios.post(
-        `${PYTHON_GAN_URL}/generate-simulation`,  // ← Colab GPU
+        `${PYTHON_GAN_URL}/generate-simulation`,
         formData,
-        { headers: formData.getHeaders(), timeout: 600000 }
+        {
+            headers: formData.getHeaders(),
+            timeout: 600000,
+            httpsAgent: new https.Agent({ rejectUnauthorized: false }) // ← fix SSL
+        }
     );
     return response.data;
 };
-
 module.exports = { analyzeFace, generateSimulation };

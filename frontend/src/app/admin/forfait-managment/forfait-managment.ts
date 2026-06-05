@@ -229,6 +229,7 @@ export class ForfaitManagment implements OnInit {
         this.closeDeleteModal();
         this.isDeleting = false;
         this.showToast('🗑️ Forfait supprimé !', 'success');
+        setTimeout(() => window.location.reload(), 1000);
       },
       error: () => {
         this.isDeleting = false;

@@ -245,6 +245,7 @@ export class ExperienceManagement implements OnInit {
         this.isDeleting = false;
         this.cdr.detectChanges();
         this.showToast('🗑️ Expérience supprimée.', 'success');
+        setTimeout(() => window.location.reload(), 1000);
       },
       error: (err) => {
         this.isDeleting = false;
